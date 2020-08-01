@@ -1,7 +1,7 @@
 package tfprotov5
 
 type AttributePath struct {
-	Steps []AttributePathStep
+	Steps []*AttributePathStep
 }
 
 type AttributePathStep struct {
