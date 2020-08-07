@@ -25,7 +25,7 @@ type SchemaBlock struct {
 
 type SchemaAttribute struct {
 	Name            string
-	Type            []byte // TODO: wat
+	Type            []byte // TODO: this is the JSON encoding of a cty type
 	Description     string
 	Required        bool
 	Optional        bool
