@@ -1,9 +1,10 @@
 # terraform-plugin-go
 
-terraform-protocol-go provides low-level Go bindings for the Terraform
-protocol, for integrations to be built upon. It strives to be a minimal
-possible abstraction on top of the protocol, only hiding the implementation
-details of the protocol while leaving its semantics unchanged.
+terraform-plugin-go provides low-level Go bindings for the Terraform
+plugin protocol, for integrations to be built upon. It strives to be a
+minimal possible abstraction on top of the protocol, only hiding the
+implementation details of the protocol while leaving its semantics
+unchanged.
 
 ## Status
 
