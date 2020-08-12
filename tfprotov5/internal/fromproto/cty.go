@@ -1,9 +1,9 @@
 package fromproto
 
 import (
-	tfproto "github.com/hashicorp/terraform-protocol-go"
-	"github.com/hashicorp/terraform-protocol-go/internal/tfplugin5"
-	"github.com/hashicorp/terraform-protocol-go/tfprotov5"
+	tfproto "github.com/hashicorp/terraform-plugin-go"
+	"github.com/hashicorp/terraform-plugin-go/internal/tfplugin5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 )
 
 func CtyBlock(in tfplugin5.DynamicValue) (tfprotov5.CtyBlock, error) {
