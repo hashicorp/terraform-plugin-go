@@ -2,7 +2,7 @@ package fromproto
 
 import (
 	tfproto "github.com/hashicorp/terraform-plugin-go"
-	"github.com/hashicorp/terraform-plugin-go/internal/tfplugin5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 )
 
