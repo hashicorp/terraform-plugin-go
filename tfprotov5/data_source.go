@@ -1,6 +1,10 @@
 package tfprotov5
 
-import "context"
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+)
 
 type DataSourceServer interface {
 	ValidateDataSourceConfig(context.Context, *ValidateDataSourceConfigRequest) (*ValidateDataSourceConfigResponse, error)
@@ -9,7 +13,7 @@ type DataSourceServer interface {
 
 type ValidateDataSourceConfigRequest struct {
 	TypeName string
-	Config   *CtyBlock
+	Config   *tftypes.RawValue
 }
 
 type ValidateDataSourceConfigResponse struct {
@@ -18,11 +22,11 @@ type ValidateDataSourceConfigResponse struct {
 
 type ReadDataSourceRequest struct {
 	TypeName     string
-	Config       *CtyBlock
-	ProviderMeta *CtyBlock
+	Config       *tftypes.RawValue
+	ProviderMeta *tftypes.RawValue
 }
 
 type ReadDataSourceResponse struct {
-	State       *CtyBlock // TODO: figure out how to represent state
+	State       *RawState
 	Diagnostics []*Diagnostic
 }

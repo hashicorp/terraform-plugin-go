@@ -1,6 +1,10 @@
 package tfprotov5
 
-import "context"
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+)
 
 type ProviderServer interface {
 	GetProviderSchema(context.Context, *GetProviderSchemaRequest) (*GetProviderSchemaResponse, error)
@@ -23,17 +27,17 @@ type GetProviderSchemaResponse struct {
 }
 
 type PrepareProviderConfigRequest struct {
-	Config *CtyBlock
+	Config *tftypes.RawValue
 }
 
 type PrepareProviderConfigResponse struct {
-	PreparedConfig *CtyBlock
+	PreparedConfig *tftypes.RawValue
 	Diagnostics    []*Diagnostic
 }
 
 type ConfigureProviderRequest struct {
 	TerraformVersion string
-	Config           *CtyBlock
+	Config           *tftypes.RawValue
 }
 
 type ConfigureProviderResponse struct {
