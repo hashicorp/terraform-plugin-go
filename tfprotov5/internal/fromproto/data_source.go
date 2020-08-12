@@ -1,15 +1,19 @@
 package fromproto
 
 import (
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
 func ValidateDataSourceConfigRequest(in tfplugin5.ValidateDataSourceConfig_Request) tfprotov5.ValidateDataSourceConfigRequest {
-	return tfprotov5.ValidateDataSourceConfigRequest{
+	resp := tfprotov5.ValidateDataSourceConfigRequest{
 		TypeName: in.TypeName,
-		Config:   nil, // TODO: unmarshal config from DynamicValue
 	}
+	if in.Config != nil {
+		config := TerraformTypesRawValue(*in.Config)
+		resp.Config = &config
+	}
+	return resp
 }
 
 func ValidateDataSourceConfigResponse(in tfplugin5.ValidateDataSourceConfig_Response) tfprotov5.ValidateDataSourceConfigResponse {
@@ -19,16 +23,27 @@ func ValidateDataSourceConfigResponse(in tfplugin5.ValidateDataSourceConfig_Resp
 }
 
 func ReadDataSourceRequest(in tfplugin5.ReadDataSource_Request) tfprotov5.ReadDataSourceRequest {
-	return tfprotov5.ReadDataSourceRequest{
-		TypeName:     in.TypeName,
-		Config:       nil, // TODO: unmarshal config from DynamicValue
-		ProviderMeta: nil, // TODO: unmarshal provider_meta from DynamicValue
+	resp := tfprotov5.ReadDataSourceRequest{
+		TypeName: in.TypeName,
 	}
+	if in.Config != nil {
+		config := TerraformTypesRawValue(*in.Config)
+		resp.Config = &config
+	}
+	if in.ProviderMeta != nil {
+		meta := TerraformTypesRawValue(*in.ProviderMeta)
+		resp.ProviderMeta = &meta
+	}
+	return resp
 }
 
 func ReadDataSourceResponse(in tfplugin5.ReadDataSource_Response) tfprotov5.ReadDataSourceResponse {
-	return tfprotov5.ReadDataSourceResponse{
-		State:       nil, // TODO: figure out how to convert state appropriately
+	resp := tfprotov5.ReadDataSourceResponse{
 		Diagnostics: Diagnostics(in.Diagnostics),
 	}
+	if in.State != nil {
+		state := TerraformTypesRawValue(*in.State)
+		resp.State = &state
+	}
+	return resp
 }

@@ -6,10 +6,14 @@ import (
 )
 
 func ValidateResourceTypeConfigRequest(in tfplugin5.ValidateResourceTypeConfig_Request) tfprotov5.ValidateResourceTypeConfigRequest {
-	return tfprotov5.ValidateResourceTypeConfigRequest{
+	resp := tfprotov5.ValidateResourceTypeConfigRequest{
 		TypeName: in.TypeName,
-		Config:   nil, // TODO: figure out how to unmarshal config
 	}
+	if in.Config != nil {
+		config := TerraformTypesRawValue(*in.Config)
+		resp.Config = &config
+	}
+	return resp
 }
 
 func ValidateResourceTypeConfigResponse(in tfplugin5.ValidateResourceTypeConfig_Response) tfprotov5.ValidateResourceTypeConfigResponse {
@@ -38,10 +42,16 @@ func UpgradeResourceStateResponse(in tfplugin5.UpgradeResourceState_Response) tf
 
 func ReadResourceRequest(in tfplugin5.ReadResource_Request) tfprotov5.ReadResourceRequest {
 	resp := tfprotov5.ReadResourceRequest{
-		TypeName:     in.TypeName,
-		Private:      in.Private,
-		CurrentState: nil, // TODO: figure out how to unmarshal cty
-		ProviderMeta: nil, // TODO: figure out how to unmarshal cty
+		TypeName: in.TypeName,
+		Private:  in.Private,
+	}
+	if in.CurrentState != nil {
+		state := TerraformTypesRawValue(*in.CurrentState)
+		resp.CurrentState = &state
+	}
+	if in.ProviderMeta != nil {
+		meta := TerraformTypesRawValue(*in.ProviderMeta)
+		resp.ProviderMeta = &meta
 	}
 	return resp
 }
@@ -50,19 +60,34 @@ func ReadResourceResponse(in tfplugin5.ReadResource_Response) tfprotov5.ReadReso
 	resp := tfprotov5.ReadResourceResponse{
 		Diagnostics: Diagnostics(in.Diagnostics),
 		Private:     in.Private,
-		NewState:    nil, // TODO: figure out how to unmarshal cty
+	}
+	if in.NewState != nil {
+		state := TerraformTypesRawValue(*in.NewState)
+		resp.NewState = &state
 	}
 	return resp
 }
 
 func PlanResourceChangeRequest(in tfplugin5.PlanResourceChange_Request) tfprotov5.PlanResourceChangeRequest {
 	resp := tfprotov5.PlanResourceChangeRequest{
-		TypeName:         in.TypeName,
-		Config:           nil, // TODO: figure out how unmarshal config
-		PriorPrivate:     in.PriorPrivate,
-		PriorState:       nil, // TODO: figure out how to unmarshal cty
-		ProposedNewState: nil, // TODO: figure out how to unmarshal cty
-		ProviderMeta:     nil, // TODO: figure out how to unmarshal cty
+		TypeName:     in.TypeName,
+		PriorPrivate: in.PriorPrivate,
+	}
+	if in.Config != nil {
+		config := TerraformTypesRawValue(*in.Config)
+		resp.Config = &config
+	}
+	if in.PriorState != nil {
+		state := TerraformTypesRawValue(*in.PriorState)
+		resp.PriorState = &state
+	}
+	if in.ProposedNewState != nil {
+		state := TerraformTypesRawValue(*in.ProposedNewState)
+		resp.ProposedNewState = &state
+	}
+	if in.ProviderMeta != nil {
+		meta := TerraformTypesRawValue(*in.ProviderMeta)
+		resp.ProviderMeta = &meta
 	}
 	return resp
 }
@@ -71,8 +96,11 @@ func PlanResourceChangeResponse(in tfplugin5.PlanResourceChange_Response) tfprot
 	resp := tfprotov5.PlanResourceChangeResponse{
 		RequiresReplace: AttributePaths(in.RequiresReplace),
 		PlannedPrivate:  in.PlannedPrivate,
-		PlannedState:    nil, // TODO: figure out how to unmarshal cty
 		Diagnostics:     Diagnostics(in.Diagnostics),
+	}
+	if in.PlannedState != nil {
+		state := TerraformTypesRawValue(*in.PlannedState)
+		resp.PlannedState = &state
 	}
 	return resp
 }
@@ -80,11 +108,23 @@ func PlanResourceChangeResponse(in tfplugin5.PlanResourceChange_Response) tfprot
 func ApplyResourceChangeRequest(in tfplugin5.ApplyResourceChange_Request) tfprotov5.ApplyResourceChangeRequest {
 	resp := tfprotov5.ApplyResourceChangeRequest{
 		TypeName:       in.TypeName,
-		Config:         nil, // TODO: figure out how to unmarshal cty
 		PlannedPrivate: in.PlannedPrivate,
-		PriorState:     nil, // TODO: figure out how to unmarshal cty
-		PlannedState:   nil, // TODO: figure out how to unmarshal cty
-		ProviderMeta:   nil, // TODO: figure out how to unmarshal cty
+	}
+	if in.Config != nil {
+		config := TerraformTypesRawValue(*in.Config)
+		resp.Config = &config
+	}
+	if in.PriorState != nil {
+		state := TerraformTypesRawValue(*in.PriorState)
+		resp.PriorState = &state
+	}
+	if in.PlannedState != nil {
+		state := TerraformTypesRawValue(*in.PlannedState)
+		resp.PlannedState = &state
+	}
+	if in.ProviderMeta != nil {
+		meta := TerraformTypesRawValue(*in.ProviderMeta)
+		resp.ProviderMeta = &meta
 	}
 	return resp
 }
@@ -93,7 +133,10 @@ func ApplyResourceChangeResponse(in tfplugin5.ApplyResourceChange_Response) tfpr
 	resp := tfprotov5.ApplyResourceChangeResponse{
 		Private:     in.Private,
 		Diagnostics: Diagnostics(in.Diagnostics),
-		NewState:    nil, // TODO: figure out how to unmarshal cty
+	}
+	if in.NewState != nil {
+		state := TerraformTypesRawValue(*in.NewState)
+		resp.NewState = &state
 	}
 	return resp
 }
@@ -116,7 +159,10 @@ func ImportedResource(in tfplugin5.ImportResourceState_ImportedResource) tfproto
 	resp := tfprotov5.ImportedResource{
 		TypeName: in.TypeName,
 		Private:  in.Private,
-		State:    nil, // TODO: figure out how to unmarshal cty
+	}
+	if in.State != nil {
+		state := TerraformTypesRawValue(*in.State)
+		resp.State = &state
 	}
 	return resp
 }

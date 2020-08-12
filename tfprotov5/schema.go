@@ -1,5 +1,7 @@
 package tfprotov5
 
+import "github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+
 const (
 	SchemaNestedBlockNestingModeInvalid SchemaNestedBlockNestingMode = 0
 	SchemaNestedBlockNestingModeSingle  SchemaNestedBlockNestingMode = 1
@@ -25,7 +27,7 @@ type SchemaBlock struct {
 
 type SchemaAttribute struct {
 	Name            string
-	Type            []byte // TODO: this is the JSON encoding of a cty type
+	Type            tftypes.Type
 	Description     string
 	Required        bool
 	Optional        bool

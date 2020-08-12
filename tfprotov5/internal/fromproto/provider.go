@@ -1,8 +1,8 @@
 package fromproto
 
 import (
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
 func GetProviderSchemaRequest(in tfplugin5.GetProviderSchema_Request) tfprotov5.GetProviderSchemaRequest {
@@ -42,23 +42,34 @@ func GetProviderSchemaResponse(in tfplugin5.GetProviderSchema_Response) tfprotov
 }
 
 func PrepareProviderConfigRequest(in tfplugin5.PrepareProviderConfig_Request) tfprotov5.PrepareProviderConfigRequest {
-	return tfprotov5.PrepareProviderConfigRequest{
-		Config: nil, // TODO: find a way of unmarshaling the config
+	resp := tfprotov5.PrepareProviderConfigRequest{}
+	if in.Config != nil {
+		config := TerraformTypesRawValue(*in.Config)
+		resp.Config = &config
 	}
+	return resp
 }
 
 func PrepareProviderConfigResponse(in tfplugin5.PrepareProviderConfig_Response) tfprotov5.PrepareProviderConfigResponse {
-	return tfprotov5.PrepareProviderConfigResponse{
-		PreparedConfig: nil, // TODO: find a way of unmarshaling the config
-		Diagnostics:    Diagnostics(in.Diagnostics),
+	resp := tfprotov5.PrepareProviderConfigResponse{
+		Diagnostics: Diagnostics(in.Diagnostics),
 	}
+	if in.PreparedConfig != nil {
+		config := TerraformTypesRawValue(*in.PreparedConfig)
+		resp.PreparedConfig = &config
+	}
+	return resp
 }
 
 func ConfigureProviderRequest(in tfplugin5.Configure_Request) tfprotov5.ConfigureProviderRequest {
-	return tfprotov5.ConfigureProviderRequest{
+	resp := tfprotov5.ConfigureProviderRequest{
 		TerraformVersion: in.TerraformVersion,
-		Config:           nil, // TODO: find a way of unmarshaling the config
 	}
+	if in.Config != nil {
+		config := TerraformTypesRawValue(*in.Config)
+		resp.Config = &config
+	}
+	return resp
 }
 
 func ConfigureProviderResponse(in tfplugin5.Configure_Response) tfprotov5.ConfigureProviderResponse {
