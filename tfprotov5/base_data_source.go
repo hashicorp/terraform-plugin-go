@@ -3,7 +3,7 @@ package tfprotov5
 import (
 	"context"
 
-	tfproto "github.com/hashicorp/terraform-protocol-go"
+	tfproto "github.com/hashicorp/terraform-plugin-go"
 )
 
 var _ DataSourceServer = &BaseDataSourceServer{}
