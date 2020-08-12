@@ -1,6 +1,10 @@
 package tfprotov5
 
-import "context"
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+)
 
 type ResourceServer interface {
 	ValidateResourceTypeConfig(context.Context, *ValidateResourceTypeConfigRequest) (*ValidateResourceTypeConfigResponse, error)
@@ -13,7 +17,7 @@ type ResourceServer interface {
 
 type ValidateResourceTypeConfigRequest struct {
 	TypeName string
-	Config   *CtyBlock
+	Config   *tftypes.RawValue
 }
 
 type ValidateResourceTypeConfigResponse struct {
@@ -27,34 +31,34 @@ type UpgradeResourceStateRequest struct {
 }
 
 type UpgradeResourceStateResponse struct {
-	UpgradedState *CtyBlock // TODO: figure out how to represent state
+	UpgradedState *RawState
 	Diagnostics   []*Diagnostic
 }
 
 type ReadResourceRequest struct {
 	TypeName     string
-	CurrentState *CtyBlock // TODO: figure out how to represent state
-	Private      []byte    // TODO: should we handle this ourselves and not surface it?
-	ProviderMeta *CtyBlock
+	CurrentState *RawState
+	Private      []byte // TODO: should we handle this ourselves and not surface it?
+	ProviderMeta *tftypes.RawValue
 }
 
 type ReadResourceResponse struct {
-	NewState    *CtyBlock // TODO: figure out how to represent state
+	NewState    *RawState
 	Diagnostics []*Diagnostic
 	Private     []byte // TODO: should we handle this ourselves and not surface it?
 }
 
 type PlanResourceChangeRequest struct {
 	TypeName         string
-	PriorState       *CtyBlock // TODO: figure out how to represent state
-	ProposedNewState *CtyBlock // TODO: figure out how to represent state
-	Config           *CtyBlock
+	PriorState       *RawState
+	ProposedNewState *RawState
+	Config           *tftypes.RawValue
 	PriorPrivate     []byte // TODO: should we handle this ourselves and not surface it?
-	ProviderMeta     *CtyBlock
+	ProviderMeta     *tftypes.RawValue
 }
 
 type PlanResourceChangeResponse struct {
-	PlannedState    *CtyBlock // TODO: figure out how to represent state
+	PlannedState    *RawState
 	RequiresReplace []*AttributePath
 	PlannedPrivate  []byte // TODO: should we handle this ourselves and not surface it?
 	Diagnostics     []*Diagnostic
@@ -62,16 +66,16 @@ type PlanResourceChangeResponse struct {
 
 type ApplyResourceChangeRequest struct {
 	TypeName       string
-	PriorState     *CtyBlock // TODO: figure out how to represent state
-	PlannedState   *CtyBlock // TODO: figure out how to represent state
-	Config         *CtyBlock
+	PriorState     *RawState
+	PlannedState   *RawState
+	Config         *tftypes.RawValue
 	PlannedPrivate []byte // TODO: should we handle this ourselves and not surface it?
-	ProviderMeta   *CtyBlock
+	ProviderMeta   *tftypes.RawValue
 }
 
 type ApplyResourceChangeResponse struct {
-	NewState    *CtyBlock // TODO: figure out how to represent state
-	Private     []byte    // TODO: should we handle this ourselves and not surface it?
+	NewState    *RawState
+	Private     []byte // TODO: should we handle this ourselves and not surface it?
 	Diagnostics []*Diagnostic
 }
 
@@ -87,6 +91,6 @@ type ImportResourceStateResponse struct {
 
 type ImportedResource struct {
 	TypeName string
-	State    *CtyBlock // TODO: figure out how to represent state
-	Private  []byte    // TODO: should we handle this ourselves and not surface it?
+	State    *RawState
+	Private  []byte // TODO: should we handle this ourselves and not surface it?
 }

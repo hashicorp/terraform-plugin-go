@@ -1,8 +1,8 @@
 package fromproto
 
 import (
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
 func ValidateResourceTypeConfigRequest(in tfplugin5.ValidateResourceTypeConfig_Request) tfprotov5.ValidateResourceTypeConfigRequest {
@@ -32,65 +32,70 @@ func UpgradeResourceStateRequest(in tfplugin5.UpgradeResourceState_Request) tfpr
 
 func UpgradeResourceStateResponse(in tfplugin5.UpgradeResourceState_Response) tfprotov5.UpgradeResourceStateResponse {
 	return tfprotov5.UpgradeResourceStateResponse{
-		UpgradedState: nil, // TODO: figure out how to unmarshal state
-		Diagnostics:   Diagnostics(in.Diagnostics),
+		Diagnostics: Diagnostics(in.Diagnostics),
 	}
 }
 
 func ReadResourceRequest(in tfplugin5.ReadResource_Request) tfprotov5.ReadResourceRequest {
-	return tfprotov5.ReadResourceRequest{
+	resp := tfprotov5.ReadResourceRequest{
 		TypeName:     in.TypeName,
-		CurrentState: nil, // TODO: figure out how to unmarshal state
 		Private:      in.Private,
+		CurrentState: nil, // TODO: figure out how to unmarshal cty
 		ProviderMeta: nil, // TODO: figure out how to unmarshal cty
 	}
+	return resp
 }
 
 func ReadResourceResponse(in tfplugin5.ReadResource_Response) tfprotov5.ReadResourceResponse {
-	return tfprotov5.ReadResourceResponse{
-		NewState:    nil, // TODO: figure out how to marshal state
+	resp := tfprotov5.ReadResourceResponse{
 		Diagnostics: Diagnostics(in.Diagnostics),
 		Private:     in.Private,
+		NewState:    nil, // TODO: figure out how to unmarshal cty
 	}
+	return resp
 }
 
 func PlanResourceChangeRequest(in tfplugin5.PlanResourceChange_Request) tfprotov5.PlanResourceChangeRequest {
-	return tfprotov5.PlanResourceChangeRequest{
+	resp := tfprotov5.PlanResourceChangeRequest{
 		TypeName:         in.TypeName,
-		PriorState:       nil, // TODO: figure out how to unmarshal state
-		ProposedNewState: nil, // TODO: figure out how to unmarshal state
 		Config:           nil, // TODO: figure out how unmarshal config
 		PriorPrivate:     in.PriorPrivate,
+		PriorState:       nil, // TODO: figure out how to unmarshal cty
+		ProposedNewState: nil, // TODO: figure out how to unmarshal cty
 		ProviderMeta:     nil, // TODO: figure out how to unmarshal cty
 	}
+	return resp
 }
 
 func PlanResourceChangeResponse(in tfplugin5.PlanResourceChange_Response) tfprotov5.PlanResourceChangeResponse {
-	return tfprotov5.PlanResourceChangeResponse{
-		PlannedState:    nil, // TODO: figure out how to unmarshal state
+	resp := tfprotov5.PlanResourceChangeResponse{
 		RequiresReplace: AttributePaths(in.RequiresReplace),
 		PlannedPrivate:  in.PlannedPrivate,
+		PlannedState:    nil, // TODO: figure out how to unmarshal cty
 		Diagnostics:     Diagnostics(in.Diagnostics),
 	}
+	return resp
 }
 
 func ApplyResourceChangeRequest(in tfplugin5.ApplyResourceChange_Request) tfprotov5.ApplyResourceChangeRequest {
-	return tfprotov5.ApplyResourceChangeRequest{
+	resp := tfprotov5.ApplyResourceChangeRequest{
 		TypeName:       in.TypeName,
-		PriorState:     nil, // TODO: figure out how to unmarshal state
-		PlannedState:   nil, // TODO: figure out how to unmarshal state
 		Config:         nil, // TODO: figure out how to unmarshal cty
 		PlannedPrivate: in.PlannedPrivate,
+		PriorState:     nil, // TODO: figure out how to unmarshal cty
+		PlannedState:   nil, // TODO: figure out how to unmarshal cty
 		ProviderMeta:   nil, // TODO: figure out how to unmarshal cty
 	}
+	return resp
 }
 
 func ApplyResourceChangeResponse(in tfplugin5.ApplyResourceChange_Response) tfprotov5.ApplyResourceChangeResponse {
-	return tfprotov5.ApplyResourceChangeResponse{
-		NewState:    nil, // TODO: figure out how to unmarshal state
+	resp := tfprotov5.ApplyResourceChangeResponse{
 		Private:     in.Private,
 		Diagnostics: Diagnostics(in.Diagnostics),
+		NewState:    nil, // TODO: figure out how to unmarshal cty
 	}
+	return resp
 }
 
 func ImportResourceStateRequest(in tfplugin5.ImportResourceState_Request) tfprotov5.ImportResourceStateRequest {
@@ -108,11 +113,12 @@ func ImportResourceStateResponse(in tfplugin5.ImportResourceState_Response) tfpr
 }
 
 func ImportedResource(in tfplugin5.ImportResourceState_ImportedResource) tfprotov5.ImportedResource {
-	return tfprotov5.ImportedResource{
+	resp := tfprotov5.ImportedResource{
 		TypeName: in.TypeName,
-		State:    nil, // TODO: figure out how to unmarshal state
 		Private:  in.Private,
+		State:    nil, // TODO: figure out how to unmarshal cty
 	}
+	return resp
 }
 
 func ImportedResources(in []*tfplugin5.ImportResourceState_ImportedResource) []*tfprotov5.ImportedResource {
