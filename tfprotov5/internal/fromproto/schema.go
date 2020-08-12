@@ -1,8 +1,8 @@
 package fromproto
 
 import (
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
 func Schema(in tfplugin5.Schema) tfprotov5.Schema {
@@ -29,7 +29,7 @@ func SchemaBlock(in tfplugin5.Schema_Block) tfprotov5.SchemaBlock {
 func SchemaAttribute(in tfplugin5.Schema_Attribute) tfprotov5.SchemaAttribute {
 	return tfprotov5.SchemaAttribute{
 		Name:            in.Name,
-		Type:            in.Type,
+		Type:            TerraformTypesType(in.Type),
 		Description:     in.Description,
 		Required:        in.Required,
 		Optional:        in.Optional,

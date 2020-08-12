@@ -27,6 +27,6 @@ type ReadDataSourceRequest struct {
 }
 
 type ReadDataSourceResponse struct {
-	State       *RawState
+	State       *tftypes.RawValue
 	Diagnostics []*Diagnostic
 }

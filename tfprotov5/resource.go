@@ -37,28 +37,28 @@ type UpgradeResourceStateResponse struct {
 
 type ReadResourceRequest struct {
 	TypeName     string
-	CurrentState *RawState
+	CurrentState *tftypes.RawValue
 	Private      []byte // TODO: should we handle this ourselves and not surface it?
 	ProviderMeta *tftypes.RawValue
 }
 
 type ReadResourceResponse struct {
-	NewState    *RawState
+	NewState    *tftypes.RawValue
 	Diagnostics []*Diagnostic
 	Private     []byte // TODO: should we handle this ourselves and not surface it?
 }
 
 type PlanResourceChangeRequest struct {
 	TypeName         string
-	PriorState       *RawState
-	ProposedNewState *RawState
+	PriorState       *tftypes.RawValue
+	ProposedNewState *tftypes.RawValue
 	Config           *tftypes.RawValue
 	PriorPrivate     []byte // TODO: should we handle this ourselves and not surface it?
 	ProviderMeta     *tftypes.RawValue
 }
 
 type PlanResourceChangeResponse struct {
-	PlannedState    *RawState
+	PlannedState    *tftypes.RawValue
 	RequiresReplace []*AttributePath
 	PlannedPrivate  []byte // TODO: should we handle this ourselves and not surface it?
 	Diagnostics     []*Diagnostic
@@ -66,15 +66,15 @@ type PlanResourceChangeResponse struct {
 
 type ApplyResourceChangeRequest struct {
 	TypeName       string
-	PriorState     *RawState
-	PlannedState   *RawState
+	PriorState     *tftypes.RawValue
+	PlannedState   *tftypes.RawValue
 	Config         *tftypes.RawValue
 	PlannedPrivate []byte // TODO: should we handle this ourselves and not surface it?
 	ProviderMeta   *tftypes.RawValue
 }
 
 type ApplyResourceChangeResponse struct {
-	NewState    *RawState
+	NewState    *tftypes.RawValue
 	Private     []byte // TODO: should we handle this ourselves and not surface it?
 	Diagnostics []*Diagnostic
 }
@@ -91,6 +91,6 @@ type ImportResourceStateResponse struct {
 
 type ImportedResource struct {
 	TypeName string
-	State    *RawState
+	State    *tftypes.RawValue
 	Private  []byte // TODO: should we handle this ourselves and not surface it?
 }
