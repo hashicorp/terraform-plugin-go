@@ -1,8 +1,8 @@
 package fromproto
 
 import (
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
 func Diagnostic(in tfplugin5.Diagnostic) tfprotov5.Diagnostic {
@@ -27,6 +27,7 @@ func Diagnostics(in []*tfplugin5.Diagnostic) []*tfprotov5.Diagnostic {
 	for _, diag := range in {
 		if diag == nil {
 			diagnostics = append(diagnostics, nil)
+			continue
 		}
 		d := Diagnostic(*diag)
 		diagnostics = append(diagnostics, &d)
