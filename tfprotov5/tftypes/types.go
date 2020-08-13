@@ -30,8 +30,14 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 	if unmarshaler, ok := dst.(Unmarshaler); ok {
 		return unmarshaler.UnmarshalTerraform5Type(r.Type, r.Value)
 	}
-	switch dst.(type) {
+	switch r.Type {
 	// TODO: cast to primitives as a default behavior
+	case String:
+		if _, ok := dst.(*string); !ok {
+			return fmt.Errorf("Can't unmarshal %s into %T", r.Type, dst)
+		}
+		str := r.Value.(string)
+		dst = &str
 	}
 	return ErrUnhandledType(r.Type)
 }
