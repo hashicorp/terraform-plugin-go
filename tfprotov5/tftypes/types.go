@@ -4,22 +4,21 @@ import (
 	"fmt"
 	"math"
 	"math/big"
-	"strconv"
 )
 
 type unknown byte
 
 const (
 	UnknownValue      = unknown(0)
-	DynamicPseudoType = Type('D')
-	String            = Type('S')
-	Number            = Type('N')
-	Bool              = Type('B')
-	List              = Type('L')
-	Set               = Type('S')
-	Map               = Type('M')
-	Tuple             = Type('T')
-	Object            = Type('O')
+	DynamicPseudoType = Type("DynamicPseudoType")
+	String            = Type("String")
+	Number            = Type("Number")
+	Bool              = Type("Bool")
+	List              = Type("List")
+	Set               = Type("Set")
+	Map               = Type("Map")
+	Tuple             = Type("Tuple")
+	Object            = Type("Object")
 )
 
 type Unmarshaler interface {
@@ -41,20 +40,20 @@ type RawValue struct {
 
 func (r RawValue) Unmarshal(dst interface{}) error {
 	if unmarshaler, ok := dst.(Unmarshaler); ok {
-		return unmarshaler.UnmarshalTerraform5Type(r.Type, r.Value)
+		return unmarshaler.UnmarshalTerraform5Type(r)
 	}
 	switch r.Type {
 	case String:
 		if _, ok := dst.(*string); !ok {
 			return fmt.Errorf("Can't unmarshal %s into %T", r.Type, dst)
 		}
-		*dst = r.Value.(string)
+		*(dst.(*string)) = r.Value.(string)
 	case Number:
 		switch r.Value.(type) {
 		case int64:
 			switch dst.(type) {
 			case *int64:
-				*dst = r.Value.(int64)
+				*(dst.(*int64)) = r.Value.(int64)
 			case *int32:
 				if r.Value.(int64) > math.MaxInt32 {
 					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
@@ -62,7 +61,7 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 				if r.Value.(int64) < math.MinInt32 {
 					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
 				}
-				*dst = int32(r.Value.(int64))
+				*(dst.(*int32)) = int32(r.Value.(int64))
 			case *int16:
 				if r.Value.(int64) > math.MaxInt16 {
 					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
@@ -70,7 +69,7 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 				if r.Value.(int64) < math.MinInt16 {
 					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
 				}
-				*dst = int16(r.Value.(int64))
+				*(dst.(*int16)) = int16(r.Value.(int64))
 			case *int8:
 				if r.Value.(int64) > math.MaxInt8 {
 					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
@@ -78,7 +77,7 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 				if r.Value.(int64) < math.MinInt8 {
 					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
 				}
-				*dst = int8(r.Value.(int64))
+				*(dst.(*int8)) = int8(r.Value.(int64))
 			case *int:
 				// int types are only guaranteed to be able to
 				// hold 32 bits; anything more is dependent on
@@ -92,38 +91,29 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 				if r.Value.(int64) < math.MinInt32 {
 					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't always fit in %T", r.Type, dst, r.Value, dst)
 				}
-				*dst = int(r.Value.(int64))
+				*(dst.(*int)) = int(r.Value.(int64))
 			default:
 				return fmt.Errorf("can't unmarshal %s into %T", r.Type, dst)
 			}
 		case uint64:
 			switch dst.(type) {
 			case *uint64:
-				*dst = r.Value.(uint64)
+				*(dst.(*uint64)) = r.Value.(uint64)
 			case *uint32:
 				if r.Value.(uint64) > math.MaxUint32 {
 					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
 				}
-				if r.Value.(uint64) < math.MinUint32 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
-				}
-				*dst = uint32(r.Value.(uint64))
+				*(dst.(*uint32)) = uint32(r.Value.(uint64))
 			case *uint16:
 				if r.Value.(uint64) > math.MaxUint16 {
 					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
 				}
-				if r.Value.(uint64) < math.MinUint16 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
-				}
-				*dst = uint16(r.Value.(uint64))
+				*(dst.(*uint16)) = uint16(r.Value.(uint64))
 			case *uint8:
 				if r.Value.(uint64) > math.MaxUint8 {
 					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
 				}
-				if r.Value.(uint64) < math.MinUint8 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
-				}
-				*dst = uint8(r.Value.(uint64))
+				*(dst.(*uint8)) = uint8(r.Value.(uint64))
 			case *uint:
 				// uint types are only guaranteed to be able to
 				// hold 32 bits; anything more is dependent on
@@ -134,36 +124,33 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 				if r.Value.(uint64) > math.MaxUint32 {
 					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't always fit in %T", r.Type, dst, r.Value, dst)
 				}
-				if r.Value.(uint64) < math.MinUint32 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't always fit in %T", r.Type, dst, r.Value, dst)
-				}
-				*dst = uint(r.Value.(uint64))
+				*(dst.(*uint)) = uint(r.Value.(uint64))
 			default:
 				return fmt.Errorf("can't unmarshal %s into %T", r.Type, dst)
 			}
 		case float64:
 			switch dst.(type) {
 			case *float64:
-				*dst = r.Value.(float64)
+				*(dst.(*float64)) = r.Value.(float64)
 			case *float32:
 				if r.Value.(float64) > math.MaxFloat32 {
 					return fmt.Errorf("can't unmarshal %s floato %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
 				}
-				if r.Value.(float64) < math.MinFloat32 {
+				if r.Value.(float64) < math.SmallestNonzeroFloat32 {
 					return fmt.Errorf("can't unmarshal %s floato %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
 				}
-				*dst = float32(r.Value.(float64))
+				*(dst.(*float32)) = float32(r.Value.(float64))
 			default:
 				return fmt.Errorf("can't unmarshal %s into %T", r.Type, dst)
 			}
 		case big.Float:
+			// TODO: handle big.Float values, like infinity or larger than 64 bit numbers
 		}
 	case Bool:
 		if _, ok := dst.(*bool); !ok {
 			return fmt.Errorf("Can't unmarshal %s into %T", r.Type, dst)
 		}
-		b := r.Value.(bool)
-		*dst = b
+		*(dst.(*bool)) = r.Value.(bool)
 	case List:
 		// TODO: handle ambiguity of msgpack types
 	case Set:
@@ -179,28 +166,8 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 }
 
 // Type is used to identify Terraform types.
-type Type rune
+type Type string
 
 func (t Type) String() string {
-	switch t {
-	case DynamicPseudoType:
-		return "tftypes.DynamicPseudoType"
-	case String:
-		return "tftypes.String"
-	case Number:
-		return "tftypes.Number"
-	case Bool:
-		return "tftypes.Bool"
-	case List:
-		return "tftypes.List"
-	case Set:
-		return "tftypes.Set"
-	case Map:
-		return "tftypes.Map"
-	case Tuple:
-		return "tftypes.Tuple"
-	case Object:
-		return "tftypes.Object"
-	}
-	return "unknown type " + strconv.QuoteRune(rune(t))
+	return "tftypes." + string(t)
 }
