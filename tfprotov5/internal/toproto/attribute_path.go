@@ -1,58 +1,75 @@
 package toproto
 
 import (
+	"errors"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
-func AttributePath(in tfprotov5.AttributePath) tfplugin5.AttributePath {
-	return tfplugin5.AttributePath{
-		Steps: AttributePath_Steps(in.Steps),
+var ErrUnknownAttributePathStepType = errors.New("unknown type of AttributePath_Step")
+
+func AttributePath(in tfprotov5.AttributePath) (tfplugin5.AttributePath, error) {
+	steps, err := AttributePath_Steps(in.Steps)
+	if err != nil {
+		return tfplugin5.AttributePath{}, err
 	}
+	return tfplugin5.AttributePath{
+		Steps: steps,
+	}, nil
 }
 
-func AttributePaths(in []*tfprotov5.AttributePath) []*tfplugin5.AttributePath {
+func AttributePaths(in []*tfprotov5.AttributePath) ([]*tfplugin5.AttributePath, error) {
 	resp := make([]*tfplugin5.AttributePath, 0, len(in))
 	for _, a := range in {
 		if a == nil {
 			resp = append(resp, nil)
 			continue
 		}
-		attr := AttributePath(*a)
+		attr, err := AttributePath(*a)
+		if err != nil {
+			return resp, err
+		}
 		resp = append(resp, &attr)
 	}
-	return resp
+	return resp, nil
 }
 
-func AttributePath_Step(step tfprotov5.AttributePathStep) tfplugin5.AttributePath_Step {
+func AttributePath_Step(step tfprotov5.AttributePathStep) (tfplugin5.AttributePath_Step, error) {
 	var resp tfplugin5.AttributePath_Step
-	if step.AttributeName != "" {
+	if name, ok := step.(tfprotov5.AttributeName); ok {
 		resp.Selector = &tfplugin5.AttributePath_Step_AttributeName{
-			AttributeName: step.AttributeName,
+			AttributeName: string(name),
 		}
+		return resp, nil
 	}
-	if step.ElementKeyString != "" {
+	if key, ok := step.(tfprotov5.ElementKeyString); ok {
 		resp.Selector = &tfplugin5.AttributePath_Step_ElementKeyString{
-			ElementKeyString: step.ElementKeyString,
+			ElementKeyString: string(key),
 		}
+		return resp, nil
 	}
-	if step.ElementKeyInt != 0 {
+	if key, ok := step.(tfprotov5.ElementKeyInt); ok {
 		resp.Selector = &tfplugin5.AttributePath_Step_ElementKeyInt{
-			ElementKeyInt: step.ElementKeyInt,
+			ElementKeyInt: int64(key),
 		}
+		return resp, nil
 	}
-	return resp
+	return resp, ErrUnknownAttributePathStepType
 }
 
-func AttributePath_Steps(in []*tfprotov5.AttributePathStep) []*tfplugin5.AttributePath_Step {
+func AttributePath_Steps(in []tfprotov5.AttributePathStep) ([]*tfplugin5.AttributePath_Step, error) {
 	resp := make([]*tfplugin5.AttributePath_Step, 0, len(in))
 	for _, step := range in {
 		if step == nil {
 			resp = append(resp, nil)
 			continue
 		}
-		s := AttributePath_Step(*step)
+		s, err := AttributePath_Step(step)
+		if err != nil {
+			return resp, err
+		}
 		resp = append(resp, &s)
 	}
-	return resp
+	return resp, nil
 }

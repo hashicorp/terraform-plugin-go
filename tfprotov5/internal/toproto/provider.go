@@ -1,15 +1,17 @@
 package toproto
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
-func GetProviderSchema_Request(in tfprotov5.GetProviderSchemaRequest) tfplugin5.GetProviderSchema_Request {
-	return tfplugin5.GetProviderSchema_Request{}
+func GetProviderSchema_Request(in tfprotov5.GetProviderSchemaRequest) (tfplugin5.GetProviderSchema_Request, error) {
+	return tfplugin5.GetProviderSchema_Request{}, nil
 }
 
-func GetProviderSchema_Response(in tfprotov5.GetProviderSchemaResponse) tfplugin5.GetProviderSchema_Response {
+func GetProviderSchema_Response(in tfprotov5.GetProviderSchemaResponse) (tfplugin5.GetProviderSchema_Response, error) {
 	var resp tfplugin5.GetProviderSchema_Response
 	if in.Provider != nil {
 		schema := Schema(*in.Provider)
@@ -37,53 +39,73 @@ func GetProviderSchema_Response(in tfprotov5.GetProviderSchemaResponse) tfplugin
 		schema := Schema(*v)
 		resp.DataSourceSchemas[k] = &schema
 	}
-	resp.Diagnostics = Diagnostics(in.Diagnostics)
-	return resp
+	diags, err := Diagnostics(in.Diagnostics)
+	if err != nil {
+		return resp, err
+	}
+	resp.Diagnostics = diags
+	return resp, nil
 }
 
-func PrepareProviderConfig_Request(in tfprotov5.PrepareProviderConfigRequest) tfplugin5.PrepareProviderConfig_Request {
+func PrepareProviderConfig_Request(in tfprotov5.PrepareProviderConfigRequest) (tfplugin5.PrepareProviderConfig_Request, error) {
 	resp := tfplugin5.PrepareProviderConfig_Request{}
 	if in.Config != nil {
-		config := Cty(*in.Config)
+		config, err := Cty(*in.Config)
+		if err != nil {
+			return resp, fmt.Errorf("Error converting config: %w", err)
+		}
 		resp.Config = &config
 	}
-	return resp
+	return resp, nil
 }
 
-func PrepareProviderConfig_Response(in tfprotov5.PrepareProviderConfigResponse) tfplugin5.PrepareProviderConfig_Response {
-	resp := tfplugin5.PrepareProviderConfig_Response{
-		Diagnostics: Diagnostics(in.Diagnostics),
+func PrepareProviderConfig_Response(in tfprotov5.PrepareProviderConfigResponse) (tfplugin5.PrepareProviderConfig_Response, error) {
+	var resp tfplugin5.PrepareProviderConfig_Response
+	diags, err := Diagnostics(in.Diagnostics)
+	if err != nil {
+		return resp, err
 	}
+	resp.Diagnostics = diags
 	if in.PreparedConfig != nil {
-		config := Cty(*in.PreparedConfig)
+		config, err := Cty(*in.PreparedConfig)
+		if err != nil {
+			return resp, fmt.Errorf("Error converting config: %w", err)
+		}
 		resp.PreparedConfig = &config
 	}
-	return resp
+	return resp, nil
 }
 
-func Configure_Request(in tfprotov5.ConfigureProviderRequest) tfplugin5.Configure_Request {
+func Configure_Request(in tfprotov5.ConfigureProviderRequest) (tfplugin5.Configure_Request, error) {
 	resp := tfplugin5.Configure_Request{
 		TerraformVersion: in.TerraformVersion,
 	}
 	if in.Config != nil {
-		config := Cty(*in.Config)
+		config, err := Cty(*in.Config)
+		if err != nil {
+			return resp, fmt.Errorf("Error converting config: %w", err)
+		}
 		resp.Config = &config
 	}
-	return resp
+	return resp, nil
 }
 
-func Configure_Response(in tfprotov5.ConfigureProviderResponse) tfplugin5.Configure_Response {
-	return tfplugin5.Configure_Response{
-		Diagnostics: Diagnostics(in.Diagnostics),
+func Configure_Response(in tfprotov5.ConfigureProviderResponse) (tfplugin5.Configure_Response, error) {
+	var resp tfplugin5.Configure_Response
+	diags, err := Diagnostics(in.Diagnostics)
+	if err != nil {
+		return resp, err
 	}
+	resp.Diagnostics = diags
+	return resp, nil
 }
 
-func Stop_Request(in tfprotov5.StopProviderRequest) tfplugin5.Stop_Request {
-	return tfplugin5.Stop_Request{}
+func Stop_Request(in tfprotov5.StopProviderRequest) (tfplugin5.Stop_Request, error) {
+	return tfplugin5.Stop_Request{}, nil
 }
 
-func Stop_Response(in tfprotov5.StopProviderResponse) tfplugin5.Stop_Response {
+func Stop_Response(in tfprotov5.StopProviderResponse) (tfplugin5.Stop_Response, error) {
 	return tfplugin5.Stop_Response{
 		Error: in.Error,
-	}
+	}, nil
 }
