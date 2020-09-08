@@ -69,7 +69,7 @@ jobs:
     steps:
       - get_dependencies
       - get_golangci_lint
-      - run: golangci-lint run -v ./...
+      - run: bin/golangci-lint run -v ./...
 
 workflows:
   version: 2
