@@ -75,6 +75,6 @@ workflows:
       - "docker-go114 gofmt":
           requires:
             - "docker-go114 build"
-      - "docker-go114 golangci-lint"
+      - "docker-go114 golangci-lint":
           requires:
             - "docker-go114 build"
