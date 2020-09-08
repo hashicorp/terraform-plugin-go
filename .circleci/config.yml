@@ -12,6 +12,15 @@ commands:
           key: go-mod-v1-{{ checksum "go.sum" }}
           paths:
             - "/go/pkg/mod"
+  get_golangci_lint:
+    steps:
+      - run:
+          command: |
+            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.31.0
+      - save_cache:
+          key: golangci-lint-v1-31-0-{{ checksum "bin/golangci-lint" }}
+          paths:
+            - "bin/"
 
 jobs:
   "docker-go114 build":
@@ -59,6 +68,7 @@ jobs:
       - image: circleci/golang:1.14
     steps:
       - get_dependencies
+      - get_golangci_lint
       - run: golangci-lint run -v ./...
 
 workflows:
