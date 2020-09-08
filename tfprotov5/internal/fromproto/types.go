@@ -35,7 +35,10 @@ func msgpackToRawValue(in []byte) (tftypes.RawValue, error) {
 	if msgpackCodes.IsExt(peek) {
 		// We just assume _all_ extensions are unknown values,
 		// since we don't have any other extensions.
-		dec.Skip() // skip what we've peeked
+		err = dec.Skip() // skip what we've peeked
+		if err != nil {
+			return tftypes.RawValue{}, err
+		}
 		return tftypes.RawValue{
 			// we don't know what type this is yet, the caller
 			// decides
@@ -46,7 +49,10 @@ func msgpackToRawValue(in []byte) (tftypes.RawValue, error) {
 	// if the caller wants this to be dynamic, we unmarshalDynamic
 
 	if peek == msgpackCodes.Nil {
-		dec.Skip() // skip what we've peeked
+		err = dec.Skip() // skip what we've peeked
+		if err != nil {
+			return tftypes.RawValue{}, err
+		}
 		return tftypes.RawValue{
 			// we don't know what type this is yet, the caller
 			// decides
