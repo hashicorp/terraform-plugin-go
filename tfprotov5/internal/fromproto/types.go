@@ -1,7 +1,12 @@
 package fromproto
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
+
+	"github.com/vmihailenco/msgpack"
+	msgpackCodes "github.com/vmihailenco/msgpack/codes"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
@@ -20,13 +25,63 @@ func TerraformTypesRawValue(in tfplugin5.DynamicValue) (tftypes.RawValue, error)
 }
 
 func msgpackToRawValue(in []byte) (tftypes.RawValue, error) {
-	// TODO: parse msgpack
-	return tftypes.RawValue{}, nil
+	r := bytes.NewReader(in)
+	dec := msgpack.NewDecoder(r)
+
+	peek, err := dec.PeekCode()
+	if err != nil {
+		return tftypes.RawValue{}, err
+	}
+	if msgpackCodes.IsExt(peek) {
+		// We just assume _all_ extensions are unknown values,
+		// since we don't have any other extensions.
+		dec.Skip() // skip what we've peeked
+		return tftypes.RawValue{
+			// we don't know what type this is yet, the caller
+			// decides
+			Type:  tftypes.UnknownType,
+			Value: tftypes.UnknownValue,
+		}, nil
+	}
+	// if the caller wants this to be dynamic, we unmarshalDynamic
+
+	if peek == msgpackCodes.Nil {
+		dec.Skip() // skip what we've peeked
+		return tftypes.RawValue{
+			// we don't know what type this is yet, the caller
+			// decides
+			Type:  tftypes.UnknownType,
+			Value: nil,
+		}, nil
+	}
+
+	val, err := dec.DecodeInterface()
+	if err != nil {
+		return tftypes.RawValue{}, err
+	}
+
+	return tftypes.RawValue{
+		Type:  tftypes.UnknownType,
+		Value: val,
+	}, nil
 }
 
 func jsonToRawValue(in []byte) (tftypes.RawValue, error) {
-	// TODO: parse json
-	return tftypes.RawValue{}, nil
+	r := bytes.NewReader(in)
+	dec := json.NewDecoder(r)
+	dec.UseNumber()
+
+	var result interface{}
+	if err := dec.Decode(&result); err != nil {
+		return tftypes.RawValue{}, err
+	}
+	if dec.More() {
+		return tftypes.RawValue{}, errors.New("more than one JSON element to decode")
+	}
+	return tftypes.RawValue{
+		Type:  tftypes.UnknownType,
+		Value: result,
+	}, nil
 }
 
 func TerraformTypesType(in []byte) tftypes.Type {

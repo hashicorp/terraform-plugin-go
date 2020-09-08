@@ -10,6 +10,7 @@ type unknown byte
 
 const (
 	UnknownValue      = unknown(0)
+	UnknownType       = Type("Unknown")
 	DynamicPseudoType = Type("DynamicPseudoType")
 	String            = Type("String")
 	Number            = Type("Number")
