@@ -91,7 +91,7 @@ func jsonToRawValue(in []byte) (tftypes.RawValue, error) {
 		return tftypes.RawValue{}, errors.New("more than one JSON element to decode")
 	}
 
-	t, err := typeFromValue(val)
+	t, err := typeFromValue(result)
 	if err != nil {
 		return tftypes.RawValue{}, err
 	}
