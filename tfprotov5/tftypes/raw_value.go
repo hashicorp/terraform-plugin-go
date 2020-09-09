@@ -267,7 +267,7 @@ func rawValueFromComplexType(typ Type, val interface{}) (RawValue, error) {
 			return RawValue{
 				Type:  Number,
 				Value: val,
-			}
+			}, nil
 		}
 		return RawValue{
 			Type:  typ,
