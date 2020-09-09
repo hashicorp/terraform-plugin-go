@@ -9,28 +9,124 @@ import (
 
 type unknown byte
 
+type Type interface {
+	Is(Type) bool
+	String() string
+	private()
+}
+
+type primitive string
+
+func (p primitive) Is(t Type) bool {
+	v, ok := t.(primitive)
+	if !ok {
+		return false
+	}
+	return p == v
+}
+
+func (p primitive) String() string {
+	return "tftypes." + string(p)
+}
+
+func (p primitive) private() {}
+
 const (
 	UnknownValue      = unknown(0)
-	UnknownType       = Type("Unknown")
-	DynamicPseudoType = Type("DynamicPseudoType")
-	String            = Type("String")
-	Number            = Type("Number")
-	Bool              = Type("Bool")
-	List              = Type("List")
-	Set               = Type("Set")
-	Map               = Type("Map")
-	Tuple             = Type("Tuple")
-	Object            = Type("Object")
+	UnknownType       = primitive("Unknown")
+	DynamicPseudoType = primitive("DynamicPseudoType")
+	String            = primitive("String")
+	Number            = primitive("Number")
+	Bool              = primitive("Bool")
 )
+
+var (
+	_ Type = primitive("test")
+)
+
+type List struct {
+	ElementType Type
+}
+
+func (l List) Is(t Type) bool {
+	_, ok := t.(List)
+	return ok
+}
+
+func (l List) String() string {
+	return "tftypes.List"
+}
+
+func (l List) private() {}
+
+type Set struct {
+	ElementType Type
+}
+
+func (s Set) Is(t Type) bool {
+	_, ok := t.(Set)
+	return ok
+}
+
+func (s Set) String() string {
+	return "tftypes.Set"
+}
+
+func (s Set) private() {}
+
+type Map struct {
+	AttributeType Type
+}
+
+func (m Map) Is(t Type) bool {
+	_, ok := t.(Map)
+	return ok
+}
+
+func (m Map) String() string {
+	return "tftypes.Map"
+}
+
+func (m Map) private() {}
+
+type Tuple struct {
+	ElementTypes []Type
+}
+
+func (tu Tuple) Is(t Type) bool {
+	_, ok := t.(Tuple)
+	return ok
+}
+
+func (t Tuple) String() string {
+	return "tftypes.Tuple"
+}
+
+func (t Tuple) private() {}
+
+type Object struct {
+	AttributeTypes map[string]Type
+}
+
+func (o Object) Is(t Type) bool {
+	_, ok := t.(Object)
+	return ok
+}
+
+func (o Object) String() string {
+	return "tftypes.Object"
+}
+
+func (o Object) private() {}
 
 type Unmarshaler interface {
 	UnmarshalTerraform5Type(RawValue) error
 }
 
-type ErrUnhandledType Type
+type ErrUnhandledType string
 
 func (e ErrUnhandledType) Error() string {
-	return fmt.Sprintf("unhandled Terraform type %s", Type(e).String())
+	return fmt.Sprintf("unhandled Terraform type %s", string(e))
 }
 
 // RawValue represents a form of a Terraform type that can be parsed into a Go
@@ -44,13 +140,13 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 	if unmarshaler, ok := dst.(Unmarshaler); ok {
 		return unmarshaler.UnmarshalTerraform5Type(r)
 	}
-	switch r.Type {
-	case String:
+	switch {
+	case r.Type.Is(String):
 		if _, ok := dst.(*string); !ok {
 			return fmt.Errorf("Can't unmarshal %s into %T", r.Type, dst)
 		}
 		*(dst.(*string)) = r.Value.(string)
-	case Number:
+	case r.Type.Is(Number):
 		switch r.Value.(type) {
 		case int64:
 			switch dst.(type) {
@@ -148,18 +244,38 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 		case big.Float:
 			// TODO: handle big.Float values, like infinity or larger than 64 bit numbers
 		}
-	case Bool:
+	case r.Type.Is(Bool):
 		if _, ok := dst.(*bool); !ok {
 			return fmt.Errorf("Can't unmarshal %s into %T", r.Type, dst)
 		}
 		*(dst.(*bool)) = r.Value.(bool)
-	case List:
-		// this could be an actual, honest-to-goodness list, or it
-		// could be a primitive with its cty information included. We
-		// only know based on what the caller tells us they're
-		// expecting; an []interface{} is  expecting a list, a RawValue
-		// is expecting a *new* RawValue, with the Type property
-		// derived from the cty information given to us.
+	case r.Type.Is(List{}):
+		// this can't be a value with the cty information included; we
+		// assume, at parsing time, that those are Tuples, not Lists.
+		// So this _has_ to be a List, no ambiguity exists here.
+		switch dst.(type) {
+		case *[]interface{}:
+			*(dst.(*[]interface{})) = r.Value.([]interface{})
+		default:
+			// TODO: return error
+		}
+	case r.Type.Is(Set{}):
+		// this can't be a value with the cty information included; we
+		// assume, at parsing time, that those are Tuples, not Sets.
+		// So this _has_ to be a Set, no ambiguity exists here.
+		switch dst.(type) {
+		case *[]interface{}:
+			*(dst.(*[]interface{})) = r.Value.([]interface{})
+		default:
+			// TODO: return error
+		}
+	case r.Type.Is(Tuple{}):
+		// this could be an actual, honest-to-goodness Tuple, or it
+		// could be a value with its cty information included. We only
+		// know based on what the caller tells us they're expecting; an
+		// []interface{} is expecting a Tuple, a RawValue is expecting
+		// a *new* RawValue, with the Type property derived from the
+		// cty information given to us.
 		switch dst.(type) {
 		case *[]interface{}:
 			*(dst.(*[]interface{})) = r.Value.([]interface{})
@@ -173,7 +289,8 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 			if err != nil {
 				// TODO: return error
 			}
-			rv, err := rawValueFromComplexType(typ, val[1])
+			parsedType, err := parseType(typ)
+			rv, err := rawValueFromComplexType(parsedType, val[1])
 			if err != nil {
 				return err
 			}
@@ -181,32 +298,22 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 		default:
 			// TODO: return error
 		}
-	case Set:
-		// this can only be something the user decided explicitly was a
-		// Set; we can't get this from default behavior, so there's no
-		// ambiguity here.
+	case r.Type.Is(Map{}):
+		// this can't be a value with the cty information included; we
+		// assume, at parsing time, that those are Objects, not Maps.
+		// So this _has_ to be a Map, no ambiguity exists here.
 		switch dst.(type) {
-		case *[]interface{}:
-			*(dst.(*[]interface{})) = r.Value.([]interface{})
+		case *map[string]interface{}:
+			*(dst.(*map[string]interface{})) = r.Value.(map[string]interface{})
 		default:
 			// TODO: return error
 		}
-	case Tuple:
-		// this can only be something the user decided explicitly was a
-		// Tuple; we can't get this from default behavior, so there's
-		// no ambiguity here.
-		switch dst.(type) {
-		case *[]interface{}:
-			*(dst.(*[]interface{})) = r.Value.([]interface{})
-		default:
-			// TODO: return error
-		}
-	case Map:
-		// this could be an actual, honest-to-goodness map, or it could
-		// be a value with its cty information included. We only know
-		// based on what the caller tells us they're expecting; a
-		// map[string]interface{} is expecting a map, a RawValue is
-		// expecting a *new* RawValue, with the TYpe property derived
+	case r.Type.Is(Object{}):
+		// this could be an actual, honest-to-goodness Object, or it
+		// could be a value with its cty information included. We only
+		// know based on what the caller tells us they're expecting; a
+		// map[string]interface{} is expecting an object, a RawValue is
+		// expecting a *new* RawValue, with the Type property derived
 		// from the cty information given to us.
 		switch dst.(type) {
 		case *map[string]interface{}:
@@ -218,7 +325,11 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 			if err != nil {
 				// TODO: return error
 			}
-			rv, err := rawValueFromComplexType(typ, val["value"])
+			parsedType, err := parseType(typ)
+			if err != nil {
+				// TODO: return error
+			}
+			rv, err := rawValueFromComplexType(parsedType, val["value"])
 			if err != nil {
 				return err
 			}
@@ -226,43 +337,110 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 		default:
 			// TODO: return error
 		}
-	case Object:
-		// this can only be something the user decided explicitly was
-		// an Object; we can't get this from default behavior, so
-		// there's no ambiguity here.
-		switch dst.(type) {
-		case *map[string]interface{}:
-			*(dst.(*map[string]interface{})) = r.Value.(map[string]interface{})
-		default:
-			// TODO: return error
-		}
 	default:
-		return ErrUnhandledType(r.Type)
+		return ErrUnhandledType(r.Type.String())
 	}
 	return nil
 }
 
-func rawValueFromComplexType(typ, val interface{}) (RawValue, error) {
-	switch v := typ.(type) {
+func rawValueFromComplexType(typ Type, val interface{}) (RawValue, error) {
+	if _, ok := typ.(primitive); ok {
+		return RawValue{
+			Type:  typ,
+			Value: val,
+		}, nil
+	}
+	switch {
+	case typ.Is(List{}) || typ.Is(Set{}):
+		var elementType Type
+		if l, ok := typ.(List); ok {
+			elementType = l.ElementType
+		} else if s, ok := typ.(Set); ok {
+			elementType = s.ElementType
+		} else {
+			// TODO: throw an error, this should never happen
+		}
+		values := make([]RawValue, len(val.([]interface{})))
+		for pos, v := range val.([]interface{}) {
+			value, err := rawValueFromComplexType(elementType, v)
+			if err != nil {
+				// TODO: return error
+			}
+			values[pos] = value
+		}
+		return RawValue{
+			Type:  typ,
+			Value: values,
+		}, nil
+	case typ.Is(Tuple{}):
+		elementTypes := typ.(Tuple).ElementTypes
+		if len(elementTypes) != len(val.([]interface{})) {
+			// TODO: return error
+		}
+		elements := make([]RawValue, len(val.([]interface{})))
+		for pos, v := range val.([]interface{}) {
+			value, err := rawValueFromComplexType(elementTypes[pos], v)
+			if err != nil {
+				// TODO: return error
+			}
+			elements[pos] = value
+		}
+		return RawValue{
+			Type:  typ,
+			Value: elements,
+		}, nil
+	case typ.Is(Map{}):
+		attributeType := typ.(Map).AttributeType
+		values := make(map[string]RawValue, len(val.(map[string]interface{})))
+		for key, v := range val.(map[string]interface{}) {
+			value, err := rawValueFromComplexType(attributeType, v)
+			if err != nil {
+				// TODO: return error
+			}
+			values[key] = value
+		}
+		return RawValue{
+			Type:  typ,
+			Value: values,
+		}, nil
+	case typ.Is(Object{}):
+		attributeTypes := typ.(Object).AttributeTypes
+		values := make(map[string]RawValue, len(val.(map[string]interface{})))
+		if len(attributeTypes) != len(val.(map[string]interface{})) {
+			// TODO: return error
+		}
+		for key, v := range val.(map[string]interface{}) {
+			attributeType, ok := attributeTypes[key]
+			if !ok {
+				// TODO: return error
+			}
+			value, err := rawValueFromComplexType(attributeType, v)
+			if err != nil {
+				// TODO: return error
+			}
+			values[key] = value
+		}
+		return RawValue{
+			Type:  typ,
+			Value: values,
+		}, nil
+	}
+	// TODO: return error
+	return RawValue{}, nil
+}
+
+func parseType(in interface{}) (Type, error) {
+	switch v := in.(type) {
 	// primitive types are represented just as strings,
 	// with the type name in the string itself
 	case string:
 		switch v {
 		case "string":
-			return RawValue{
-				Type:  String,
-				Value: val,
-			}, nil
+			return String, nil
 		case "number":
-			return RawValue{
-				Type:  Number,
-				Value: 0, // TODO: how to represent numbers?
-			}, nil
+			return Number, nil
 		case "bool":
-			return RawValue{
-				Type:  Bool,
-				Value: val,
-			}, nil
+			return Bool, nil
 		default:
 			// TODO: return an error
 		}
@@ -275,103 +453,74 @@ func rawValueFromComplexType(typ, val interface{}) (RawValue, error) {
 		}
 		switch v[0] {
 		case "set":
-			if len(v) < 2 {
+			if len(v) != 2 {
 				// TODO: return an error
 			}
-			var vals []RawValue
-			for _, value := range val.([]interface{}) {
-				rv, err := rawValueFromComplexType(v[1], value)
-				if err != nil {
-					// TODO: return an error
-				}
-				vals = append(vals, rv)
+			subType, err := parseType(v[1])
+			if err != nil {
+				// TODO: return an error
 			}
-			return RawValue{
-				Type:  Set,
-				Value: vals,
+			return Set{
+				ElementType: subType,
 			}, nil
 		case "list":
-			if len(v) < 2 {
+			if len(v) != 2 {
 				// TODO: return an error
 			}
-			var vals []RawValue
-			for _, value := range val.([]interface{}) {
-				rv, err := rawValueFromComplexType(v[1], value)
-				if err != nil {
-					// TODO: return an error
-				}
-				vals = append(vals, rv)
+			subType, err := parseType(v[1])
+			if err != nil {
+				// TODO: return an error
 			}
-			return RawValue{
-				Type:  List,
-				Value: vals,
+			return List{
+				ElementType: subType,
 			}, nil
 		case "tuple":
-			if len(v) < len(val.([]interface{}))+1 {
-				// TODO: return an error
-			}
-			var vals []RawValue
-			for pos, value := range val.([]interface{}) {
-				rv, err := rawValueFromComplexType(v[pos+1], value)
-				if err != nil {
-					// TODO: return an error
-				}
-				vals = append(vals, rv)
-			}
-			return RawValue{
-				Type:  Tuple,
-				Value: vals,
-			}, nil
-		case "map":
 			if len(v) < 2 {
 				// TODO: return an error
 			}
-			vals := map[string]RawValue{}
-			for key, value := range val.(map[string]interface{}) {
-				rv, err := rawValueFromComplexType(v[1], value)
+			var types []Type
+			for _, typ := range v {
+				subType, err := parseType(typ)
 				if err != nil {
 					// TODO: return an error
 				}
-				vals[key] = rv
+				types = append(types, subType)
 			}
-			return RawValue{
-				Type:  Map,
-				Value: vals,
+			return Tuple{
+				ElementTypes: types,
+			}, nil
+		case "map":
+			if len(v) != 2 {
+				// TODO: return an error
+			}
+			subType, err := parseType(v[1])
+			if err != nil {
+				// TODO: return an error
+			}
+			return Map{
+				AttributeType: subType,
 			}, nil
 		case "object":
 			if len(v) < 2 {
 				// TODO: return an error
 			}
-			vals := map[string]RawValue{}
+			types := map[string]Type{}
 			valTypes := v[1].(map[string]interface{})
-			if len(valTypes) != len(val.(map[string]interface{})) {
-				// TODO: return an error
-			}
-			for key, value := range val.(map[string]interface{}) {
-				typ, ok := valTypes[key]
-				if !ok {
-					// TODO: return error
-				}
-				rv, err := rawValueFromComplexType(typ, value)
+			for key, typ := range valTypes {
+				subType, err := parseType(typ)
 				if err != nil {
 					// TODO: return an error
 				}
-				vals[key] = rv
+				types[key] = subType
 			}
-			return RawValue{
-				Type:  Object,
-				Value: vals,
+			return Object{
+				AttributeTypes: types,
 			}, nil
 		default:
+			// TODO: return an error
+			return nil, nil
 		}
 	}
-	// TODO: return error?
-	return RawValue{}, nil
-}
-
-// Type is used to identify Terraform types.
-type Type string
-
-func (t Type) String() string {
-	return "tftypes." + string(t)
+	// TODO: return an error
+	return nil, nil
 }

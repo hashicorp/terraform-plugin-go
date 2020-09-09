@@ -105,7 +105,7 @@ func typeFromValue(in interface{}) (tftypes.Type, error) {
 	if in == nil {
 		return tftypes.UnknownType, nil
 	}
-	switch in.(type) {
+	switch v := in.(type) {
 	case string:
 		return tftypes.String, nil
 	case json.Number, int64, int32, int16, int8, int, uint64, uint32, uint16, uint8, uint:
@@ -113,9 +113,29 @@ func typeFromValue(in interface{}) (tftypes.Type, error) {
 	case bool:
 		return tftypes.Bool, nil
 	case []interface{}:
-		return tftypes.List, nil
+		var types []tftypes.Type
+		for _, val := range v {
+			typ, err := typeFromValue(val)
+			if err != nil {
+				// TODO: return error
+			}
+			types = append(types, typ)
+		}
+		return tftypes.Tuple{
+			ElementTypes: types,
+		}, nil
 	case map[string]interface{}:
-		return tftypes.Map, nil
+		types := map[string]tftypes.Type{}
+		for k, val := range v {
+			typ, err := typeFromValue(val)
+			if err != nil {
+				// TODO: return error
+			}
+			types[k] = typ
+		}
+		return tftypes.Object{
+			AttributeTypes: types,
+		}, nil
 	}
 	return tftypes.UnknownType, fmt.Errorf("Go type %T has no default tftypes.Type", in)
 }
