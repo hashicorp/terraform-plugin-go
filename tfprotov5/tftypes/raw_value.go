@@ -333,15 +333,40 @@ func unmarshalFloat64(in float64, dst interface{}) error {
 func rawValueFromComplexType(typ Type, val interface{}) (RawValue, error) {
 	if _, ok := typ.(primitive); ok {
 		if typ.Is(Number) {
-			// TODO: put numbers in a consistent format
-			// numbers could be coming to us as like a billion
-			// different types, and we want developers to have
-			// stable types to build against. We should cast or
-			// wrap as necessary here to handle that.
-			return RawValue{
-				Type:  Number,
-				Value: val,
-			}, nil
+			result := RawValue{
+				Type: Number,
+			}
+			switch v := val.(type) {
+			case *big.Float:
+				v.Set(v)
+			case uint64:
+				result.Value = big.NewFloat(float64(v))
+			case uint32:
+				result.Value = big.NewFloat(float64(v))
+			case uint16:
+				result.Value = big.NewFloat(float64(v))
+			case uint8:
+				result.Value = big.NewFloat(float64(v))
+			case uint:
+				result.Value = big.NewFloat(float64(v))
+			case int64:
+				result.Value = big.NewFloat(float64(v))
+			case int32:
+				result.Value = big.NewFloat(float64(v))
+			case int16:
+				result.Value = big.NewFloat(float64(v))
+			case int8:
+				result.Value = big.NewFloat(float64(v))
+			case int:
+				result.Value = big.NewFloat(float64(v))
+			case float64:
+				result.Value = big.NewFloat(v)
+			case float32:
+				result.Value = big.NewFloat(float64(v))
+			default:
+				return result, fmt.Errorf("can't use type %T as a %s", val, Number)
+			}
+			return result, nil
 		}
 		return RawValue{
 			Type:  typ,
