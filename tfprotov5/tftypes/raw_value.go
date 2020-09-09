@@ -145,7 +145,7 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 		case *[]interface{}:
 			*(dst.(*[]interface{})) = r.Value.([]interface{})
 		default:
-			// TODO: return error
+			return fmt.Errorf("can't unmarshal %s into %T", r.Type, dst)
 		}
 	case r.Type.Is(Set{}):
 		// this can't be a value with the cty information included; we
@@ -155,7 +155,7 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 		case *[]interface{}:
 			*(dst.(*[]interface{})) = r.Value.([]interface{})
 		default:
-			// TODO: return error
+			return fmt.Errorf("can't unmarshal %s into %T", r.Type, dst)
 		}
 	case r.Type.Is(Tuple{}):
 		// this could be an actual, honest-to-goodness Tuple, or it
@@ -168,23 +168,33 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 		case *[]interface{}:
 			*(dst.(*[]interface{})) = r.Value.([]interface{})
 		case *RawValue:
-			val := r.Value.([]interface{})
+			val, ok := r.Value.([]interface{})
+			if !ok {
+				return fmt.Errorf("can't unmarshal into tftypes.RawValue; invalid type information. Intermediary type is %T, not %T", r.Value, []interface{}{})
+			}
 			if len(val) != 2 {
-				// TODO: return error
+				return fmt.Errorf("can't unmarshal into tftypes.RawValue; invalid type information. Expected %d items, got %d.", 2, len(val))
 			}
 			var typ interface{}
-			err := json.Unmarshal([]byte(val[0].(string)), &typ)
+			str, ok := val[0].(string)
+			if !ok {
+				return fmt.Errorf("can't unmarshal into tftypes.RawValue; invalid type information. Expected %T for first value, got %T", str, val[0])
+			}
+			err := json.Unmarshal([]byte(str), &typ)
 			if err != nil {
-				// TODO: return error
+				return fmt.Errorf("can't unmarshal into tftypes.RawValue; invalid type information. First value %q isn't valid JSON: %w", str, err)
 			}
 			parsedType, err := parseType(typ)
+			if err != nil {
+				return fmt.Errorf("error parsing type: %w", err)
+			}
 			rv, err := rawValueFromComplexType(parsedType, val[1])
 			if err != nil {
 				return err
 			}
 			*(dst.(*RawValue)) = rv
 		default:
-			// TODO: return error
+			return fmt.Errorf("can't unmarshal %s into %T", r.Type, dst)
 		}
 	case r.Type.Is(Map{}):
 		// this can't be a value with the cty information included; we
@@ -194,7 +204,7 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 		case *map[string]interface{}:
 			*(dst.(*map[string]interface{})) = r.Value.(map[string]interface{})
 		default:
-			// TODO: return error
+			return fmt.Errorf("can't unmarshal %s into %T", r.Type, dst)
 		}
 	case r.Type.Is(Object{}):
 		// this could be an actual, honest-to-goodness Object, or it
@@ -207,23 +217,38 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 		case *map[string]interface{}:
 			*(dst.(*map[string]interface{})) = r.Value.(map[string]interface{})
 		case *RawValue:
-			val := r.Value.(map[string]interface{})
+			val, ok := r.Value.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("can't unmarshal into tftypes.RawValue; invalid type information. Intermediary type is %T, not %T", r.Value, map[string]interface{}{})
+			}
 			var typ interface{}
-			err := json.Unmarshal([]byte(val["type"].(string)), &typ)
+			typeInterface, ok := val["type"]
+			if !ok {
+				return fmt.Errorf("can't unmarshal into tftypes.RawValue; invalid type information. No \"type\" key found.")
+			}
+			typeStr, ok := typeInterface.(string)
+			if !ok {
+				return fmt.Errorf("can't unmarshal into tftypes.RawValue; invalid type information. Expected %T for \"type\" key, got %T", typeStr, typeInterface)
+			}
+			err := json.Unmarshal([]byte(typeStr), &typ)
 			if err != nil {
-				// TODO: return error
+				return fmt.Errorf("can't unmarshal into tftypes.RawValue; invalid type information. \"type\" key's value %q isn't valid JSON: %w", typeStr, err)
 			}
 			parsedType, err := parseType(typ)
 			if err != nil {
-				// TODO: return error
+				return fmt.Errorf("error parsing type: %w", err)
 			}
-			rv, err := rawValueFromComplexType(parsedType, val["value"])
+			valueInterface, ok := val["value"]
+			if !ok {
+				return fmt.Errorf("can't unmarshal into tftypes.RawValue; no \"value\" key found")
+			}
+			rv, err := rawValueFromComplexType(parsedType, valueInterface)
 			if err != nil {
-				return err
+				return fmt.Errorf("error parsing value: %w", err)
 			}
 			*(dst.(*RawValue)) = rv
 		default:
-			// TODO: return error
+			return fmt.Errorf("can't unmarshal %s into %T", r.Type, dst)
 		}
 	default:
 		return ErrUnhandledType(r.Type.String())
@@ -246,13 +271,17 @@ func rawValueFromComplexType(typ Type, val interface{}) (RawValue, error) {
 		} else if s, ok := typ.(Set); ok {
 			elementType = s.ElementType
 		} else {
-			// TODO: throw an error, this should never happen
+			return RawValue{}, fmt.Errorf("type is %T, not %T or %T. This shouldn't be possible", typ, Set{}, List{})
 		}
-		values := make([]RawValue, len(val.([]interface{})))
-		for pos, v := range val.([]interface{}) {
+		interfaceValues, ok := val.([]interface{})
+		if !ok {
+			return RawValue{}, fmt.Errorf("unexpected intermediary type %T, expected %T", val, interfaceValues)
+		}
+		values := make([]RawValue, len(interfaceValues))
+		for pos, v := range interfaceValues {
 			value, err := rawValueFromComplexType(elementType, v)
 			if err != nil {
-				// TODO: return error
+				return RawValue{}, fmt.Errorf("error converting element %d of %T to a tftypes.RawValue: %w", pos, typ, err)
 			}
 			values[pos] = value
 		}
@@ -262,14 +291,18 @@ func rawValueFromComplexType(typ Type, val interface{}) (RawValue, error) {
 		}, nil
 	case typ.Is(Tuple{}):
 		elementTypes := typ.(Tuple).ElementTypes
-		if len(elementTypes) != len(val.([]interface{})) {
-			// TODO: return error
+		interfaceValues, ok := val.([]interface{})
+		if !ok {
+			return RawValue{}, fmt.Errorf("unexpected intermediary type %T, expected %T", val, interfaceValues)
 		}
-		elements := make([]RawValue, len(val.([]interface{})))
-		for pos, v := range val.([]interface{}) {
+		if len(elementTypes) != len(interfaceValues) {
+			return RawValue{}, fmt.Errorf("expected %d element types in %T, got %d", len(interfaceValues), typ, len(elementTypes))
+		}
+		elements := make([]RawValue, len(interfaceValues))
+		for pos, v := range interfaceValues {
 			value, err := rawValueFromComplexType(elementTypes[pos], v)
 			if err != nil {
-				// TODO: return error
+				return RawValue{}, fmt.Errorf("error converting element %d of %T to a tftypes.RawValue: %w", pos, typ, err)
 			}
 			elements[pos] = value
 		}
@@ -279,11 +312,15 @@ func rawValueFromComplexType(typ Type, val interface{}) (RawValue, error) {
 		}, nil
 	case typ.Is(Map{}):
 		attributeType := typ.(Map).AttributeType
-		values := make(map[string]RawValue, len(val.(map[string]interface{})))
-		for key, v := range val.(map[string]interface{}) {
+		msiValues, ok := val.(map[string]interface{})
+		if !ok {
+			return RawValue{}, fmt.Errorf("unexpected intermediary type %T, expected %T", val, msiValues)
+		}
+		values := make(map[string]RawValue, len(msiValues))
+		for key, v := range msiValues {
 			value, err := rawValueFromComplexType(attributeType, v)
 			if err != nil {
-				// TODO: return error
+				return RawValue{}, fmt.Errorf("error converting attribute %q of %T to a tftypes.RawValue: %w", key, typ, err)
 			}
 			values[key] = value
 		}
@@ -293,18 +330,22 @@ func rawValueFromComplexType(typ Type, val interface{}) (RawValue, error) {
 		}, nil
 	case typ.Is(Object{}):
 		attributeTypes := typ.(Object).AttributeTypes
-		values := make(map[string]RawValue, len(val.(map[string]interface{})))
-		if len(attributeTypes) != len(val.(map[string]interface{})) {
-			// TODO: return error
+		msiValues, ok := val.(map[string]interface{})
+		if !ok {
+			return RawValue{}, fmt.Errorf("unexpected intermediary type %T, expected %T", val, msiValues)
 		}
-		for key, v := range val.(map[string]interface{}) {
+		values := make(map[string]RawValue, len(msiValues))
+		if len(attributeTypes) != len(msiValues) {
+			return RawValue{}, fmt.Errorf("expected %d attribute types in %T, got %d", len(msiValues), typ, len(attributeTypes))
+		}
+		for key, v := range msiValues {
 			attributeType, ok := attributeTypes[key]
 			if !ok {
-				// TODO: return error
+				return RawValue{}, fmt.Errorf("expected type for attribute %q of %T, but didn't get one", key, typ)
 			}
 			value, err := rawValueFromComplexType(attributeType, v)
 			if err != nil {
-				// TODO: return error
+				return RawValue{}, fmt.Errorf("error converting attribute %q of %T to a tftypes.RawValue: %w", key, typ, err)
 			}
 			values[key] = value
 		}
@@ -313,6 +354,5 @@ func rawValueFromComplexType(typ Type, val interface{}) (RawValue, error) {
 			Value: values,
 		}, nil
 	}
-	// TODO: return error
-	return RawValue{}, nil
+	return RawValue{}, fmt.Errorf("unrecognized type %T can't be converted to a tftypes.RawValue", typ)
 }

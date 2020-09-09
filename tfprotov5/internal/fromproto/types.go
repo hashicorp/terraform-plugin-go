@@ -114,10 +114,10 @@ func typeFromValue(in interface{}) (tftypes.Type, error) {
 		return tftypes.Bool, nil
 	case []interface{}:
 		var types []tftypes.Type
-		for _, val := range v {
+		for pos, val := range v {
 			typ, err := typeFromValue(val)
 			if err != nil {
-				// TODO: return error
+				return nil, fmt.Errorf("error choosing default tftypes.Type for value %d of type %T: %w", pos, in, err)
 			}
 			types = append(types, typ)
 		}
@@ -129,7 +129,7 @@ func typeFromValue(in interface{}) (tftypes.Type, error) {
 		for k, val := range v {
 			typ, err := typeFromValue(val)
 			if err != nil {
-				// TODO: return error
+				return nil, fmt.Errorf("error choosing default tftypes.Type for attribute %q of type %T: %w", k, in, err)
 			}
 			types[k] = typ
 		}
