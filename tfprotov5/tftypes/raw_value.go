@@ -184,7 +184,7 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 			if err != nil {
 				return fmt.Errorf("can't unmarshal into tftypes.RawValue; invalid type information. First value %q isn't valid JSON: %w", str, err)
 			}
-			parsedType, err := parseType(typ)
+			parsedType, err := ParseType(typ)
 			if err != nil {
 				return fmt.Errorf("error parsing type: %w", err)
 			}
@@ -234,7 +234,7 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 			if err != nil {
 				return fmt.Errorf("can't unmarshal into tftypes.RawValue; invalid type information. \"type\" key's value %q isn't valid JSON: %w", typeStr, err)
 			}
-			parsedType, err := parseType(typ)
+			parsedType, err := ParseType(typ)
 			if err != nil {
 				return fmt.Errorf("error parsing type: %w", err)
 			}

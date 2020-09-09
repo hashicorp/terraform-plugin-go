@@ -8,7 +8,7 @@ type Type interface {
 	private()
 }
 
-func parseType(in interface{}) (Type, error) {
+func ParseType(in interface{}) (Type, error) {
 	switch v := in.(type) {
 	// primitive types are represented just as strings,
 	// with the type name in the string itself
@@ -35,7 +35,7 @@ func parseType(in interface{}) (Type, error) {
 			if len(v) != 2 {
 				return nil, fmt.Errorf("improperly formatted type information; need %d elements, got %d", 2, len(v))
 			}
-			subType, err := parseType(v[1])
+			subType, err := ParseType(v[1])
 			if err != nil {
 				return nil, fmt.Errorf("error parsing element type for tftypes.Set: %w", err)
 			}
@@ -46,7 +46,7 @@ func parseType(in interface{}) (Type, error) {
 			if len(v) != 2 {
 				return nil, fmt.Errorf("improperly formatted type information; need %d elements, got %d", 2, len(v))
 			}
-			subType, err := parseType(v[1])
+			subType, err := ParseType(v[1])
 			if err != nil {
 				return nil, fmt.Errorf("error parsing element type for tftypes.List: %w", err)
 			}
@@ -59,7 +59,7 @@ func parseType(in interface{}) (Type, error) {
 			}
 			var types []Type
 			for pos, typ := range v {
-				subType, err := parseType(typ)
+				subType, err := ParseType(typ)
 				if err != nil {
 					return nil, fmt.Errorf("error parsing type of element %d for tftypes.Tuple: %w", pos, err)
 				}
@@ -72,7 +72,7 @@ func parseType(in interface{}) (Type, error) {
 			if len(v) != 2 {
 				return nil, fmt.Errorf("improperly formatted type information; need %d elements, got %d", 2, len(v))
 			}
-			subType, err := parseType(v[1])
+			subType, err := ParseType(v[1])
 			if err != nil {
 				return nil, fmt.Errorf("error parsing attribute type for tftypes.Map: %w", err)
 			}
@@ -86,7 +86,7 @@ func parseType(in interface{}) (Type, error) {
 			types := map[string]Type{}
 			valTypes := v[1].(map[string]interface{})
 			for key, typ := range valTypes {
-				subType, err := parseType(typ)
+				subType, err := ParseType(typ)
 				if err != nil {
 					return nil, fmt.Errorf("error parsing type of attribute %q for tftypes.Object: %w", key, err)
 				}

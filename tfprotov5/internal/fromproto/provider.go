@@ -14,11 +14,17 @@ func GetProviderSchemaRequest(in tfplugin5.GetProviderSchema_Request) (tfprotov5
 func GetProviderSchemaResponse(in tfplugin5.GetProviderSchema_Response) (tfprotov5.GetProviderSchemaResponse, error) {
 	var resp tfprotov5.GetProviderSchemaResponse
 	if in.Provider != nil {
-		schema := Schema(*in.Provider)
+		schema, err := Schema(*in.Provider)
+		if err != nil {
+			return resp, err
+		}
 		resp.Provider = &schema
 	}
 	if in.ProviderMeta != nil {
-		schema := Schema(*in.ProviderMeta)
+		schema, err := Schema(*in.ProviderMeta)
+		if err != nil {
+			return resp, err
+		}
 		resp.ProviderMeta = &schema
 	}
 	resp.ResourceSchemas = make(map[string]*tfprotov5.Schema, len(in.ResourceSchemas))
@@ -27,7 +33,10 @@ func GetProviderSchemaResponse(in tfplugin5.GetProviderSchema_Response) (tfproto
 			resp.ResourceSchemas[k] = nil
 			continue
 		}
-		schema := Schema(*v)
+		schema, err := Schema(*v)
+		if err != nil {
+			return resp, err
+		}
 		resp.ResourceSchemas[k] = &schema
 	}
 	resp.DataSourceSchemas = make(map[string]*tfprotov5.Schema, len(in.DataSourceSchemas))
@@ -36,7 +45,10 @@ func GetProviderSchemaResponse(in tfplugin5.GetProviderSchema_Response) (tfproto
 			resp.DataSourceSchemas[k] = nil
 			continue
 		}
-		schema := Schema(*v)
+		schema, err := Schema(*v)
+		if err != nil {
+			return resp, err
+		}
 		resp.DataSourceSchemas[k] = &schema
 	}
 	diags, err := Diagnostics(in.Diagnostics)

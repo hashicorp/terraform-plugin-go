@@ -140,8 +140,11 @@ func typeFromValue(in interface{}) (tftypes.Type, error) {
 	return tftypes.UnknownType, fmt.Errorf("Go type %T has no default tftypes.Type", in)
 }
 
-func TerraformTypesType(in []byte) tftypes.Type {
-	// TODO: figure out how to unmarshal a cty []byte to tftypes.Type
-	var resp tftypes.Type
-	return resp
+func TerraformTypesType(in []byte) (tftypes.Type, error) {
+	var raw interface{}
+	err := json.Unmarshal(in, &raw)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing type, not valid JSON: %w", err)
+	}
+	return tftypes.ParseType(raw)
 }
