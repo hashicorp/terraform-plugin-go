@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/vmihailenco/msgpack"
 	msgpackCodes "github.com/vmihailenco/msgpack/codes"
@@ -66,8 +67,13 @@ func msgpackToRawValue(in []byte) (tftypes.RawValue, error) {
 		return tftypes.RawValue{}, err
 	}
 
+	t, err := typeFromValue(val)
+	if err != nil {
+		return tftypes.RawValue{}, err
+	}
+
 	return tftypes.RawValue{
-		Type:  tftypes.UnknownType,
+		Type:  t,
 		Value: val,
 	}, nil
 }
@@ -84,10 +90,34 @@ func jsonToRawValue(in []byte) (tftypes.RawValue, error) {
 	if dec.More() {
 		return tftypes.RawValue{}, errors.New("more than one JSON element to decode")
 	}
+
+	t, err := typeFromValue(val)
+	if err != nil {
+		return tftypes.RawValue{}, err
+	}
 	return tftypes.RawValue{
-		Type:  tftypes.UnknownType,
+		Type:  t,
 		Value: result,
 	}, nil
+}
+
+func typeFromValue(in interface{}) (tftypes.Type, error) {
+	if in == nil {
+		return tftypes.UnknownType, nil
+	}
+	switch in.(type) {
+	case string:
+		return tftypes.String, nil
+	case json.Number, int64, int32, int16, int8, int, uint64, uint32, uint16, uint8, uint:
+		return tftypes.Number, nil
+	case bool:
+		return tftypes.Bool, nil
+	case []interface{}:
+		return tftypes.List, nil
+	case map[string]interface{}:
+		return tftypes.Map, nil
+	}
+	return tftypes.UnknownType, fmt.Errorf("Go type %T has no default tftypes.Type", in)
 }
 
 func TerraformTypesType(in []byte) tftypes.Type {
