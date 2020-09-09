@@ -231,24 +231,24 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 }
 
 func unmarshalUint64(in uint64, dst interface{}) error {
-	switch dst.(type) {
+	switch v := dst.(type) {
 	case *uint64:
-		*(dst.(*uint64)) = in
+		*v = in
 	case *uint32:
 		if in > math.MaxUint32 {
 			return fmt.Errorf("%d doesn't fit in %T", in, dst)
 		}
-		*(dst.(*uint32)) = uint32(in)
+		*v = uint32(in)
 	case *uint16:
 		if in > math.MaxUint16 {
 			return fmt.Errorf("%d doesn't fit in %T", in, dst)
 		}
-		*(dst.(*uint16)) = uint16(in)
+		*v = uint16(in)
 	case *uint8:
 		if in > math.MaxUint8 {
 			return fmt.Errorf("%d doesn't fit in %T", in, dst)
 		}
-		*(dst.(*uint8)) = uint8(in)
+		*v = uint8(in)
 	case *uint:
 		// uint types are only guaranteed to be able to hold 32 bits;
 		// anything more is dependent on the system. Because providers
@@ -258,7 +258,7 @@ func unmarshalUint64(in uint64, dst interface{}) error {
 		if in > math.MaxUint32 {
 			return fmt.Errorf("%d doesn't always fit in %T", in, dst)
 		}
-		*(dst.(*uint)) = uint(in)
+		*v = uint(in)
 	default:
 		return fmt.Errorf("can't unmarshal uint64 into %T", dst)
 	}
@@ -266,9 +266,9 @@ func unmarshalUint64(in uint64, dst interface{}) error {
 }
 
 func unmarshalInt64(in int64, dst interface{}) error {
-	switch dst.(type) {
+	switch v := dst.(type) {
 	case *int64:
-		*(dst.(*int64)) = in
+		*v = in
 	case *int32:
 		if in > math.MaxInt32 {
 			return fmt.Errorf("%d doesn't fit in %T", in, dst)
@@ -276,7 +276,7 @@ func unmarshalInt64(in int64, dst interface{}) error {
 		if in < math.MinInt32 {
 			return fmt.Errorf("%d doesn't fit in %T", in, dst)
 		}
-		*(dst.(*int32)) = int32(in)
+		*v = int32(in)
 	case *int16:
 		if in > math.MaxInt16 {
 			return fmt.Errorf("%d doesn't fit in %T", in, dst)
@@ -284,7 +284,7 @@ func unmarshalInt64(in int64, dst interface{}) error {
 		if in < math.MinInt16 {
 			return fmt.Errorf("%d doesn't fit in %T", in, dst)
 		}
-		*(dst.(*int16)) = int16(in)
+		*v = int16(in)
 	case *int8:
 		if in > math.MaxInt8 {
 			return fmt.Errorf("%d doesn't fit in %T", in, dst)
@@ -292,7 +292,7 @@ func unmarshalInt64(in int64, dst interface{}) error {
 		if in < math.MinInt8 {
 			return fmt.Errorf("%d doesn't fit in %T", in, dst)
 		}
-		*(dst.(*int8)) = int8(in)
+		*v = int8(in)
 	case *int:
 		// int types are only guaranteed to be able to hold 32 bits;
 		// anything more is dependent on the system. Because providers
@@ -305,7 +305,7 @@ func unmarshalInt64(in int64, dst interface{}) error {
 		if in < math.MinInt32 {
 			return fmt.Errorf("%d doesn't always fit in %T", in, dst)
 		}
-		*(dst.(*int)) = int(in)
+		*v = int(in)
 	default:
 		return fmt.Errorf("can't unmarshal int64 into %T", dst)
 	}
@@ -313,9 +313,9 @@ func unmarshalInt64(in int64, dst interface{}) error {
 }
 
 func unmarshalFloat64(in float64, dst interface{}) error {
-	switch dst.(type) {
+	switch v := dst.(type) {
 	case *float64:
-		*(dst.(*float64)) = in
+		*v = in
 	case *float32:
 		if in > math.MaxFloat32 {
 			return fmt.Errorf("%f doesn't fit in %T", in, dst)
@@ -323,7 +323,7 @@ func unmarshalFloat64(in float64, dst interface{}) error {
 		if in < math.SmallestNonzeroFloat32 {
 			return fmt.Errorf("%f doesn't fit in %T", in, dst)
 		}
-		*(dst.(*float32)) = float32(in)
+		*v = float32(in)
 	default:
 		return fmt.Errorf("can't unmarshal float64 into %T", dst)
 	}
