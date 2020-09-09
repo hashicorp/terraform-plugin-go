@@ -258,6 +258,17 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 
 func rawValueFromComplexType(typ Type, val interface{}) (RawValue, error) {
 	if _, ok := typ.(primitive); ok {
+		if typ.Is(Number) {
+			// TODO: put numbers in a consistent format
+			// numbers could be coming to us as like a billion
+			// different types, and we want developers to have
+			// stable types to build against. We should cast or
+			// wrap as necessary here to handle that.
+			return RawValue{
+				Type:  Number,
+				Value: val,
+			}
+		}
 		return RawValue{
 			Type:  typ,
 			Value: val,
