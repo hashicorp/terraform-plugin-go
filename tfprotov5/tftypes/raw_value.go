@@ -37,100 +37,74 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 	case r.Type.Is(Number):
 		switch r.Value.(type) {
 		case int64:
-			switch dst.(type) {
-			case *int64:
-				*(dst.(*int64)) = r.Value.(int64)
-			case *int32:
-				if r.Value.(int64) > math.MaxInt32 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
-				}
-				if r.Value.(int64) < math.MinInt32 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
-				}
-				*(dst.(*int32)) = int32(r.Value.(int64))
-			case *int16:
-				if r.Value.(int64) > math.MaxInt16 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
-				}
-				if r.Value.(int64) < math.MinInt16 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
-				}
-				*(dst.(*int16)) = int16(r.Value.(int64))
-			case *int8:
-				if r.Value.(int64) > math.MaxInt8 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
-				}
-				if r.Value.(int64) < math.MinInt8 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
-				}
-				*(dst.(*int8)) = int8(r.Value.(int64))
-			case *int:
-				// int types are only guaranteed to be able to
-				// hold 32 bits; anything more is dependent on
-				// the system. Because providers need to work
-				// across architectures, we're going to ensure
-				// that only the minimum is used here. Anyone
-				// that needs more can use int64
-				if r.Value.(int64) > math.MaxInt32 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't always fit in %T", r.Type, dst, r.Value, dst)
-				}
-				if r.Value.(int64) < math.MinInt32 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't always fit in %T", r.Type, dst, r.Value, dst)
-				}
-				*(dst.(*int)) = int(r.Value.(int64))
-			default:
-				return fmt.Errorf("can't unmarshal %s into %T", r.Type, dst)
+			err := unmarshalInt64(r.Value.(int64), dst)
+			if err != nil {
+				return fmt.Errorf("can't unmarshal %s into %T: %w", r.Type, dst, err)
 			}
+			return nil
 		case uint64:
-			switch dst.(type) {
-			case *uint64:
-				*(dst.(*uint64)) = r.Value.(uint64)
-			case *uint32:
-				if r.Value.(uint64) > math.MaxUint32 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
-				}
-				*(dst.(*uint32)) = uint32(r.Value.(uint64))
-			case *uint16:
-				if r.Value.(uint64) > math.MaxUint16 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
-				}
-				*(dst.(*uint16)) = uint16(r.Value.(uint64))
-			case *uint8:
-				if r.Value.(uint64) > math.MaxUint8 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't fit in %T", r.Type, dst, r.Value, dst)
-				}
-				*(dst.(*uint8)) = uint8(r.Value.(uint64))
-			case *uint:
-				// uint types are only guaranteed to be able to
-				// hold 32 bits; anything more is dependent on
-				// the system. Because providers need to work
-				// across architectures, we're going to ensure
-				// that only the minimum is used here. Anyone
-				// that needs more can use uint64
-				if r.Value.(uint64) > math.MaxUint32 {
-					return fmt.Errorf("can't unmarshal %s into %T: %d doesn't always fit in %T", r.Type, dst, r.Value, dst)
-				}
-				*(dst.(*uint)) = uint(r.Value.(uint64))
-			default:
-				return fmt.Errorf("can't unmarshal %s into %T", r.Type, dst)
+			err := unmarshalUint64(r.Value.(uint64), dst)
+			if err != nil {
+				return fmt.Errorf("can't unmarshal %s into %T: %w", r.Type, dst, err)
 			}
+			return nil
 		case float64:
+			err := unmarshalFloat64(r.Value.(float64), dst)
+			if err != nil {
+				return fmt.Errorf("can't unmarshal %s into %T: %w", r.Type, dst, err)
+			}
+		case *big.Float:
 			switch dst.(type) {
-			case *float64:
-				*(dst.(*float64)) = r.Value.(float64)
-			case *float32:
-				if r.Value.(float64) > math.MaxFloat32 {
-					return fmt.Errorf("can't unmarshal %s into %T: %f doesn't fit in %T", r.Type, dst, r.Value, dst)
+			case *big.Float:
+				dst.(*big.Float).Set(r.Value.(*big.Float))
+			case *uint64, *uint32, *uint16, *uint8, *uint:
+				if !r.Value.(*big.Float).IsInt() {
+					return fmt.Errorf("can't unmarshal %s into %T: is not an integer", r.Type, dst)
 				}
-				if r.Value.(float64) < math.SmallestNonzeroFloat32 {
-					return fmt.Errorf("can't unmarshal %s into %T: %f doesn't fit in %T", r.Type, dst, r.Value, dst)
+				if r.Value.(*big.Float).Cmp(big.NewFloat(math.MaxUint64)) == 1 {
+					return fmt.Errorf("can't unmarshal %s into %T: value too large", r.Type, dst)
 				}
-				*(dst.(*float32)) = float32(r.Value.(float64))
+				if r.Value.(*big.Float).Cmp(big.NewFloat(0)) == -1 {
+					return fmt.Errorf("can't unmarshal %s into %T: value too small", r.Type, dst)
+				}
+				v, _ := r.Value.(*big.Float).Uint64()
+				err := unmarshalUint64(v, dst)
+				if err != nil {
+					return fmt.Errorf("can't unmarshal %s into %T: %w", r.Type, dst, err)
+				}
+				return nil
+			case *int64, *int32, *int16, *int8, int:
+				if !r.Value.(*big.Float).IsInt() {
+					return fmt.Errorf("can't unmarshal %s into %T: is not an integer", r.Type, dst)
+				}
+				if r.Value.(*big.Float).Cmp(big.NewFloat(math.MaxInt64)) == 1 {
+					return fmt.Errorf("can't unmarshal %s into %T: value too large", r.Type, dst)
+				}
+				if r.Value.(*big.Float).Cmp(big.NewFloat(math.MinInt64)) == -1 {
+					return fmt.Errorf("can't unmarshal %s into %T: value too small", r.Type, dst)
+				}
+				v, _ := r.Value.(*big.Float).Int64()
+				err := unmarshalInt64(v, dst)
+				if err != nil {
+					return fmt.Errorf("can't unmarshal %s into %T: %w", r.Type, dst, err)
+				}
+				return nil
+			case *float64, *float32:
+				if r.Value.(*big.Float).Cmp(big.NewFloat(math.MaxFloat64)) == 1 {
+					return fmt.Errorf("can't unmarshal %s into %T: value too large", r.Type, dst)
+				}
+				if r.Value.(*big.Float).Cmp(big.NewFloat(math.SmallestNonzeroFloat64)) == -1 {
+					return fmt.Errorf("can't unmarshal %s into %T: value too small", r.Type, dst)
+				}
+				v, _ := r.Value.(*big.Float).Float64()
+				err := unmarshalFloat64(v, dst)
+				if err != nil {
+					return fmt.Errorf("can't unmarshal %s into %T: %w", r.Type, dst, err)
+				}
+				return nil
 			default:
 				return fmt.Errorf("can't unmarshal %s into %T", r.Type, dst)
 			}
-		case big.Float:
-			// TODO: handle big.Float values, like infinity or larger than 64 bit numbers
 		}
 	case r.Type.Is(Bool):
 		if _, ok := dst.(*bool); !ok {
@@ -252,6 +226,106 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 		}
 	default:
 		return ErrUnhandledType(r.Type.String())
+	}
+	return nil
+}
+
+func unmarshalUint64(in uint64, dst interface{}) error {
+	switch dst.(type) {
+	case *uint64:
+		*(dst.(*uint64)) = in
+	case *uint32:
+		if in > math.MaxUint32 {
+			return fmt.Errorf("%d doesn't fit in %T", in, dst)
+		}
+		*(dst.(*uint32)) = uint32(in)
+	case *uint16:
+		if in > math.MaxUint16 {
+			return fmt.Errorf("%d doesn't fit in %T", in, dst)
+		}
+		*(dst.(*uint16)) = uint16(in)
+	case *uint8:
+		if in > math.MaxUint8 {
+			return fmt.Errorf("%d doesn't fit in %T", in, dst)
+		}
+		*(dst.(*uint8)) = uint8(in)
+	case *uint:
+		// uint types are only guaranteed to be able to hold 32 bits;
+		// anything more is dependent on the system. Because providers
+		// need to work across architectures, we're going to ensure
+		// that only the minimum is used here. Anyone that needs more
+		// can use uint64
+		if in > math.MaxUint32 {
+			return fmt.Errorf("%d doesn't always fit in %T", in, dst)
+		}
+		*(dst.(*uint)) = uint(in)
+	default:
+		return fmt.Errorf("can't unmarshal uint64 into %T", dst)
+	}
+	return nil
+}
+
+func unmarshalInt64(in int64, dst interface{}) error {
+	switch dst.(type) {
+	case *int64:
+		*(dst.(*int64)) = in
+	case *int32:
+		if in > math.MaxInt32 {
+			return fmt.Errorf("%d doesn't fit in %T", in, dst)
+		}
+		if in < math.MinInt32 {
+			return fmt.Errorf("%d doesn't fit in %T", in, dst)
+		}
+		*(dst.(*int32)) = int32(in)
+	case *int16:
+		if in > math.MaxInt16 {
+			return fmt.Errorf("%d doesn't fit in %T", in, dst)
+		}
+		if in < math.MinInt16 {
+			return fmt.Errorf("%d doesn't fit in %T", in, dst)
+		}
+		*(dst.(*int16)) = int16(in)
+	case *int8:
+		if in > math.MaxInt8 {
+			return fmt.Errorf("%d doesn't fit in %T", in, dst)
+		}
+		if in < math.MinInt8 {
+			return fmt.Errorf("%d doesn't fit in %T", in, dst)
+		}
+		*(dst.(*int8)) = int8(in)
+	case *int:
+		// int types are only guaranteed to be able to hold 32 bits;
+		// anything more is dependent on the system. Because providers
+		// need to work across architectures, we're going to ensure
+		// that only the minimum is used here. Anyone that needs more
+		// can use int64
+		if in > math.MaxInt32 {
+			return fmt.Errorf("%d doesn't always fit in %T", in, dst)
+		}
+		if in < math.MinInt32 {
+			return fmt.Errorf("%d doesn't always fit in %T", in, dst)
+		}
+		*(dst.(*int)) = int(in)
+	default:
+		return fmt.Errorf("can't unmarshal int64 into %T", dst)
+	}
+	return nil
+}
+
+func unmarshalFloat64(in float64, dst interface{}) error {
+	switch dst.(type) {
+	case *float64:
+		*(dst.(*float64)) = in
+	case *float32:
+		if in > math.MaxFloat32 {
+			return fmt.Errorf("%f doesn't fit in %T", in, dst)
+		}
+		if in < math.SmallestNonzeroFloat32 {
+			return fmt.Errorf("%f doesn't fit in %T", in, dst)
+		}
+		*(dst.(*float32)) = float32(in)
+	default:
+		return fmt.Errorf("can't unmarshal float64 into %T", dst)
 	}
 	return nil
 }
