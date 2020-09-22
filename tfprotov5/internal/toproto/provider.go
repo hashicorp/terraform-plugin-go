@@ -14,11 +14,17 @@ func GetProviderSchema_Request(in tfprotov5.GetProviderSchemaRequest) (tfplugin5
 func GetProviderSchema_Response(in tfprotov5.GetProviderSchemaResponse) (tfplugin5.GetProviderSchema_Response, error) {
 	var resp tfplugin5.GetProviderSchema_Response
 	if in.Provider != nil {
-		schema := Schema(*in.Provider)
+		schema, err := Schema(*in.Provider)
+		if err != nil {
+			return resp, fmt.Errorf("error marshaling provider schema: %w", err)
+		}
 		resp.Provider = &schema
 	}
 	if in.ProviderMeta != nil {
-		schema := Schema(*in.ProviderMeta)
+		schema, err := Schema(*in.ProviderMeta)
+		if err != nil {
+			return resp, fmt.Errorf("error marshaling provider_meta schema: %w", err)
+		}
 		resp.ProviderMeta = &schema
 	}
 	resp.ResourceSchemas = make(map[string]*tfplugin5.Schema, len(in.ResourceSchemas))
@@ -27,7 +33,10 @@ func GetProviderSchema_Response(in tfprotov5.GetProviderSchemaResponse) (tfplugi
 			resp.ResourceSchemas[k] = nil
 			continue
 		}
-		schema := Schema(*v)
+		schema, err := Schema(*v)
+		if err != nil {
+			return resp, fmt.Errorf("error marshaling resource schema for %q: %w", k, err)
+		}
 		resp.ResourceSchemas[k] = &schema
 	}
 	resp.DataSourceSchemas = make(map[string]*tfplugin5.Schema, len(in.DataSourceSchemas))
@@ -36,7 +45,10 @@ func GetProviderSchema_Response(in tfprotov5.GetProviderSchemaResponse) (tfplugi
 			resp.DataSourceSchemas[k] = nil
 			continue
 		}
-		schema := Schema(*v)
+		schema, err := Schema(*v)
+		if err != nil {
+			return resp, fmt.Errorf("error marshaling data source schema for %q: %w", k, err)
+		}
 		resp.DataSourceSchemas[k] = &schema
 	}
 	diags, err := Diagnostics(in.Diagnostics)

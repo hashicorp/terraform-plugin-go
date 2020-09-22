@@ -5,6 +5,7 @@ import "fmt"
 type Type interface {
 	Is(Type) bool
 	String() string
+	MarshalJSON() ([]byte, error)
 	private()
 }
 

@@ -1,5 +1,7 @@
 package tftypes
 
+import "fmt"
+
 const (
 	UnknownType       = primitive("Unknown")
 	DynamicPseudoType = primitive("DynamicPseudoType")
@@ -27,3 +29,17 @@ func (p primitive) String() string {
 }
 
 func (p primitive) private() {}
+
+func (p primitive) MarshalJSON() ([]byte, error) {
+	switch p {
+	case String:
+		return []byte(`"string"`), nil
+	case Number:
+		return []byte(`"number"`), nil
+	case Bool:
+		return []byte(`"bool"`), nil
+	case DynamicPseudoType:
+		return []byte(`"dynamic"`), nil
+	}
+	return nil, fmt.Errorf("unknown primitive type %q", p)
+}

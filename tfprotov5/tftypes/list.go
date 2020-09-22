@@ -1,5 +1,7 @@
 package tftypes
 
+import "fmt"
+
 type List struct {
 	ElementType Type
 }
@@ -14,3 +16,11 @@ func (l List) String() string {
 }
 
 func (l List) private() {}
+
+func (l List) MarshalJSON() ([]byte, error) {
+	elementType, err := l.ElementType.MarshalJSON()
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling tftypes.List's element type %T to JSON: %w", l.ElementType, err)
+	}
+	return []byte(`["list",` + string(elementType) + `]`), nil
+}
