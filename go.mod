@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/golang/protobuf v1.4.2
+	github.com/hashicorp/go-plugin v1.3.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a // indirect
