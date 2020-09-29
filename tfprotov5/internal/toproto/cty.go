@@ -85,7 +85,15 @@ func marshal(val interface{}, typ tftypes.Type, path []string, enc *msgpack.Enco
 	case typ.Is(tftypes.String):
 		s, ok := val.(string)
 		if !ok {
-			return unexpectedValueTypeError(path, s, val, typ)
+			u, ok := val.([]uint8)
+			if !ok {
+				return unexpectedValueTypeError(path, s, val, typ)
+			}
+			b := make([]byte, 0, len(u))
+			for _, i := range u {
+				b = append(b, i)
+			}
+			s = string(b)
 		}
 		err := enc.EncodeString(s)
 		if err != nil {
@@ -98,7 +106,15 @@ func marshal(val interface{}, typ tftypes.Type, path []string, enc *msgpack.Enco
 		// for Go's int/float type variations
 		n, ok := val.(*big.Float)
 		if !ok {
-			return unexpectedValueTypeError(path, n, val, typ)
+			u, ok := val.(uint16)
+			if !ok {
+				return unexpectedValueTypeError(path, n, val, typ)
+			}
+			err := enc.EncodeUint16(u)
+			if err != nil {
+				return pathError(path, "error encoding uint16 value: %w", err)
+			}
+			return nil
 		}
 		if iv, acc := n.Int64(); acc == big.Exact {
 			err := enc.EncodeInt(iv)
@@ -224,7 +240,7 @@ func marshal(val interface{}, typ tftypes.Type, path []string, enc *msgpack.Enco
 		for k, v := range o {
 			ty := types[k]
 			attrPath := newPath(path, k)
-			err := marshal(k, ty, attrPath, enc)
+			err := marshal(k, tftypes.String, attrPath, enc)
 			if err != nil {
 				return pathError(path, "error encoding object key: %w", err)
 			}
@@ -251,7 +267,9 @@ func unexpectedValueTypeError(path []string, expected, got interface{}, typ tfty
 
 func newPath(path []string, v interface{}) []string {
 	n := make([]string, len(path)+1)
-	copy(path, n)
+	for i, v := range path {
+		n[i] = v
+	}
 	n[len(n)-1] = fmt.Sprintf("%v", v)
 	return n
 }

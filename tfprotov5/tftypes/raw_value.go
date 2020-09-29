@@ -26,7 +26,13 @@ type RawValue struct {
 
 func (r RawValue) Unmarshal(dst interface{}) error {
 	if unmarshaler, ok := dst.(Unmarshaler); ok {
-		return unmarshaler.UnmarshalTerraform5Type(r)
+		//typ, val := standardizeRawValue(r)
+		var typ Type
+		var val interface{}
+		return unmarshaler.UnmarshalTerraform5Type(RawValue{
+			Type:  typ,
+			Value: val,
+		})
 	}
 	switch {
 	case r.Type.Is(String):
@@ -117,7 +123,14 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 		// So this _has_ to be a List, no ambiguity exists here.
 		switch dst.(type) {
 		case *[]interface{}:
-			*(dst.(*[]interface{})) = r.Value.([]interface{})
+			var res []interface{}
+			for _, i := range r.Value.([]interface{}) {
+				res = append(res, RawValue{
+					Type:  r.Type.(List).ElementType,
+					Value: i,
+				})
+			}
+			*(dst.(*[]interface{})) = res
 		default:
 			return fmt.Errorf("can't unmarshal %s into %T", r.Type, dst)
 		}
@@ -127,7 +140,14 @@ func (r RawValue) Unmarshal(dst interface{}) error {
 		// So this _has_ to be a Set, no ambiguity exists here.
 		switch dst.(type) {
 		case *[]interface{}:
-			*(dst.(*[]interface{})) = r.Value.([]interface{})
+			var res []interface{}
+			for _, i := range r.Value.([]interface{}) {
+				res = append(res, RawValue{
+					Type:  r.Type.(Set).ElementType,
+					Value: i,
+				})
+			}
+			*(dst.(*[]interface{})) = res
 		default:
 			return fmt.Errorf("can't unmarshal %s into %T", r.Type, dst)
 		}

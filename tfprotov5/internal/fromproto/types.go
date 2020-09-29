@@ -47,7 +47,6 @@ func msgpackToRawValue(in []byte) (tftypes.RawValue, error) {
 			Value: tftypes.UnknownValue,
 		}, nil
 	}
-	// if the caller wants this to be dynamic, we unmarshalDynamic
 
 	if peek == msgpackCodes.Nil {
 		err = dec.Skip() // skip what we've peeked
@@ -106,7 +105,7 @@ func typeFromValue(in interface{}) (tftypes.Type, error) {
 		return tftypes.UnknownType, nil
 	}
 	switch v := in.(type) {
-	case string:
+	case string, []uint8:
 		return tftypes.String, nil
 	case json.Number, int64, int32, int16, int8, int, uint64, uint32, uint16, uint8, uint:
 		return tftypes.Number, nil
