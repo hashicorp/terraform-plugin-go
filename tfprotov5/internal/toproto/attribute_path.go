@@ -9,12 +9,12 @@ import (
 
 var ErrUnknownAttributePathStepType = errors.New("unknown type of AttributePath_Step")
 
-func AttributePath(in tfprotov5.AttributePath) (tfplugin5.AttributePath, error) {
+func AttributePath(in *tfprotov5.AttributePath) (*tfplugin5.AttributePath, error) {
 	steps, err := AttributePath_Steps(in.Steps)
 	if err != nil {
-		return tfplugin5.AttributePath{}, err
+		return nil, err
 	}
-	return tfplugin5.AttributePath{
+	return &tfplugin5.AttributePath{
 		Steps: steps,
 	}, nil
 }
@@ -26,36 +26,36 @@ func AttributePaths(in []*tfprotov5.AttributePath) ([]*tfplugin5.AttributePath, 
 			resp = append(resp, nil)
 			continue
 		}
-		attr, err := AttributePath(*a)
+		attr, err := AttributePath(a)
 		if err != nil {
 			return resp, err
 		}
-		resp = append(resp, &attr)
+		resp = append(resp, attr)
 	}
 	return resp, nil
 }
 
-func AttributePath_Step(step tfprotov5.AttributePathStep) (tfplugin5.AttributePath_Step, error) {
+func AttributePath_Step(step tfprotov5.AttributePathStep) (*tfplugin5.AttributePath_Step, error) {
 	var resp tfplugin5.AttributePath_Step
 	if name, ok := step.(tfprotov5.AttributeName); ok {
 		resp.Selector = &tfplugin5.AttributePath_Step_AttributeName{
 			AttributeName: string(name),
 		}
-		return resp, nil
+		return &resp, nil
 	}
 	if key, ok := step.(tfprotov5.ElementKeyString); ok {
 		resp.Selector = &tfplugin5.AttributePath_Step_ElementKeyString{
 			ElementKeyString: string(key),
 		}
-		return resp, nil
+		return &resp, nil
 	}
 	if key, ok := step.(tfprotov5.ElementKeyInt); ok {
 		resp.Selector = &tfplugin5.AttributePath_Step_ElementKeyInt{
 			ElementKeyInt: int64(key),
 		}
-		return resp, nil
+		return &resp, nil
 	}
-	return resp, ErrUnknownAttributePathStepType
+	return nil, ErrUnknownAttributePathStepType
 }
 
 func AttributePath_Steps(in []tfprotov5.AttributePathStep) ([]*tfplugin5.AttributePath_Step, error) {
@@ -69,7 +69,7 @@ func AttributePath_Steps(in []tfprotov5.AttributePathStep) ([]*tfplugin5.Attribu
 		if err != nil {
 			return resp, err
 		}
-		resp = append(resp, &s)
+		resp = append(resp, s)
 	}
 	return resp, nil
 }

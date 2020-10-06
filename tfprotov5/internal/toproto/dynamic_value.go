@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 )
 
-func DynamicValue(in tfprotov5.DynamicValue) tfplugin5.DynamicValue {
-	return tfplugin5.DynamicValue{
+func DynamicValue(in *tfprotov5.DynamicValue) *tfplugin5.DynamicValue {
+	return &tfplugin5.DynamicValue{
 		Msgpack: in.MsgPack,
 		Json:    in.JSON,
 	}

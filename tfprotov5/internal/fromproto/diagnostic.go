@@ -5,18 +5,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
-func Diagnostic(in tfplugin5.Diagnostic) (tfprotov5.Diagnostic, error) {
-	diag := tfprotov5.Diagnostic{
+func Diagnostic(in *tfplugin5.Diagnostic) (*tfprotov5.Diagnostic, error) {
+	diag := &tfprotov5.Diagnostic{
 		Severity: DiagnosticSeverity(in.Severity),
 		Summary:  in.Summary,
 		Detail:   in.Detail,
 	}
 	if in.Attribute != nil {
-		attr, err := AttributePath(*in.Attribute)
+		attr, err := AttributePath(in.Attribute)
 		if err != nil {
 			return diag, err
 		}
-		diag.Attribute = &attr
+		diag.Attribute = attr
 	}
 	return diag, nil
 }
@@ -32,11 +32,11 @@ func Diagnostics(in []*tfplugin5.Diagnostic) ([]*tfprotov5.Diagnostic, error) {
 			diagnostics = append(diagnostics, nil)
 			continue
 		}
-		d, err := Diagnostic(*diag)
+		d, err := Diagnostic(diag)
 		if err != nil {
 			return diagnostics, err
 		}
-		diagnostics = append(diagnostics, &d)
+		diagnostics = append(diagnostics, d)
 	}
 	return diagnostics, nil
 }

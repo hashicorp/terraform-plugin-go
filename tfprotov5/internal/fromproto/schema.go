@@ -7,21 +7,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
-func Schema(in tfplugin5.Schema) (tfprotov5.Schema, error) {
+func Schema(in *tfplugin5.Schema) (*tfprotov5.Schema, error) {
 	var resp tfprotov5.Schema
 	resp.Version = in.Version
 	if in.Block != nil {
-		block, err := SchemaBlock(*in.Block)
+		block, err := SchemaBlock(in.Block)
 		if err != nil {
-			return resp, err
+			return &resp, err
 		}
-		resp.Block = &block
+		resp.Block = block
 	}
-	return resp, nil
+	return &resp, nil
 }
 
-func SchemaBlock(in tfplugin5.Schema_Block) (tfprotov5.SchemaBlock, error) {
-	resp := tfprotov5.SchemaBlock{
+func SchemaBlock(in *tfplugin5.Schema_Block) (*tfprotov5.SchemaBlock, error) {
+	resp := &tfprotov5.SchemaBlock{
 		Version:         in.Version,
 		Description:     in.Description,
 		DescriptionKind: StringKind(in.DescriptionKind),
@@ -40,8 +40,8 @@ func SchemaBlock(in tfplugin5.Schema_Block) (tfprotov5.SchemaBlock, error) {
 	return resp, nil
 }
 
-func SchemaAttribute(in tfplugin5.Schema_Attribute) (tfprotov5.SchemaAttribute, error) {
-	resp := tfprotov5.SchemaAttribute{
+func SchemaAttribute(in *tfplugin5.Schema_Attribute) (*tfprotov5.SchemaAttribute, error) {
+	resp := &tfprotov5.SchemaAttribute{
 		Name:            in.Name,
 		Description:     in.Description,
 		Required:        in.Required,
@@ -66,28 +66,28 @@ func SchemaAttributes(in []*tfplugin5.Schema_Attribute) ([]*tfprotov5.SchemaAttr
 			resp = append(resp, nil)
 			continue
 		}
-		attr, err := SchemaAttribute(*a)
+		attr, err := SchemaAttribute(a)
 		if err != nil {
 			return resp, fmt.Errorf("error converting schema attribute %d: %w", pos, err)
 		}
-		resp = append(resp, &attr)
+		resp = append(resp, attr)
 	}
 	return resp, nil
 }
 
-func SchemaNestedBlock(in tfplugin5.Schema_NestedBlock) (tfprotov5.SchemaNestedBlock, error) {
-	resp := tfprotov5.SchemaNestedBlock{
+func SchemaNestedBlock(in *tfplugin5.Schema_NestedBlock) (*tfprotov5.SchemaNestedBlock, error) {
+	resp := &tfprotov5.SchemaNestedBlock{
 		TypeName: in.TypeName,
 		Nesting:  SchemaNestedBlockNestingMode(in.Nesting),
 		MinItems: in.MinItems,
 		MaxItems: in.MaxItems,
 	}
 	if in.Block != nil {
-		block, err := SchemaBlock(*in.Block)
+		block, err := SchemaBlock(in.Block)
 		if err != nil {
 			return resp, err
 		}
-		resp.Block = &block
+		resp.Block = block
 	}
 	return resp, nil
 }
@@ -99,11 +99,11 @@ func SchemaNestedBlocks(in []*tfplugin5.Schema_NestedBlock) ([]*tfprotov5.Schema
 			resp = append(resp, nil)
 			continue
 		}
-		block, err := SchemaNestedBlock(*b)
+		block, err := SchemaNestedBlock(b)
 		if err != nil {
 			return resp, fmt.Errorf("error converting nested block %d: %w", pos, err)
 		}
-		resp = append(resp, &block)
+		resp = append(resp, block)
 	}
 	return resp, nil
 }

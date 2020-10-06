@@ -5,52 +5,49 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
-func ValidateDataSourceConfig_Request(in tfprotov5.ValidateDataSourceConfigRequest) (tfplugin5.ValidateDataSourceConfig_Request, error) {
-	resp := tfplugin5.ValidateDataSourceConfig_Request{
+func ValidateDataSourceConfig_Request(in *tfprotov5.ValidateDataSourceConfigRequest) (*tfplugin5.ValidateDataSourceConfig_Request, error) {
+	resp := &tfplugin5.ValidateDataSourceConfig_Request{
 		TypeName: in.TypeName,
 	}
 	if in.Config != nil {
-		config := DynamicValue(*in.Config)
-		resp.Config = &config
+		resp.Config = DynamicValue(in.Config)
 	}
 	return resp, nil
 }
 
-func ValidateDataSourceConfig_Response(in tfprotov5.ValidateDataSourceConfigResponse) (tfplugin5.ValidateDataSourceConfig_Response, error) {
-	var resp tfplugin5.ValidateDataSourceConfig_Response
+func ValidateDataSourceConfig_Response(in *tfprotov5.ValidateDataSourceConfigResponse) (*tfplugin5.ValidateDataSourceConfig_Response, error) {
 	diags, err := Diagnostics(in.Diagnostics)
 	if err != nil {
-		return resp, err
+		return nil, err
 	}
-	resp.Diagnostics = diags
-	return resp, nil
+	return &tfplugin5.ValidateDataSourceConfig_Response{
+		Diagnostics: diags,
+	}, nil
 }
 
-func ReadDataSource_Request(in tfprotov5.ReadDataSourceRequest) (tfplugin5.ReadDataSource_Request, error) {
-	resp := tfplugin5.ReadDataSource_Request{
+func ReadDataSource_Request(in *tfprotov5.ReadDataSourceRequest) (*tfplugin5.ReadDataSource_Request, error) {
+	resp := &tfplugin5.ReadDataSource_Request{
 		TypeName: in.TypeName,
 	}
 	if in.Config != nil {
-		config := DynamicValue(*in.Config)
-		resp.Config = &config
+		resp.Config = DynamicValue(in.Config)
 	}
 	if in.ProviderMeta != nil {
-		meta := DynamicValue(*in.ProviderMeta)
-		resp.ProviderMeta = &meta
+		resp.ProviderMeta = DynamicValue(in.ProviderMeta)
 	}
 	return resp, nil
 }
 
-func ReadDataSource_Response(in tfprotov5.ReadDataSourceResponse) (tfplugin5.ReadDataSource_Response, error) {
-	var resp tfplugin5.ReadDataSource_Response
+func ReadDataSource_Response(in *tfprotov5.ReadDataSourceResponse) (*tfplugin5.ReadDataSource_Response, error) {
 	diags, err := Diagnostics(in.Diagnostics)
 	if err != nil {
-		return resp, err
+		return nil, err
 	}
-	resp.Diagnostics = diags
+	resp := &tfplugin5.ReadDataSource_Response{
+		Diagnostics: diags,
+	}
 	if in.State != nil {
-		state := DynamicValue(*in.State)
-		resp.State = &state
+		resp.State = DynamicValue(in.State)
 	}
 	return resp, nil
 }

@@ -9,12 +9,12 @@ import (
 
 var ErrUnknownAttributePathStepType = errors.New("unknown type of AttributePath_Step")
 
-func AttributePath(in tfplugin5.AttributePath) (tfprotov5.AttributePath, error) {
+func AttributePath(in *tfplugin5.AttributePath) (*tfprotov5.AttributePath, error) {
 	steps, err := AttributePathSteps(in.Steps)
 	if err != nil {
-		return tfprotov5.AttributePath{}, err
+		return nil, err
 	}
-	return tfprotov5.AttributePath{
+	return &tfprotov5.AttributePath{
 		Steps: steps,
 	}, nil
 }
@@ -26,16 +26,16 @@ func AttributePaths(in []*tfplugin5.AttributePath) ([]*tfprotov5.AttributePath, 
 			resp = append(resp, nil)
 			continue
 		}
-		attr, err := AttributePath(*a)
+		attr, err := AttributePath(a)
 		if err != nil {
 			return resp, err
 		}
-		resp = append(resp, &attr)
+		resp = append(resp, attr)
 	}
 	return resp, nil
 }
 
-func AttributePathStep(step tfplugin5.AttributePath_Step) (tfprotov5.AttributePathStep, error) {
+func AttributePathStep(step *tfplugin5.AttributePath_Step) (tfprotov5.AttributePathStep, error) {
 	selector := step.GetSelector()
 	if v, ok := selector.(*tfplugin5.AttributePath_Step_AttributeName); ok {
 		return tfprotov5.AttributeName(v.AttributeName), nil
@@ -55,7 +55,7 @@ func AttributePathSteps(in []*tfplugin5.AttributePath_Step) ([]tfprotov5.Attribu
 		if step == nil {
 			continue
 		}
-		s, err := AttributePathStep(*step)
+		s, err := AttributePathStep(step)
 		if err != nil {
 			return resp, err
 		}
