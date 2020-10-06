@@ -2,8 +2,6 @@ package tfprotov5
 
 import (
 	"context"
-
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 )
 
 type ProviderServer interface {
@@ -27,17 +25,17 @@ type GetProviderSchemaResponse struct {
 }
 
 type PrepareProviderConfigRequest struct {
-	Config *tftypes.RawValue
+	Config *DynamicValue
 }
 
 type PrepareProviderConfigResponse struct {
-	PreparedConfig *tftypes.RawValue
+	PreparedConfig *DynamicValue
 	Diagnostics    []*Diagnostic
 }
 
 type ConfigureProviderRequest struct {
 	TerraformVersion string
-	Config           *tftypes.RawValue
+	Config           *DynamicValue
 }
 
 type ConfigureProviderResponse struct {

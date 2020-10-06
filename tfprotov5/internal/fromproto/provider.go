@@ -62,10 +62,7 @@ func GetProviderSchemaResponse(in tfplugin5.GetProviderSchema_Response) (tfproto
 func PrepareProviderConfigRequest(in tfplugin5.PrepareProviderConfig_Request) (tfprotov5.PrepareProviderConfigRequest, error) {
 	var resp tfprotov5.PrepareProviderConfigRequest
 	if in.Config != nil {
-		config, err := TerraformTypesRawValue(*in.Config)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting config: %w", err)
-		}
+		config := DynamicValue(*in.Config)
 		resp.Config = &config
 	}
 	return resp, nil
@@ -79,7 +76,7 @@ func PrepareProviderConfigResponse(in tfplugin5.PrepareProviderConfig_Response) 
 	}
 	resp.Diagnostics = diags
 	if in.PreparedConfig != nil {
-		config, err := TerraformTypesRawValue(*in.PreparedConfig)
+		config := DynamicValue(*in.PreparedConfig)
 		if err != nil {
 			return resp, fmt.Errorf("Error converting config: %w", err)
 		}
@@ -93,10 +90,7 @@ func ConfigureProviderRequest(in tfplugin5.Configure_Request) (tfprotov5.Configu
 		TerraformVersion: in.TerraformVersion,
 	}
 	if in.Config != nil {
-		config, err := TerraformTypesRawValue(*in.Config)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting config: %w", err)
-		}
+		config := DynamicValue(*in.Config)
 		resp.Config = &config
 	}
 	return resp, nil

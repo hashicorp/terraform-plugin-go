@@ -2,8 +2,6 @@ package tfprotov5
 
 import (
 	"context"
-
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 )
 
 type ResourceServer interface {
@@ -17,7 +15,7 @@ type ResourceServer interface {
 
 type ValidateResourceTypeConfigRequest struct {
 	TypeName string
-	Config   *tftypes.RawValue
+	Config   *DynamicValue
 }
 
 type ValidateResourceTypeConfigResponse struct {
@@ -37,28 +35,28 @@ type UpgradeResourceStateResponse struct {
 
 type ReadResourceRequest struct {
 	TypeName     string
-	CurrentState *tftypes.RawValue
+	CurrentState *DynamicValue
 	Private      []byte
-	ProviderMeta *tftypes.RawValue
+	ProviderMeta *DynamicValue
 }
 
 type ReadResourceResponse struct {
-	NewState    *tftypes.RawValue
+	NewState    *DynamicValue
 	Diagnostics []*Diagnostic
 	Private     []byte
 }
 
 type PlanResourceChangeRequest struct {
 	TypeName         string
-	PriorState       *tftypes.RawValue
-	ProposedNewState *tftypes.RawValue
-	Config           *tftypes.RawValue
+	PriorState       *DynamicValue
+	ProposedNewState *DynamicValue
+	Config           *DynamicValue
 	PriorPrivate     []byte
-	ProviderMeta     *tftypes.RawValue
+	ProviderMeta     *DynamicValue
 }
 
 type PlanResourceChangeResponse struct {
-	PlannedState    *tftypes.RawValue
+	PlannedState    *DynamicValue
 	RequiresReplace []*AttributePath
 	PlannedPrivate  []byte
 	Diagnostics     []*Diagnostic
@@ -66,15 +64,15 @@ type PlanResourceChangeResponse struct {
 
 type ApplyResourceChangeRequest struct {
 	TypeName       string
-	PriorState     *tftypes.RawValue
-	PlannedState   *tftypes.RawValue
-	Config         *tftypes.RawValue
+	PriorState     *DynamicValue
+	PlannedState   *DynamicValue
+	Config         *DynamicValue
 	PlannedPrivate []byte
-	ProviderMeta   *tftypes.RawValue
+	ProviderMeta   *DynamicValue
 }
 
 type ApplyResourceChangeResponse struct {
-	NewState    *tftypes.RawValue
+	NewState    *DynamicValue
 	Private     []byte
 	Diagnostics []*Diagnostic
 }
@@ -91,6 +89,6 @@ type ImportResourceStateResponse struct {
 
 type ImportedResource struct {
 	TypeName string
-	State    *tftypes.RawValue
+	State    *DynamicValue
 	Private  []byte
 }

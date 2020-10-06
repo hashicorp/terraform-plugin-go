@@ -2,8 +2,6 @@ package tfprotov5
 
 import (
 	"context"
-
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 )
 
 type DataSourceServer interface {
@@ -13,7 +11,7 @@ type DataSourceServer interface {
 
 type ValidateDataSourceConfigRequest struct {
 	TypeName string
-	Config   *tftypes.RawValue
+	Config   *DynamicValue
 }
 
 type ValidateDataSourceConfigResponse struct {
@@ -22,11 +20,11 @@ type ValidateDataSourceConfigResponse struct {
 
 type ReadDataSourceRequest struct {
 	TypeName     string
-	Config       *tftypes.RawValue
-	ProviderMeta *tftypes.RawValue
+	Config       *DynamicValue
+	ProviderMeta *DynamicValue
 }
 
 type ReadDataSourceResponse struct {
-	State       *tftypes.RawValue
+	State       *DynamicValue
 	Diagnostics []*Diagnostic
 }

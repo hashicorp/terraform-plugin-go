@@ -12,10 +12,7 @@ func ValidateResourceTypeConfigRequest(in tfplugin5.ValidateResourceTypeConfig_R
 		TypeName: in.TypeName,
 	}
 	if in.Config != nil {
-		config, err := TerraformTypesRawValue(*in.Config)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting config: %w", err)
-		}
+		config := DynamicValue(*in.Config)
 		resp.Config = &config
 	}
 	return resp, nil
@@ -59,17 +56,11 @@ func ReadResourceRequest(in tfplugin5.ReadResource_Request) (tfprotov5.ReadResou
 		Private:  in.Private,
 	}
 	if in.CurrentState != nil {
-		state, err := TerraformTypesRawValue(*in.CurrentState)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting current state: %w", err)
-		}
+		state := DynamicValue(*in.CurrentState)
 		resp.CurrentState = &state
 	}
 	if in.ProviderMeta != nil {
-		meta, err := TerraformTypesRawValue(*in.ProviderMeta)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting provider_meta: %w", err)
-		}
+		meta := DynamicValue(*in.ProviderMeta)
 		resp.ProviderMeta = &meta
 	}
 	return resp, nil
@@ -85,10 +76,7 @@ func ReadResourceResponse(in tfplugin5.ReadResource_Response) (tfprotov5.ReadRes
 	}
 	resp.Diagnostics = diags
 	if in.NewState != nil {
-		state, err := TerraformTypesRawValue(*in.NewState)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting new state: %w", err)
-		}
+		state := DynamicValue(*in.NewState)
 		resp.NewState = &state
 	}
 	return resp, nil
@@ -100,31 +88,19 @@ func PlanResourceChangeRequest(in tfplugin5.PlanResourceChange_Request) (tfproto
 		PriorPrivate: in.PriorPrivate,
 	}
 	if in.Config != nil {
-		config, err := TerraformTypesRawValue(*in.Config)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting config: %w", err)
-		}
+		config := DynamicValue(*in.Config)
 		resp.Config = &config
 	}
 	if in.PriorState != nil {
-		state, err := TerraformTypesRawValue(*in.PriorState)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting prior state: %w", err)
-		}
+		state := DynamicValue(*in.PriorState)
 		resp.PriorState = &state
 	}
 	if in.ProposedNewState != nil {
-		state, err := TerraformTypesRawValue(*in.ProposedNewState)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting proposed new state: %w", err)
-		}
+		state := DynamicValue(*in.ProposedNewState)
 		resp.ProposedNewState = &state
 	}
 	if in.ProviderMeta != nil {
-		meta, err := TerraformTypesRawValue(*in.ProviderMeta)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting provider_meta: %w", err)
-		}
+		meta := DynamicValue(*in.ProviderMeta)
 		resp.ProviderMeta = &meta
 	}
 	return resp, nil
@@ -145,7 +121,7 @@ func PlanResourceChangeResponse(in tfplugin5.PlanResourceChange_Response) (tfpro
 	}
 	resp.Diagnostics = diags
 	if in.PlannedState != nil {
-		state, err := TerraformTypesRawValue(*in.PlannedState)
+		state := DynamicValue(*in.PlannedState)
 		if err != nil {
 			return resp, fmt.Errorf("Error converting planned state: %w", err)
 		}
@@ -160,31 +136,19 @@ func ApplyResourceChangeRequest(in tfplugin5.ApplyResourceChange_Request) (tfpro
 		PlannedPrivate: in.PlannedPrivate,
 	}
 	if in.Config != nil {
-		config, err := TerraformTypesRawValue(*in.Config)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting config: %w", err)
-		}
+		config := DynamicValue(*in.Config)
 		resp.Config = &config
 	}
 	if in.PriorState != nil {
-		state, err := TerraformTypesRawValue(*in.PriorState)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting prior state: %w", err)
-		}
+		state := DynamicValue(*in.PriorState)
 		resp.PriorState = &state
 	}
 	if in.PlannedState != nil {
-		state, err := TerraformTypesRawValue(*in.PlannedState)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting planned state: %w", err)
-		}
+		state := DynamicValue(*in.PlannedState)
 		resp.PlannedState = &state
 	}
 	if in.ProviderMeta != nil {
-		meta, err := TerraformTypesRawValue(*in.ProviderMeta)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting provider_meta: %w", err)
-		}
+		meta := DynamicValue(*in.ProviderMeta)
 		resp.ProviderMeta = &meta
 	}
 	return resp, nil
@@ -200,7 +164,7 @@ func ApplyResourceChangeResponse(in tfplugin5.ApplyResourceChange_Response) (tfp
 	}
 	resp.Diagnostics = diags
 	if in.NewState != nil {
-		state, err := TerraformTypesRawValue(*in.NewState)
+		state := DynamicValue(*in.NewState)
 		if err != nil {
 			return resp, fmt.Errorf("Error converting new state: %w", err)
 		}
@@ -237,10 +201,7 @@ func ImportedResource(in tfplugin5.ImportResourceState_ImportedResource) (tfprot
 		Private:  in.Private,
 	}
 	if in.State != nil {
-		state, err := TerraformTypesRawValue(*in.State)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting state: %w", err)
-		}
+		state := DynamicValue(*in.State)
 		resp.State = &state
 	}
 	return resp, nil

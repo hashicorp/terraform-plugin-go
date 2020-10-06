@@ -12,10 +12,7 @@ func ValidateResourceTypeConfig_Request(in tfprotov5.ValidateResourceTypeConfigR
 		TypeName: in.TypeName,
 	}
 	if in.Config != nil {
-		config, err := Cty(*in.Config)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting config: %w", err)
-		}
+		config := DynamicValue(*in.Config)
 		resp.Config = &config
 	}
 	return resp, nil
@@ -59,17 +56,11 @@ func ReadResource_Request(in tfprotov5.ReadResourceRequest) (tfplugin5.ReadResou
 		Private:  in.Private,
 	}
 	if in.CurrentState != nil {
-		state, err := Cty(*in.CurrentState)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting current state: %w", err)
-		}
+		state := DynamicValue(*in.CurrentState)
 		resp.CurrentState = &state
 	}
 	if in.ProviderMeta != nil {
-		meta, err := Cty(*in.ProviderMeta)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting provider_meta: %w", err)
-		}
+		meta := DynamicValue(*in.ProviderMeta)
 		resp.ProviderMeta = &meta
 	}
 	return resp, nil
@@ -85,10 +76,7 @@ func ReadResource_Response(in tfprotov5.ReadResourceResponse) (tfplugin5.ReadRes
 	}
 	resp.Diagnostics = diags
 	if in.NewState != nil {
-		state, err := Cty(*in.NewState)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting new state: %w", err)
-		}
+		state := DynamicValue(*in.NewState)
 		resp.NewState = &state
 	}
 	return resp, nil
@@ -100,31 +88,19 @@ func PlanResourceChange_Request(in tfprotov5.PlanResourceChangeRequest) (tfplugi
 		PriorPrivate: in.PriorPrivate,
 	}
 	if in.Config != nil {
-		config, err := Cty(*in.Config)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting config :%w", err)
-		}
+		config := DynamicValue(*in.Config)
 		resp.Config = &config
 	}
 	if in.PriorState != nil {
-		state, err := Cty(*in.PriorState)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting prior state: %w", err)
-		}
+		state := DynamicValue(*in.PriorState)
 		resp.PriorState = &state
 	}
 	if in.ProposedNewState != nil {
-		state, err := Cty(*in.ProposedNewState)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting proposed new state: %w", err)
-		}
+		state := DynamicValue(*in.ProposedNewState)
 		resp.ProposedNewState = &state
 	}
 	if in.ProviderMeta != nil {
-		meta, err := Cty(*in.ProviderMeta)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting provider_meta: %w", err)
-		}
+		meta := DynamicValue(*in.ProviderMeta)
 		resp.ProviderMeta = &meta
 	}
 	return resp, nil
@@ -145,7 +121,7 @@ func PlanResourceChange_Response(in tfprotov5.PlanResourceChangeResponse) (tfplu
 	}
 	resp.Diagnostics = diags
 	if in.PlannedState != nil {
-		state, err := Cty(*in.PlannedState)
+		state := DynamicValue(*in.PlannedState)
 		if err != nil {
 			return resp, fmt.Errorf("Error converting planned state: %w", err)
 		}
@@ -160,31 +136,19 @@ func ApplyResourceChange_Request(in tfprotov5.ApplyResourceChangeRequest) (tfplu
 		PlannedPrivate: in.PlannedPrivate,
 	}
 	if in.Config != nil {
-		config, err := Cty(*in.Config)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting config: %w", err)
-		}
+		config := DynamicValue(*in.Config)
 		resp.Config = &config
 	}
 	if in.PriorState != nil {
-		state, err := Cty(*in.PriorState)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting prior state: %w", err)
-		}
+		state := DynamicValue(*in.PriorState)
 		resp.PriorState = &state
 	}
 	if in.PlannedState != nil {
-		state, err := Cty(*in.PlannedState)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting planned state: %w", err)
-		}
+		state := DynamicValue(*in.PlannedState)
 		resp.PlannedState = &state
 	}
 	if in.ProviderMeta != nil {
-		meta, err := Cty(*in.ProviderMeta)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting provider_meta: %w", err)
-		}
+		meta := DynamicValue(*in.ProviderMeta)
 		resp.ProviderMeta = &meta
 	}
 	return resp, nil
@@ -200,7 +164,7 @@ func ApplyResourceChange_Response(in tfprotov5.ApplyResourceChangeResponse) (tfp
 	}
 	resp.Diagnostics = diags
 	if in.NewState != nil {
-		state, err := Cty(*in.NewState)
+		state := DynamicValue(*in.NewState)
 		if err != nil {
 			return resp, fmt.Errorf("Error converting new state: %w", err)
 		}
@@ -237,10 +201,7 @@ func ImportResourceState_ImportedResource(in tfprotov5.ImportedResource) (tfplug
 		Private:  in.Private,
 	}
 	if in.State != nil {
-		state, err := Cty(*in.State)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting state: %w", err)
-		}
+		state := DynamicValue(*in.State)
 		resp.State = &state
 	}
 	return resp, nil

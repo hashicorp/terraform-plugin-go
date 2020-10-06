@@ -1,8 +1,6 @@
 package toproto
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
@@ -12,10 +10,7 @@ func ValidateDataSourceConfig_Request(in tfprotov5.ValidateDataSourceConfigReque
 		TypeName: in.TypeName,
 	}
 	if in.Config != nil {
-		config, err := Cty(*in.Config)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting config: %w", err)
-		}
+		config := DynamicValue(*in.Config)
 		resp.Config = &config
 	}
 	return resp, nil
@@ -36,17 +31,11 @@ func ReadDataSource_Request(in tfprotov5.ReadDataSourceRequest) (tfplugin5.ReadD
 		TypeName: in.TypeName,
 	}
 	if in.Config != nil {
-		config, err := Cty(*in.Config)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting config: %w", err)
-		}
+		config := DynamicValue(*in.Config)
 		resp.Config = &config
 	}
 	if in.ProviderMeta != nil {
-		meta, err := Cty(*in.ProviderMeta)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting provider_meta: %w", err)
-		}
+		meta := DynamicValue(*in.ProviderMeta)
 		resp.ProviderMeta = &meta
 	}
 	return resp, nil
@@ -60,10 +49,7 @@ func ReadDataSource_Response(in tfprotov5.ReadDataSourceResponse) (tfplugin5.Rea
 	}
 	resp.Diagnostics = diags
 	if in.State != nil {
-		state, err := Cty(*in.State)
-		if err != nil {
-			return resp, fmt.Errorf("Error converting state: %w", err)
-		}
+		state := DynamicValue(*in.State)
 		resp.State = &state
 	}
 	return resp, nil
