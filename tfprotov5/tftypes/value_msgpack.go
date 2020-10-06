@@ -20,7 +20,7 @@ func marshalMsgPack(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
 		}
 		return nil
 	}
-	if !val.IsNull() {
+	if val.IsNull() {
 		err := enc.EncodeNil()
 		if err != nil {
 			return p.NewErrorf("error encoding null value: %w", err)
