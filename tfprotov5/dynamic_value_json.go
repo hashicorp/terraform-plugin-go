@@ -15,7 +15,7 @@ func jsonByteDecoder(buf []byte) *json.Decoder {
 	return dec
 }
 
-func jsonUnmarshal(buf []byte, typ tftypes.Type, p tftypes.Path) (tftypes.Value, error) {
+func jsonUnmarshal(buf []byte, typ tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
@@ -51,7 +51,7 @@ func jsonUnmarshal(buf []byte, typ tftypes.Type, p tftypes.Path) (tftypes.Value,
 	return tftypes.Value{}, p.NewErrorf("unknown type %s", typ)
 }
 
-func jsonUnmarshalString(buf []byte, typ tftypes.Type, p tftypes.Path) (tftypes.Value, error) {
+func jsonUnmarshalString(buf []byte, typ tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
@@ -70,7 +70,7 @@ func jsonUnmarshalString(buf []byte, typ tftypes.Type, p tftypes.Path) (tftypes.
 	return tftypes.Value{}, p.NewErrorf("unsupported type %T sent as %s", tok, tftypes.String)
 }
 
-func jsonUnmarshalNumber(buf []byte, typ tftypes.Type, p tftypes.Path) (tftypes.Value, error) {
+func jsonUnmarshalNumber(buf []byte, typ tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
@@ -85,7 +85,7 @@ func jsonUnmarshalNumber(buf []byte, typ tftypes.Type, p tftypes.Path) (tftypes.
 	return tftypes.NewValue(typ, numTok), nil
 }
 
-func jsonUnmarshalBool(buf []byte, typ tftypes.Type, p tftypes.Path) (tftypes.Value, error) {
+func jsonUnmarshalBool(buf []byte, typ tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
 	dec := jsonByteDecoder(buf)
 	tok, err := dec.Token()
 	if err != nil {
@@ -100,7 +100,7 @@ func jsonUnmarshalBool(buf []byte, typ tftypes.Type, p tftypes.Path) (tftypes.Va
 	return tftypes.Value{}, p.NewErrorf("unsupported type %T sent as %s", tok, tftypes.Bool)
 }
 
-func jsonUnmarshalDynamicPseudoType(buf []byte, typ tftypes.Type, p tftypes.Path) (tftypes.Value, error) {
+func jsonUnmarshalDynamicPseudoType(buf []byte, typ tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
 	dec := jsonByteDecoder(buf)
 	tok, err := dec.Token()
 	if err != nil {
@@ -153,7 +153,7 @@ func jsonUnmarshalDynamicPseudoType(buf []byte, typ tftypes.Type, p tftypes.Path
 	return jsonUnmarshal(valBody, t, p)
 }
 
-func jsonUnmarshalList(buf []byte, elementType tftypes.Type, p tftypes.Path) (tftypes.Value, error) {
+func jsonUnmarshalList(buf []byte, elementType tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
@@ -176,15 +176,9 @@ func jsonUnmarshalList(buf []byte, elementType tftypes.Type, p tftypes.Path) (tf
 	// distinction, so we'll allow it.
 	vals := []tftypes.Value{}
 
-	// add a placeholder at the end of the path
-	// we'll fix this in each part of the loop to have the right value
-	// we can't just append in the loop, we need to replace, or we'll
-	// be adding, not modifying, the last part of the path
-	p = append(p, nil)
 	var idx int64
 	for dec.More() {
-		// correct the last value in the path
-		p[len(p)-1] = idx
+		p.WithElementKeyInt(idx)
 		// update the index
 		idx++
 
@@ -198,9 +192,8 @@ func jsonUnmarshalList(buf []byte, elementType tftypes.Type, p tftypes.Path) (tf
 			return tftypes.Value{}, err
 		}
 		vals = append(vals, val)
+		p.WithoutLastStep()
 	}
-	// drop the last value, we're out of the loop now
-	p = p.RemoveLastStep()
 
 	tok, err = dec.Token()
 	if err != nil {
@@ -214,7 +207,7 @@ func jsonUnmarshalList(buf []byte, elementType tftypes.Type, p tftypes.Path) (tf
 	}, vals), nil
 }
 
-func jsonUnmarshalSet(buf []byte, elementType tftypes.Type, p tftypes.Path) (tftypes.Value, error) {
+func jsonUnmarshalSet(buf []byte, elementType tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
@@ -237,8 +230,8 @@ func jsonUnmarshalSet(buf []byte, elementType tftypes.Type, p tftypes.Path) (tft
 	// distinction, so we'll allow it.
 	vals := []tftypes.Value{}
 
-	p = p.AddValueStep(tftypes.NewValue(elementType, tftypes.UnknownValue))
 	for dec.More() {
+		p.WithElementKeyValue(tftypes.NewValue(elementType, tftypes.UnknownValue))
 		var rawVal json.RawMessage
 		err = dec.Decode(&rawVal)
 		if err != nil {
@@ -249,10 +242,8 @@ func jsonUnmarshalSet(buf []byte, elementType tftypes.Type, p tftypes.Path) (tft
 			return tftypes.Value{}, err
 		}
 		vals = append(vals, val)
+		p.WithoutLastStep()
 	}
-	// drop the last value, we're out of the loop now
-	p = p.RemoveLastStep()
-
 	tok, err = dec.Token()
 	if err != nil {
 		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
@@ -265,7 +256,7 @@ func jsonUnmarshalSet(buf []byte, elementType tftypes.Type, p tftypes.Path) (tft
 	}, vals), nil
 }
 
-func jsonUnmarshalMap(buf []byte, attrType tftypes.Type, p tftypes.Path) (tftypes.Value, error) {
+func jsonUnmarshalMap(buf []byte, attrType tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
@@ -277,8 +268,8 @@ func jsonUnmarshalMap(buf []byte, attrType tftypes.Type, p tftypes.Path) (tftype
 	}
 
 	vals := map[string]tftypes.Value{}
-	p = p.AddValueStep(tftypes.NewValue(attrType, tftypes.UnknownValue))
 	for dec.More() {
+		p.WithElementKeyValue(tftypes.NewValue(attrType, tftypes.UnknownValue))
 		tok, err := dec.Token()
 		if err != nil {
 			return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
@@ -289,7 +280,8 @@ func jsonUnmarshalMap(buf []byte, attrType tftypes.Type, p tftypes.Path) (tftype
 		}
 
 		//fix the path value, we have an actual key now
-		p[len(p)-1] = key
+		p.WithoutLastStep()
+		p.WithElementKeyString(key)
 
 		var rawVal json.RawMessage
 		err = dec.Decode(&rawVal)
@@ -301,10 +293,8 @@ func jsonUnmarshalMap(buf []byte, attrType tftypes.Type, p tftypes.Path) (tftype
 			return tftypes.Value{}, err
 		}
 		vals[key] = val
+		p.WithoutLastStep()
 	}
-	// drop the last value, we're out of the loop now
-	p = p.RemoveLastStep()
-
 	tok, err = dec.Token()
 	if err != nil {
 		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
@@ -318,7 +308,7 @@ func jsonUnmarshalMap(buf []byte, attrType tftypes.Type, p tftypes.Path) (tftype
 	}, vals), nil
 }
 
-func jsonUnmarshalTuple(buf []byte, elementTypes []tftypes.Type, p tftypes.Path) (tftypes.Value, error) {
+func jsonUnmarshalTuple(buf []byte, elementTypes []tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
@@ -341,18 +331,13 @@ func jsonUnmarshalTuple(buf []byte, elementTypes []tftypes.Type, p tftypes.Path)
 	// distinction, so we'll allow it.
 	vals := []tftypes.Value{}
 
-	// add a placeholder at the end of the path
-	// we'll fix this in each part of the loop to have the right value
-	// we can't just append in the loop, we need to replace, or we'll
-	// be adding, not modifying, the last part of the path
-	p = append(p, nil)
 	var idx int64
 	for dec.More() {
 		if idx >= int64(len(elementTypes)) {
-			return tftypes.Value{}, p[:len(p)-1].NewErrorf("too many tuple elements (only have types for %d)", len(elementTypes))
+			return tftypes.Value{}, p.NewErrorf("too many tuple elements (only have types for %d)", len(elementTypes))
 		}
 
-		p[len(p)-1] = idx
+		p.WithElementKeyInt(idx)
 		elementType := elementTypes[idx]
 		idx++
 
@@ -366,9 +351,8 @@ func jsonUnmarshalTuple(buf []byte, elementTypes []tftypes.Type, p tftypes.Path)
 			return tftypes.Value{}, err
 		}
 		vals = append(vals, val)
+		p.WithoutLastStep()
 	}
-	//drop the last value, we're out of the loop now
-	p = p.RemoveLastStep()
 
 	tok, err = dec.Token()
 	if err != nil {
@@ -387,7 +371,7 @@ func jsonUnmarshalTuple(buf []byte, elementTypes []tftypes.Type, p tftypes.Path)
 	}, vals), nil
 }
 
-func jsonUnmarshalObject(buf []byte, attrTypes map[string]tftypes.Type, p tftypes.Path) (tftypes.Value, error) {
+func jsonUnmarshalObject(buf []byte, attrTypes map[string]tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
@@ -399,10 +383,8 @@ func jsonUnmarshalObject(buf []byte, attrTypes map[string]tftypes.Type, p tftype
 	}
 
 	vals := map[string]tftypes.Value{}
-	// placeholder for the attributes we're about to loop through
-	p = append(p, nil)
-
 	for dec.More() {
+		p.WithElementKeyValue(tftypes.NewValue(tftypes.String, tftypes.UnknownValue))
 		tok, err := dec.Token()
 		if err != nil {
 			return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
@@ -415,8 +397,8 @@ func jsonUnmarshalObject(buf []byte, attrTypes map[string]tftypes.Type, p tftype
 		if !ok {
 			return tftypes.Value{}, p.NewErrorf("unsupported attribute %q", key)
 		}
-
-		p[len(p)-1] = key
+		p.WithoutLastStep()
+		p.WithAttributeName(key)
 
 		var rawVal json.RawMessage
 		err = dec.Decode(&rawVal)
@@ -428,9 +410,8 @@ func jsonUnmarshalObject(buf []byte, attrTypes map[string]tftypes.Type, p tftype
 			return tftypes.Value{}, err
 		}
 		vals[key] = val
+		p.WithoutLastStep()
 	}
-	// we're out of the loop, drop the key from our path
-	p = p.RemoveLastStep()
 
 	tok, err = dec.Token()
 	if err != nil {

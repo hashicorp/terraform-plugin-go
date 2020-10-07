@@ -1,16 +1,51 @@
-package tfprotov5
+package tftypes
 
 import (
 	"errors"
+	"fmt"
 )
 
 var (
-	ErrNotAttributePathStepper = errors.New("doesn't fill tfprotov5.AttributePathStepper interface")
+	ErrNotAttributePathStepper = errors.New("doesn't fill tftypes.AttributePathStepper interface")
 	ErrInvalidStep             = errors.New("step cannot be applied to this value")
 )
 
 type AttributePath struct {
 	Steps []AttributePathStep
+}
+
+func (a AttributePath) NewErrorf(f string, args ...interface{}) error {
+	return attributePathError{
+		error: fmt.Errorf(f, args...),
+		path:  a,
+	}
+}
+
+func (a AttributePath) NewError(err error) error {
+	return attributePathError{
+		error: err,
+		path:  a,
+	}
+}
+
+func (a *AttributePath) WithAttributeName(name string) {
+	a.Steps = append(a.Steps, AttributeName(name))
+}
+
+func (a *AttributePath) WithElementKeyString(key string) {
+	a.Steps = append(a.Steps, ElementKeyString(key))
+}
+
+func (a *AttributePath) WithElementKeyInt(key int64) {
+	a.Steps = append(a.Steps, ElementKeyInt(key))
+}
+
+func (a *AttributePath) WithElementKeyValue(key Value) {
+	a.Steps = append(a.Steps, ElementKeyValue(key))
+}
+
+func (a *AttributePath) WithoutLastStep() {
+	a.Steps = a.Steps[:len(a.Steps)-1]
 }
 
 type AttributePathStep interface {
@@ -34,6 +69,10 @@ func (e ElementKeyString) unfulfillable() {}
 type ElementKeyInt int64
 
 func (e ElementKeyInt) unfulfillable() {}
+
+type ElementKeyValue Value
+
+func (e ElementKeyValue) unfulfillable() {}
 
 type AttributePathStepper interface {
 	// Return the attribute or element the AttributePathStep is referring

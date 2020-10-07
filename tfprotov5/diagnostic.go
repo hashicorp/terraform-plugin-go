@@ -1,5 +1,7 @@
 package tfprotov5
 
+import "github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+
 const (
 	DiagnosticSeverityInvalid DiagnosticSeverity = 0
 	DiagnosticSeverityError   DiagnosticSeverity = 1
@@ -10,7 +12,7 @@ type Diagnostic struct {
 	Severity  DiagnosticSeverity
 	Summary   string
 	Detail    string
-	Attribute *AttributePath
+	Attribute *tftypes.AttributePath
 }
 
 type DiagnosticSeverity int32

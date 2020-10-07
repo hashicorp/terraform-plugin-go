@@ -8,7 +8,7 @@ import (
 	"github.com/vmihailenco/msgpack"
 )
 
-func marshalMsgPack(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
+func marshalMsgPack(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
 	if typ.Is(DynamicPseudoType) && !val.Is(DynamicPseudoType) {
 		return marshalMsgPackDynamicPseudoType(val, typ, p, enc)
 
@@ -48,7 +48,7 @@ func marshalMsgPack(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
 	return fmt.Errorf("unknown type %s", typ)
 }
 
-func marshalMsgPackDynamicPseudoType(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
+func marshalMsgPackDynamicPseudoType(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
 	dst, ok := val.value.(Value)
 	if !ok {
 		return unexpectedValueTypeError(p, Value{}, val, typ)
@@ -72,7 +72,7 @@ func marshalMsgPackDynamicPseudoType(val Value, typ Type, p Path, enc *msgpack.E
 	return nil
 }
 
-func marshalMsgPackString(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
+func marshalMsgPackString(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
 	s, ok := val.value.(string)
 	if !ok {
 		return unexpectedValueTypeError(p, s, val, typ)
@@ -84,7 +84,7 @@ func marshalMsgPackString(val Value, typ Type, p Path, enc *msgpack.Encoder) err
 	return nil
 }
 
-func marshalMsgPackNumber(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
+func marshalMsgPackNumber(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
 	// TODO: can we accept other types besides *big.Float?
 	// at the very least it would be nice to have built-in handling
 	// for Go's int/float type variations
@@ -114,7 +114,7 @@ func marshalMsgPackNumber(val Value, typ Type, p Path, enc *msgpack.Encoder) err
 	return nil
 }
 
-func marshalMsgPackBool(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
+func marshalMsgPackBool(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
 	b, ok := val.value.(bool)
 	if !ok {
 		return unexpectedValueTypeError(p, b, val, typ)
@@ -126,7 +126,7 @@ func marshalMsgPackBool(val Value, typ Type, p Path, enc *msgpack.Encoder) error
 	return nil
 }
 
-func marshalMsgPackList(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
+func marshalMsgPackList(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
 	l, ok := val.value.([]Value)
 	if !ok {
 		return unexpectedValueTypeError(p, l, val, typ)
@@ -135,18 +135,18 @@ func marshalMsgPackList(val Value, typ Type, p Path, enc *msgpack.Encoder) error
 	if err != nil {
 		return p.NewErrorf("error encoding list length: %w", err)
 	}
-	p = append(p, nil)
 	for pos, i := range l {
-		p[len(p)-1] = pos
+		p.WithElementKeyInt(int64(pos))
 		err := marshalMsgPack(i, typ.(List).ElementType, p, enc)
 		if err != nil {
 			return err
 		}
+		p.WithoutLastStep()
 	}
 	return nil
 }
 
-func marshalMsgPackSet(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
+func marshalMsgPackSet(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
 	s, ok := val.value.([]Value)
 	if !ok {
 		return unexpectedValueTypeError(p, s, val, typ)
@@ -155,18 +155,18 @@ func marshalMsgPackSet(val Value, typ Type, p Path, enc *msgpack.Encoder) error 
 	if err != nil {
 		return p.NewErrorf("error encoding set length: %w", err)
 	}
-	p = append(p, nil)
 	for _, i := range s {
-		p[len(p)-1] = i
+		p.WithElementKeyValue(i)
 		err := marshalMsgPack(i, typ.(Set).ElementType, p, enc)
 		if err != nil {
 			return err
 		}
+		p.WithoutLastStep()
 	}
 	return nil
 }
 
-func marshalMsgPackMap(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
+func marshalMsgPackMap(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
 	m, ok := val.value.(map[string]Value)
 	if !ok {
 		return unexpectedValueTypeError(p, m, val, typ)
@@ -175,9 +175,8 @@ func marshalMsgPackMap(val Value, typ Type, p Path, enc *msgpack.Encoder) error 
 	if err != nil {
 		return p.NewErrorf("error encoding map length: %w", err)
 	}
-	p = append(p, nil)
 	for k, v := range m {
-		p[len(p)-1] = k
+		p.WithElementKeyString(k)
 		err := marshalMsgPack(NewValue(String, k), String, p, enc)
 		if err != nil {
 			return p.NewErrorf("error encoding map key: %w", err)
@@ -186,11 +185,12 @@ func marshalMsgPackMap(val Value, typ Type, p Path, enc *msgpack.Encoder) error 
 		if err != nil {
 			return err
 		}
+		p.WithoutLastStep()
 	}
 	return nil
 }
 
-func marshalMsgPackTuple(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
+func marshalMsgPackTuple(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
 	t, ok := val.value.([]Value)
 	if !ok {
 		return unexpectedValueTypeError(p, t, val, typ)
@@ -200,19 +200,19 @@ func marshalMsgPackTuple(val Value, typ Type, p Path, enc *msgpack.Encoder) erro
 	if err != nil {
 		return p.NewErrorf("error encoding tuple length: %w", err)
 	}
-	p = append(p, nil)
 	for pos, v := range t {
+		p.WithElementKeyInt(int64(pos))
 		ty := types[pos]
-		p[len(p)-1] = pos
 		err := marshalMsgPack(v, ty, p, enc)
 		if err != nil {
 			return err
 		}
+		p.WithoutLastStep()
 	}
 	return nil
 }
 
-func marshalMsgPackObject(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
+func marshalMsgPackObject(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
 	o, ok := val.value.(map[string]Value)
 	if !ok {
 		return unexpectedValueTypeError(p, o, val, typ)
@@ -227,10 +227,9 @@ func marshalMsgPackObject(val Value, typ Type, p Path, enc *msgpack.Encoder) err
 	if err != nil {
 		return p.NewErrorf("error encoding object length: %w", err)
 	}
-	p = append(p, nil)
 	for _, k := range keys {
+		p.WithAttributeName(k)
 		ty := types[k]
-		p[len(p)-1] = k
 		v, ok := o[k]
 		if !ok {
 			return p.NewErrorf("no value set")
@@ -243,6 +242,7 @@ func marshalMsgPackObject(val Value, typ Type, p Path, enc *msgpack.Encoder) err
 		if err != nil {
 			return err
 		}
+		p.WithoutLastStep()
 	}
 	return nil
 }
