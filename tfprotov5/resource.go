@@ -69,8 +69,8 @@ type PlanResourceChangeResponse struct {
 	//
 	// We have to expose it here for terraform-plugin-sdk to be muxable, or
 	// we wouldn't even be including it in this type. Don't use it. It may
-	// go away or change behavior on your with no warning. It is
-	// unsupported.
+	// go away or change behavior on you with no warning. It is
+	// explicitly unsupported and not part of our SemVer guarantees.
 	UnsafeToUseLegacyTypeSystem bool
 }
 
@@ -96,8 +96,8 @@ type ApplyResourceChangeResponse struct {
 	//
 	// We have to expose it here for terraform-plugin-sdk to be muxable, or
 	// we wouldn't even be including it in this type. Don't use it. It may
-	// go away or change behavior on your with no warning. It is
-	// unsupported.
+	// go away or change behavior on you with no warning. It is
+	// explicitly unsupported and not part of our SemVer guarantees.
 	UnsafeToUseLegacyTypeSystem bool
 }
 
