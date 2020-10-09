@@ -71,6 +71,8 @@ type PlanResourceChangeResponse struct {
 	// we wouldn't even be including it in this type. Don't use it. It may
 	// go away or change behavior on you with no warning. It is
 	// explicitly unsupported and not part of our SemVer guarantees.
+	//
+	// Deprecated: Really, just don't use this, you don't need it.
 	UnsafeToUseLegacyTypeSystem bool
 }
 
@@ -98,6 +100,8 @@ type ApplyResourceChangeResponse struct {
 	// we wouldn't even be including it in this type. Don't use it. It may
 	// go away or change behavior on you with no warning. It is
 	// explicitly unsupported and not part of our SemVer guarantees.
+	//
+	// Deprecated: Really, just don't use this, you don't need it.
 	UnsafeToUseLegacyTypeSystem bool
 }
 
