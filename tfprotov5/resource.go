@@ -60,6 +60,18 @@ type PlanResourceChangeResponse struct {
 	RequiresReplace []*AttributePath
 	PlannedPrivate  []byte
 	Diagnostics     []*Diagnostic
+
+	// This field should only be set by hashicorp/terraform-plugin-sdk.
+	// It modifies Terraform's behavior to work with the legacy
+	// expectations of that SDK.
+	//
+	// Nobody else should use this. Ever. For any reason. Just don't do it.
+	//
+	// We have to expose it here for terraform-plugin-sdk to be muxable, or
+	// we wouldn't even be including it in this type. Don't use it. It may
+	// go away or change behavior on your with no warning. It is
+	// unsupported.
+	UnsafeToUseLegacyTypeSystem bool
 }
 
 type ApplyResourceChangeRequest struct {
@@ -75,6 +87,18 @@ type ApplyResourceChangeResponse struct {
 	NewState    *DynamicValue
 	Private     []byte
 	Diagnostics []*Diagnostic
+
+	// This field should only be set by hashicorp/terraform-plugin-sdk.
+	// It modifies Terraform's behavior to work with the legacy
+	// expectations of that SDK.
+	//
+	// Nobody else should use this. Ever. For any reason. Just don't do it.
+	//
+	// We have to expose it here for terraform-plugin-sdk to be muxable, or
+	// we wouldn't even be including it in this type. Don't use it. It may
+	// go away or change behavior on your with no warning. It is
+	// unsupported.
+	UnsafeToUseLegacyTypeSystem bool
 }
 
 type ImportResourceStateRequest struct {

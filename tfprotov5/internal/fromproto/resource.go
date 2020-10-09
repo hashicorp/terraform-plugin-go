@@ -99,7 +99,8 @@ func PlanResourceChangeRequest(in *tfplugin5.PlanResourceChange_Request) (*tfpro
 
 func PlanResourceChangeResponse(in *tfplugin5.PlanResourceChange_Response) (*tfprotov5.PlanResourceChangeResponse, error) {
 	resp := &tfprotov5.PlanResourceChangeResponse{
-		PlannedPrivate: in.PlannedPrivate,
+		PlannedPrivate:              in.PlannedPrivate,
+		UnsafeToUseLegacyTypeSystem: in.LegacyTypeSystem,
 	}
 	attributePaths, err := AttributePaths(in.RequiresReplace)
 	if err != nil {
@@ -139,7 +140,8 @@ func ApplyResourceChangeRequest(in *tfplugin5.ApplyResourceChange_Request) (*tfp
 
 func ApplyResourceChangeResponse(in *tfplugin5.ApplyResourceChange_Response) (*tfprotov5.ApplyResourceChangeResponse, error) {
 	resp := &tfprotov5.ApplyResourceChangeResponse{
-		Private: in.Private,
+		Private:                     in.Private,
+		UnsafeToUseLegacyTypeSystem: in.LegacyTypeSystem,
 	}
 	diags, err := Diagnostics(in.Diagnostics)
 	if err != nil {
