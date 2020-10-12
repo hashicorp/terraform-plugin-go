@@ -58,30 +58,35 @@ func (val Value) As(dst interface{}) error {
 			return fmt.Errorf("can't unmarshal %s into %T, expected string", val.typ, dst)
 		}
 		*target = v
+		return nil
 	case *big.Float:
 		v, ok := val.value.(*big.Float)
 		if !ok {
 			return fmt.Errorf("can't unmarshal %s into %T, expected *big.Float", val.typ, dst)
 		}
 		target.Set(v)
+		return nil
 	case *bool:
 		v, ok := val.value.(bool)
 		if !ok {
 			return fmt.Errorf("can't unmarshal %s into %T, expected boolean", val.typ, dst)
 		}
 		*target = v
+		return nil
 	case *map[string]Value:
 		v, ok := val.value.(map[string]Value)
 		if !ok {
 			return fmt.Errorf("can't unmarshal %s into %T, expected map[string]tftypes.Value", val.typ, dst)
 		}
 		*target = v
+		return nil
 	case *[]Value:
 		v, ok := val.value.([]Value)
 		if !ok {
 			return fmt.Errorf("can't unmarshal %s into %T expected []tftypes.Value", val.typ, dst)
 		}
 		*target = v
+		return nil
 	}
 	return fmt.Errorf("can't unmarshal into %T, needs UnmarshalTerraform5Type method", dst)
 }
