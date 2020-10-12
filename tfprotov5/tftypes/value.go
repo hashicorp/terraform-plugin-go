@@ -3,6 +3,7 @@ package tftypes
 import (
 	"bytes"
 	"fmt"
+	"math/big"
 
 	"github.com/vmihailenco/msgpack"
 )
@@ -39,13 +40,50 @@ func NewValue(t Type, val interface{}) Value {
 	}
 }
 
-func (v Value) As(dst interface{}) error {
+func (val Value) As(dst interface{}) error {
 	unmarshaler, ok := dst.(Unmarshaler)
-	if !ok {
-		// TODO: let's do unmarshaling to builtin types out of the box
-		return fmt.Errorf("can't unmarshal into %T, needs UnmarshalTerraform5Type method", dst)
+	if ok {
+		return unmarshaler.UnmarshalTerraform5Type(val)
 	}
-	return unmarshaler.UnmarshalTerraform5Type(v)
+	if val.IsNull() {
+		return fmt.Errorf("unmarshaling null values is not supported")
+	}
+	if !val.IsKnown() {
+		return fmt.Errorf("unmarshaling unknown values is not supported")
+	}
+	switch target := dst.(type) {
+	case *string:
+		v, ok := val.value.(string)
+		if !ok {
+			return fmt.Errorf("can't unmarshal %s into %T, expected string", val.typ, dst)
+		}
+		*target = v
+	case *big.Float:
+		v, ok := val.value.(*big.Float)
+		if !ok {
+			return fmt.Errorf("can't unmarshal %s into %T, expected *big.Float", val.typ, dst)
+		}
+		target.Set(v)
+	case *bool:
+		v, ok := val.value.(bool)
+		if !ok {
+			return fmt.Errorf("can't unmarshal %s into %T, expected boolean", val.typ, dst)
+		}
+		*target = v
+	case *map[string]Value:
+		v, ok := val.value.(map[string]Value)
+		if !ok {
+			return fmt.Errorf("can't unmarshal %s into %T, expected map[string]tftypes.Value", val.typ, dst)
+		}
+		*target = v
+	case *[]Value:
+		v, ok := val.value.([]Value)
+		if !ok {
+			return fmt.Errorf("can't unmarshal %s into %T expected []tftypes.Value", val.typ, dst)
+		}
+		*target = v
+	}
+	return fmt.Errorf("can't unmarshal into %T, needs UnmarshalTerraform5Type method", dst)
 }
 
 func (v Value) Is(t Type) bool {
