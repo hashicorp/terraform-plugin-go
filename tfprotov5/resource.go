@@ -2,6 +2,8 @@ package tfprotov5
 
 import (
 	"context"
+
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 )
 
 type ResourceServer interface {
@@ -57,7 +59,7 @@ type PlanResourceChangeRequest struct {
 
 type PlanResourceChangeResponse struct {
 	PlannedState    *DynamicValue
-	RequiresReplace []*AttributePath
+	RequiresReplace []*tftypes.AttributePath
 	PlannedPrivate  []byte
 	Diagnostics     []*Diagnostic
 }

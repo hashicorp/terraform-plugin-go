@@ -91,13 +91,13 @@ func (v Value) MarshalMsgPack(t Type) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := msgpack.NewEncoder(&buf)
 
-	err := marshalMsgPack(v, t, Path{}, enc)
+	err := marshalMsgPack(v, t, AttributePath{}, enc)
 	if err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
 }
 
-func unexpectedValueTypeError(p Path, expected, got interface{}, typ Type) error {
+func unexpectedValueTypeError(p AttributePath, expected, got interface{}, typ Type) error {
 	return p.NewErrorf("unexpected value type %T, %s values must be of type %T", got, typ, expected)
 }

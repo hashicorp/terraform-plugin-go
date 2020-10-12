@@ -54,12 +54,12 @@ type DynamicValue struct {
 // Unmarshal.
 func (d DynamicValue) Unmarshal(typ tftypes.Type) (tftypes.Value, error) {
 	if d.JSON != nil {
-		return jsonUnmarshal(d.JSON, typ, nil)
+		return jsonUnmarshal(d.JSON, typ, tftypes.AttributePath{})
 	}
 	if d.MsgPack != nil {
 		r := bytes.NewReader(d.MsgPack)
 		dec := msgpack.NewDecoder(r)
-		return msgpackUnmarshal(dec, typ, nil)
+		return msgpackUnmarshal(dec, typ, tftypes.AttributePath{})
 	}
 	return tftypes.Value{}, ErrUnknownDynamicValueType
 }
