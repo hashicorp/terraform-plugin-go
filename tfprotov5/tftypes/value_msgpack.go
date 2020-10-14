@@ -51,7 +51,7 @@ func marshalMsgPack(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
 func marshalMsgPackDynamicPseudoType(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
 	dst, ok := val.value.(Value)
 	if !ok {
-		return unexpectedValueTypeError(p, Value{}, val, typ)
+		return unexpectedValueTypeError(p, Value{}, val.value, typ)
 	}
 	typeJSON, err := dst.typ.MarshalJSON()
 	if err != nil {
@@ -75,7 +75,7 @@ func marshalMsgPackDynamicPseudoType(val Value, typ Type, p Path, enc *msgpack.E
 func marshalMsgPackString(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
 	s, ok := val.value.(string)
 	if !ok {
-		return unexpectedValueTypeError(p, s, val, typ)
+		return unexpectedValueTypeError(p, s, val.value, typ)
 	}
 	err := enc.EncodeString(s)
 	if err != nil {
@@ -93,7 +93,7 @@ func marshalMsgPackNumber(val Value, typ Type, p Path, enc *msgpack.Encoder) err
 	// advantage of that...
 	n, ok := val.value.(*big.Float)
 	if !ok {
-		return unexpectedValueTypeError(p, n, val, typ)
+		return unexpectedValueTypeError(p, n, val.value, typ)
 	}
 	if iv, acc := n.Int64(); acc == big.Exact {
 		err := enc.EncodeInt(iv)
@@ -117,7 +117,7 @@ func marshalMsgPackNumber(val Value, typ Type, p Path, enc *msgpack.Encoder) err
 func marshalMsgPackBool(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
 	b, ok := val.value.(bool)
 	if !ok {
-		return unexpectedValueTypeError(p, b, val, typ)
+		return unexpectedValueTypeError(p, b, val.value, typ)
 	}
 	err := enc.EncodeBool(b)
 	if err != nil {
@@ -129,7 +129,7 @@ func marshalMsgPackBool(val Value, typ Type, p Path, enc *msgpack.Encoder) error
 func marshalMsgPackList(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
 	l, ok := val.value.([]Value)
 	if !ok {
-		return unexpectedValueTypeError(p, l, val, typ)
+		return unexpectedValueTypeError(p, l, val.value, typ)
 	}
 	err := enc.EncodeArrayLen(len(l))
 	if err != nil {
@@ -149,7 +149,7 @@ func marshalMsgPackList(val Value, typ Type, p Path, enc *msgpack.Encoder) error
 func marshalMsgPackSet(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
 	s, ok := val.value.([]Value)
 	if !ok {
-		return unexpectedValueTypeError(p, s, val, typ)
+		return unexpectedValueTypeError(p, s, val.value, typ)
 	}
 	err := enc.EncodeArrayLen(len(s))
 	if err != nil {
@@ -169,7 +169,7 @@ func marshalMsgPackSet(val Value, typ Type, p Path, enc *msgpack.Encoder) error 
 func marshalMsgPackMap(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
 	m, ok := val.value.(map[string]Value)
 	if !ok {
-		return unexpectedValueTypeError(p, m, val, typ)
+		return unexpectedValueTypeError(p, m, val.value, typ)
 	}
 	err := enc.EncodeMapLen(len(m))
 	if err != nil {
@@ -193,7 +193,7 @@ func marshalMsgPackMap(val Value, typ Type, p Path, enc *msgpack.Encoder) error 
 func marshalMsgPackTuple(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
 	t, ok := val.value.([]Value)
 	if !ok {
-		return unexpectedValueTypeError(p, t, val, typ)
+		return unexpectedValueTypeError(p, t, val.value, typ)
 	}
 	types := typ.(Tuple).ElementTypes
 	err := enc.EncodeArrayLen(len(types))
@@ -215,7 +215,7 @@ func marshalMsgPackTuple(val Value, typ Type, p Path, enc *msgpack.Encoder) erro
 func marshalMsgPackObject(val Value, typ Type, p Path, enc *msgpack.Encoder) error {
 	o, ok := val.value.(map[string]Value)
 	if !ok {
-		return unexpectedValueTypeError(p, o, val, typ)
+		return unexpectedValueTypeError(p, o, val.value, typ)
 	}
 	types := typ.(Object).AttributeTypes
 	keys := make([]string, 0, len(types))
