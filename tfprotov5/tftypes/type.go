@@ -1,6 +1,10 @@
 package tftypes
 
-import "fmt"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+)
 
 type Type interface {
 	Is(Type) bool
@@ -9,96 +13,128 @@ type Type interface {
 	private()
 }
 
-func ParseType(in interface{}) (Type, error) {
-	switch v := in.(type) {
-	// primitive types are represented just as strings,
-	// with the type name in the string itself
+type jsonType struct {
+	t Type
+}
+
+func ParseJSONType(buf []byte) (Type, error) {
+	var t jsonType
+	err := json.Unmarshal(buf, &t)
+	return t.t, err
+}
+
+func (t *jsonType) UnmarshalJSON(buf []byte) error {
+	r := bytes.NewReader(buf)
+	dec := json.NewDecoder(r)
+
+	tok, err := dec.Token()
+	if err != nil {
+		return err
+	}
+
+	switch v := tok.(type) {
 	case string:
 		switch v {
-		case "string":
-			return String, nil
-		case "number":
-			return Number, nil
 		case "bool":
-			return Bool, nil
+			t.t = Bool
+		case "number":
+			t.t = Number
+		case "string":
+			t.t = String
+		case "dynamic":
+			t.t = DynamicPseudoType
 		default:
-			return nil, fmt.Errorf("unknown type %q", v)
+			return fmt.Errorf("invalid primitive type name %q", v)
 		}
-	case []interface{}:
-		// sets, lists, tuples, maps, and objects are
-		// represented as slices, recursive iterations of this
-		// type/value syntax
-		if len(v) < 1 {
-			return nil, fmt.Errorf("improperly formatted type information; need at least %d elements, got %d", 1, len(v))
+
+		if dec.More() {
+			return fmt.Errorf("extraneous data after type description")
 		}
-		switch v[0] {
-		case "set":
-			if len(v) != 2 {
-				return nil, fmt.Errorf("improperly formatted type information; need %d elements, got %d", 2, len(v))
-			}
-			subType, err := ParseType(v[1])
-			if err != nil {
-				return nil, fmt.Errorf("error parsing element type for tftypes.Set: %w", err)
-			}
-			return Set{
-				ElementType: subType,
-			}, nil
+		return nil
+	case json.Delim:
+		if rune(v) != '[' {
+			return fmt.Errorf("invalid complex type description")
+		}
+
+		tok, err = dec.Token()
+		if err != nil {
+			return err
+		}
+
+		kind, ok := tok.(string)
+		if !ok {
+			return fmt.Errorf("invalid complex type kind name")
+		}
+
+		switch kind {
 		case "list":
-			if len(v) != 2 {
-				return nil, fmt.Errorf("improperly formatted type information; need %d elements, got %d", 2, len(v))
-			}
-			subType, err := ParseType(v[1])
+			var ety jsonType
+			err = dec.Decode(&ety)
 			if err != nil {
-				return nil, fmt.Errorf("error parsing element type for tftypes.List: %w", err)
+				return err
 			}
-			return List{
-				ElementType: subType,
-			}, nil
-		case "tuple":
-			if len(v) < 2 {
-				return nil, fmt.Errorf("improperly formatted type information; need at least %d elements, got %d", 2, len(v))
+			t.t = List{
+				ElementType: ety.t,
 			}
-			var types []Type
-			for pos, typ := range v {
-				subType, err := ParseType(typ)
-				if err != nil {
-					return nil, fmt.Errorf("error parsing type of element %d for tftypes.Tuple: %w", pos, err)
-				}
-				types = append(types, subType)
-			}
-			return Tuple{
-				ElementTypes: types,
-			}, nil
 		case "map":
-			if len(v) != 2 {
-				return nil, fmt.Errorf("improperly formatted type information; need %d elements, got %d", 2, len(v))
-			}
-			subType, err := ParseType(v[1])
+			var ety jsonType
+			err = dec.Decode(&ety)
 			if err != nil {
-				return nil, fmt.Errorf("error parsing attribute type for tftypes.Map: %w", err)
+				return err
 			}
-			return Map{
-				AttributeType: subType,
-			}, nil
+			t.t = Map{
+				AttributeType: ety.t,
+			}
+		case "set":
+			var ety jsonType
+			err = dec.Decode(&ety)
+			if err != nil {
+				return err
+			}
+			t.t = Set{
+				ElementType: ety.t,
+			}
 		case "object":
-			if len(v) != 2 {
-				return nil, fmt.Errorf("improperly formatted type information; need %d elements, got %d", 2, len(v))
+			var atys map[string]jsonType
+			err = dec.Decode(&atys)
+			if err != nil {
+				return err
 			}
-			types := map[string]Type{}
-			valTypes := v[1].(map[string]interface{})
-			for key, typ := range valTypes {
-				subType, err := ParseType(typ)
-				if err != nil {
-					return nil, fmt.Errorf("error parsing type of attribute %q for tftypes.Object: %w", key, err)
-				}
-				types[key] = subType
+			types := make(map[string]Type, len(atys))
+			for k, v := range atys {
+				types[k] = v.t
 			}
-			return Object{
+			t.t = Object{
 				AttributeTypes: types,
-			}, nil
+			}
+		case "tuple":
+			var etys []jsonType
+			err = dec.Decode(&etys)
+			if err != nil {
+				return err
+			}
+			types := make([]Type, 0, len(etys))
+			for _, ty := range etys {
+				types = append(types, ty.t)
+			}
+			t.t = Tuple{
+				ElementTypes: types,
+			}
 		default:
-			return nil, fmt.Errorf("unknown type %q", v[0])
+			return fmt.Errorf("invalid complex type kind name")
 		}
+
+		tok, err = dec.Token()
+		if err != nil {
+			return err
+		}
+		if delim, ok := tok.(json.Delim); !ok || rune(delim) != ']' || dec.More() {
+			return fmt.Errorf("unexpected extra data in type description")
+		}
+
+		return nil
+
+	default:
+		return fmt.Errorf("invalid type description")
 	}
-	return nil, fmt.Errorf("unhandled intermediary type %T", in)
 }
