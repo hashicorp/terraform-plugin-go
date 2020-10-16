@@ -7,7 +7,20 @@ type Tuple struct {
 }
 
 func (tu Tuple) Is(t Type) bool {
-	_, ok := t.(Tuple)
+	v, ok := t.(Tuple)
+	if !ok {
+		return false
+	}
+	if v.ElementTypes != nil {
+		if len(v.ElementTypes) != len(tu.ElementTypes) {
+			return false
+		}
+		for pos, typ := range tu.ElementTypes {
+			if !typ.Is(v.ElementTypes[pos]) {
+				return false
+			}
+		}
+	}
 	return ok
 }
 

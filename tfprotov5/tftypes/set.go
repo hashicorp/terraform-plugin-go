@@ -7,7 +7,13 @@ type Set struct {
 }
 
 func (s Set) Is(t Type) bool {
-	_, ok := t.(Set)
+	v, ok := t.(Set)
+	if !ok {
+		return false
+	}
+	if v.ElementType != nil {
+		return s.ElementType.Is(v.ElementType)
+	}
 	return ok
 }
 

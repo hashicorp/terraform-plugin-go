@@ -7,7 +7,13 @@ type Map struct {
 }
 
 func (m Map) Is(t Type) bool {
-	_, ok := t.(Map)
+	v, ok := t.(Map)
+	if !ok {
+		return false
+	}
+	if m.AttributeType != nil {
+		return m.AttributeType.Is(v.AttributeType)
+	}
 	return ok
 }
 
