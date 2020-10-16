@@ -41,9 +41,13 @@ func UpgradeResourceState_Response(in *tfprotov5.UpgradeResourceStateResponse) (
 	if err != nil {
 		return nil, err
 	}
-	return &tfplugin5.UpgradeResourceState_Response{
+	resp := &tfplugin5.UpgradeResourceState_Response{
 		Diagnostics: diags,
-	}, nil
+	}
+	if in.UpgradedState != nil {
+		resp.UpgradedState = DynamicValue(in.UpgradedState)
+	}
+	return resp, nil
 }
 
 func ReadResource_Request(in *tfprotov5.ReadResourceRequest) (*tfplugin5.ReadResource_Request, error) {
