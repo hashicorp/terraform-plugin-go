@@ -31,7 +31,7 @@ type UpgradeResourceStateRequest struct {
 }
 
 type UpgradeResourceStateResponse struct {
-	UpgradedState *RawState
+	UpgradedState *DynamicValue
 	Diagnostics   []*Diagnostic
 }
 
