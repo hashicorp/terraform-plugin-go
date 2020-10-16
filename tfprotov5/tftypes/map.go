@@ -11,7 +11,7 @@ func (m Map) Is(t Type) bool {
 	if !ok {
 		return false
 	}
-	if m.AttributeType != nil {
+	if v.AttributeType != nil {
 		return m.AttributeType.Is(v.AttributeType)
 	}
 	return ok
