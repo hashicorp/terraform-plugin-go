@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 )
 
 func Schema(in *tfplugin5.Schema) (*tfprotov5.Schema, error) {
@@ -51,7 +52,7 @@ func SchemaAttribute(in *tfplugin5.Schema_Attribute) (*tfprotov5.SchemaAttribute
 		DescriptionKind: StringKind(in.DescriptionKind),
 		Deprecated:      in.Deprecated,
 	}
-	typ, err := TerraformTypesType(in.Type)
+	typ, err := tftypes.ParseJSONType(in.Type)
 	if err != nil {
 		return resp, err
 	}

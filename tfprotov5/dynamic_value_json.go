@@ -3,7 +3,6 @@ package tfprotov5
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 )
@@ -127,7 +126,7 @@ func jsonUnmarshalDynamicPseudoType(buf []byte, typ tftypes.Type, p tftypes.Attr
 		}
 		switch key {
 		case "type":
-			t, err = parseJSONType(rawVal)
+			t, err = tftypes.ParseJSONType(rawVal)
 			if err != nil {
 				return tftypes.Value{}, p.NewErrorf("error decoding type information: %w", err)
 			}
@@ -431,130 +430,4 @@ func jsonUnmarshalObject(buf []byte, attrTypes map[string]tftypes.Type, p tftype
 	return tftypes.NewValue(tftypes.Object{
 		AttributeTypes: attrTypes,
 	}, vals), nil
-}
-
-type jsonType struct {
-	t tftypes.Type
-}
-
-func parseJSONType(buf []byte) (tftypes.Type, error) {
-	var t jsonType
-	err := json.Unmarshal(buf, &t)
-	return t.t, err
-}
-
-func (t *jsonType) UnmarshalJSON(buf []byte) error {
-	r := bytes.NewReader(buf)
-	dec := json.NewDecoder(r)
-
-	tok, err := dec.Token()
-	if err != nil {
-		return err
-	}
-
-	switch v := tok.(type) {
-	case string:
-		switch v {
-		case "bool":
-			t.t = tftypes.Bool
-		case "number":
-			t.t = tftypes.Number
-		case "string":
-			t.t = tftypes.String
-		case "dynamic":
-			t.t = tftypes.DynamicPseudoType
-		default:
-			return fmt.Errorf("invalid primitive type name %q", v)
-		}
-
-		if dec.More() {
-			return fmt.Errorf("extraneous data after type description")
-		}
-		return nil
-	case json.Delim:
-		if rune(v) != '[' {
-			return fmt.Errorf("invalid complex type description")
-		}
-
-		tok, err = dec.Token()
-		if err != nil {
-			return err
-		}
-
-		kind, ok := tok.(string)
-		if !ok {
-			return fmt.Errorf("invalid complex type kind name")
-		}
-
-		switch kind {
-		case "list":
-			var ety jsonType
-			err = dec.Decode(&ety)
-			if err != nil {
-				return err
-			}
-			t.t = tftypes.List{
-				ElementType: ety.t,
-			}
-		case "map":
-			var ety jsonType
-			err = dec.Decode(&ety)
-			if err != nil {
-				return err
-			}
-			t.t = tftypes.Map{
-				AttributeType: ety.t,
-			}
-		case "set":
-			var ety jsonType
-			err = dec.Decode(&ety)
-			if err != nil {
-				return err
-			}
-			t.t = tftypes.Set{
-				ElementType: ety.t,
-			}
-		case "object":
-			var atys map[string]jsonType
-			err = dec.Decode(&atys)
-			if err != nil {
-				return err
-			}
-			types := make(map[string]tftypes.Type, len(atys))
-			for k, v := range atys {
-				types[k] = v.t
-			}
-			t.t = tftypes.Object{
-				AttributeTypes: types,
-			}
-		case "tuple":
-			var etys []jsonType
-			err = dec.Decode(&etys)
-			if err != nil {
-				return err
-			}
-			types := make([]tftypes.Type, 0, len(etys))
-			for _, ty := range etys {
-				types = append(types, ty.t)
-			}
-			t.t = tftypes.Tuple{
-				ElementTypes: types,
-			}
-		default:
-			return fmt.Errorf("invalid complex type kind name")
-		}
-
-		tok, err = dec.Token()
-		if err != nil {
-			return err
-		}
-		if delim, ok := tok.(json.Delim); !ok || rune(delim) != ']' || dec.More() {
-			return fmt.Errorf("unexpected extra data in type description")
-		}
-
-		return nil
-
-	default:
-		return fmt.Errorf("invalid type description")
-	}
 }
