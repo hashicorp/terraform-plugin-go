@@ -7,7 +7,23 @@ type Object struct {
 }
 
 func (o Object) Is(t Type) bool {
-	_, ok := t.(Object)
+	v, ok := t.(Object)
+	if !ok {
+		return false
+	}
+	if v.AttributeTypes != nil {
+		if len(o.AttributeTypes) != len(v.AttributeTypes) {
+			return false
+		}
+		for k, typ := range o.AttributeTypes {
+			if _, ok := v.AttributeTypes[k]; !ok {
+				return false
+			}
+			if !typ.Is(v.AttributeTypes[k]) {
+				return false
+			}
+		}
+	}
 	return ok
 }
 

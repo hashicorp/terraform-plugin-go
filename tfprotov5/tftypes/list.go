@@ -7,7 +7,13 @@ type List struct {
 }
 
 func (l List) Is(t Type) bool {
-	_, ok := t.(List)
+	v, ok := t.(List)
+	if !ok {
+		return false
+	}
+	if v.ElementType != nil {
+		return l.ElementType.Is(v.ElementType)
+	}
 	return ok
 }
 
