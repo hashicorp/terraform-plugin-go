@@ -3,11 +3,81 @@ package tfprotov5server
 import (
 	"context"
 
+	"github.com/hashicorp/go-hclog"
+	"github.com/hashicorp/go-plugin"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/toproto"
 )
+
+type ServeOpt interface {
+	ApplyServeOpt(*ServeConfig) error
+}
+
+type ServeConfig struct {
+	logger       hclog.Logger
+	debugCtx     context.Context
+	debugCh      chan *plugin.ReattachConfig
+	debugCloseCh chan struct{}
+}
+
+type serveConfigFunc func(*ServeConfig) error
+
+func (s serveConfigFunc) ApplyServeOpt(in *ServeConfig) error {
+	return s(in)
+}
+
+func WithDebug(ctx context.Context, config chan *plugin.ReattachConfig, closeCh chan struct{}) ServeOpt {
+	return serveConfigFunc(func(in *ServeConfig) error {
+		in.debugCtx = ctx
+		in.debugCh = config
+		in.debugCloseCh = closeCh
+		return nil
+	})
+}
+
+func WithGoPluginLogger(logger hclog.Logger) ServeOpt {
+	return serveConfigFunc(func(in *ServeConfig) error {
+		in.logger = logger
+		return nil
+	})
+}
+
+func Serve(name string, serverFactory func() tfprotov5.ProviderServer, opts ...ServeOpt) error {
+	var conf ServeConfig
+	for _, opt := range opts {
+		err := opt.ApplyServeOpt(&conf)
+		if err != nil {
+			return err
+		}
+	}
+	serveConfig := &plugin.ServeConfig{
+		HandshakeConfig: plugin.HandshakeConfig{
+			ProtocolVersion:  5,
+			MagicCookieKey:   "TF_PLUGIN_MAGIC_COOKIE",
+			MagicCookieValue: "d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d6991ca9872b2",
+		},
+		Plugins: plugin.PluginSet{
+			"provider": &GRPCProviderPlugin{
+				GRPCProvider: serverFactory,
+			},
+		},
+		GRPCServer: plugin.DefaultGRPCServer,
+	}
+	if conf.logger != nil {
+		serveConfig.Logger = conf.logger
+	}
+	if conf.debugCh != nil {
+		serveConfig.Test = &plugin.ServeTestConfig{
+			Context:          conf.debugCtx,
+			ReattachConfigCh: conf.debugCh,
+			CloseCh:          conf.debugCloseCh,
+		}
+	}
+	plugin.Serve(serveConfig)
+	return nil
+}
 
 type server struct {
 	downstream tfprotov5.ProviderServer
