@@ -27,6 +27,8 @@ var ErrUnknownDynamicValueType = errors.New("DynamicValue had no JSON or msgpack
 // allows for other interactions, they are explicitly not supported, and will
 // not be considered when evaluating for breaking changes. Treat this type as
 // an opaque value, and *only* call its `Unmarshal` method.
+//
+// TODO: document how to create a DynamicValue.
 type DynamicValue struct {
 	MsgPack []byte
 	JSON    []byte
