@@ -138,50 +138,48 @@ func (val Value) As(dst interface{}) error {
 	return fmt.Errorf("can't unmarshal into %T, needs UnmarshalTerraform5Type method", dst)
 }
 
-func (v Value) Is(t Type) bool {
-	if v.typ == nil || t == nil {
-		return v.typ == nil && t == nil
+func (val Value) Is(t Type) bool {
+	if val.typ == nil || t == nil {
+		return val.typ == nil && t == nil
 	}
-	return v.typ.Is(t)
+	return val.typ.Is(t)
 }
 
-func (v Value) IsKnown() bool {
-	return v.value != UnknownValue
+func (val Value) IsKnown() bool {
+	return val.value != UnknownValue
 }
 
-func (v Value) IsFullyKnown() bool {
-	switch v.typ.(type) {
+func (val Value) IsFullyKnown() bool {
+	switch val.typ.(type) {
 	case primitive:
-		return v.IsKnown()
+		return val.IsKnown()
 	case List, Set, Tuple:
-		for _, val := range v.value.([]Value) {
-			if !val.IsFullyKnown() {
+		for _, v := range val.value.([]Value) {
+			if !v.IsFullyKnown() {
 				return false
 			}
 		}
 		return true
 	case Map, Object:
-		for _, val := range v.value.(map[string]Value) {
-			if !val.IsFullyKnown() {
+		for _, v := range val.value.(map[string]Value) {
+			if !v.IsFullyKnown() {
 				return false
 			}
 		}
 		return true
 	}
-	panic(fmt.Sprintf("unknown type %T", v.typ))
+	panic(fmt.Sprintf("unknown type %T", val.typ))
 }
 
-func (v Value) IsNull() bool {
-	return v.value == nil
+func (val Value) IsNull() bool {
+	return val.value == nil
 }
 
-func (v Value) MarshalMsgPack(t Type) ([]byte, error) {
-	// always populate msgpack, as per
-	// https://github.com/hashicorp/terraform/blob/doc-provider-value-wire-protocol/docs/plugin-protocol/object-wire-format.md
+func (val Value) MarshalMsgPack(t Type) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := msgpack.NewEncoder(&buf)
 
-	err := marshalMsgPack(v, t, AttributePath{}, enc)
+	err := marshalMsgPack(val, t, AttributePath{}, enc)
 	if err != nil {
 		return nil, err
 	}

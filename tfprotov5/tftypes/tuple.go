@@ -24,14 +24,14 @@ func (tu Tuple) Is(t Type) bool {
 	return ok
 }
 
-func (t Tuple) String() string {
+func (tu Tuple) String() string {
 	return "tftypes.Tuple"
 }
 
-func (t Tuple) private() {}
+func (tu Tuple) private() {}
 
-func (t Tuple) MarshalJSON() ([]byte, error) {
-	elements, err := json.Marshal(t.ElementTypes)
+func (tu Tuple) MarshalJSON() ([]byte, error) {
+	elements, err := json.Marshal(tu.ElementTypes)
 	if err != nil {
 		return nil, err
 	}
