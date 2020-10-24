@@ -76,7 +76,7 @@ type ReadDataSourceRequest struct {
 // ReadDataSourceResponse is the response from the provider about the current
 // state of the requested data source.
 type ReadDataSourceResponse struct {
-	// State is the current state of the provider, represented as a
+	// State is the current state of the data source, represented as a
 	// `DynamicValue`. See the documentation on `DynamicValue` for
 	// information about safely creating the `DynamicValue`.
 	//
