@@ -8,8 +8,12 @@ import (
 	"github.com/vmihailenco/msgpack"
 )
 
-type Unmarshaler interface {
-	UnmarshalTerraform5Type(Value) error
+type ValueConverter interface {
+	FromTerraform5Value(Value) error
+}
+
+type ValueCreator interface {
+	ToTerraform5Value() (Value, error)
 }
 
 type ErrUnhandledType string
@@ -26,8 +30,6 @@ func (u msgPackUnknownType) MarshalMsgpack() ([]byte, error) {
 	return []byte{0xd4, 0, 0}, nil
 }
 
-// Value represents a form of a Terraform type that can be parsed into a Go
-// type.
 type Value struct {
 	typ   Type
 	value interface{}
@@ -41,9 +43,9 @@ func NewValue(t Type, val interface{}) Value {
 }
 
 func (val Value) As(dst interface{}) error {
-	unmarshaler, ok := dst.(Unmarshaler)
+	unmarshaler, ok := dst.(ValueConverter)
 	if ok {
-		return unmarshaler.UnmarshalTerraform5Type(val)
+		return unmarshaler.FromTerraform5Value(val)
 	}
 	if !val.IsKnown() {
 		return fmt.Errorf("unmarshaling unknown values is not supported")
@@ -135,7 +137,7 @@ func (val Value) As(dst interface{}) error {
 		}
 		return val.As(*target)
 	}
-	return fmt.Errorf("can't unmarshal into %T, needs UnmarshalTerraform5Type method", dst)
+	return fmt.Errorf("can't unmarshal into %T, needs FromTerraform5Value method", dst)
 }
 
 func (val Value) Is(t Type) bool {

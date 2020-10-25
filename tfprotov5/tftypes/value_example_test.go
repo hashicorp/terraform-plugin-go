@@ -63,9 +63,9 @@ type exampleResource struct {
 	suppliedName *bool // true for yes, false for no, nil for we haven't asked
 }
 
-// fill the tftypes.Unmarshaler interface to control how As works
+// fill the tftypes.ValueConverter interface to control how As works
 // we want a pointer to exampleResource so we can change the properties
-func (e *exampleResource) UnmarshalTerraform5Type(val tftypes.Value) error {
+func (e *exampleResource) FromTerraform5Value(val tftypes.Value) error {
 	// this is an object type, so we're always going to get a
 	// `tftypes.Value` that coerces to a map[string]tftypes.Value
 	// as input
@@ -105,10 +105,10 @@ func ExampleValue_As_interface() {
 		"supplied_name": tftypes.NewValue(tftypes.Bool, nil),
 	})
 
-	// exampleResource has UnmarshalTerraform5Type method defined on it,
-	// see value_example_test.go for implementation details
-	// we'd put the function and type inline here, but apparently Go can't
-	// have methods defined on types defined inside a function
+	// exampleResource has FromTerraform5Value method defined on it, see
+	// value_example_test.go for implementation details. We'd put the
+	// function and type inline here, but apparently Go can't have methods
+	// defined on types defined inside a function
 	var res exampleResource
 
 	// call As as usual
