@@ -70,8 +70,8 @@ method. `As` will return an error if the `Value` is not known.
 
 ## Testing
 
-TODO: insert information here on how to use `helper/resource` to test providers
-written with terraform-plugin-go.
+ TODO: insert information here on how to use `helper/resource` to test
+providers written with terraform-plugin-go.
 
 ## Documentation
 
@@ -82,8 +82,9 @@ the module, its common uses, and patterns developers may wish to take advantage
 of.
 
 Please bear with us as we work to get this information published, and please
-[open issues](https://github.com/hashicorp/terraform-plugin-go) with requests
-for the kind of documentation you would find useful.
+[open
+issues](https://github.com/hashicorp/terraform-plugin-go/issues/new/choose)
+with requests for the kind of documentation you would find useful.
 
 ## Scope
 
