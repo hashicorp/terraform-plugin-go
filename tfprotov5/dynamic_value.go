@@ -21,14 +21,26 @@ import (
 // terraform-plugin-go and is no longer a valid value.
 var ErrUnknownDynamicValueType = errors.New("DynamicValue had no JSON or msgpack data set")
 
+// NewDynamicValue creates a DynamicValue from a tftypes.Value. You must
+// specify the tftype.Type you want to send the value as, and it must be a type
+// that is compatible with the Type of the Value. Usually it should just be the
+// Type of the Value, but it can also be the DynamicPseudoType.
+func NewDynamicValue(t tftypes.Type, v tftypes.Value) (DynamicValue, error) {
+	b, err := v.MarshalMsgPack(t)
+	if err != nil {
+		return DynamicValue{}, err
+	}
+	return DynamicValue{
+		MsgPack: b,
+	}, nil
+}
+
 // DynamicValue represents a nested encoding value that came from the protocol.
 // The only way providers should ever interact with it is by calling its
 // `Unmarshal` method to retrive a `tftypes.Value`. Although the type system
 // allows for other interactions, they are explicitly not supported, and will
 // not be considered when evaluating for breaking changes. Treat this type as
 // an opaque value, and *only* call its `Unmarshal` method.
-//
-// TODO: document how to create a DynamicValue.
 type DynamicValue struct {
 	MsgPack []byte
 	JSON    []byte
