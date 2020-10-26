@@ -3,11 +3,22 @@ package tftypes
 import "fmt"
 
 const (
-	UnknownType       = primitive("Unknown")
+	// DynamicPseudoType is a pseudo-type in Terraform's type system that
+	// is used as a wildcard type. It indicates that any Terraform type can
+	// be used.
 	DynamicPseudoType = primitive("DynamicPseudoType")
-	String            = primitive("String")
-	Number            = primitive("Number")
-	Bool              = primitive("Bool")
+
+	// String is a primitive type in Terraform that represents a UTF-8
+	// string of bytes.
+	String = primitive("String")
+
+	// Number is a primitive type in Terraform that represents a real
+	// number.
+	Number = primitive("Number")
+
+	// Bool is a primitive type in Terraform that represents a true or
+	// false boolean value.
+	Bool = primitive("Bool")
 )
 
 var (

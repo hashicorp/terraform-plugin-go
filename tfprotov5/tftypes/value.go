@@ -8,18 +8,21 @@ import (
 	"github.com/vmihailenco/msgpack"
 )
 
+// ValueConverter is an interface that provider-defined types can implement to
+// control how Value.As will convert a Value into that type. The passed Value
+// is the Value that Value.As is being called on. The intended usage is to call
+// Value.As on the passed Value, converting it into a builtin type, and then
+// converting or casting that builtin type to the provider-defined type.
 type ValueConverter interface {
 	FromTerraform5Value(Value) error
 }
 
+// ValueCreator is an interface that provider-defined types can implement to
+// control how NewValue will convert that type into a Value. The returned
+// interface should return one of the builtin Value representations that should
+// be used for that Value.
 type ValueCreator interface {
-	ToTerraform5Value() (Value, error)
-}
-
-type ErrUnhandledType string
-
-func (e ErrUnhandledType) Error() string {
-	return fmt.Sprintf("unhandled Terraform type %s", string(e))
+	ToTerraform5Value() (interface{}, error)
 }
 
 type msgPackUnknownType struct{}
@@ -30,18 +33,84 @@ func (u msgPackUnknownType) MarshalMsgpack() ([]byte, error) {
 	return []byte{0xd4, 0, 0}, nil
 }
 
+// Value is a piece of data from Terraform or being returned to Terraform. It
+// has a Type associated with it, defining its shape and characteristics, and a
+// Go representation of that Type containing the data itself. Values are a
+// special type and are not represented as pure Go values beause they can
+// contain UnknownValues, which cannot be losslessly represented in Go's type
+// system.
+//
+// The recommended usage of a Value is to check that it is known, using
+// Value.IsKnown, then to convert it to a Go type, using Value.As. The Go type
+// can then be manipulated.
 type Value struct {
 	typ   Type
 	value interface{}
 }
 
+// NewValue returns a Value constructed using the specified Type and stores the
+// passed value in it.
+//
+// The passed value should be in one of the builtin Value representations or
+// implement the ValueCreator interface.
+//
+// The builtin Value representations are:
+//
+// * string for String
+//
+// * *big.Float for Number
+//
+// * bool for Bool
+//
+// * map[string]Value or map[string]interface{} for Map and Object
+//
+// * []Value or []interface{} for Tuple, List, and Set
 func NewValue(t Type, val interface{}) Value {
+	// TODO: handle ValueCreator implementations.
 	return Value{
 		typ:   t,
 		value: val,
 	}
 }
 
+// As converts a Value into a Go value. `dst` must be set to a pointer to a
+// value of a supported type for the Value's type or an implementation of the
+// ValueConverter interface.
+//
+// For Strings, `dst` must be a pointer to a string or a pointer to a pointer
+// to a string. If it's a pointer to a pointer to a string, if the Value is
+// null, the pointer to the string will be set to nil. If it's a pointer to a
+// string, if the Value is null, the string will be set to the empty value.
+//
+// For Numbers, `dst` must be a poitner to a big.Float or a pointer to a
+// pointer to a big.Float. If it's a pointer to a pointer to a big.Float, if
+// the Value is null, the pointer to the big.Float will be set to nil. If it's
+// a pointer to a big.Float, if the Value is null, the big.Float will be set to
+// 0.
+//
+// For Bools, `dst` must be a pointer to a bool or a pointer to a pointer to a
+// bool. If it's a pointer to a pointer to a bool, if the Value is null, the
+// pointer to the bool will be set to nil. If it's a pointer to a bool, if the
+// Value is null, the bool will be set to false.
+//
+// For Maps and Objects, `dst` must be a pointer to a map[string]Value or a
+// pointer to a pointer to a map[string]Value. If it's a pointer to a pointer
+// to a map[string]Value, if the Value is null, the pointer to the
+// map[string]Value will be set to nil. If it's a pointer to a
+// map[string]Value, if the Value is null, the map[string]Value will be set to
+// an empty map.
+//
+// For Lists, Sets, and Tuples, `dst` must be a pointer to a []Value or a
+// pointer to a pointer to a []Value. If it's a pointer to a pointer to a
+// []Value, if the Value is null, the poitner to []Value will be set to nil. If
+// it's a pointer to a []Value, if the Value is null, the []Value will be set
+// to an empty slice.
+//
+// Future builtin conversions may be added over time.
+//
+// If `val` is unknown, an error will be returned, as unknown values can't be
+// represented in Go's type system. Providers should check Value.IsKnown before
+// calling Value.As.
 func (val Value) As(dst interface{}) error {
 	unmarshaler, ok := dst.(ValueConverter)
 	if ok {
@@ -140,6 +209,7 @@ func (val Value) As(dst interface{}) error {
 	return fmt.Errorf("can't unmarshal into %T, needs FromTerraform5Value method", dst)
 }
 
+// Is calls Type.Is using the Type of the Value.
 func (val Value) Is(t Type) bool {
 	if val.typ == nil || t == nil {
 		return val.typ == nil && t == nil
@@ -147,10 +217,16 @@ func (val Value) Is(t Type) bool {
 	return val.typ.Is(t)
 }
 
+// IsKnown returns true if `val` is known. If `val` is an aggregate type, only
+// the top level of the aggregate type is checked; elements and attributes are
+// not checked.
 func (val Value) IsKnown() bool {
 	return val.value != UnknownValue
 }
 
+// IsFullyKnown returns true if `val` is known. If `val` is an aggregate type,
+// IsFullyKnown only returns true if all elements and attributes are known, as
+// well.
 func (val Value) IsFullyKnown() bool {
 	switch val.typ.(type) {
 	case primitive:
@@ -173,10 +249,13 @@ func (val Value) IsFullyKnown() bool {
 	panic(fmt.Sprintf("unknown type %T", val.typ))
 }
 
+// IsNull returns true if the Value is null.
 func (val Value) IsNull() bool {
 	return val.value == nil
 }
 
+// MarshalMsgPack returns a msgpack representation of the Value. This is used
+// for constructing tfprotov5.DynamicValues.
 func (val Value) MarshalMsgPack(t Type) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := msgpack.NewEncoder(&buf)

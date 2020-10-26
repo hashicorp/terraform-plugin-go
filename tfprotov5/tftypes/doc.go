@@ -30,11 +30,15 @@
 // support using them as destinations for converted data:
 //
 // * String values can be converted into strings
+//
 // * Number values can be converted into *big.Floats
+//
 // * Boolean values can be converted into bools
+//
 // * List, Set, and Tuple values can be converted into a slice of Values
+//
 // * Map and Object values can be converted into a map with string keys and
-//   Value values.
+// Value values.
 //
 // These defaults were chosen because they're capable of losslessly
 // representing all possible values for their Terraform type, with the

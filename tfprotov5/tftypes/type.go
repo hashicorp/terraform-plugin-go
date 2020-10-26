@@ -6,10 +6,26 @@ import (
 	"fmt"
 )
 
+// Type is an interface representing a Terraform type. It is only meant to be
+// implemented by the tftypes package. Types define the shape and
+// characteristics of data coming from or being sent to Terraform.
 type Type interface {
+	// Is is used to determine what type a Type implementation is. It is
+	// the recommended method for determining whether two types are
+	// equivalent or not.
 	Is(Type) bool
+
+	// String returns a string representation of the Type's name.
 	String() string
+
+	// MarshalJSON returns a JSON representation of the Type's signature.
+	// It is modeled based on Terraform's requirements for type signature
+	// JSON representations, and may change over time to match Terraform's
+	// formatting.
 	MarshalJSON() ([]byte, error)
+
+	// private is meant to keep this interface from being implemented by
+	// types from other packages.
 	private()
 }
 
@@ -17,6 +33,9 @@ type jsonType struct {
 	t Type
 }
 
+// ParseJSONType returns a Type from its JSON representation. The JSON
+// representation should come from Terraform or from MarshalJSON as the format
+// is not part of this package's API guarantees.
 func ParseJSONType(buf []byte) (Type, error) {
 	var t jsonType
 	err := json.Unmarshal(buf, &t)
