@@ -23,6 +23,7 @@ type ProviderServer interface {
 	// StopProvider is called when Terraform would like providers to shut
 	// down as quickly as possible, and usually represents an interrupt.
 	StopProvider(context.Context, *StopProviderRequest) (*StopProviderResponse, error)
+	StopContext(context.Context) context.Context
 
 	// ResourceServer is an interface encapsulating all the
 	// resource-related RPC requests. ProviderServer implementations must

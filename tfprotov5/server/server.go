@@ -2,6 +2,7 @@ package tf5server
 
 import (
 	"context"
+	"sync"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -100,6 +101,8 @@ func Serve(name string, serverFactory func() tfprotov5.ProviderServer, opts ...S
 
 type server struct {
 	downstream tfprotov5.ProviderServer
+	stopCh     chan struct{}
+	stopMu     sync.Mutex
 	tfplugin5.UnimplementedProviderServer
 }
 
@@ -109,6 +112,30 @@ func New(serve tfprotov5.ProviderServer) tfplugin5.ProviderServer {
 	return server{
 		downstream: serve,
 	}
+}
+
+// mergeStop is called in a goroutine and waits for the global stop signal
+// and propagates cancellation to the passed in ctx/cancel func. The ctx is
+// also passed to this function and waited upon so no goroutine leak is caused.
+func mergeStop(ctx context.Context, cancel context.CancelFunc, stopCh chan struct{}) {
+	select {
+	case <-ctx.Done():
+		return
+	case <-stopCh:
+		cancel()
+	}
+}
+
+// StopContext derives a new context from the passed in grpc context.
+// It creates a goroutine to wait for the server stop and propagates
+// cancellation to the derived grpc context.
+func (s server) StopContext(ctx context.Context) context.Context {
+	s.stopMu.Lock()
+	defer s.stopMu.Unlock()
+
+	stoppable, cancel := context.WithCancel(ctx)
+	go mergeStop(stoppable, cancel, s.stopCh)
+	return stoppable
 }
 
 func (s server) GetSchema(ctx context.Context, req *tfplugin5.GetProviderSchema_Request) (*tfplugin5.GetProviderSchema_Response, error) {
