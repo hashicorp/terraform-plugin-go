@@ -11,41 +11,30 @@ import (
 type ResourceServer interface {
 	// ValidateResourceTypeConfig is called when Terraform is checking that
 	// a resource's configuration is valid. It is guaranteed to have types
-	// conforming to your schema, but it is not guaranteed that all values
-	// will be known. This is your opportunity to do custom or advanced
-	// validation prior to a plan being generated.
+	// conforming to your schema. This is your opportunity to do custom or
+	// advanced validation prior to a plan being generated.
 	ValidateResourceTypeConfig(context.Context, *ValidateResourceTypeConfigRequest) (*ValidateResourceTypeConfigResponse, error)
 
 	// UpgradeResourceState is called when Terraform has encountered a
-	// resource with a state format version that doesn't match the schema's
-	// state format version. It is the provider's responsibility to modify
-	// the state to upgrade it to the latest state format version.
+	// resource with a state in a schema that doesn't match the schema's
+	// current version. It is the provider's responsibility to modify the
+	// state to upgrade it to the latest state schema.
 	UpgradeResourceState(context.Context, *UpgradeResourceStateRequest) (*UpgradeResourceStateResponse, error)
 
 	// ReadResource is called when Terraform is refreshing a resource's
-	// state. It is guaranteed that all values will be known at this time.
-	//
-	// TODO: is that true? Do we have all our values at this point?
-	// TODO: we can probably document the requirements the protocol has for
-	// what can be set in state here.
+	// state.
 	ReadResource(context.Context, *ReadResourceRequest) (*ReadResourceResponse, error)
 
 	// PlanResourceChange is called when Terraform is attempting to
 	// calculate a plan for a resource. Terraform will suggest a proposed
 	// new state, which the provider can modify or return unmodified to
 	// influence Terraform's plan.
-	//
-	// TODO: we can probably document the requirements the protocol has for
-	// what can be set in state here.
 	PlanResourceChange(context.Context, *PlanResourceChangeRequest) (*PlanResourceChangeResponse, error)
 
 	// ApplyResourceChange is called when Terraform has detected a diff
 	// between the resource's state and the user's config, and the user has
 	// approved a planned change. The provider is to apply the changes
 	// contained in the plan, and return the resulting state.
-	//
-	// TODO: we can probably document the requirements the protocol has for
-	// what can be set in state here.
 	ApplyResourceChange(context.Context, *ApplyResourceChangeRequest) (*ApplyResourceChangeResponse, error)
 
 	// ImportResourceState is called when a user has requested Terraform
@@ -65,9 +54,13 @@ type ValidateResourceTypeConfigRequest struct {
 	// the documentation on `DynamicValue` for more information about
 	// safely accessing the configuration.
 	//
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
+	//
 	// This configuration may contain unknown values if a user uses
 	// interpolation or other functionality that would prevent Terraform
-	// from knowing the value at request time.
+	// from knowing the value at request time. Any attributes not directly
+	// set in the configuration will be null.
 	Config *DynamicValue
 }
 
@@ -103,8 +96,8 @@ type UpgradeResourceStateResponse struct {
 	// a `DynamicValue`. See the documentation on `DynamicValue` for
 	// information about safely creating the `DynamicValue`.
 	//
-	// TODO: we should indicate what kind of tftypes.Value providers should
-	// be supplying to specify state in the proper format.
+	// The state should be represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
 	UpgradedState *DynamicValue
 
 	// Diagnostics report errors or warnings related to upgrading the
@@ -124,6 +117,9 @@ type ReadResourceRequest struct {
 	// Terraform knows, represented as a `DynamicValue`. See the
 	// documentation for `DynamicValue` for information about safely
 	// accessing the state.
+	//
+	// The state is represented as a tftypes.Object, with each attribute
+	// and nested block getting its own key and value.
 	CurrentState *DynamicValue
 
 	// TODO: what is private for
@@ -137,6 +133,9 @@ type ReadResourceRequest struct {
 	// documentation on `DynamicValue` for information about safely
 	// accessing the configuration.
 	//
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
+	//
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
 }
@@ -149,11 +148,8 @@ type ReadResourceResponse struct {
 	// `DynamicValue` for information about safely creating the
 	// `DynamicValue`.
 	//
-	// TODO: we should indicate the requirements providers must meet about
-	// what must be set in state.
-	//
-	// TODO: we should indicate what kind of tftypes.Value providers should
-	// be supplying to specify state in the proper format.
+	// The state should be represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
 	NewState *DynamicValue
 
 	// Diagnostics report errors or warnings related to retrieving the
@@ -176,6 +172,9 @@ type PlanResourceChangeRequest struct {
 	// PriorState is the state of the resource before the plan is applied,
 	// represented as a `DynamicValue`. See the documentation for
 	// `DynamicValue` for information about safely accessing the state.
+	//
+	// The state is represented as a tftypes.Object, with each attribute
+	// and nested block getting its own key and value.
 	PriorState *DynamicValue
 
 	// ProposedNewState is the state that Terraform is proposing for the
@@ -183,14 +182,23 @@ type PlanResourceChangeRequest struct {
 	// as a `DynamicValue`. See the documentation for `DynamicValue` for
 	// information about safely accessing the state.
 	//
-	// The proposed new state may contain unknown values if a user uses
-	// interpolation or other functionality that would prevent Terraform
-	// from knowing the value at request time.
+	// The ProposedNewState merges any non-null values in the configuration
+	// with any computed attributes in PriorState as a utility to help
+	// providers avoid needing to implement such merging functionality
+	// themselves.
+	//
+	// The state is represented as a tftypes.Object, with each attribute
+	// and nested block getting its own key and value.
+	//
+	// The ProposedNewState will be null when planning a delete operation.
 	ProposedNewState *DynamicValue
 
 	// Config is the configuration the user supplied for the resource. See
 	// the documentation on `DynamicValue` for more information about
 	// safely accessing the configuration.
+	//
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
 	//
 	// This configuration may contain unknown values if a user uses
 	// interpolation or other functionality that would prevent Terraform
@@ -208,6 +216,9 @@ type PlanResourceChangeRequest struct {
 	// documentation on `DynamicValue` for information about safely
 	// accessing the configuration.
 	//
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
+	//
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
 }
@@ -220,11 +231,37 @@ type PlanResourceChangeResponse struct {
 	// the documentation for `DynamicValue` for information about safely
 	// creating the `DynamicValue`.
 	//
-	// TODO: we should indicate the requirements providers must meet about
-	// what must be set in state.
+	// This is usually derived from the ProposedNewState passed in the
+	// PlanResourceChangeRequest, with default values substituted for any
+	// null values and overriding any computed values that are expected to
+	// change as a result of the apply operation. This may contain unknown
+	// values if the value could change but its new value won't be known
+	// until apply time.
 	//
-	// TODO: we should indicate what kind of tftypes.Value providers should
-	// be supplying to specify state in the proper format.
+	// Any value that was non-null in the configuration must either
+	// preserve the exact configuration value or return the corresponding
+	// value from the prior state. The value from the prior state should be
+	// returned when the configuration value is semantically equivalent to
+	// the state value.
+	//
+	// Any value that is marked as computed in the schema and is null in
+	// the configuration may be set by the provider to any value of the
+	// expected type.
+	//
+	// PlanResourceChange will actually be called twice; once when
+	// generating the plan for the user to approve, once during the apply.
+	// During the apply, additional values from the configuration--upstream
+	// values interpolated in that were computed at apply time--will be
+	// populated. During this second call, any attribute that had a known
+	// value in the first PlannedState must have an identical value in the
+	// second PlannedState. Any unknown values may remain unknown or may
+	// take on any value of the appropriate type. This means the values
+	// returned in PlannedState should be deterministic and unknown values
+	// should be used if a field's value may change depending on what value
+	// ends up filling an unknown value in the config.
+	//
+	// The state should be represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
 	PlannedState *DynamicValue
 
 	// RequiresReplace is a list of tftypes.AttributePaths that require the
@@ -266,19 +303,30 @@ type ApplyResourceChangeRequest struct {
 	// PriorState is the state of the resource before the changes are
 	// applied, represented as a `DynamicValue`. See the documentation for
 	// `DynamicValue` for information about safely accessing the state.
+	//
+	// The state is represented as a tftypes.Object, with each attribute
+	// and nested block getting its own key and value.
 	PriorState *DynamicValue
 
 	// PlannedState is Terraform's plan for what the state should look like
 	// after the changes are applied, represented as a `DynamicValue`. See
 	// the documentation for `DynamicValue` for information about safely
 	// accessing the state.
+	//
+	// This is the PlannedState returned during PlanResourceChange.
+	//
+	// The state is represented as a tftypes.Object, with each attribute
+	// and nested block getting its own key and value.
 	PlannedState *DynamicValue
 
 	// Config is the configuration the user supplied for the resource. See
 	// the documentation on `DynamicValue` for more information about
 	// safely accessing the configuration.
 	//
-	// This configuration will not contain unknown values.
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
+	//
+	// This configuration may contain unknown values.
 	Config *DynamicValue
 
 	// TODO: what is planned private
@@ -292,6 +340,9 @@ type ApplyResourceChangeRequest struct {
 	// documentation on `DynamicValue` for information about safely
 	// accessing the configuration.
 	//
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
+	//
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
 }
@@ -304,11 +355,16 @@ type ApplyResourceChangeResponse struct {
 	// See the documentation for `DynamicValue` for information about
 	// safely creating the `DynamicValue`.
 	//
-	// TODO: we should indicate the requirements providers must meet about
-	// what must be set in state.
+	// Any attribute, whether computed or not, that has a known value in
+	// the PlannedState in the ApplyResourceChangeRequest must be preserved
+	// exactly as it was in NewState.
 	//
-	// TODO: we should indicate what kind of tftypes.Value providers should
-	// be supplying to specify state in the proper format.
+	// Any attribute in the PlannedState in the ApplyResourceChangeRequest
+	// that is unknown must take on a known value at this time. No unknown
+	// values are allowed in the NewState.
+	//
+	// The state should be represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
 	NewState *DynamicValue
 
 	// TODO: what is private
@@ -371,11 +427,8 @@ type ImportedResource struct {
 	// `DynamicValue` for information about safely creating the
 	// `DynamicValue`.
 	//
-	// TODO: we should indicate the requirements providers must meet about
-	// what must be set in state.
-	//
-	// TODO: we should indicate what kind of tftypes.Value providers should
-	// be supplying to specify state in the proper format.
+	// The state should be represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
 	State *DynamicValue
 
 	// TODO: what is private

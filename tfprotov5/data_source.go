@@ -15,10 +15,7 @@ type DataSourceServer interface {
 	ValidateDataSourceConfig(context.Context, *ValidateDataSourceConfigRequest) (*ValidateDataSourceConfigResponse, error)
 
 	// ReadDataSource is called when Terraform is refreshing a data
-	// source's state. It is guaranteed that all values will be known at
-	// this time.
-	// TODO: we can probably document the requirements the protocol has for
-	// data sources here.
+	// source's state.
 	ReadDataSource(context.Context, *ReadDataSourceRequest) (*ReadDataSourceResponse, error)
 }
 
@@ -31,6 +28,9 @@ type ValidateDataSourceConfigRequest struct {
 	// Config is the configuration the user supplied for that data source.
 	// See the documentation on `DynamicValue` for more information about
 	// safely accessing the configuration.
+	//
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
 	//
 	// This configuration may contain unknown values if a user uses
 	// interpolation or other functionality that would prevent Terraform
@@ -58,7 +58,10 @@ type ReadDataSourceRequest struct {
 	// See the documentation on `DynamicValue` for information about safely
 	// accessing the configuration.
 	//
-	// This configuration will have known values for all fields.
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
+	//
+	// This configuration may have unknown values.
 	Config *DynamicValue
 
 	// ProviderMeta supplies the provider metadata configuration for the
@@ -68,6 +71,9 @@ type ReadDataSourceRequest struct {
 	// https://github.com/hashicorp/terraform/issues/new/choose. See the
 	// documentation on `DynamicValue` for information about safely
 	// accessing the configuration.
+	//
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
 	//
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
@@ -80,11 +86,8 @@ type ReadDataSourceResponse struct {
 	// `DynamicValue`. See the documentation on `DynamicValue` for
 	// information about safely creating the `DynamicValue`.
 	//
-	// TODO: we should indicate what requirements providers must meet about
-	// what must be set in state.
-	//
-	// TODO: we should indicate what kind of tftypes.Value providers should
-	// be supplying to specify state in the proper format.
+	// The state should be represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
 	State *DynamicValue
 
 	// Diagnostics report errors or warnings related to retrieving the

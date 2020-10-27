@@ -29,10 +29,6 @@ type ProviderServer interface {
 	// implement them, but they are a handy interface for defining what a
 	// resource is to terraform-plugin-go, so they're their own interface
 	// that is composed into ProviderServer.
-	//
-	// It is common, but not required, to fill this part of the
-	// ProviderServer interface by embeding a ResourceRouter into your
-	// ProviderServer implementation and inheriting its implementation.
 	ResourceServer
 
 	// DataSourceServer is an interface encapsulating all the data
@@ -40,10 +36,6 @@ type ProviderServer interface {
 	// implement them, but they are a handy interface for defining what a
 	// data source is to terraform-plugin-go, so they're their own
 	// interface that is composed into ProviderServer.
-	//
-	// It is common, but not required, to fill this part of the
-	// ProviderServer interface by embedding a DataSourceRouter into your
-	// ProviderServer implementation and inheriting its implementation.
 	DataSourceServer
 }
 
@@ -93,7 +85,15 @@ type PrepareProviderConfigRequest struct {
 	// the documentation on `DynamicValue` for more information about
 	// safely accessing the configuration.
 	//
-	// TODO: can this configuration contain unknown values?
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
+	//
+	// The PrepareProviderConfig RPC call will be called twice; once when
+	// generating a plan, once when applying the plan. When called during
+	// plan, Config can contain unknown values if fields with unknown
+	// values are interpolated into it. At apply time, all fields will have
+	// known values. Values that are not set in the configuration will be
+	// null.
 	Config *DynamicValue
 }
 
@@ -113,6 +113,9 @@ type PrepareProviderConfigResponse struct {
 	// PreparedConfig to the value of the PrepareProviderConfigRequest's
 	// Config property, indicating that no changes are needed to the
 	// configuration.
+	//
+	// The configuration should be represented as a tftypes.Object, with
+	// each attribute and nested block getting its own key and value.
 	//
 	// TODO: should we provide an implementation that does that that
 	// provider developers can just embed and not need to implement the
@@ -142,7 +145,15 @@ type ConfigureProviderRequest struct {
 	// RPC requests. See the documentation on `DynamicValue` for more
 	// information about safely accessing the configuration.
 	//
-	// TODO: can this configuration contain unknown values?
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
+	//
+	// The ConfigureProvider RPC call will be called twice; once when
+	// generating a plan, once when applying the plan. When called during
+	// plan, Config can contain unknown values if fields with unknown
+	// values are interpolated into it. At apply time, all fields will have
+	// known values. Values that are not set in the configuration will be
+	// null.
 	Config *DynamicValue
 }
 

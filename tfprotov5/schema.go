@@ -5,32 +5,48 @@ import "github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 const (
 	// SchemaNestedBlockNestingModeInvalid indicates that the nesting mode
 	// for a nested block in the schema is invalid. This generally
-	// indicates a nested block that was creating incorrectly.
+	// indicates a nested block that was created incorrectly.
 	SchemaNestedBlockNestingModeInvalid SchemaNestedBlockNestingMode = 0
 
 	// SchemaNestedBlockNestingModeSingle indicates that the nested block
-	// should be treated as a single block, and there should not be more
-	// than one of these blocks in the resource.
+	// should be treated as a single block with no labels, and there should
+	// not be more than one of these blocks in the containing block. The
+	// block will appear in config and state values as a tftypes.Object.
 	SchemaNestedBlockNestingModeSingle SchemaNestedBlockNestingMode = 1
 
-	// SchemaNestedBlockNestingModeList indicates that the nested block
-	// should allow multiple blocks of that type in the config, and their
-	// order should be considered significant, and identical values should
-	// be permitted.
+	// SchemaNestedBlockNestingModeList indicates that multiple instances
+	// of the nested block should be permitted, with no labels, and that
+	// the instances of the block should appear in config and state values
+	// as a tftypes.List, with an ElementType of tftypes.Object.
 	SchemaNestedBlockNestingModeList SchemaNestedBlockNestingMode = 2
 
-	// SchemaNestedBlockNestingModeSet indicates that the nested block
-	// should allow multiple blocks of that type in the config, and their
-	// order should not be significant, and identical values should be
-	// considered only once.
+	// SchemaNestedBlockNestingModeSet indicates that multiple instances
+	// of the nested block should be permitted, with no labels, and that
+	// the instances of the block should appear in config and state values
+	// as a tftypes.Set, with an ElementType of tftypes.Object.
 	SchemaNestedBlockNestingModeSet SchemaNestedBlockNestingMode = 3
 
-	// SchemaNestedBlockNestingModeMap indicates that the nested block should
-	// TODO: what does this actually mean
+	// SchemaNestedBlockNestingModeMap indicates that multiple instances of
+	// the nested block should be permitted, each with a single label, and
+	// that they should be represented in state and config values as a
+	// tftypes.Map, with an AttributeType of tftypes.Object. The labels on
+	// the blocks will be used as the map keys. It is an error, therefore,
+	// to use the same label value on multiple block instances.
 	SchemaNestedBlockNestingModeMap SchemaNestedBlockNestingMode = 4
 
-	// SchemaNestedBlockNestingModeGroup indicates that the nested block should
-	// TODO: what does this actually mean
+	// SchemaNestedBlockNestingModeGroup indicates that the nested block
+	// should be treated as a single block with no labels, and there should
+	// not be more than one of these blocks in the containing block. The
+	// block will appear in config and state values as a tftypes.Object.
+	//
+	// SchemaNestedBlockNestingModeGroup is distinct from
+	// SchemaNestedBlockNestingModeSingle in that it guarantees that the
+	// block will never be null. If it is omitted from a config, the block
+	// will still be set, but its attributes and nested blocks will all be
+	// null. This is an exception to the rule that any block not set in the
+	// configuration cannot be set in config by the provider; this ensures
+	// the block is always considered "set" in the configuration, and is
+	// therefore settable in state by the provider.
 	SchemaNestedBlockNestingModeGroup SchemaNestedBlockNestingMode = 5
 )
 
@@ -46,16 +62,18 @@ type Schema struct {
 	// Terraform requests the provider upgrade the resource's state.
 	Version int64
 
-	// Block is the root level of the schema.
-	// TODO: we can probably do a better explanation of the semantics of
-	// this. If only I knew them. "It's that way because it is." isn't
-	// ideal documentation, tho.
+	// Block is the root level of the schema, the collection of attributes
+	// and blocks that make up a resource, data source, provider, or other
+	// configuration block.
 	Block *SchemaBlock
 }
 
 // SchemaBlock represents a block in a schema. Blocks are how Terraform creates
 // groupings of attributes. In configurations, they don't use the equals sign
 // and use dynamic instead of list comprehensions.
+//
+// Blocks will show up in state and config Values as a tftypes.Object, with the
+// attributes and nested blocks defining the tftypes.Object's AttributeTypes.
 type SchemaBlock struct {
 	// TODO: why do we have version in the block, too?
 	Version int64
@@ -78,12 +96,12 @@ type SchemaBlock struct {
 	// Description field is using.
 	DescriptionKind StringKind
 
-	// Deprecated, when set to true, will indicate to the user that this
-	// block is deprecated and the user should migrate away from it.
-	//
-	// TODO: does it? I feel like there should be a place for a
-	// provider-specified message here... unless this is used for something
-	// else.
+	// Deprecated, when set to true, indicates that a block should no
+	// longer be used and users should migrate away from it. At the moment
+	// it is unused and will have no impact, but it will be used in future
+	// tooling that is powered by provider schemas to enable richer user
+	// experiences. Providers should set it when deprecating blocks in
+	// preparation for these tools.
 	Deprecated bool
 }
 
@@ -135,12 +153,12 @@ type SchemaAttribute struct {
 	// Description field is using.
 	DescriptionKind StringKind
 
-	// Deprecated, when set to true, will indicate to the user that this
-	// attribute is deprecated and the user should migrate away from it.
-	//
-	// TODO: does it? I feel like there should be a place for a
-	// provider-specified message here... unless this is used for something
-	// else.
+	// Deprecated, when set to true, indicates that a attribute should no
+	// longer be used and users should migrate away from it. At the moment
+	// it is unused and will have no impact, but it will be used in future
+	// tooling that is powered by provider schemas to enable richer user
+	// experiences. Providers should set it when deprecating attributes in
+	// preparation for these tools.
 	Deprecated bool
 }
 
@@ -161,18 +179,29 @@ type SchemaNestedBlock struct {
 
 	// MinItems is the minimum number of instances of this block that a
 	// user must specify or Terraform will return an error.
+	//
+	// MinItems can only be set for SchemaNestedBlockNestingModeList and
+	// SchemaNestedBlockNestingModeSet. SchemaNestedBlockNestingModeSingle
+	// can also set MinItems and MaxItems both to 1 to indicate that the
+	// block is required to be set. All other SchemaNestedBlockNestingModes
+	// must leave MinItems set to 0.
 	MinItems int64
 
 	// MaxItems is the maximum number of instances of this block that a
 	// user may specify before Terraform returns an error.
+	//
+	// MaxItems can only be set for SchemaNestedBlockNestingModeList and
+	// SchemaNestedBlockNestingModeSet. SchemaNestedBlockNestingModeSingle
+	// can also set MinItems and MaxItems both to 1 to indicate that the
+	// block is required to be set. All other SchemaNestedBlockNestingModes
+	// must leave MaxItems set to 0.
 	MaxItems int64
 }
 
-// SchemaNestedBlockNestingMode indicates the behavior a nested block should
-// have and the type of data it implies. Blocks may have the same syntax and be
-// the same construct, but they can be configured to imply different types of
-// data and behave differently. See the documentation for each constant for the
-// type of data it implies and the behavior it exhibits.
+// SchemaNestedBlockNestingMode indicates the nesting mode for
+// SchemaNestedBlocks. The nesting mode determines the number of instances of
+// the block allowed, how many labels the block expects, and the data structure
+// used for the block in config and state values.
 type SchemaNestedBlockNestingMode int32
 
 func (s SchemaNestedBlockNestingMode) String() string {
