@@ -85,12 +85,6 @@ func marshalMsgPackString(val Value, typ Type, p AttributePath, enc *msgpack.Enc
 }
 
 func marshalMsgPackNumber(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
-	// TODO: can we accept other types besides *big.Float?
-	// at the very least it would be nice to have built-in handling
-	// for Go's int/float type variations
-	//
-	// once we build up the Value.As interface, we may be able to take
-	// advantage of that...
 	n, ok := val.value.(*big.Float)
 	if !ok {
 		return unexpectedValueTypeError(p, n, val.value, typ)

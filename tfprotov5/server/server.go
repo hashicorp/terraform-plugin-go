@@ -1,4 +1,4 @@
-package tfprotov5server
+package tf5server
 
 import (
 	"context"
@@ -11,10 +11,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/toproto"
 )
 
+// ServeOpt is an interface for defining options that can be passed to the
+// Serve function. Each implementation modifies the ServeConfig being
+// generated. A slice of ServeOpts then, cumulatively applied, render a full
+// ServeConfig.
 type ServeOpt interface {
 	ApplyServeOpt(*ServeConfig) error
 }
 
+// ServeConfig contains the configured options for how a provider should be
+// served.
 type ServeConfig struct {
 	logger       hclog.Logger
 	debugCtx     context.Context
@@ -28,6 +34,8 @@ func (s serveConfigFunc) ApplyServeOpt(in *ServeConfig) error {
 	return s(in)
 }
 
+// WithDebug returns a ServeOpt that will set the server into debug mode, using
+// the passed options to populate the go-plugin ServeTestConfig.
 func WithDebug(ctx context.Context, config chan *plugin.ReattachConfig, closeCh chan struct{}) ServeOpt {
 	return serveConfigFunc(func(in *ServeConfig) error {
 		in.debugCtx = ctx
@@ -37,6 +45,8 @@ func WithDebug(ctx context.Context, config chan *plugin.ReattachConfig, closeCh 
 	})
 }
 
+// WithGoPluginLogger returns a ServeOpt that will set the logger that
+// go-plugin should use to log messages.
 func WithGoPluginLogger(logger hclog.Logger) ServeOpt {
 	return serveConfigFunc(func(in *ServeConfig) error {
 		in.logger = logger
@@ -44,6 +54,15 @@ func WithGoPluginLogger(logger hclog.Logger) ServeOpt {
 	})
 }
 
+// Serve starts a tfprotov5.ProviderServer serving, ready for Terraform to
+// connect to it. The name passed in should be the fully qualified name that
+// users will enter in the source field of the required_providers block, like
+// "registry.terraform.io/hashicorp/time".
+//
+// Zero or more options to configure the server may also be passed. The default
+// invocation is sufficient, but if the provider wants to run in debug mode or
+// modify the logger that go-plugin is using, ServeOpts can be specified to
+// support that.
 func Serve(name string, serverFactory func() tfprotov5.ProviderServer, opts ...ServeOpt) error {
 	var conf ServeConfig
 	for _, opt := range opts {
@@ -84,6 +103,8 @@ type server struct {
 	tfplugin5.UnimplementedProviderServer
 }
 
+// New converts a tfprotov5.ProviderServer into a server capable of handling
+// Terraform protocol requests and issuing responses using the gRPC types.
 func New(serve tfprotov5.ProviderServer) tfplugin5.ProviderServer {
 	return server{
 		downstream: serve,
