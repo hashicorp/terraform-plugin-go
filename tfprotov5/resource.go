@@ -122,7 +122,9 @@ type ReadResourceRequest struct {
 	// and nested block getting its own key and value.
 	CurrentState *DynamicValue
 
-	// TODO: what is private for
+	// Private is any provider-defined private state stored with the
+	// resource. It is used for keeping state with the resource that is not
+	// meant to be included when calculating diffs.
 	Private []byte
 
 	// ProviderMeta supplies the provider metadata configuration for the
@@ -158,7 +160,9 @@ type ReadResourceResponse struct {
 	// generated.
 	Diagnostics []*Diagnostic
 
-	// TODO: what is private for
+	// Private should be set to any state that the provider would like sent
+	// with requests for this resource. This state will be associated with
+	// the resource, but will not be considered when calculating diffs.
 	Private []byte
 }
 
@@ -205,7 +209,9 @@ type PlanResourceChangeRequest struct {
 	// from knowing the value at request time.
 	Config *DynamicValue
 
-	// TODO: what is prior private for
+	// PriorPrivate is any provider-defined private state stored with the
+	// resource. It is used for keeping state with the resource that is not
+	// meant to be included when calculating diffs.
 	PriorPrivate []byte
 
 	// ProviderMeta supplies the provider metadata configuration for the
@@ -270,7 +276,10 @@ type PlanResourceChangeResponse struct {
 	// recreated.
 	RequiresReplace []*tftypes.AttributePath
 
-	// TODO: what is planned private for
+	// PlannedPrivate should be set to any state that the provider would
+	// like sent with requests for this resource. This state will be
+	// associated with the resource, but will not be considered when
+	// calculating diffs.
 	PlannedPrivate []byte
 
 	// Diagnostics report errors or warnings related to determining the
@@ -329,7 +338,9 @@ type ApplyResourceChangeRequest struct {
 	// This configuration may contain unknown values.
 	Config *DynamicValue
 
-	// TODO: what is planned private
+	// PlannedPrivate is any provider-defined private state stored with the
+	// resource. It is used for keeping state with the resource that is not
+	// meant to be included when calculating diffs.
 	PlannedPrivate []byte
 
 	// ProviderMeta supplies the provider metadata configuration for the
@@ -367,7 +378,9 @@ type ApplyResourceChangeResponse struct {
 	// attribute and nested block getting its own key and value.
 	NewState *DynamicValue
 
-	// TODO: what is private
+	// Private should be set to any state that the provider would like sent
+	// with requests for this resource. This state will be associated with
+	// the resource, but will not be considered when calculating diffs.
 	Private []byte
 
 	// Diagnostics report errors or warnings related to applying changes to
@@ -431,6 +444,8 @@ type ImportedResource struct {
 	// attribute and nested block getting its own key and value.
 	State *DynamicValue
 
-	// TODO: what is private
+	// Private should be set to any state that the provider would like sent
+	// with requests for this resource. This state will be associated with
+	// the resource, but will not be considered when calculating diffs.
 	Private []byte
 }
