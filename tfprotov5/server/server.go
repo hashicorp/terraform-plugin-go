@@ -2,6 +2,7 @@ package tf5server
 
 import (
 	"context"
+	"sync"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -101,17 +102,44 @@ func Serve(name string, serverFactory func() tfprotov5.ProviderServer, opts ...S
 type server struct {
 	downstream tfprotov5.ProviderServer
 	tfplugin5.UnimplementedProviderServer
+
+	stopMu sync.Mutex
+	stopCh chan struct{}
+}
+
+func mergeStop(ctx context.Context, cancel context.CancelFunc, stopCh chan struct{}) {
+	select {
+	case <-ctx.Done():
+		return
+	case <-stopCh:
+		cancel()
+	}
+}
+
+// stoppableContext returns a context that wraps `ctx` but will be canceled
+// when the server's stopCh is closed.
+//
+// This is used to cancel all in-flight contexts when the Stop method of the
+// server is called.
+func (s *server) stoppableContext(ctx context.Context) context.Context {
+	s.stopMu.Lock()
+	defer s.stopMu.Unlock()
+
+	stoppable, cancel := context.WithCancel(ctx)
+	go mergeStop(stoppable, cancel, s.stopCh)
+	return stoppable
 }
 
 // New converts a tfprotov5.ProviderServer into a server capable of handling
 // Terraform protocol requests and issuing responses using the gRPC types.
 func New(serve tfprotov5.ProviderServer) tfplugin5.ProviderServer {
-	return server{
+	return &server{
 		downstream: serve,
 	}
 }
 
-func (s server) GetSchema(ctx context.Context, req *tfplugin5.GetProviderSchema_Request) (*tfplugin5.GetProviderSchema_Response, error) {
+func (s *server) GetSchema(ctx context.Context, req *tfplugin5.GetProviderSchema_Request) (*tfplugin5.GetProviderSchema_Response, error) {
+	ctx = s.stoppableContext(ctx)
 	r, err := fromproto.GetProviderSchemaRequest(req)
 	if err != nil {
 		return nil, err
@@ -127,7 +155,8 @@ func (s server) GetSchema(ctx context.Context, req *tfplugin5.GetProviderSchema_
 	return ret, nil
 }
 
-func (s server) PrepareProviderConfig(ctx context.Context, req *tfplugin5.PrepareProviderConfig_Request) (*tfplugin5.PrepareProviderConfig_Response, error) {
+func (s *server) PrepareProviderConfig(ctx context.Context, req *tfplugin5.PrepareProviderConfig_Request) (*tfplugin5.PrepareProviderConfig_Response, error) {
+	ctx = s.stoppableContext(ctx)
 	r, err := fromproto.PrepareProviderConfigRequest(req)
 	if err != nil {
 		return nil, err
@@ -143,7 +172,8 @@ func (s server) PrepareProviderConfig(ctx context.Context, req *tfplugin5.Prepar
 	return ret, nil
 }
 
-func (s server) Configure(ctx context.Context, req *tfplugin5.Configure_Request) (*tfplugin5.Configure_Response, error) {
+func (s *server) Configure(ctx context.Context, req *tfplugin5.Configure_Request) (*tfplugin5.Configure_Response, error) {
+	ctx = s.stoppableContext(ctx)
 	r, err := fromproto.ConfigureProviderRequest(req)
 	if err != nil {
 		return nil, err
@@ -159,7 +189,21 @@ func (s server) Configure(ctx context.Context, req *tfplugin5.Configure_Request)
 	return ret, nil
 }
 
-func (s server) Stop(ctx context.Context, req *tfplugin5.Stop_Request) (*tfplugin5.Stop_Response, error) {
+// stop closes the stopCh associated with the server and replaces it with a new
+// one.
+//
+// This causes all in-flight requests for the server to have their contexts
+// canceled.
+func (s *server) stop() {
+	s.stopMu.Lock()
+	defer s.stopMu.Unlock()
+
+	close(s.stopCh)
+	s.stopCh = make(chan struct{})
+}
+
+func (s *server) Stop(ctx context.Context, req *tfplugin5.Stop_Request) (*tfplugin5.Stop_Response, error) {
+	ctx = s.stoppableContext(ctx)
 	r, err := fromproto.StopProviderRequest(req)
 	if err != nil {
 		return nil, err
@@ -168,6 +212,7 @@ func (s server) Stop(ctx context.Context, req *tfplugin5.Stop_Request) (*tfplugi
 	if err != nil {
 		return nil, err
 	}
+	s.stop()
 	ret, err := toproto.Stop_Response(resp)
 	if err != nil {
 		return nil, err
@@ -175,7 +220,8 @@ func (s server) Stop(ctx context.Context, req *tfplugin5.Stop_Request) (*tfplugi
 	return ret, nil
 }
 
-func (s server) ValidateDataSourceConfig(ctx context.Context, req *tfplugin5.ValidateDataSourceConfig_Request) (*tfplugin5.ValidateDataSourceConfig_Response, error) {
+func (s *server) ValidateDataSourceConfig(ctx context.Context, req *tfplugin5.ValidateDataSourceConfig_Request) (*tfplugin5.ValidateDataSourceConfig_Response, error) {
+	ctx = s.stoppableContext(ctx)
 	r, err := fromproto.ValidateDataSourceConfigRequest(req)
 	if err != nil {
 		return nil, err
@@ -191,7 +237,8 @@ func (s server) ValidateDataSourceConfig(ctx context.Context, req *tfplugin5.Val
 	return ret, nil
 }
 
-func (s server) ReadDataSource(ctx context.Context, req *tfplugin5.ReadDataSource_Request) (*tfplugin5.ReadDataSource_Response, error) {
+func (s *server) ReadDataSource(ctx context.Context, req *tfplugin5.ReadDataSource_Request) (*tfplugin5.ReadDataSource_Response, error) {
+	ctx = s.stoppableContext(ctx)
 	r, err := fromproto.ReadDataSourceRequest(req)
 	if err != nil {
 		return nil, err
@@ -207,7 +254,8 @@ func (s server) ReadDataSource(ctx context.Context, req *tfplugin5.ReadDataSourc
 	return ret, nil
 }
 
-func (s server) ValidateResourceTypeConfig(ctx context.Context, req *tfplugin5.ValidateResourceTypeConfig_Request) (*tfplugin5.ValidateResourceTypeConfig_Response, error) {
+func (s *server) ValidateResourceTypeConfig(ctx context.Context, req *tfplugin5.ValidateResourceTypeConfig_Request) (*tfplugin5.ValidateResourceTypeConfig_Response, error) {
+	ctx = s.stoppableContext(ctx)
 	r, err := fromproto.ValidateResourceTypeConfigRequest(req)
 	if err != nil {
 		return nil, err
@@ -223,7 +271,8 @@ func (s server) ValidateResourceTypeConfig(ctx context.Context, req *tfplugin5.V
 	return ret, nil
 }
 
-func (s server) UpgradeResourceState(ctx context.Context, req *tfplugin5.UpgradeResourceState_Request) (*tfplugin5.UpgradeResourceState_Response, error) {
+func (s *server) UpgradeResourceState(ctx context.Context, req *tfplugin5.UpgradeResourceState_Request) (*tfplugin5.UpgradeResourceState_Response, error) {
+	ctx = s.stoppableContext(ctx)
 	r, err := fromproto.UpgradeResourceStateRequest(req)
 	if err != nil {
 		return nil, err
@@ -239,7 +288,8 @@ func (s server) UpgradeResourceState(ctx context.Context, req *tfplugin5.Upgrade
 	return ret, nil
 }
 
-func (s server) ReadResource(ctx context.Context, req *tfplugin5.ReadResource_Request) (*tfplugin5.ReadResource_Response, error) {
+func (s *server) ReadResource(ctx context.Context, req *tfplugin5.ReadResource_Request) (*tfplugin5.ReadResource_Response, error) {
+	ctx = s.stoppableContext(ctx)
 	r, err := fromproto.ReadResourceRequest(req)
 	if err != nil {
 		return nil, err
@@ -255,7 +305,8 @@ func (s server) ReadResource(ctx context.Context, req *tfplugin5.ReadResource_Re
 	return ret, nil
 }
 
-func (s server) PlanResourceChange(ctx context.Context, req *tfplugin5.PlanResourceChange_Request) (*tfplugin5.PlanResourceChange_Response, error) {
+func (s *server) PlanResourceChange(ctx context.Context, req *tfplugin5.PlanResourceChange_Request) (*tfplugin5.PlanResourceChange_Response, error) {
+	ctx = s.stoppableContext(ctx)
 	r, err := fromproto.PlanResourceChangeRequest(req)
 	if err != nil {
 		return nil, err
@@ -271,7 +322,8 @@ func (s server) PlanResourceChange(ctx context.Context, req *tfplugin5.PlanResou
 	return ret, nil
 }
 
-func (s server) ApplyResourceChange(ctx context.Context, req *tfplugin5.ApplyResourceChange_Request) (*tfplugin5.ApplyResourceChange_Response, error) {
+func (s *server) ApplyResourceChange(ctx context.Context, req *tfplugin5.ApplyResourceChange_Request) (*tfplugin5.ApplyResourceChange_Response, error) {
+	ctx = s.stoppableContext(ctx)
 	r, err := fromproto.ApplyResourceChangeRequest(req)
 	if err != nil {
 		return nil, err
@@ -287,7 +339,8 @@ func (s server) ApplyResourceChange(ctx context.Context, req *tfplugin5.ApplyRes
 	return ret, nil
 }
 
-func (s server) ImportResourceState(ctx context.Context, req *tfplugin5.ImportResourceState_Request) (*tfplugin5.ImportResourceState_Response, error) {
+func (s *server) ImportResourceState(ctx context.Context, req *tfplugin5.ImportResourceState_Request) (*tfplugin5.ImportResourceState_Response, error) {
+	ctx = s.stoppableContext(ctx)
 	r, err := fromproto.ImportResourceStateRequest(req)
 	if err != nil {
 		return nil, err
