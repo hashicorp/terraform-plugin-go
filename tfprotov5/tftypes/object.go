@@ -45,6 +45,8 @@ func (o Object) private() {}
 
 // MarshalJSON returns a JSON representation of the full type signature of `o`,
 // including the AttributeTypes.
+//
+// Deprecated: this is not meant to be called by third-party code.
 func (o Object) MarshalJSON() ([]byte, error) {
 	attrs, err := json.Marshal(o.AttributeTypes)
 	if err != nil {

@@ -126,7 +126,7 @@ func jsonUnmarshalDynamicPseudoType(buf []byte, typ tftypes.Type, p tftypes.Attr
 		}
 		switch key {
 		case "type":
-			t, err = tftypes.ParseJSONType(rawVal)
+			t, err = tftypes.ParseJSONType(rawVal) //nolint:staticcheck
 			if err != nil {
 				return tftypes.Value{}, p.NewErrorf("error decoding type information: %w", err)
 			}

@@ -306,7 +306,7 @@ func msgpackUnmarshalDynamic(dec *msgpack.Decoder, path tftypes.AttributePath) (
 	if err != nil {
 		return tftypes.Value{}, path.NewErrorf("error decoding bytes: %w", err)
 	}
-	typ, err := tftypes.ParseJSONType(typeJSON)
+	typ, err := tftypes.ParseJSONType(typeJSON) //nolint:staticcheck
 	if err != nil {
 		return tftypes.Value{}, path.NewErrorf("error parsing type information: %w", err)
 	}

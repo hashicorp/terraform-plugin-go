@@ -42,6 +42,8 @@ func (tu Tuple) private() {}
 
 // MarshalJSON returns a JSON representation of the full type signature of
 // `tu`, including the ElementTypes.
+//
+// Deprecated: this is not meant to be called by third-party code.
 func (tu Tuple) MarshalJSON() ([]byte, error) {
 	elements, err := json.Marshal(tu.ElementTypes)
 	if err != nil {

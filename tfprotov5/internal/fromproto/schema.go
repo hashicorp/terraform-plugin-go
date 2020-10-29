@@ -52,7 +52,7 @@ func SchemaAttribute(in *tfplugin5.Schema_Attribute) (*tfprotov5.SchemaAttribute
 		DescriptionKind: StringKind(in.DescriptionKind),
 		Deprecated:      in.Deprecated,
 	}
-	typ, err := tftypes.ParseJSONType(in.Type)
+	typ, err := tftypes.ParseJSONType(in.Type) //nolint:staticcheck
 	if err != nil {
 		return resp, err
 	}

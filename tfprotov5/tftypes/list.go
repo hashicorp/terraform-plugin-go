@@ -31,6 +31,8 @@ func (l List) private() {}
 
 // MarshalJSON returns a JSON representation of the full type signature of `l`,
 // including its ElementType.
+//
+// Deprecated: this is not meant to be called by third-party code.
 func (l List) MarshalJSON() ([]byte, error) {
 	elementType, err := l.ElementType.MarshalJSON()
 	if err != nil {

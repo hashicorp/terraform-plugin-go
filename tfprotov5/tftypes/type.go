@@ -22,6 +22,8 @@ type Type interface {
 	// It is modeled based on Terraform's requirements for type signature
 	// JSON representations, and may change over time to match Terraform's
 	// formatting.
+	//
+	// Deprecated: this is not meant to be called by third-party code.
 	MarshalJSON() ([]byte, error)
 
 	// private is meant to keep this interface from being implemented by
@@ -36,6 +38,8 @@ type jsonType struct {
 // ParseJSONType returns a Type from its JSON representation. The JSON
 // representation should come from Terraform or from MarshalJSON as the format
 // is not part of this package's API guarantees.
+//
+// Deprecated: this is not meant to be called by third-party code.
 func ParseJSONType(buf []byte) (Type, error) {
 	var t jsonType
 	err := json.Unmarshal(buf, &t)

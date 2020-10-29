@@ -30,6 +30,8 @@ func (m Map) private() {}
 
 // MarshalJSON returns a JSON representation of the full type signature of `m`,
 // including its AttributeType.
+//
+// Deprecated: this is not meant to be called by third-party code.
 func (m Map) MarshalJSON() ([]byte, error) {
 	attributeType, err := m.AttributeType.MarshalJSON()
 	if err != nil {
