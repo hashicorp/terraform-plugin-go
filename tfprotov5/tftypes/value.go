@@ -256,6 +256,8 @@ func (val Value) IsNull() bool {
 
 // MarshalMsgPack returns a msgpack representation of the Value. This is used
 // for constructing tfprotov5.DynamicValues.
+//
+// Deprecated: this is not meant to be called by third parties. Don't use it.
 func (val Value) MarshalMsgPack(t Type) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := msgpack.NewEncoder(&buf)
