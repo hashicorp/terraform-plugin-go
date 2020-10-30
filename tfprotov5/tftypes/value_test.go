@@ -315,3 +315,244 @@ func TestValueAs(t *testing.T) {
 		})
 	}
 }
+
+func TestValueIsKnown(t *testing.T) {
+	t.Parallel()
+	type testCase struct {
+		value      Value
+		known      bool
+		fullyKnown bool
+	}
+	tests := map[string]testCase{
+		"string-known": {
+			value:      NewValue(String, "hello"),
+			known:      true,
+			fullyKnown: true,
+		},
+		"string-unknown": {
+			value:      NewValue(String, UnknownValue),
+			known:      false,
+			fullyKnown: false,
+		},
+		"number-known": {
+			value:      NewValue(Number, big.NewFloat(123)),
+			known:      true,
+			fullyKnown: true,
+		},
+		"number-unknown": {
+			value:      NewValue(Number, UnknownValue),
+			known:      false,
+			fullyKnown: false,
+		},
+		"bool-known": {
+			value:      NewValue(Bool, true),
+			known:      true,
+			fullyKnown: true,
+		},
+		"bool-unknown": {
+			value:      NewValue(Bool, UnknownValue),
+			known:      false,
+			fullyKnown: false,
+		},
+		"list-string-known": {
+			value:      NewValue(List{ElementType: String}, []Value{NewValue(String, "hello")}),
+			known:      true,
+			fullyKnown: true,
+		},
+		"list-string-partially-known": {
+			value:      NewValue(List{ElementType: String}, []Value{NewValue(String, UnknownValue)}),
+			known:      true,
+			fullyKnown: false,
+		},
+		"list-string-unknown": {
+			value:      NewValue(List{ElementType: String}, UnknownValue),
+			known:      false,
+			fullyKnown: false,
+		},
+		"set-string-known": {
+			value:      NewValue(Set{ElementType: String}, []Value{NewValue(String, "hello")}),
+			known:      true,
+			fullyKnown: true,
+		},
+		"set-string-partially-known": {
+			value:      NewValue(Set{ElementType: String}, []Value{NewValue(String, UnknownValue)}),
+			known:      true,
+			fullyKnown: false,
+		},
+		"set-string-unknown": {
+			value:      NewValue(Set{ElementType: String}, UnknownValue),
+			known:      false,
+			fullyKnown: false,
+		},
+		"map-string-known": {
+			value:      NewValue(Map{AttributeType: String}, map[string]Value{"foo": NewValue(String, "hello")}),
+			known:      true,
+			fullyKnown: true,
+		},
+		"map-string-partially-known": {
+			value:      NewValue(Map{AttributeType: String}, map[string]Value{"foo": NewValue(String, UnknownValue)}),
+			known:      true,
+			fullyKnown: false,
+		},
+		"map-string-unknown": {
+			value:      NewValue(Map{AttributeType: String}, UnknownValue),
+			known:      false,
+			fullyKnown: false,
+		},
+		"object-string_number_bool-known": {
+			value: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}, map[string]Value{
+				"foo": NewValue(String, "hello"),
+				"bar": NewValue(Number, big.NewFloat(123)),
+				"baz": NewValue(Bool, true),
+			}),
+			known:      true,
+			fullyKnown: true,
+		},
+		"object-string_number_bool-partially-known": {
+			value: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}, map[string]Value{
+				"foo": NewValue(String, "hello"),
+				"bar": NewValue(Number, UnknownValue),
+				"baz": NewValue(Bool, true),
+			}),
+			known:      true,
+			fullyKnown: false,
+		},
+		"object-string_number_bool-unknown": {
+			value: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}, UnknownValue),
+			known:      false,
+			fullyKnown: false,
+		},
+		"tuple-string_number_bool-known": {
+			value: NewValue(Tuple{ElementTypes: []Type{
+				String, Number, Bool,
+			}}, []Value{
+				NewValue(String, "hello"),
+				NewValue(Number, big.NewFloat(123)),
+				NewValue(Bool, true),
+			}),
+			known:      true,
+			fullyKnown: true,
+		},
+		"tuple-string_number_bool-partially-known": {
+			value: NewValue(Tuple{ElementTypes: []Type{
+				String, Number, Bool,
+			}}, []Value{
+				NewValue(String, "hello"),
+				NewValue(Number, UnknownValue),
+				NewValue(Bool, true),
+			}),
+			known:      true,
+			fullyKnown: false,
+		},
+		"tuple-string_number_bool-unknown": {
+			value: NewValue(Tuple{ElementTypes: []Type{
+				String, Number, Bool,
+			}}, UnknownValue),
+			known:      false,
+			fullyKnown: false,
+		},
+		"complicated-known": {
+			value: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": Tuple{ElementTypes: []Type{
+					String, Bool, List{ElementType: Map{
+						AttributeType: String,
+					}},
+				}},
+			}}, map[string]Value{
+				"foo": NewValue(Tuple{ElementTypes: []Type{
+					String, Bool, List{ElementType: Map{
+						AttributeType: String,
+					}},
+				}}, []Value{
+					NewValue(String, "hello"),
+					NewValue(Bool, false),
+					NewValue(List{ElementType: Map{
+						AttributeType: String,
+					}}, []Value{
+						NewValue(Map{
+							AttributeType: String,
+						}, map[string]Value{
+							"red":    NewValue(String, "orange"),
+							"yellow": NewValue(String, "green"),
+							"blue":   NewValue(String, nil),
+						}),
+						NewValue(Map{
+							AttributeType: String,
+						}, map[string]Value{
+							"a": NewValue(String, "apple"),
+							"b": NewValue(String, "banana"),
+							"c": NewValue(String, "chili"),
+						}),
+					}),
+				}),
+			}),
+			known:      true,
+			fullyKnown: true,
+		},
+		"complicated-unknown": {
+			value: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": Tuple{ElementTypes: []Type{
+					String, Bool, List{ElementType: Map{
+						AttributeType: String,
+					}},
+				}},
+			}}, map[string]Value{
+				"foo": NewValue(Tuple{ElementTypes: []Type{
+					String, Bool, List{ElementType: Map{
+						AttributeType: String,
+					}},
+				}}, []Value{
+					NewValue(String, "hello"),
+					NewValue(Bool, false),
+					NewValue(List{ElementType: Map{
+						AttributeType: String,
+					}}, []Value{
+						NewValue(Map{
+							AttributeType: String,
+						}, map[string]Value{
+							"red":    NewValue(String, "orange"),
+							"yellow": NewValue(String, "green"),
+							"blue":   NewValue(String, nil),
+						}),
+						NewValue(Map{
+							AttributeType: String,
+						}, map[string]Value{
+							"a": NewValue(String, "apple"),
+							"b": NewValue(String, UnknownValue),
+							"c": NewValue(String, "chili"),
+						}),
+					}),
+				}),
+			}),
+			known:      true,
+			fullyKnown: false,
+		},
+	}
+	for name, test := range tests {
+		name, test := name, test
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			known := test.value.IsKnown()
+			fullyKnown := test.value.IsFullyKnown()
+
+			if test.known != known {
+				t.Errorf("expected known to be %v, is %v", test.known, known)
+			}
+			if test.fullyKnown != fullyKnown {
+				t.Errorf("expected fully known to be %v, is %v", test.fullyKnown, fullyKnown)
+			}
+		})
+	}
+}

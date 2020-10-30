@@ -228,9 +228,12 @@ func (val Value) IsKnown() bool {
 // IsFullyKnown only returns true if all elements and attributes are known, as
 // well.
 func (val Value) IsFullyKnown() bool {
+	if !val.IsKnown() {
+		return false
+	}
 	switch val.typ.(type) {
 	case primitive:
-		return val.IsKnown()
+		return true
 	case List, Set, Tuple:
 		for _, v := range val.value.([]Value) {
 			if !v.IsFullyKnown() {
