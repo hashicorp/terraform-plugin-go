@@ -64,15 +64,31 @@ type Value struct {
 //
 // * bool for Bool
 //
-// * map[string]Value or map[string]interface{} for Map and Object
+// * map[string]Value for Map and Object
 //
-// * []Value or []interface{} for Tuple, List, and Set
+// * []Value for Tuple, List, and Set
 func NewValue(t Type, val interface{}) Value {
-	// TODO: handle ValueCreator implementations.
-	return Value{
-		typ:   t,
-		value: val,
+	if val == nil || val == UnknownValue {
+		return Value{
+			typ:   t,
+			value: val,
+		}
 	}
+	if creator, ok := val.(ValueCreator); ok {
+		var err error
+		val, err = creator.ToTerraform5Value()
+		if err != nil {
+			panic("error creating tftypes.Value: " + err.Error())
+		}
+	}
+	switch val.(type) {
+	case string, *big.Float, bool, map[string]Value, []Value:
+		return Value{
+			typ:   t,
+			value: val,
+		}
+	}
+	panic(fmt.Sprintf("unknown type %T passed to NewValue", val))
 }
 
 // As converts a Value into a Go value. `dst` must be set to a pointer to a
