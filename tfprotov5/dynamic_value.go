@@ -27,8 +27,6 @@ var ErrUnknownDynamicValueType = errors.New("DynamicValue had no JSON or msgpack
 // Type of the Value, but it can also be the DynamicPseudoType.
 func NewDynamicValue(t tftypes.Type, v tftypes.Value) (DynamicValue, error) {
 	b, err := v.MarshalMsgPack(t) //nolint:staticcheck
-	//
-	// Deprecated: this is not meant to be called by third-party code.
 	if err != nil {
 		return DynamicValue{}, err
 	}

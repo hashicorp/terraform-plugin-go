@@ -7,17 +7,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func numberComparer(i, j *big.Float) bool {
-	return (i == nil && j == nil) || (i != nil && j != nil && i.Cmp(j) == 0)
-}
-
-func valueComparer(i, j Value) bool {
-	if !i.typ.Is(j.typ) {
-		return false
-	}
-	return cmp.Equal(i.value, j.value, cmp.Comparer(numberComparer), cmp.Comparer(valueComparer))
-}
-
 func TestValueAs(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
@@ -309,7 +298,7 @@ func TestValueAs(t *testing.T) {
 			}
 			if diff := cmp.Diff(test.expected, test.as,
 				cmp.Comparer(numberComparer),
-				cmp.Comparer(valueComparer)); diff != "" {
+				ValueComparer()); diff != "" {
 				t.Errorf("Unexpected results (-wanted, +got): %s", diff)
 			}
 		})
