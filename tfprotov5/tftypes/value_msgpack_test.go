@@ -263,17 +263,17 @@ func TestMsgPackMarshalValue(t *testing.T) {
 		"dynamic-list-string-hello": {
 			hex:   "9192c40822737472696e6722a568656c6c6f",
 			value: NewValue(List{ElementType: String}, []Value{NewValue(String, "hello")}),
-			typ:   DynamicPseudoType,
+			typ:   List{ElementType: DynamicPseudoType},
 		},
 		"dynamic-list-string-null": {
 			hex:   "9192c40822737472696e6722c0",
 			value: NewValue(List{ElementType: String}, []Value{NewValue(String, nil)}),
-			typ:   DynamicPseudoType,
+			typ:   List{ElementType: DynamicPseudoType},
 		},
 		"dynamic-list-unknown": {
 			hex:   "91d40000",
 			value: NewValue(List{ElementType: DynamicPseudoType}, []Value{NewValue(DynamicPseudoType, UnknownValue)}),
-			typ:   DynamicPseudoType,
+			typ:   List{ElementType: DynamicPseudoType},
 		},
 	}
 	for name, test := range tests {

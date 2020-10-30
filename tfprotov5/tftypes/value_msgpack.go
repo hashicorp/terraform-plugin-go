@@ -50,13 +50,9 @@ func marshalMsgPack(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) 
 }
 
 func marshalMsgPackDynamicPseudoType(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
-	dst, ok := val.value.(Value)
-	if !ok {
-		return unexpectedValueTypeError(p, Value{}, val.value, typ)
-	}
-	typeJSON, err := dst.typ.MarshalJSON()
+	typeJSON, err := val.typ.MarshalJSON()
 	if err != nil {
-		return p.NewErrorf("error generating JSON for type %s: %w", dst.typ, err)
+		return p.NewErrorf("error generating JSON for type %s: %w", val.typ, err)
 	}
 	err = enc.EncodeArrayLen(2)
 	if err != nil {
@@ -66,7 +62,7 @@ func marshalMsgPackDynamicPseudoType(val Value, typ Type, p AttributePath, enc *
 	if err != nil {
 		return p.NewErrorf("error encoding JSON type info: %w", err)
 	}
-	err = marshalMsgPack(dst, dst.typ, p, enc)
+	err = marshalMsgPack(val, val.typ, p, enc)
 	if err != nil {
 		return p.NewErrorf("error marshaling DynamicPseudoType value: %w", err)
 	}
