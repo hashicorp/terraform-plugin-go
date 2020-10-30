@@ -2,6 +2,7 @@ package tftypes
 
 import (
 	"fmt"
+	"math"
 	"math/big"
 	"sort"
 
@@ -89,7 +90,21 @@ func marshalMsgPackNumber(val Value, typ Type, p AttributePath, enc *msgpack.Enc
 	if !ok {
 		return unexpectedValueTypeError(p, n, val.value, typ)
 	}
-	if iv, acc := n.Int64(); acc == big.Exact {
+	if n.IsInf() {
+		if n.Sign() == -1 {
+			err := enc.EncodeFloat64(math.Inf(-1))
+			if err != nil {
+				return p.NewErrorf("error encoding negative infinity: %w", err)
+			}
+		} else if n.Sign() == 1 {
+			err := enc.EncodeFloat64(math.Inf(1))
+			if err != nil {
+				return p.NewErrorf("error encoding positive infinity: %w", err)
+			}
+		} else {
+			return p.NewErrorf("error encoding unknown infiniy: sign %d is unknown", n.Sign())
+		}
+	} else if iv, acc := n.Int64(); acc == big.Exact {
 		err := enc.EncodeInt(iv)
 		if err != nil {
 			return p.NewErrorf("error encoding int value: %w", err)
