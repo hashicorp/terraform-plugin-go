@@ -3,6 +3,8 @@ package tfprotov5
 import (
 	"bytes"
 	"encoding/json"
+	"math/big"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 )
@@ -63,8 +65,10 @@ func jsonUnmarshalString(buf []byte, typ tftypes.Type, p tftypes.AttributePath) 
 	case json.Number:
 		return tftypes.NewValue(tftypes.String, string(v)), nil
 	case bool:
-		// TODO: convert boolean to a string
-		// not really sure why, but... compatibility!
+		if v {
+			return tftypes.NewValue(tftypes.String, "true"), nil
+		}
+		return tftypes.NewValue(tftypes.String, "false"), nil
 	}
 	return tftypes.Value{}, p.NewErrorf("unsupported type %T sent as %s", tok, tftypes.String)
 }
@@ -76,12 +80,21 @@ func jsonUnmarshalNumber(buf []byte, typ tftypes.Type, p tftypes.AttributePath) 
 	if err != nil {
 		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
 	}
-	numTok, ok := tok.(json.Number)
-	if !ok {
-		return tftypes.Value{}, p.NewErrorf("unsupported type %T sent as %s", tok, tftypes.Number)
+	switch numTok := tok.(type) {
+	case json.Number:
+		f, _, err := big.ParseFloat(string(numTok), 10, 512, big.ToNearestEven)
+		if err != nil {
+			return tftypes.Value{}, p.NewErrorf("error parsing number: %w", err)
+		}
+		return tftypes.NewValue(typ, f), nil
+	case string:
+		f, _, err := big.ParseFloat(string(numTok), 10, 512, big.ToNearestEven)
+		if err != nil {
+			return tftypes.Value{}, p.NewErrorf("error parsing number: %w", err)
+		}
+		return tftypes.NewValue(typ, f), nil
 	}
-	// TODO: convert numTok to big.Float
-	return tftypes.NewValue(typ, numTok), nil
+	return tftypes.Value{}, p.NewErrorf("unsupported type %T sent as %s", tok, tftypes.Number)
 }
 
 func jsonUnmarshalBool(buf []byte, typ tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
@@ -94,7 +107,25 @@ func jsonUnmarshalBool(buf []byte, typ tftypes.Type, p tftypes.AttributePath) (t
 	case bool:
 		return tftypes.NewValue(tftypes.Bool, v), nil
 	case string:
-		// TODO: convert string to boolean
+		switch v {
+		case "true", "1":
+			return tftypes.NewValue(tftypes.Bool, true), nil
+		case "false", "0":
+			return tftypes.NewValue(tftypes.Bool, false), nil
+		}
+		switch strings.ToLower(string(v)) {
+		case "true":
+			return tftypes.Value{}, p.NewErrorf("to convert from string, use lowercase \"true\"")
+		case "false":
+			return tftypes.Value{}, p.NewErrorf("to convert from string, use lowercase \"false\"")
+		}
+	case json.Number:
+		switch v {
+		case "1":
+			return tftypes.NewValue(tftypes.Bool, true), nil
+		case "0":
+			return tftypes.NewValue(tftypes.Bool, false), nil
+		}
 	}
 	return tftypes.Value{}, p.NewErrorf("unsupported type %T sent as %s", tok, tftypes.Bool)
 }
@@ -201,8 +232,16 @@ func jsonUnmarshalList(buf []byte, elementType tftypes.Type, p tftypes.Attribute
 	if tok != json.Delim(']') {
 		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim(']'), tok)
 	}
+
+	elTyp := elementType
+	if elTyp == tftypes.DynamicPseudoType {
+		elTyp, err = tftypes.TypeFromElements(vals)
+		if err != nil {
+			return tftypes.Value{}, p.NewErrorf("invalid elements for list: %w", err)
+		}
+	}
 	return tftypes.NewValue(tftypes.List{
-		ElementType: elementType,
+		ElementType: elTyp,
 	}, vals), nil
 }
 
@@ -250,8 +289,16 @@ func jsonUnmarshalSet(buf []byte, elementType tftypes.Type, p tftypes.AttributeP
 	if tok != json.Delim(']') {
 		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim(']'), tok)
 	}
+
+	elTyp := elementType
+	if elTyp == tftypes.DynamicPseudoType {
+		elTyp, err = tftypes.TypeFromElements(vals)
+		if err != nil {
+			return tftypes.Value{}, p.NewErrorf("invalid elements for list: %w", err)
+		}
+	}
 	return tftypes.NewValue(tftypes.Set{
-		ElementType: elementType,
+		ElementType: elTyp,
 	}, vals), nil
 }
 

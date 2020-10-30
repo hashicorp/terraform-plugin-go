@@ -2,9 +2,11 @@ package tftypes
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"math/big"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/vmihailenco/msgpack"
 )
 
@@ -228,9 +230,12 @@ func (val Value) IsKnown() bool {
 // IsFullyKnown only returns true if all elements and attributes are known, as
 // well.
 func (val Value) IsFullyKnown() bool {
+	if !val.IsKnown() {
+		return false
+	}
 	switch val.typ.(type) {
 	case primitive:
-		return val.IsKnown()
+		return true
 	case List, Set, Tuple:
 		for _, v := range val.value.([]Value) {
 			if !v.IsFullyKnown() {
@@ -271,4 +276,41 @@ func (val Value) MarshalMsgPack(t Type) ([]byte, error) {
 
 func unexpectedValueTypeError(p AttributePath, expected, got interface{}, typ Type) error {
 	return p.NewErrorf("unexpected value type %T, %s values must be of type %T", got, typ, expected)
+}
+
+// ValueComparer returns a github.com/google/go-cmp/cmp#Option that can be used
+// to tell go-cmp how to compare Values.
+func ValueComparer() cmp.Option {
+	return cmp.Comparer(valueComparer)
+}
+
+func numberComparer(i, j *big.Float) bool {
+	return (i == nil && j == nil) || (i != nil && j != nil && i.Cmp(j) == 0)
+}
+
+func valueComparer(i, j Value) bool {
+	if !i.typ.Is(j.typ) {
+		return false
+	}
+	return cmp.Equal(i.value, j.value, cmp.Comparer(numberComparer), ValueComparer())
+}
+
+// TypeFromElements returns the common type that the passed elements all have
+// in common. An error will be returned if the passed elements are not of the
+// same type.
+func TypeFromElements(elements []Value) (Type, error) {
+	var typ Type
+	for _, el := range elements {
+		if typ == nil {
+			typ = el.typ
+			continue
+		}
+		if !typ.Is(el.typ) {
+			return nil, errors.New("elements do not all have the same types")
+		}
+	}
+	if typ == nil {
+		return DynamicPseudoType, nil
+	}
+	return typ, nil
 }

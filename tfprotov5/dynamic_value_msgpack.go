@@ -134,8 +134,16 @@ func msgpackUnmarshalList(dec *msgpack.Decoder, typ tftypes.Type, path tftypes.A
 		path.WithoutLastStep()
 	}
 
+	elTyp := typ
+	if elTyp == tftypes.DynamicPseudoType {
+		elTyp, err = tftypes.TypeFromElements(vals)
+		if err != nil {
+			return tftypes.Value{}, err
+		}
+	}
+
 	return tftypes.NewValue(tftypes.List{
-		ElementType: typ,
+		ElementType: elTyp,
 	}, vals), nil
 }
 
@@ -167,8 +175,13 @@ func msgpackUnmarshalSet(dec *msgpack.Decoder, typ tftypes.Type, path tftypes.At
 		path.WithoutLastStep()
 	}
 
+	elTyp, err := tftypes.TypeFromElements(vals)
+	if err != nil {
+		return tftypes.Value{}, err
+	}
+
 	return tftypes.NewValue(tftypes.Set{
-		ElementType: typ,
+		ElementType: elTyp,
 	}, vals), nil
 }
 

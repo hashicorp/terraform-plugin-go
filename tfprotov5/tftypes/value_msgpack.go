@@ -2,6 +2,7 @@ package tftypes
 
 import (
 	"fmt"
+	"math"
 	"math/big"
 	"sort"
 
@@ -49,13 +50,9 @@ func marshalMsgPack(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) 
 }
 
 func marshalMsgPackDynamicPseudoType(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
-	dst, ok := val.value.(Value)
-	if !ok {
-		return unexpectedValueTypeError(p, Value{}, val.value, typ)
-	}
-	typeJSON, err := dst.typ.MarshalJSON()
+	typeJSON, err := val.typ.MarshalJSON()
 	if err != nil {
-		return p.NewErrorf("error generating JSON for type %s: %w", dst.typ, err)
+		return p.NewErrorf("error generating JSON for type %s: %w", val.typ, err)
 	}
 	err = enc.EncodeArrayLen(2)
 	if err != nil {
@@ -65,7 +62,7 @@ func marshalMsgPackDynamicPseudoType(val Value, typ Type, p AttributePath, enc *
 	if err != nil {
 		return p.NewErrorf("error encoding JSON type info: %w", err)
 	}
-	err = marshalMsgPack(dst, dst.typ, p, enc)
+	err = marshalMsgPack(val, val.typ, p, enc)
 	if err != nil {
 		return p.NewErrorf("error marshaling DynamicPseudoType value: %w", err)
 	}
@@ -89,7 +86,21 @@ func marshalMsgPackNumber(val Value, typ Type, p AttributePath, enc *msgpack.Enc
 	if !ok {
 		return unexpectedValueTypeError(p, n, val.value, typ)
 	}
-	if iv, acc := n.Int64(); acc == big.Exact {
+	if n.IsInf() {
+		if n.Sign() == -1 {
+			err := enc.EncodeFloat64(math.Inf(-1))
+			if err != nil {
+				return p.NewErrorf("error encoding negative infinity: %w", err)
+			}
+		} else if n.Sign() == 1 {
+			err := enc.EncodeFloat64(math.Inf(1))
+			if err != nil {
+				return p.NewErrorf("error encoding positive infinity: %w", err)
+			}
+		} else {
+			return p.NewErrorf("error encoding unknown infiniy: sign %d is unknown", n.Sign())
+		}
+	} else if iv, acc := n.Int64(); acc == big.Exact {
 		err := enc.EncodeInt(iv)
 		if err != nil {
 			return p.NewErrorf("error encoding int value: %w", err)
