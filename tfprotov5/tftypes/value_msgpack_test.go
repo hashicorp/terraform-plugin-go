@@ -277,7 +277,9 @@ func TestMsgPackMarshalValue(t *testing.T) {
 		},
 	}
 	for name, test := range tests {
+		name, test := name, test
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			got, err := test.value.MarshalMsgPack(test.typ)
 			if err != nil {
 				t.Fatalf("unexpected error marshaling: %s", err)
