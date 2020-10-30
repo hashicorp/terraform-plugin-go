@@ -8,6 +8,7 @@ require (
 	github.com/hashicorp/go-hclog v0.0.0-20180709165350-ff2cf002a8dd
 	github.com/hashicorp/go-plugin v1.3.0
 	github.com/kr/pretty v0.1.0 // indirect
+	github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce
 	github.com/vmihailenco/msgpack v4.0.4+incompatible
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a // indirect
 	google.golang.org/appengine v1.6.5 // indirect
