@@ -70,6 +70,15 @@ jobs:
       - get_dependencies
       - get_golangci_lint
       - run: bin/golangci-lint run -v ./...
+  "docker-go114 release":
+    docker:
+      - image: circleci/golang:1.14
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "e4:90:79:81:db:0f:b7:53:be:6e:58:81:40:34:47:1d"
+      - get_dependencies
+      - run: ./scripts/release/release.sh
 
 workflows:
   version: 2
@@ -88,3 +97,31 @@ workflows:
       - "docker-go114 golangci-lint":
           requires:
             - "docker-go114 build"
+  release:
+    jobs:
+      - "docker-go114 build"
+      - "docker-go114 test":
+          requires:
+            - "docker-go114 build"
+      - "docker-go114 vet":
+          requires:
+            - "docker-go114 build"
+      - "docker-go114 gofmt":
+          requires:
+            - "docker-go114 build"
+      - "docker-go114 golangci-lint":
+          requires:
+            - "docker-go114 build"
+      - trigger-release:
+          filters:
+            branches:
+              only:
+                - main
+          type: approval
+      - "docker-go114 release":
+          requires:
+            - trigger-release
+            - "docker-go114 test"
+            - "docker-go114 vet"
+            - "docker-go114 gofmt"
+            - "docker-go114 golangci-lint"
