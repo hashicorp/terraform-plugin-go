@@ -119,6 +119,10 @@ workflows:
                 - main
           type: approval
       - "docker-go114 release":
+          filters:
+            branches:
+              only:
+                - main
           requires:
             - trigger-release
             - "docker-go114 test"
