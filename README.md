@@ -70,8 +70,39 @@ method. `As` will return an error if the `Value` is not known.
 
 ## Testing
 
- TODO: insert information here on how to use `helper/resource` to test
-providers written with terraform-plugin-go.
+The Terraform Plugin SDK's [`helper/resource`](https://pkg.go.dev/github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource) package can be used to test providers written using terraform-plugin-go. While we are working on a testing framework for terraform-plugin-go providers that is independent of the Plugin SDK, this may take some time, so we recommend writing tests in the meantime using the plugin SDK, which will not be a runtime dependency of your provider.
+
+You must supply a factory for your provider server by setting `ProtoV5ProviderFactories` on each [`TestCase`](https://pkg.go.dev/github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource#TestCase). For example:
+
+```go
+package myprovider
+
+import (
+	"regexp"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+)
+
+func TestAccDataSourceFoo(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV5ProviderFactories: map[string]func() (tfprotov5.ProviderServer, error){
+			"myprovider": func() (tfprotov5.ProviderServer, error) {
+				return Server(), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: `"data" "myprovider_foo" "bar" {}`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestMatchResourceAttr("data.myprovider_foo.bar", "current", regexp.MustCompile(`[0-9]+`)),
+				),
+			},
+		},
+	})
+}
+```
 
 ## Documentation
 
