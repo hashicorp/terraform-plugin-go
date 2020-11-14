@@ -24,6 +24,12 @@ func TestValueAs(t *testing.T) {
 	numberPointerPointer := func(in *big.Float) **big.Float {
 		return &in
 	}
+	float64Pointer := func(in float64) *float64 {
+		return &in
+	}
+	float32Pointer := func(in float32) *float32 {
+		return &in
+	}
 	int64Pointer := func(in int64) *int64 {
 		return &in
 	}
@@ -107,6 +113,26 @@ func TestValueAs(t *testing.T) {
 			in:       NewValue(Number, big.NewFloat(123)),
 			as:       big.NewFloat(0),
 			expected: big.NewFloat(123),
+		},
+		"number-pointer-float64": {
+			in:       NewValue(Number, float64Pointer(123.4)),
+			as:       big.NewFloat(0),
+			expected: big.NewFloat(123.4),
+		},
+		"number-pointer-float64-null": {
+			in:       NewValue(Number, (*float64)(nil)),
+			as:       numberPointerPointer(big.NewFloat(123.4)),
+			expected: numberPointerPointer(nil),
+		},
+		"number-pointer-float32": {
+			in:       NewValue(Number, float32Pointer(0.125)),
+			as:       big.NewFloat(0),
+			expected: big.NewFloat(0.125),
+		},
+		"number-pointer-float32-null": {
+			in:       NewValue(Number, (*float32)(nil)),
+			as:       numberPointerPointer(big.NewFloat(0.125)),
+			expected: numberPointerPointer(nil),
 		},
 		"number-pointer-int64": {
 			in:       NewValue(Number, int64Pointer(123)),

@@ -61,7 +61,8 @@ type Value struct {
 // * String: string, *string
 //
 // * Number: *big.Float, int64, *int64, int32, *int32, int16, *int16, int8, *int8, int, *int,
-//   uint64, *uint64, uint32, *uint32, uint16, *uint16, uint8, *uint8, byte, *byte, uint, *uint
+//   uint64, *uint64, uint32, *uint32, uint16, *uint16, uint8, *uint8, byte, *byte, uint, *uint,
+//   float64, *float64, float32, *float32
 //
 // * Bool: bool, *bool
 //
@@ -225,6 +226,28 @@ func NewValue(t Type, val interface{}) Value {
 		return Value{
 			typ:   t,
 			value: f,
+		}
+	case *float32:
+		if val == nil {
+			return Value{
+				typ:   t,
+				value: nil,
+			}
+		}
+		return Value{
+			typ:   t,
+			value: big.NewFloat(float64(*val)),
+		}
+	case *float64:
+		if val == nil {
+			return Value{
+				typ:   t,
+				value: nil,
+			}
+		}
+		return Value{
+			typ:   t,
+			value: big.NewFloat(*val),
 		}
 	case string, *big.Float, bool, map[string]Value, []Value:
 		return Value{
