@@ -44,17 +44,13 @@ interface. This type should be passed to
 along with the name (like `"hashicorp/time"`).
 
 Resources and data sources can be handled in resource-specific or data
-source-specific functions by using
-[`tfprotov5.ResourceRouter`](https://pkg.go.dev/github.com/hashicorp/terraform-plugin-go/tfprotov5#ResourceRouter)
-and
-[`tfprotov5.DataSourceRouter`](https://pkg.go.dev/github.com/hashicorp/terraform-plugin-go/tfprotov5#DataSourceRouter)
-as embedded values in their `tfprotov5.ProviderServer` implementation type,
-falling back on their implementations of the
+source-specific functions by using implementations of the
 [`tfprotov5.ResourceServer`](https://pkg.go.dev/github.com/hashicorp/terraform-plugin-go/tfprotov5#ResourceServer)
 and
 [`tfprotov5.DataSourceServer`](https://pkg.go.dev/github.com/hashicorp/terraform-plugin-go/tfprotov5#DataSourceServer)
-interfaces to split resource and data source requests into single-purpose
-functions based on which resource or data source the request is for.
+interfaces, using the provider-level implementations of the interfaces to route
+to the correct resource or data source level implementations using
+`req.TypeName`.
 
 When handling requests,
 [`tfprotov5.DynamicValue`](https://pkg.go.dev/github.com/hashicorp/terraform-plugin-go/tfprotov5#DynamicValue)
