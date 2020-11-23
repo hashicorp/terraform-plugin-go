@@ -1,3 +1,9 @@
+# 0.2.1 (Unreleased)
+
+BUG FIXES:
+
+* Fixed a bug that could cause a crash when a provider was prematurely stopped. [GH-49]
+
 # 0.2.0 (November 20, 2020)
 
 ENHANCEMENTS:
