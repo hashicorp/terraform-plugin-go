@@ -287,7 +287,7 @@ func NewValue(t Type, val interface{}) Value {
 //
 // For Lists, Sets, and Tuples, `dst` must be a pointer to a []Value or a
 // pointer to a pointer to a []Value. If it's a pointer to a pointer to a
-// []Value, if the Value is null, the poitner to []Value will be set to nil. If
+// []Value, if the Value is null, the pointer to []Value will be set to nil. If
 // it's a pointer to a []Value, if the Value is null, the []Value will be set
 // to an empty slice.
 //
@@ -297,8 +297,7 @@ func NewValue(t Type, val interface{}) Value {
 // represented in Go's type system. Providers should check Value.IsKnown before
 // calling Value.As.
 func (val Value) As(dst interface{}) error {
-	unmarshaler, ok := dst.(ValueConverter)
-	if ok {
+	if unmarshaler, ok := dst.(ValueConverter); ok {
 		return unmarshaler.FromTerraform5Value(val)
 	}
 	if !val.IsKnown() {
