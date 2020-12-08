@@ -15,6 +15,9 @@ func TestValueAs(t *testing.T) {
 		expected interface{}
 	}
 
+	interfacePointer := func(in interface{}) *interface{} {
+		return &in
+	}
 	strPointer := func(in string) *string {
 		return &in
 	}
@@ -72,10 +75,16 @@ func TestValueAs(t *testing.T) {
 	mapPointerPointer := func(in *map[string]Value) **map[string]Value {
 		return &in
 	}
+	mapInterfacePointer := func(in map[string]interface{}) *map[string]interface{} {
+		return &in
+	}
 	slicePointer := func(in []Value) *[]Value {
 		return &in
 	}
 	slicePointerPointer := func(in *[]Value) **[]Value {
+		return &in
+	}
+	sliceInterfacePointer := func(in []interface{}) *[]interface{} {
 		return &in
 	}
 	tests := map[string]testCase{
@@ -88,6 +97,16 @@ func TestValueAs(t *testing.T) {
 			in:       NewValue(String, nil),
 			as:       strPointer("this value should be removed"),
 			expected: strPointer(""),
+		},
+		"string-interface": {
+			in:       NewValue(String, "hello"),
+			as:       interfacePointer(nil),
+			expected: interfacePointer("hello"),
+		},
+		"string-interface-null": {
+			in:       NewValue(String, nil),
+			as:       interfacePointer("foo"),
+			expected: interfacePointer(nil),
 		},
 		"string-pointer": {
 			in:       NewValue(String, "hello"),
@@ -249,6 +268,16 @@ func TestValueAs(t *testing.T) {
 			as:       numberPointerPointer(big.NewFloat(123)),
 			expected: numberPointerPointer(nil),
 		},
+		"number-interface": {
+			in:       NewValue(Number, big.NewFloat(123)),
+			as:       interfacePointer(nil),
+			expected: interfacePointer(big.NewFloat(123)),
+		},
+		"number-interface-null": {
+			in:       NewValue(Number, nil),
+			as:       interfacePointer("foo"),
+			expected: interfacePointer(nil),
+		},
 		"bool": {
 			in:       NewValue(Bool, true),
 			as:       boolPointer(false),
@@ -278,6 +307,16 @@ func TestValueAs(t *testing.T) {
 			in:       NewValue(Bool, (*bool)(nil)),
 			as:       boolPointerPointer(boolPointer(true)),
 			expected: boolPointerPointer(nil),
+		},
+		"bool-interface": {
+			in:       NewValue(Bool, true),
+			as:       interfacePointer(nil),
+			expected: interfacePointer(true),
+		},
+		"bool-interface-null": {
+			in:       NewValue(Bool, nil),
+			as:       interfacePointer("foo"),
+			expected: interfacePointer(nil),
 		},
 		"map": {
 			in: NewValue(Map{AttributeType: String}, map[string]Value{
@@ -311,6 +350,38 @@ func TestValueAs(t *testing.T) {
 			})),
 			expected: mapPointerPointer(nil),
 		},
+		"map-interface-map": {
+			in: NewValue(Map{AttributeType: String}, map[string]Value{
+				"hello": NewValue(String, "world"),
+			}),
+			as: mapInterfacePointer(nil),
+			expected: mapInterfacePointer(map[string]interface{}{
+				"hello": "world",
+			}),
+		},
+		"map-interface-map-null": {
+			in: NewValue(Map{AttributeType: String}, nil),
+			as: mapInterfacePointer(map[string]interface{}{
+				"a": "this should be removed",
+			}),
+			expected: mapInterfacePointer(nil),
+		},
+		"map-interface": {
+			in: NewValue(Map{AttributeType: String}, map[string]Value{
+				"hello": NewValue(String, "world"),
+			}),
+			as: interfacePointer(nil),
+			expected: interfacePointer(map[string]interface{}{
+				"hello": "world",
+			}),
+		},
+		"map-interface-null": {
+			in: NewValue(Map{AttributeType: String}, nil),
+			as: interfacePointer(map[string]interface{}{
+				"a": "this should be removed",
+			}),
+			expected: interfacePointer(nil),
+		},
 		"list": {
 			in:       NewValue(List{ElementType: String}, []Value{NewValue(String, "hello")}),
 			as:       slicePointer([]Value{}),
@@ -331,6 +402,26 @@ func TestValueAs(t *testing.T) {
 			as:       slicePointerPointer(slicePointer([]Value{NewValue(String, "hello")})),
 			expected: slicePointerPointer(nil),
 		},
+		"list-interface-slice": {
+			in:       NewValue(List{ElementType: String}, []Value{NewValue(String, "hello")}),
+			as:       sliceInterfacePointer([]interface{}{}),
+			expected: sliceInterfacePointer([]interface{}{"hello"}),
+		},
+		"list-interface-slice-null": {
+			in:       NewValue(List{ElementType: String}, nil),
+			as:       sliceInterfacePointer([]interface{}{"hello"}),
+			expected: sliceInterfacePointer(nil),
+		},
+		"list-interface": {
+			in:       NewValue(List{ElementType: String}, []Value{NewValue(String, "hello")}),
+			as:       interfacePointer([]interface{}{}),
+			expected: interfacePointer([]interface{}{"hello"}),
+		},
+		"list-interface-null": {
+			in:       NewValue(List{ElementType: String}, nil),
+			as:       interfacePointer([]interface{}{"hello"}),
+			expected: interfacePointer(nil),
+		},
 		"set": {
 			in:       NewValue(Set{ElementType: String}, []Value{NewValue(String, "hello")}),
 			as:       slicePointer([]Value{}),
@@ -350,6 +441,26 @@ func TestValueAs(t *testing.T) {
 			in:       NewValue(Set{ElementType: String}, nil),
 			as:       slicePointerPointer(slicePointer([]Value{NewValue(String, "hello")})),
 			expected: slicePointerPointer(nil),
+		},
+		"set-interface": {
+			in:       NewValue(Set{ElementType: String}, []Value{NewValue(String, "hello")}),
+			as:       interfacePointer(nil),
+			expected: interfacePointer([]interface{}{"hello"}),
+		},
+		"set-interface-null": {
+			in:       NewValue(Set{ElementType: String}, nil),
+			as:       interfacePointer([]interface{}{"hello"}),
+			expected: interfacePointer(nil),
+		},
+		"set-interface-slice": {
+			in:       NewValue(Set{ElementType: String}, []Value{NewValue(String, "hello")}),
+			as:       sliceInterfacePointer([]interface{}{}),
+			expected: sliceInterfacePointer([]interface{}{"hello"}),
+		},
+		"set-interface-slice-null": {
+			in:       NewValue(Set{ElementType: String}, nil),
+			as:       sliceInterfacePointer([]interface{}{"hello"}),
+			expected: sliceInterfacePointer(nil),
 		},
 		"object": {
 			in: NewValue(Object{AttributeTypes: map[string]Type{
@@ -411,6 +522,66 @@ func TestValueAs(t *testing.T) {
 			})),
 			expected: mapPointerPointer(nil),
 		},
+		"object-interface-map": {
+			in: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}, map[string]Value{
+				"foo": NewValue(String, "hello"),
+				"bar": NewValue(Number, big.NewFloat(123)),
+				"baz": NewValue(Bool, true),
+			}),
+			as: mapInterfacePointer(nil),
+			expected: mapInterfacePointer(map[string]interface{}{
+				"foo": "hello",
+				"bar": big.NewFloat(123),
+				"baz": true,
+			}),
+		},
+		"object-interface": {
+			in: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}, map[string]Value{
+				"foo": NewValue(String, "hello"),
+				"bar": NewValue(Number, big.NewFloat(123)),
+				"baz": NewValue(Bool, true),
+			}),
+			as: interfacePointer(nil),
+			expected: interfacePointer(map[string]interface{}{
+				"foo": "hello",
+				"bar": big.NewFloat(123),
+				"baz": true,
+			}),
+		},
+		"object-interface-map-null": {
+			in: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}, nil),
+			as: mapInterfacePointer(map[string]interface{}{
+				"foo": "hello",
+				"bar": big.NewFloat(123),
+				"baz": true,
+			}),
+			expected: mapInterfacePointer(nil),
+		},
+		"object-interface-null": {
+			in: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}, nil),
+			as: interfacePointer(map[string]interface{}{
+				"foo": "hello",
+				"bar": big.NewFloat(123),
+				"baz": true,
+			}),
+			expected: interfacePointer(nil),
+		},
 		"tuple": {
 			in: NewValue(Tuple{ElementTypes: []Type{
 				String, Number, Bool,
@@ -462,6 +633,47 @@ func TestValueAs(t *testing.T) {
 				NewValue(Bool, true),
 			})),
 			expected: slicePointerPointer(nil),
+		},
+		"tuple-interface-slice": {
+			in: NewValue(Tuple{ElementTypes: []Type{
+				String, Number, Bool,
+			}}, []Value{
+				NewValue(String, "hello"),
+				NewValue(Number, big.NewFloat(123)),
+				NewValue(Bool, true),
+			}),
+			as: sliceInterfacePointer(nil),
+			expected: sliceInterfacePointer([]interface{}{
+				"hello",
+				big.NewFloat(123),
+				true,
+			}),
+		},
+		"tuple-interface": {
+			in: NewValue(Tuple{ElementTypes: []Type{
+				String, Number, Bool,
+			}}, []Value{
+				NewValue(String, "hello"),
+				NewValue(Number, big.NewFloat(123)),
+				NewValue(Bool, true),
+			}),
+			as: interfacePointer(nil),
+			expected: interfacePointer([]interface{}{
+				"hello",
+				big.NewFloat(123),
+				true,
+			}),
+		},
+		"tuple-interface-null": {
+			in: NewValue(Tuple{ElementTypes: []Type{
+				String, Number, Bool,
+			}}, nil),
+			as: sliceInterfacePointer([]interface{}{
+				"hello",
+				big.NewFloat(123),
+				true,
+			}),
+			expected: sliceInterfacePointer(nil),
 		},
 	}
 

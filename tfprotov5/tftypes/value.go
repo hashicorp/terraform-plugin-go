@@ -304,6 +304,44 @@ func (val Value) As(dst interface{}) error {
 		return fmt.Errorf("unmarshaling unknown values is not supported")
 	}
 	switch target := dst.(type) {
+
+	// tftypes.Value preserving typing
+	case *map[string]Value:
+		if val.IsNull() {
+			*target = map[string]Value{}
+			return nil
+		}
+		v, ok := val.value.(map[string]Value)
+		if !ok {
+			return fmt.Errorf("can't unmarshal %s into %T, expected map[string]tftypes.Value", val.typ, dst)
+		}
+		*target = v
+		return nil
+	case **map[string]Value:
+		if val.IsNull() {
+			*target = nil
+			return nil
+		}
+		return val.As(*target)
+	case *[]Value:
+		if val.IsNull() {
+			*target = []Value{}
+			return nil
+		}
+		v, ok := val.value.([]Value)
+		if !ok {
+			return fmt.Errorf("can't unmarshal %s into %T expected []tftypes.Value", val.typ, dst)
+		}
+		*target = v
+		return nil
+	case **[]Value:
+		if val.IsNull() {
+			*target = nil
+			return nil
+		}
+		return val.As(*target)
+
+	// native go typing
 	case *string:
 		if val.IsNull() {
 			*target = ""
@@ -355,41 +393,78 @@ func (val Value) As(dst interface{}) error {
 			return nil
 		}
 		return val.As(*target)
-	case *map[string]Value:
-		if val.IsNull() {
-			*target = map[string]Value{}
-			return nil
-		}
-		v, ok := val.value.(map[string]Value)
-		if !ok {
-			return fmt.Errorf("can't unmarshal %s into %T, expected map[string]tftypes.Value", val.typ, dst)
-		}
-		*target = v
-		return nil
-	case **map[string]Value:
+
+	// interface typing
+	case *interface{}:
 		if val.IsNull() {
 			*target = nil
 			return nil
 		}
-		return val.As(*target)
-	case *[]Value:
-		if val.IsNull() {
-			*target = []Value{}
-			return nil
+
+		switch val.value.(type) {
+		case []Value:
+			iv := []interface{}{}
+			err := val.As(&iv)
+			if err != nil {
+				return err
+			}
+			*target = iv
+		case map[string]Value:
+			iv := map[string]interface{}{}
+			err := val.As(&iv)
+			if err != nil {
+				return err
+			}
+			*target = iv
+		default:
+			*target = val.value
 		}
-		v, ok := val.value.([]Value)
-		if !ok {
-			return fmt.Errorf("can't unmarshal %s into %T expected []tftypes.Value", val.typ, dst)
-		}
-		*target = v
+
 		return nil
-	case **[]Value:
+	case *[]interface{}:
 		if val.IsNull() {
 			*target = nil
 			return nil
 		}
-		return val.As(*target)
+		raw := []Value{}
+		err := val.As(&raw)
+		if err != nil {
+			return err
+		}
+		values := []interface{}{}
+		for i, r := range raw {
+			var v interface{}
+			err := r.As(&v)
+			if err != nil {
+				return fmt.Errorf("unable to unmarshal element %d: %w", i, err)
+			}
+			values = append(values, v)
+		}
+		*target = values
+		return nil
+	case *map[string]interface{}:
+		if val.IsNull() {
+			*target = nil
+			return nil
+		}
+		raw := map[string]Value{}
+		err := val.As(&raw)
+		if err != nil {
+			return err
+		}
+		values := map[string]interface{}{}
+		for k, r := range raw {
+			var v interface{}
+			err := r.As(&v)
+			if err != nil {
+				return fmt.Errorf("unable to unmarshal element %q: %w", k, err)
+			}
+			values[k] = v
+		}
+		*target = values
+		return nil
 	}
+
 	return fmt.Errorf("can't unmarshal into %T, needs FromTerraform5Value method", dst)
 }
 
