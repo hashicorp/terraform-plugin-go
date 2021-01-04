@@ -9,7 +9,7 @@ labels: bug
 Inspect your go.mod as below to find the version, and paste the result between
 the ``` marks below.
 
-go mod edit -json | jq '.Require[] | select(.Path=="github.com/hashicorp/terraform-plugin-go")'
+go list -m github.com/hashicorp/terraform-plugin-go
 
 If you are not running the latest version of terraform-plugin-go, please try
 upgrading because your bug may have already been fixed.
