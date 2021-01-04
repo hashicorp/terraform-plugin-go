@@ -4,7 +4,7 @@ about: Suggest a new feature or other enhancement.
 labels: enhancement
 ---
 
-### SDK version
+### terraform-plugin-go version
 <!--
 Inspect your go.mod as below to find the version, and paste the result between the ``` marks below.
 
