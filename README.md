@@ -132,8 +132,8 @@ out of scope and should live in a separate module.
 
 ## Contributing
 
-Please see [`.github/CONTRIBUTING.md`](https://github.com/hashicorp/terraform-plugin-go/blob/master/.github/CONTRIBUTING.md).
+Please see [`.github/CONTRIBUTING.md`](https://github.com/hashicorp/terraform-plugin-go/blob/main/.github/CONTRIBUTING.md).
 
 ## License
 
-This module is licensed under the [Mozilla Public License v2.0](https://github.com/hashicorp/terraform-plugin-go/blob/master/LICENSE).
+This module is licensed under the [Mozilla Public License v2.0](https://github.com/hashicorp/terraform-plugin-go/blob/main/LICENSE).
