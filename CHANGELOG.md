@@ -1,8 +1,8 @@
-# 0.2.1 (Unreleased)
+# 0.2.1 (January 07, 2021)
 
 BUG FIXES:
 
-* Fixed a bug that could cause a crash when a provider was prematurely stopped. [GH-49]
+* Fixed a bug that could cause a crash when a provider was prematurely stopped. ([#49](https://github.com/hashicorp/terraform-plugin-go/issues/49))
 
 # 0.2.0 (November 20, 2020)
 
