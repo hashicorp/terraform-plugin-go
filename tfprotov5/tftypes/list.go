@@ -6,6 +6,7 @@ import "fmt"
 // of the same type.
 type List struct {
 	ElementType Type
+	_           []struct{}
 }
 
 // Is returns whether `t` is a List type or not. If `t` is an instance of the

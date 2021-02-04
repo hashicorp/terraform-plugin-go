@@ -8,6 +8,7 @@ import "encoding/json"
 // numbers or types of elements are considered to be distinct types.
 type Tuple struct {
 	ElementTypes []Type
+	_            []struct{}
 }
 
 // Is returns whether `t` is a Tuple type or not. If `t` is an instance of the

@@ -6,6 +6,7 @@ import "fmt"
 // elements, all of the same type.
 type Set struct {
 	ElementType Type
+	_           []struct{}
 }
 
 // Is returns whether `t` is a Set type or not. If `t` is an instance of the

@@ -6,6 +6,7 @@ import "fmt"
 // all of the same type, each identifiable with a unique string key.
 type Map struct {
 	AttributeType Type
+	_             []struct{}
 }
 
 // Is returns whether `t` is a Map type or not. If `t` is an instance of the
