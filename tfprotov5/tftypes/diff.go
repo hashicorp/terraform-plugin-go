@@ -86,6 +86,9 @@ func (val1 Value) Diff(val2 Value) ([]ValueDiff, error) {
 		}
 		return true, nil
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	// make sure everything in val1 is also in val2 and also that it all matches
 	err = Walk(val1, func(path AttributePath, value1 Value) (bool, error) {
