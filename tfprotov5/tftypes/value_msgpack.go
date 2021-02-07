@@ -141,12 +141,10 @@ func marshalMsgPackList(val Value, typ Type, p AttributePath, enc *msgpack.Encod
 		return p.NewErrorf("error encoding list length: %w", err)
 	}
 	for pos, i := range l {
-		p.WithElementKeyInt(int64(pos))
-		err := marshalMsgPack(i, typ.(List).ElementType, p, enc)
+		err := marshalMsgPack(i, typ.(List).ElementType, p.WithElementKeyInt(int64(pos)), enc)
 		if err != nil {
 			return err
 		}
-		p.WithoutLastStep()
 	}
 	return nil
 }
@@ -161,12 +159,10 @@ func marshalMsgPackSet(val Value, typ Type, p AttributePath, enc *msgpack.Encode
 		return p.NewErrorf("error encoding set length: %w", err)
 	}
 	for _, i := range s {
-		p.WithElementKeyValue(i)
-		err := marshalMsgPack(i, typ.(Set).ElementType, p, enc)
+		err := marshalMsgPack(i, typ.(Set).ElementType, p.WithElementKeyValue(i), enc)
 		if err != nil {
 			return err
 		}
-		p.WithoutLastStep()
 	}
 	return nil
 }
@@ -181,8 +177,7 @@ func marshalMsgPackMap(val Value, typ Type, p AttributePath, enc *msgpack.Encode
 		return p.NewErrorf("error encoding map length: %w", err)
 	}
 	for k, v := range m {
-		p.WithElementKeyString(k)
-		err := marshalMsgPack(NewValue(String, k), String, p, enc)
+		err := marshalMsgPack(NewValue(String, k), String, p.WithElementKeyString(k), enc)
 		if err != nil {
 			return p.NewErrorf("error encoding map key: %w", err)
 		}
@@ -190,7 +185,6 @@ func marshalMsgPackMap(val Value, typ Type, p AttributePath, enc *msgpack.Encode
 		if err != nil {
 			return err
 		}
-		p.WithoutLastStep()
 	}
 	return nil
 }
@@ -206,13 +200,11 @@ func marshalMsgPackTuple(val Value, typ Type, p AttributePath, enc *msgpack.Enco
 		return p.NewErrorf("error encoding tuple length: %w", err)
 	}
 	for pos, v := range t {
-		p.WithElementKeyInt(int64(pos))
 		ty := types[pos]
-		err := marshalMsgPack(v, ty, p, enc)
+		err := marshalMsgPack(v, ty, p.WithElementKeyInt(int64(pos)), enc)
 		if err != nil {
 			return err
 		}
-		p.WithoutLastStep()
 	}
 	return nil
 }
@@ -233,21 +225,19 @@ func marshalMsgPackObject(val Value, typ Type, p AttributePath, enc *msgpack.Enc
 		return p.NewErrorf("error encoding object length: %w", err)
 	}
 	for _, k := range keys {
-		p.WithAttributeName(k)
 		ty := types[k]
 		v, ok := o[k]
 		if !ok {
-			return p.NewErrorf("no value set")
+			return p.WithAttributeName(k).NewErrorf("no value set")
 		}
-		err := marshalMsgPack(NewValue(String, k), String, p, enc)
+		err := marshalMsgPack(NewValue(String, k), String, p.WithAttributeName(k), enc)
 		if err != nil {
 			return err
 		}
-		err = marshalMsgPack(v, ty, p, enc)
+		err = marshalMsgPack(v, ty, p.WithAttributeName(k), enc)
 		if err != nil {
 			return err
 		}
-		p.WithoutLastStep()
 	}
 	return nil
 }

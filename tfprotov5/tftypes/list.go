@@ -29,7 +29,7 @@ func (l List) Is(t Type) bool {
 }
 
 func (l List) String() string {
-	return "tftypes.List"
+	return "tftypes.List[" + l.ElementType.String() + "]"
 }
 
 func (l List) private() {}

@@ -29,7 +29,7 @@ func (s Set) Is(t Type) bool {
 }
 
 func (s Set) String() string {
-	return "tftypes.Set"
+	return "tftypes.Set[" + s.ElementType.String() + "]"
 }
 
 func (s Set) private() {}

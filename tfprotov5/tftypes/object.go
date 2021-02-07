@@ -1,6 +1,10 @@
 package tftypes
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"sort"
+	"strings"
+)
 
 // Object is a Terraform type representing an unordered collection of
 // attributes, potentially of differing types, each identifiable with a unique
@@ -43,7 +47,22 @@ func (o Object) Is(t Type) bool {
 }
 
 func (o Object) String() string {
-	return "tftypes.Object"
+	var res strings.Builder
+	res.WriteString("tftypes.Object[")
+	keys := make([]string, 0, len(o.AttributeTypes))
+	for k := range o.AttributeTypes {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for pos, key := range keys {
+		if pos != 0 {
+			res.WriteString(", ")
+		}
+		res.WriteString(`"` + key + `":`)
+		res.WriteString(o.AttributeTypes[key].String())
+	}
+	res.WriteString("]")
+	return res.String()
 }
 
 func (o Object) private() {}

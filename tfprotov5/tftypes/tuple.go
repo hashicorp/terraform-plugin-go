@@ -1,6 +1,9 @@
 package tftypes
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+)
 
 // Tuple is a Terraform type representing an ordered collection of elements,
 // potentially of differing types. The number of elements and their types are
@@ -40,7 +43,16 @@ func (tu Tuple) Is(t Type) bool {
 }
 
 func (tu Tuple) String() string {
-	return "tftypes.Tuple"
+	var res strings.Builder
+	res.WriteString("tftypes.Tuple[")
+	for pos, t := range tu.ElementTypes {
+		if pos != 0 {
+			res.WriteString(", ")
+		}
+		res.WriteString(t.String())
+	}
+	res.WriteString("]")
+	return res.String()
 }
 
 func (tu Tuple) private() {}

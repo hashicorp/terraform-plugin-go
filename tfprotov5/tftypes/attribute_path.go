@@ -3,6 +3,8 @@ package tftypes
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 var (
@@ -26,6 +28,76 @@ type AttributePath struct {
 	Steps []AttributePathStep
 }
 
+func (a AttributePath) String() string {
+	var res strings.Builder
+	for pos, step := range a.Steps {
+		if pos != 0 {
+			res.WriteString(".")
+		}
+		switch v := step.(type) {
+		case AttributeName:
+			res.WriteString(`AttributeName("` + string(v) + `")`)
+		case ElementKeyString:
+			res.WriteString(`ElementKeyString("` + string(v) + `")`)
+		case ElementKeyInt:
+			res.WriteString(`ElementKeyInt(` + strconv.FormatInt(int64(v), 10) + `)`)
+		case ElementKeyValue:
+			res.WriteString(`ElementKeyValue(` + Value(v).String() + `)`)
+		}
+	}
+	return res.String()
+}
+
+func (a AttributePath) Equal(o AttributePath) bool {
+	if len(a.Steps) != len(o.Steps) {
+		return false
+	}
+	for pos, aStep := range a.Steps {
+		oStep := o.Steps[pos]
+		switch aVal := aStep.(type) {
+		case AttributeName:
+			oVal, ok := oStep.(AttributeName)
+			if !ok {
+				return false
+			}
+			if oVal != aVal {
+				return false
+			}
+		case ElementKeyString:
+			oVal, ok := oStep.(ElementKeyString)
+			if !ok {
+				return false
+			}
+			if oVal != aVal {
+				return false
+			}
+		case ElementKeyInt:
+			oVal, ok := oStep.(ElementKeyInt)
+			if !ok {
+				return false
+			}
+			if oVal != aVal {
+				return false
+			}
+		case ElementKeyValue:
+			oVal, ok := oStep.(ElementKeyValue)
+			if !ok {
+				return false
+			}
+			diffs, err := Value(aVal).Diff(Value(oVal))
+			if err != nil {
+				panic(err)
+			}
+			if len(diffs) > 0 {
+				return false
+			}
+		default:
+			panic(fmt.Sprintf("unknown step %T in ValueDiff.Equal", aStep))
+		}
+	}
+	return true
+}
+
 // NewErrorf returns an error associated with the value indicated by `a`. This
 // is equivalent to calling a.NewError(fmt.Errorf(f, args...)).
 func (a AttributePath) NewErrorf(f string, args ...interface{}) error {
@@ -46,32 +118,57 @@ func (a AttributePath) NewError(err error) error {
 
 // WithAttributeName adds an AttributeName step to `a`, using `name` as the
 // attribute's name.
-func (a *AttributePath) WithAttributeName(name string) {
-	a.Steps = append(a.Steps, AttributeName(name))
+func (a AttributePath) WithAttributeName(name string) AttributePath {
+	steps := make([]AttributePathStep, len(a.Steps))
+	copy(steps, a.Steps)
+	return AttributePath{
+		Steps: append(steps, AttributeName(name)),
+	}
 }
 
 // WithElementKeyString adds an ElementKeyString step to `a`, using `key` as
 // the element's key.
-func (a *AttributePath) WithElementKeyString(key string) {
-	a.Steps = append(a.Steps, ElementKeyString(key))
+func (a AttributePath) WithElementKeyString(key string) AttributePath {
+	steps := make([]AttributePathStep, len(a.Steps))
+	copy(steps, a.Steps)
+	return AttributePath{
+		Steps: append(steps, ElementKeyString(key)),
+	}
 }
 
 // WithElementKeyInt adds an ElementKeyInt step to `a`, using `key` as the
 // element's key.
-func (a *AttributePath) WithElementKeyInt(key int64) {
-	a.Steps = append(a.Steps, ElementKeyInt(key))
+func (a AttributePath) WithElementKeyInt(key int64) AttributePath {
+	steps := make([]AttributePathStep, len(a.Steps))
+	copy(steps, a.Steps)
+	return AttributePath{
+		Steps: append(steps, ElementKeyInt(key)),
+	}
 }
 
 // WithElementKeyValue adds an ElementKeyValue to `a`, using `key` as the
 // element's key.
-func (a *AttributePath) WithElementKeyValue(key Value) {
-	a.Steps = append(a.Steps, ElementKeyValue(key))
+func (a AttributePath) WithElementKeyValue(key Value) AttributePath {
+	steps := make([]AttributePathStep, len(a.Steps))
+	copy(steps, a.Steps)
+	return AttributePath{
+		Steps: append(steps, ElementKeyValue(key)),
+	}
 }
 
 // WithoutLastStep removes the last step, whatever kind of step it was, from
 // `a`.
-func (a *AttributePath) WithoutLastStep() {
-	a.Steps = a.Steps[:len(a.Steps)-1]
+func (a AttributePath) WithoutLastStep() AttributePath {
+	steps := make([]AttributePathStep, len(a.Steps))
+	copy(steps, a.Steps)
+	if len(a.Steps) < 1 {
+		return AttributePath{
+			Steps: steps,
+		}
+	}
+	return AttributePath{
+		Steps: steps[:len(steps)-1],
+	}
 }
 
 // AttributePathStep is an intentionally unimplementable interface that

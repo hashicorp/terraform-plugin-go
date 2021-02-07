@@ -5,6 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/vmihailenco/msgpack"
@@ -48,6 +51,180 @@ func (u msgPackUnknownType) MarshalMsgpack() ([]byte, error) {
 type Value struct {
 	typ   Type
 	value interface{}
+}
+
+func (v Value) String() string {
+	// TODO: replace with v.Type() once #58 lands
+	typ := v.typ
+
+	// null and unknown values we use static strings for
+	if v.IsNull() {
+		return typ.String() + "<null>"
+	}
+	if !v.IsKnown() {
+		return typ.String() + "<unknown>"
+	}
+
+	// everything else is built up
+	var res strings.Builder
+	switch {
+	case typ.Is(String):
+		var s string
+		err := v.As(&s)
+		if err != nil {
+			panic(err)
+		}
+		res.WriteString(typ.String() + `<"` + s + `">`)
+	case typ.Is(Number):
+		n := big.NewFloat(0)
+		err := v.As(&n)
+		if err != nil {
+			panic(err)
+		}
+		res.WriteString(typ.String() + `<"` + n.String() + `">`)
+	case typ.Is(Bool):
+		var b bool
+		err := v.As(&b)
+		if err != nil {
+			panic(err)
+		}
+		res.WriteString(typ.String() + `<"` + strconv.FormatBool(b) + `">`)
+	case v.Is(List{}), v.Is(Set{}), v.Is(Tuple{}):
+		var l []Value
+		err := v.As(&l)
+		if err != nil {
+			panic(err)
+		}
+		res.WriteString(typ.String() + `<`)
+		for pos, el := range l {
+			if pos != 0 {
+				res.WriteString(", ")
+			}
+			res.WriteString(el.String())
+		}
+		res.WriteString(">")
+	case v.Is(Map{}), v.Is(Object{}):
+		m := map[string]Value{}
+		err := v.As(&m)
+		if err != nil {
+			panic(err)
+		}
+		res.WriteString(typ.String() + `<`)
+		keys := make([]string, 0, len(m))
+		for k := range m {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for pos, key := range keys {
+			if pos != 0 {
+				res.WriteString(", ")
+			}
+			res.WriteString(`"` + key + `":`)
+			res.WriteString(m[key].String())
+		}
+		res.WriteString(">")
+	}
+	return res.String()
+}
+
+func (v Value) ApplyTerraform5AttributePathStep(step AttributePathStep) (interface{}, error) {
+	if !v.IsKnown() || v.IsNull() {
+		return nil, ErrInvalidStep
+	}
+	switch s := step.(type) {
+	case AttributeName:
+		if !v.Is(Object{}) {
+			return nil, ErrInvalidStep
+		}
+		o := map[string]Value{}
+		err := v.As(&o)
+		if err != nil {
+			return nil, err
+		}
+		res, ok := o[string(s)]
+		if !ok {
+			return nil, ErrInvalidStep
+		}
+		return res, nil
+	case ElementKeyString:
+		if !v.Is(Map{}) {
+			return nil, ErrInvalidStep
+		}
+		m := map[string]Value{}
+		err := v.As(&m)
+		if err != nil {
+			return nil, err
+		}
+		res, ok := m[string(s)]
+		if !ok {
+			return nil, ErrInvalidStep
+		}
+		return res, nil
+	case ElementKeyInt:
+		if !v.Is(List{}) && !v.Is(Tuple{}) {
+			return nil, ErrInvalidStep
+		}
+		sl := []Value{}
+		err := v.As(&sl)
+		if err != nil {
+			return nil, err
+		}
+		if int64(len(sl)) <= int64(s) {
+			return nil, ErrInvalidStep
+		}
+		return sl[int64(s)], nil
+	case ElementKeyValue:
+		if !v.Is(Set{}) {
+			return nil, ErrInvalidStep
+		}
+		sl := []Value{}
+		err := v.As(&sl)
+		if err != nil {
+			return nil, err
+		}
+		for _, el := range sl {
+			diffs, err := el.Diff(Value(s))
+			if err != nil {
+				return nil, err
+			}
+			if len(diffs) == 0 {
+				return el, nil
+			}
+		}
+		return nil, ErrInvalidStep
+	default:
+		return nil, fmt.Errorf("unexpected AttributePathStep type %T", step)
+	}
+}
+
+func (v Value) Equal(o Value) bool {
+	if !v.Is(o.typ) {
+		return false
+	}
+	diff, err := v.Diff(o)
+	if err != nil {
+		panic(err)
+	}
+	return len(diff) < 1
+}
+
+func (v Value) Copy() Value {
+	newVal := v.value
+	switch val := v.value.(type) {
+	case []Value:
+		newVals := make([]Value, 0, len(val))
+		for _, value := range val {
+			newVals = append(newVals, value.Copy())
+		}
+		newVal = newVals
+	case map[string]Value:
+		newVals := make(map[string]Value, len(val))
+		for k, value := range val {
+			newVals[k] = value.Copy()
+		}
+		newVal = newVals
+	}
+	return NewValue(v.typ, newVal)
 }
 
 // NewValue returns a Value constructed using the specified Type and stores the
