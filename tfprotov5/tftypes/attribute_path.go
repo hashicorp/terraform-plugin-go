@@ -48,6 +48,9 @@ func (a AttributePath) String() string {
 	return res.String()
 }
 
+// Equal returns true if two AttributePaths should be considered equal.
+// AttributePaths are considered equal if they have the same number of steps,
+// the steps are all the same types, and the steps have all the same values.
 func (a AttributePath) Equal(o AttributePath) bool {
 	if len(a.Steps) != len(o.Steps) {
 		return false
