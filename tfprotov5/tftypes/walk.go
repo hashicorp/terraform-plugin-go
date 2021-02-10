@@ -49,8 +49,7 @@ func walk(path AttributePath, val Value, cb func(AttributePath, Value) (bool, er
 		return nil
 	}
 
-	// TODO(paddy): replace with val.Type() once #58 lands
-	ty := val.typ
+	ty := val.Type()
 	switch {
 	case ty.Is(List{}), ty.Is(Set{}), ty.Is(Tuple{}):
 		var v []Value
@@ -110,8 +109,7 @@ func Transform(val Value, cb func(AttributePath, Value) (Value, error)) (Value, 
 
 func transform(path AttributePath, val Value, cb func(AttributePath, Value) (Value, error)) (Value, error) {
 	var newVal Value
-	// TODO(paddy): change this to val.Type() when #58 lands
-	ty := val.typ
+	ty := val.Type()
 
 	switch {
 	case val.IsNull() || !val.IsKnown():
@@ -185,7 +183,7 @@ func transform(path AttributePath, val Value, cb func(AttributePath, Value) (Val
 		}
 		return res, err
 	}
-	if !newVal.Is(ty) {
+	if !newVal.Type().Is(ty) {
 		return val, path.NewError(errors.New("invalid transform: value changed type"))
 	}
 	return res, err

@@ -65,8 +65,7 @@ func (v ValueDiff) Equal(o ValueDiff) bool {
 }
 
 func (val1 Value) Diff(val2 Value) ([]ValueDiff, error) {
-	// TODO: replace with Type() when #58 is merged
-	if !val1.typ.Is(val2.typ) {
+	if !val1.Type().Is(val2.Type()) {
 		return nil, errors.New("Can't diff values of different types")
 	}
 	var diffs []ValueDiff
@@ -166,7 +165,7 @@ func (val1 Value) Diff(val2 Value) ([]ValueDiff, error) {
 
 		// we know there are known, non-null values, time to compare them
 		switch {
-		case value1.Is(String):
+		case value1.Type().Is(String):
 			var s1, s2 string
 			err := value1.As(&s1)
 			if err != nil {
@@ -184,7 +183,7 @@ func (val1 Value) Diff(val2 Value) ([]ValueDiff, error) {
 				})
 			}
 			return false, nil
-		case value1.Is(Number):
+		case value1.Type().Is(Number):
 			n1, n2 := big.NewFloat(0), big.NewFloat(0)
 			err := value1.As(&n1)
 			if err != nil {
@@ -202,7 +201,7 @@ func (val1 Value) Diff(val2 Value) ([]ValueDiff, error) {
 				})
 			}
 			return false, nil
-		case value1.Is(Bool):
+		case value1.Type().Is(Bool):
 			var b1, b2 bool
 			err := value1.As(&b1)
 			if err != nil {
@@ -220,7 +219,7 @@ func (val1 Value) Diff(val2 Value) ([]ValueDiff, error) {
 				})
 			}
 			return false, nil
-		case value1.Is(List{}), value1.Is(Set{}), value1.Is(Tuple{}):
+		case value1.Type().Is(List{}), value1.Type().Is(Set{}), value1.Type().Is(Tuple{}):
 			var s1, s2 []Value
 			err := value1.As(&s1)
 			if err != nil {
@@ -242,7 +241,7 @@ func (val1 Value) Diff(val2 Value) ([]ValueDiff, error) {
 				return true, nil
 			}
 			return true, nil
-		case value1.Is(Map{}), value1.Is(Object{}):
+		case value1.Type().Is(Map{}), value1.Type().Is(Object{}):
 			m1 := map[string]Value{}
 			m2 := map[string]Value{}
 			err := value1.As(&m1)
@@ -267,7 +266,7 @@ func (val1 Value) Diff(val2 Value) ([]ValueDiff, error) {
 			// from the walk check the sub-values match
 			return true, nil
 		}
-		return false, fmt.Errorf("unexpected type %v in Diff at %s", value1.typ, path)
+		return false, fmt.Errorf("unexpected type %v in Diff at %s", value1.Type(), path)
 	})
 	return diffs, err
 }

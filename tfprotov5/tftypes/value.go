@@ -54,8 +54,7 @@ type Value struct {
 }
 
 func (v Value) String() string {
-	// TODO: replace with v.Type() once #58 lands
-	typ := v.typ
+	typ := v.Type()
 
 	// null and unknown values we use static strings for
 	if v.IsNull() {
@@ -89,7 +88,7 @@ func (v Value) String() string {
 			panic(err)
 		}
 		res.WriteString(typ.String() + `<"` + strconv.FormatBool(b) + `">`)
-	case v.Is(List{}), v.Is(Set{}), v.Is(Tuple{}):
+	case typ.Is(List{}), typ.Is(Set{}), typ.Is(Tuple{}):
 		var l []Value
 		err := v.As(&l)
 		if err != nil {
@@ -103,7 +102,7 @@ func (v Value) String() string {
 			res.WriteString(el.String())
 		}
 		res.WriteString(">")
-	case v.Is(Map{}), v.Is(Object{}):
+	case typ.Is(Map{}), typ.Is(Object{}):
 		m := map[string]Value{}
 		err := v.As(&m)
 		if err != nil {
@@ -133,7 +132,7 @@ func (v Value) ApplyTerraform5AttributePathStep(step AttributePathStep) (interfa
 	}
 	switch s := step.(type) {
 	case AttributeName:
-		if !v.Is(Object{}) {
+		if !v.Type().Is(Object{}) {
 			return nil, ErrInvalidStep
 		}
 		o := map[string]Value{}
@@ -147,7 +146,7 @@ func (v Value) ApplyTerraform5AttributePathStep(step AttributePathStep) (interfa
 		}
 		return res, nil
 	case ElementKeyString:
-		if !v.Is(Map{}) {
+		if !v.Type().Is(Map{}) {
 			return nil, ErrInvalidStep
 		}
 		m := map[string]Value{}
@@ -161,7 +160,7 @@ func (v Value) ApplyTerraform5AttributePathStep(step AttributePathStep) (interfa
 		}
 		return res, nil
 	case ElementKeyInt:
-		if !v.Is(List{}) && !v.Is(Tuple{}) {
+		if !v.Type().Is(List{}) && !v.Type().Is(Tuple{}) {
 			return nil, ErrInvalidStep
 		}
 		sl := []Value{}
@@ -174,7 +173,7 @@ func (v Value) ApplyTerraform5AttributePathStep(step AttributePathStep) (interfa
 		}
 		return sl[int64(s)], nil
 	case ElementKeyValue:
-		if !v.Is(Set{}) {
+		if !v.Type().Is(Set{}) {
 			return nil, ErrInvalidStep
 		}
 		sl := []Value{}
@@ -198,7 +197,7 @@ func (v Value) ApplyTerraform5AttributePathStep(step AttributePathStep) (interfa
 }
 
 func (v Value) Equal(o Value) bool {
-	if !v.Is(o.typ) {
+	if !v.Type().Is(o.Type()) {
 		return false
 	}
 	diff, err := v.Diff(o)
@@ -224,7 +223,7 @@ func (v Value) Copy() Value {
 		}
 		newVal = newVals
 	}
-	return NewValue(v.typ, newVal)
+	return NewValue(v.Type(), newVal)
 }
 
 // NewValue returns a Value constructed using the specified Type and stores the
@@ -489,7 +488,7 @@ func (val Value) As(dst interface{}) error {
 		}
 		v, ok := val.value.(string)
 		if !ok {
-			return fmt.Errorf("can't unmarshal %s into %T, expected string", val.typ, dst)
+			return fmt.Errorf("can't unmarshal %s into %T, expected string", val.Type(), dst)
 		}
 		*target = v
 		return nil
@@ -506,7 +505,7 @@ func (val Value) As(dst interface{}) error {
 		}
 		v, ok := val.value.(*big.Float)
 		if !ok {
-			return fmt.Errorf("can't unmarshal %s into %T, expected *big.Float", val.typ, dst)
+			return fmt.Errorf("can't unmarshal %s into %T, expected *big.Float", val.Type(), dst)
 		}
 		target.Set(v)
 		return nil
@@ -523,7 +522,7 @@ func (val Value) As(dst interface{}) error {
 		}
 		v, ok := val.value.(bool)
 		if !ok {
-			return fmt.Errorf("can't unmarshal %s into %T, expected boolean", val.typ, dst)
+			return fmt.Errorf("can't unmarshal %s into %T, expected boolean", val.Type(), dst)
 		}
 		*target = v
 		return nil
@@ -540,7 +539,7 @@ func (val Value) As(dst interface{}) error {
 		}
 		v, ok := val.value.(map[string]Value)
 		if !ok {
-			return fmt.Errorf("can't unmarshal %s into %T, expected map[string]tftypes.Value", val.typ, dst)
+			return fmt.Errorf("can't unmarshal %s into %T, expected map[string]tftypes.Value", val.Type(), dst)
 		}
 		*target = v
 		return nil
@@ -557,7 +556,7 @@ func (val Value) As(dst interface{}) error {
 		}
 		v, ok := val.value.([]Value)
 		if !ok {
-			return fmt.Errorf("can't unmarshal %s into %T expected []tftypes.Value", val.typ, dst)
+			return fmt.Errorf("can't unmarshal %s into %T expected []tftypes.Value", val.Type(), dst)
 		}
 		*target = v
 		return nil
@@ -590,7 +589,7 @@ func (val Value) IsFullyKnown() bool {
 	if !val.IsKnown() {
 		return false
 	}
-	switch val.typ.(type) {
+	switch val.Type().(type) {
 	case primitive:
 		return true
 	case List, Set, Tuple:
@@ -608,7 +607,7 @@ func (val Value) IsFullyKnown() bool {
 		}
 		return true
 	}
-	panic(fmt.Sprintf("unknown type %T", val.typ))
+	panic(fmt.Sprintf("unknown type %T", val.Type()))
 }
 
 // IsNull returns true if the Value is null.
@@ -646,7 +645,7 @@ func numberComparer(i, j *big.Float) bool {
 }
 
 func valueComparer(i, j Value) bool {
-	if !i.typ.Is(j.typ) {
+	if !i.Type().Is(j.Type()) {
 		return false
 	}
 	return cmp.Equal(i.value, j.value, cmp.Comparer(numberComparer), ValueComparer())
@@ -659,10 +658,10 @@ func TypeFromElements(elements []Value) (Type, error) {
 	var typ Type
 	for _, el := range elements {
 		if typ == nil {
-			typ = el.typ
+			typ = el.Type()
 			continue
 		}
-		if !typ.Is(el.typ) {
+		if !typ.Is(el.Type()) {
 			return nil, errors.New("elements do not all have the same types")
 		}
 	}

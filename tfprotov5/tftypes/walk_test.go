@@ -1116,11 +1116,10 @@ func TestTransform(t *testing.T) {
 		"null:byValue": {
 			f: func(_ AttributePath, v Value) (Value, error) {
 				if v.IsNull() {
-					// TODO: replace with v.Type() when #58 lands
-					return NewValue(v.typ, UnknownValue), nil
+					return NewValue(v.Type(), UnknownValue), nil
 				}
 				if !v.IsKnown() {
-					return NewValue(v.typ, nil), nil
+					return NewValue(v.Type(), nil), nil
 				}
 				return v, nil
 			},
