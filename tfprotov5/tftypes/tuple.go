@@ -8,6 +8,11 @@ import "encoding/json"
 // numbers or types of elements are considered to be distinct types.
 type Tuple struct {
 	ElementTypes []Type
+
+	// used to make this type uncomparable
+	// see https://golang.org/ref/spec#Comparison_operators
+	// this enforces the use of Is, instead
+	_ []struct{}
 }
 
 // Is returns whether `t` is a Tuple type or not. If `t` is an instance of the

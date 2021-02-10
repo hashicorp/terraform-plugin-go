@@ -2,54 +2,61 @@ package tftypes
 
 import "fmt"
 
-const (
+var (
 	// DynamicPseudoType is a pseudo-type in Terraform's type system that
 	// is used as a wildcard type. It indicates that any Terraform type can
 	// be used.
-	DynamicPseudoType = primitive("DynamicPseudoType")
+	DynamicPseudoType = primitive{name: "DynamicPseudoType"}
 
 	// String is a primitive type in Terraform that represents a UTF-8
 	// string of bytes.
-	String = primitive("String")
+	String = primitive{name: "String"}
 
 	// Number is a primitive type in Terraform that represents a real
 	// number.
-	Number = primitive("Number")
+	Number = primitive{name: "Number"}
 
 	// Bool is a primitive type in Terraform that represents a true or
 	// false boolean value.
-	Bool = primitive("Bool")
+	Bool = primitive{name: "Bool"}
 )
 
 var (
-	_ Type = primitive("test")
+	_ Type = primitive{name: "test"}
 )
 
-type primitive string
+type primitive struct {
+	name string
+
+	// used to make this type uncomparable
+	// see https://golang.org/ref/spec#Comparison_operators
+	// this enforces the use of Is, instead
+	_ []struct{}
+}
 
 func (p primitive) Is(t Type) bool {
 	v, ok := t.(primitive)
 	if !ok {
 		return false
 	}
-	return p == v
+	return p.name == v.name
 }
 
 func (p primitive) String() string {
-	return "tftypes." + string(p)
+	return "tftypes." + string(p.name)
 }
 
 func (p primitive) private() {}
 
 func (p primitive) MarshalJSON() ([]byte, error) {
-	switch p {
-	case String:
+	switch p.name {
+	case String.name:
 		return []byte(`"string"`), nil
-	case Number:
+	case Number.name:
 		return []byte(`"number"`), nil
-	case Bool:
+	case Bool.name:
 		return []byte(`"bool"`), nil
-	case DynamicPseudoType:
+	case DynamicPseudoType.name:
 		return []byte(`"dynamic"`), nil
 	}
 	return nil, fmt.Errorf("unknown primitive type %q", p)

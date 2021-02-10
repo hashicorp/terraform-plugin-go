@@ -394,12 +394,9 @@ func (val Value) As(dst interface{}) error {
 	return fmt.Errorf("can't unmarshal into %T, needs FromTerraform5Value method", dst)
 }
 
-// Is calls Type.Is using the Type of the Value.
-func (val Value) Is(t Type) bool {
-	if val.typ == nil || t == nil {
-		return val.typ == nil && t == nil
-	}
-	return val.typ.Is(t)
+// Type returns the Type of the Value.
+func (val Value) Type() Type {
+	return val.typ
 }
 
 // IsKnown returns true if `val` is known. If `val` is an aggregate type, only

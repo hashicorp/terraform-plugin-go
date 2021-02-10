@@ -10,7 +10,7 @@ import (
 )
 
 func marshalMsgPack(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
-	if typ.Is(DynamicPseudoType) && !val.Is(DynamicPseudoType) {
+	if typ.Is(DynamicPseudoType) && !val.Type().Is(DynamicPseudoType) {
 		return marshalMsgPackDynamicPseudoType(val, typ, p, enc)
 
 	}

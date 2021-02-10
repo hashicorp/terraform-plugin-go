@@ -1,0 +1,11 @@
+```release-note:feature
+`tftypes.Value`s now have a `Type` method, exposing their `tftypes.Type`.
+```
+
+```release-note:breaking-change
+`tftypes.Value`s no longer have an `Is` method. Use `tftypes.Value.Type().Is` instead.
+```
+
+```release-note:breaking-change
+`tftypes.String`, `tftypes.Number`, `tftypes.Bool`, and `tftypes.DynamicPseudoType` are now represented by a different Go type. Uses of `==` and `switch` on them will no longer work. The recommended way to compare any type is using `Is`.
+```

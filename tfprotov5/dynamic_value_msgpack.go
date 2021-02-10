@@ -135,7 +135,7 @@ func msgpackUnmarshalList(dec *msgpack.Decoder, typ tftypes.Type, path tftypes.A
 	}
 
 	elTyp := typ
-	if elTyp == tftypes.DynamicPseudoType {
+	if elTyp.Is(tftypes.DynamicPseudoType) {
 		elTyp, err = tftypes.TypeFromElements(vals)
 		if err != nil {
 			return tftypes.Value{}, err

@@ -234,7 +234,7 @@ func jsonUnmarshalList(buf []byte, elementType tftypes.Type, p tftypes.Attribute
 	}
 
 	elTyp := elementType
-	if elTyp == tftypes.DynamicPseudoType {
+	if elTyp.Is(tftypes.DynamicPseudoType) {
 		elTyp, err = tftypes.TypeFromElements(vals)
 		if err != nil {
 			return tftypes.Value{}, p.NewErrorf("invalid elements for list: %w", err)
@@ -291,7 +291,7 @@ func jsonUnmarshalSet(buf []byte, elementType tftypes.Type, p tftypes.AttributeP
 	}
 
 	elTyp := elementType
-	if elTyp == tftypes.DynamicPseudoType {
+	if elTyp.Is(tftypes.DynamicPseudoType) {
 		elTyp, err = tftypes.TypeFromElements(vals)
 		if err != nil {
 			return tftypes.Value{}, p.NewErrorf("invalid elements for list: %w", err)
