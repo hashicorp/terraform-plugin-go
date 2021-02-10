@@ -155,7 +155,7 @@ func (a AttributePath) WithElementKeyValue(key Value) AttributePath {
 	steps := make([]AttributePathStep, len(a.Steps))
 	copy(steps, a.Steps)
 	return AttributePath{
-		Steps: append(steps, ElementKeyValue(key)),
+		Steps: append(steps, ElementKeyValue(key.Copy())),
 	}
 }
 
