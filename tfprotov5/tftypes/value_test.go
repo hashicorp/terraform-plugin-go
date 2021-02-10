@@ -721,3 +721,15 @@ func TestValueIsKnown(t *testing.T) {
 		})
 	}
 }
+
+func TestValueEqual(t *testing.T) {
+	t.Error("not implemented")
+}
+
+func TestValueApplyTerraform5AttributePathStep(t *testing.T) {
+	t.Error("not implemented")
+}
+
+func TestValueWalkAttributePath(t *testing.T) {
+	t.Error("not implemented")
+}

@@ -182,3 +182,7 @@ func TestWalkAttributePath(t *testing.T) {
 		})
 	}
 }
+
+func TestAttributePathEquals(t *testing.T) {
+	t.Error("not implemented")
+}
