@@ -1,0 +1,35 @@
+```release-note:feature
+Added tftypes.Walk and tftypes.Transform functions for the tftypes.Value type, allowing providers to traverse and mutate a tftypes.Value, respectively.
+```
+
+```release-note:feature
+Added tftypes.Diff function to return the elements and attributes that are different between two tftypes.Values.
+```
+
+```release-note:enhancement
+Added an Equal method to tftypes.Value to compare two tftypes.Values.
+```
+
+```release-note:enhancement
+Added an Equal method to tftypes.AttributePath to compares two tftypes.AttributePaths.
+```
+
+```release-note:enhancement
+Added a String method to tftypes.AttributePath to return a string representation of the tftypes.AttributePath.
+```
+
+```release-note:breaking-change
+tftypes.AttributePath.WithAttributeName, WithElementKeyString, WithElementKeyInt, and WithElementKeyValue no longer accept pointers and mutate the AttributePath. They now copy the AttributePath, and return a version of it with the new AttributePathStep appended.
+```
+
+```release-note:enhancement
+Added a String method to tftypes.Value, returning a string representation of the tftypes.Value.
+```
+
+```release-note:enhancement
+Added a Copy method to tftypes.Value, returning a clone of the tftypes.Value such that modifying the clone is guaranteed to not modify the original.
+```
+
+```release-note:enhancement
+Updated the String method of all tftypes.Type implementations to include any element or attribute types in the string as well.
+```
