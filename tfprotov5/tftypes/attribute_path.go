@@ -95,7 +95,7 @@ func (a AttributePath) Equal(o AttributePath) bool {
 				return false
 			}
 		default:
-			panic(fmt.Sprintf("unknown step %T in ValueDiff.Equal", aStep))
+			panic(fmt.Sprintf("unknown step %T in AttributePath.Equal", aStep))
 		}
 	}
 	return true
