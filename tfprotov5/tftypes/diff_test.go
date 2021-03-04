@@ -1,8 +1,11 @@
 package tftypes
 
 import (
+	"errors"
 	"math/big"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func valuePointer(val Value) *Value {
@@ -366,5 +369,128 @@ func TestValueDiffEqual(t *testing.T) {
 }
 
 func TestValueDiffDiff(t *testing.T) {
-	t.Error("not implemented")
+	t.Parallel()
+	type testCase struct {
+		val1  Value
+		val2  Value
+		diffs []ValueDiff
+		err   error
+	}
+
+	tests := map[string]testCase{
+		"primitiveDiff": {
+			val1: NewValue(String, "foo"),
+			val2: NewValue(String, "bar"),
+			diffs: []ValueDiff{
+				{
+					Value1: valuePointer(NewValue(String, "foo")),
+					Value2: valuePointer(NewValue(String, "bar")),
+				},
+			},
+		},
+		"primitiveNoDiff": {
+			val1: NewValue(String, "foo"),
+			val2: NewValue(String, "foo"),
+		},
+		"primitiveTypeError": {
+			val1: NewValue(String, "foo"),
+			val2: NewValue(Bool, true),
+			err:  errors.New("Can't diff values of different types"),
+		},
+		"listVal2Longer": {
+			val1: NewValue(List{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, "foo"),
+				NewValue(String, "bar"),
+			}),
+			val2: NewValue(List{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, "foo"),
+				NewValue(String, "bar"),
+				NewValue(String, "baz"),
+			}),
+			diffs: []ValueDiff{
+				{
+					Path:   AttributePath{}.WithElementKeyInt(2),
+					Value1: nil,
+					Value2: valuePointer(NewValue(String, "baz")),
+				},
+				{
+					Value1: valuePointer(NewValue(List{
+						ElementType: String,
+					}, []Value{
+						NewValue(String, "foo"),
+						NewValue(String, "bar"),
+					})),
+					Value2: valuePointer(NewValue(List{
+						ElementType: String,
+					}, []Value{
+						NewValue(String, "foo"),
+						NewValue(String, "bar"),
+						NewValue(String, "baz"),
+					})),
+				},
+			},
+		},
+		"listVal1Longer": {
+			val1: NewValue(List{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, "foo"),
+				NewValue(String, "bar"),
+				NewValue(String, "baz"),
+			}),
+			val2: NewValue(List{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, "foo"),
+				NewValue(String, "bar"),
+			}),
+			diffs: []ValueDiff{
+				{
+					Value1: valuePointer(NewValue(List{
+						ElementType: String,
+					}, []Value{
+						NewValue(String, "foo"),
+						NewValue(String, "bar"),
+						NewValue(String, "baz"),
+					})),
+					Value2: valuePointer(NewValue(List{
+						ElementType: String,
+					}, []Value{
+						NewValue(String, "foo"),
+						NewValue(String, "bar"),
+					})),
+				},
+				{
+					Path:   AttributePath{}.WithElementKeyInt(2),
+					Value1: valuePointer(NewValue(String, "baz")),
+					Value2: nil,
+				},
+			},
+		},
+	}
+	for name, test := range tests {
+		name, test := name, test
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			diffs, err := test.val1.Diff(test.val2)
+			if (err == nil && test.err != nil) || (test.err == nil && err != nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected error to be %v, got %v", test.err, err)
+			}
+
+			if !cmp.Equal(diffs, test.diffs) {
+				t.Errorf("Diff mismatch: %s", cmp.Diff(diffs, test.diffs))
+			}
+
+			// run the same test, but which value is val1
+			diffs, err = test.val2.Diff(test.val1)
+			if (err == nil && test.err != nil) || (test.err == nil && err != nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
+				t.Errorf("Expected reversed error to be %v, got %v", test.err, err)
+			}
+		})
+	}
 }
