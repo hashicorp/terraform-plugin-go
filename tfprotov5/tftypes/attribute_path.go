@@ -297,6 +297,9 @@ func (i interfaceSliceAttributePathStepper) ApplyTerraform5AttributePathStep(ste
 	if !isElementKeyInt {
 		return nil, ErrInvalidStep
 	}
+	if eki < 0 {
+		return nil, ErrInvalidStep
+	}
 	// slices can only have items up to the max value of int
 	// but we get ElementKeyInt as an int64
 	// we keep ElementKeyInt as an int64 and cast the length of the slice
