@@ -59,27 +59,15 @@ func (a AttributePath) Equal(o AttributePath) bool {
 		oStep := o.Steps[pos]
 		switch aVal := aStep.(type) {
 		case AttributeName:
-			oVal, ok := oStep.(AttributeName)
-			if !ok {
-				return false
-			}
-			if oVal != aVal {
+			if oStep != aVal {
 				return false
 			}
 		case ElementKeyString:
-			oVal, ok := oStep.(ElementKeyString)
-			if !ok {
-				return false
-			}
-			if oVal != aVal {
+			if oStep != aVal {
 				return false
 			}
 		case ElementKeyInt:
-			oVal, ok := oStep.(ElementKeyInt)
-			if !ok {
-				return false
-			}
-			if oVal != aVal {
+			if oStep != aVal {
 				return false
 			}
 		case ElementKeyValue:
@@ -87,11 +75,7 @@ func (a AttributePath) Equal(o AttributePath) bool {
 			if !ok {
 				return false
 			}
-			diffs, err := Value(aVal).Diff(Value(oVal))
-			if err != nil {
-				panic(err)
-			}
-			if len(diffs) > 0 {
+			if !Value(aVal).Equal(Value(oVal)) {
 				return false
 			}
 		default:
