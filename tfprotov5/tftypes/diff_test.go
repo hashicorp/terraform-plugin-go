@@ -487,7 +487,7 @@ func TestValueDiffDiff(t *testing.T) {
 			}
 
 			// run the same test, but which value is val1
-			diffs, err = test.val2.Diff(test.val1)
+			_, err = test.val2.Diff(test.val1)
 			if (err == nil && test.err != nil) || (test.err == nil && err != nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
 				t.Errorf("Expected reversed error to be %v, got %v", test.err, err)
 			}
