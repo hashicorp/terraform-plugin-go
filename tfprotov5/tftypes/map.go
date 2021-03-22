@@ -28,7 +28,7 @@ func (m Map) Is(t Type) bool {
 }
 
 func (m Map) String() string {
-	return "tftypes.Map"
+	return "tftypes.Map[" + m.AttributeType.String() + "]"
 }
 
 func (m Map) private() {}
