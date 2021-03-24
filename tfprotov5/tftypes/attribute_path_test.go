@@ -44,7 +44,7 @@ func TestWalkAttributePath(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
 		value    interface{}
-		path     AttributePath
+		path     *AttributePath
 		expected interface{}
 	}
 	tests := map[string]testCase{
@@ -59,8 +59,8 @@ func TestWalkAttributePath(t *testing.T) {
 					"blue": 234,
 				},
 			},
-			path: AttributePath{
-				Steps: []AttributePathStep{
+			path: &AttributePath{
+				steps: []AttributePathStep{
 					AttributeName("a"),
 				},
 			},
@@ -80,8 +80,8 @@ func TestWalkAttributePath(t *testing.T) {
 					"blue": 234,
 				},
 			},
-			path: AttributePath{
-				Steps: []AttributePathStep{
+			path: &AttributePath{
+				steps: []AttributePathStep{
 					AttributeName("a"),
 					AttributeName("red"),
 				},
@@ -104,8 +104,8 @@ func TestWalkAttributePath(t *testing.T) {
 					},
 				},
 			},
-			path: AttributePath{
-				Steps: []AttributePathStep{
+			path: &AttributePath{
+				steps: []AttributePathStep{
 					ElementKeyInt(1),
 				},
 			},
@@ -134,8 +134,8 @@ func TestWalkAttributePath(t *testing.T) {
 					},
 				},
 			},
-			path: AttributePath{
-				Steps: []AttributePathStep{
+			path: &AttributePath{
+				steps: []AttributePathStep{
 					ElementKeyInt(1),
 					AttributeName("c"),
 					ElementKeyInt(0),
@@ -158,8 +158,8 @@ func TestWalkAttributePath(t *testing.T) {
 					},
 				},
 			},
-			path: AttributePath{
-				Steps: []AttributePathStep{
+			path: &AttributePath{
+				steps: []AttributePathStep{
 					ElementKeyInt(1),
 					AttributeName("Colors"),
 					ElementKeyInt(0),
@@ -187,75 +187,82 @@ func TestWalkAttributePath(t *testing.T) {
 func TestAttributePathEqual(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
-		path1 AttributePath
-		path2 AttributePath
+		path1 *AttributePath
+		path2 *AttributePath
 		equal bool
 	}
 
 	tests := map[string]testCase{
 		"empty": {
-			path1: AttributePath{},
-			path2: AttributePath{},
+			path1: NewAttributePath(),
+			path2: NewAttributePath(),
+			equal: true,
+		},
+		"nil": {
+			equal: true,
+		},
+		"empty-and-nil": {
+			path1: NewAttributePath(),
 			equal: true,
 		},
 		"an-different-types": {
-			path1: AttributePath{}.WithAttributeName("testing"),
-			path2: AttributePath{}.WithElementKeyString("testing"),
+			path1: NewAttributePath().WithAttributeName("testing"),
+			path2: NewAttributePath().WithElementKeyString("testing"),
 			equal: false,
 		},
 		"eks-different-types": {
-			path1: AttributePath{}.WithElementKeyString("testing"),
-			path2: AttributePath{}.WithAttributeName("testing"),
+			path1: NewAttributePath().WithElementKeyString("testing"),
+			path2: NewAttributePath().WithAttributeName("testing"),
 			equal: false,
 		},
 		"eki-different-types": {
-			path1: AttributePath{}.WithElementKeyInt(1234),
-			path2: AttributePath{}.WithAttributeName("testing"),
+			path1: NewAttributePath().WithElementKeyInt(1234),
+			path2: NewAttributePath().WithAttributeName("testing"),
 			equal: false,
 		},
 		"ekv-different-types": {
-			path1: AttributePath{}.WithElementKeyValue(NewValue(String, "testing")),
-			path2: AttributePath{}.WithAttributeName("testing"),
+			path1: NewAttributePath().WithElementKeyValue(NewValue(String, "testing")),
+			path2: NewAttributePath().WithAttributeName("testing"),
 			equal: false,
 		},
 		"an": {
-			path1: AttributePath{}.WithAttributeName("testing"),
-			path2: AttributePath{}.WithAttributeName("testing"),
+			path1: NewAttributePath().WithAttributeName("testing"),
+			path2: NewAttributePath().WithAttributeName("testing"),
 			equal: true,
 		},
 		"an-an": {
-			path1: AttributePath{}.WithAttributeName("testing").WithAttributeName("testing2"),
-			path2: AttributePath{}.WithAttributeName("testing").WithAttributeName("testing2"),
+			path1: NewAttributePath().WithAttributeName("testing").WithAttributeName("testing2"),
+			path2: NewAttributePath().WithAttributeName("testing").WithAttributeName("testing2"),
 			equal: true,
 		},
 		"eks": {
-			path1: AttributePath{}.WithElementKeyString("testing"),
-			path2: AttributePath{}.WithElementKeyString("testing"),
+			path1: NewAttributePath().WithElementKeyString("testing"),
+			path2: NewAttributePath().WithElementKeyString("testing"),
 			equal: true,
 		},
 		"eks-eks": {
-			path1: AttributePath{}.WithElementKeyString("testing").WithElementKeyString("testing2"),
-			path2: AttributePath{}.WithElementKeyString("testing").WithElementKeyString("testing2"),
+			path1: NewAttributePath().WithElementKeyString("testing").WithElementKeyString("testing2"),
+			path2: NewAttributePath().WithElementKeyString("testing").WithElementKeyString("testing2"),
 			equal: true,
 		},
 		"eki": {
-			path1: AttributePath{}.WithElementKeyInt(123),
-			path2: AttributePath{}.WithElementKeyInt(123),
+			path1: NewAttributePath().WithElementKeyInt(123),
+			path2: NewAttributePath().WithElementKeyInt(123),
 			equal: true,
 		},
 		"eki-eki": {
-			path1: AttributePath{}.WithElementKeyInt(123).WithElementKeyInt(456),
-			path2: AttributePath{}.WithElementKeyInt(123).WithElementKeyInt(456),
+			path1: NewAttributePath().WithElementKeyInt(123).WithElementKeyInt(456),
+			path2: NewAttributePath().WithElementKeyInt(123).WithElementKeyInt(456),
 			equal: true,
 		},
 		"ekv": {
-			path1: AttributePath{}.WithElementKeyValue(NewValue(List{
+			path1: NewAttributePath().WithElementKeyValue(NewValue(List{
 				ElementType: String,
 			}, []Value{
 				NewValue(String, "hello"),
 				NewValue(String, "world"),
 			})),
-			path2: AttributePath{}.WithElementKeyValue(NewValue(List{
+			path2: NewAttributePath().WithElementKeyValue(NewValue(List{
 				ElementType: String,
 			}, []Value{
 				NewValue(String, "hello"),
@@ -264,13 +271,13 @@ func TestAttributePathEqual(t *testing.T) {
 			equal: true,
 		},
 		"ekv-ekv": {
-			path1: AttributePath{}.WithElementKeyValue(NewValue(List{
+			path1: NewAttributePath().WithElementKeyValue(NewValue(List{
 				ElementType: String,
 			}, []Value{
 				NewValue(String, "hello"),
 				NewValue(String, "world"),
 			})).WithElementKeyValue(NewValue(Bool, true)),
-			path2: AttributePath{}.WithElementKeyValue(NewValue(List{
+			path2: NewAttributePath().WithElementKeyValue(NewValue(List{
 				ElementType: String,
 			}, []Value{
 				NewValue(String, "hello"),
@@ -279,12 +286,12 @@ func TestAttributePathEqual(t *testing.T) {
 			equal: true,
 		},
 		"an-eks-eki-ekv": {
-			path1: AttributePath{}.WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
-			path2: AttributePath{}.WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
+			path1: NewAttributePath().WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
+			path2: NewAttributePath().WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
 			equal: true,
 		},
 		"ekv-eki-eks-an": {
-			path1: AttributePath{}.WithElementKeyValue(NewValue(Object{
+			path1: NewAttributePath().WithElementKeyValue(NewValue(Object{
 				AttributeTypes: map[string]Type{
 					"foo": Bool,
 					"bar": Number,
@@ -293,7 +300,7 @@ func TestAttributePathEqual(t *testing.T) {
 				"foo": NewValue(Bool, true),
 				"bar": NewValue(Number, big.NewFloat(1234)),
 			})).WithElementKeyInt(123).WithElementKeyString("testing").WithAttributeName("othertesting"),
-			path2: AttributePath{}.WithElementKeyValue(NewValue(Object{
+			path2: NewAttributePath().WithElementKeyValue(NewValue(Object{
 				AttributeTypes: map[string]Type{
 					"foo": Bool,
 					"bar": Number,
@@ -305,58 +312,58 @@ func TestAttributePathEqual(t *testing.T) {
 			equal: true,
 		},
 		"an-diff": {
-			path1: AttributePath{}.WithAttributeName("testing"),
-			path2: AttributePath{}.WithAttributeName("testing2"),
+			path1: NewAttributePath().WithAttributeName("testing"),
+			path2: NewAttributePath().WithAttributeName("testing2"),
 			equal: false,
 		},
 		"an-an-diff": {
-			path1: AttributePath{}.WithAttributeName("testing").WithAttributeName("testing2"),
-			path2: AttributePath{}.WithAttributeName("testing2").WithAttributeName("testing2"),
+			path1: NewAttributePath().WithAttributeName("testing").WithAttributeName("testing2"),
+			path2: NewAttributePath().WithAttributeName("testing2").WithAttributeName("testing2"),
 			equal: false,
 		},
 		"an-an-diff-2": {
-			path1: AttributePath{}.WithAttributeName("testing").WithAttributeName("testing2"),
-			path2: AttributePath{}.WithAttributeName("testing").WithAttributeName("testing3"),
+			path1: NewAttributePath().WithAttributeName("testing").WithAttributeName("testing2"),
+			path2: NewAttributePath().WithAttributeName("testing").WithAttributeName("testing3"),
 			equal: false,
 		},
 		"eks-diff": {
-			path1: AttributePath{}.WithElementKeyString("testing"),
-			path2: AttributePath{}.WithElementKeyString("testing2"),
+			path1: NewAttributePath().WithElementKeyString("testing"),
+			path2: NewAttributePath().WithElementKeyString("testing2"),
 			equal: false,
 		},
 		"eks-eks-diff": {
-			path1: AttributePath{}.WithElementKeyString("testing").WithElementKeyString("testing2"),
-			path2: AttributePath{}.WithElementKeyString("testing2").WithElementKeyString("testing2"),
+			path1: NewAttributePath().WithElementKeyString("testing").WithElementKeyString("testing2"),
+			path2: NewAttributePath().WithElementKeyString("testing2").WithElementKeyString("testing2"),
 			equal: false,
 		},
 		"eks-eks-diff-2": {
-			path1: AttributePath{}.WithElementKeyString("testing").WithElementKeyString("testing2"),
-			path2: AttributePath{}.WithElementKeyString("testing").WithElementKeyString("testing3"),
+			path1: NewAttributePath().WithElementKeyString("testing").WithElementKeyString("testing2"),
+			path2: NewAttributePath().WithElementKeyString("testing").WithElementKeyString("testing3"),
 			equal: false,
 		},
 		"eki-diff": {
-			path1: AttributePath{}.WithElementKeyInt(123),
-			path2: AttributePath{}.WithElementKeyInt(1234),
+			path1: NewAttributePath().WithElementKeyInt(123),
+			path2: NewAttributePath().WithElementKeyInt(1234),
 			equal: false,
 		},
 		"eki-eki-diff": {
-			path1: AttributePath{}.WithElementKeyInt(123).WithElementKeyInt(456),
-			path2: AttributePath{}.WithElementKeyInt(1234).WithElementKeyInt(456),
+			path1: NewAttributePath().WithElementKeyInt(123).WithElementKeyInt(456),
+			path2: NewAttributePath().WithElementKeyInt(1234).WithElementKeyInt(456),
 			equal: false,
 		},
 		"eki-eki-diff-2": {
-			path1: AttributePath{}.WithElementKeyInt(123).WithElementKeyInt(456),
-			path2: AttributePath{}.WithElementKeyInt(123).WithElementKeyInt(4567),
+			path1: NewAttributePath().WithElementKeyInt(123).WithElementKeyInt(456),
+			path2: NewAttributePath().WithElementKeyInt(123).WithElementKeyInt(4567),
 			equal: false,
 		},
 		"ekv-diff": {
-			path1: AttributePath{}.WithElementKeyValue(NewValue(List{
+			path1: NewAttributePath().WithElementKeyValue(NewValue(List{
 				ElementType: String,
 			}, []Value{
 				NewValue(String, "hello"),
 				NewValue(String, "world"),
 			})),
-			path2: AttributePath{}.WithElementKeyValue(NewValue(List{
+			path2: NewAttributePath().WithElementKeyValue(NewValue(List{
 				ElementType: String,
 			}, []Value{
 				NewValue(String, "hello"),
@@ -365,13 +372,13 @@ func TestAttributePathEqual(t *testing.T) {
 			equal: false,
 		},
 		"ekv-ekv-diff": {
-			path1: AttributePath{}.WithElementKeyValue(NewValue(List{
+			path1: NewAttributePath().WithElementKeyValue(NewValue(List{
 				ElementType: String,
 			}, []Value{
 				NewValue(String, "hello"),
 				NewValue(String, "world"),
 			})).WithElementKeyValue(NewValue(Bool, true)),
-			path2: AttributePath{}.WithElementKeyValue(NewValue(List{
+			path2: NewAttributePath().WithElementKeyValue(NewValue(List{
 				ElementType: String,
 			}, []Value{
 				NewValue(String, "hello"),
@@ -380,13 +387,13 @@ func TestAttributePathEqual(t *testing.T) {
 			equal: false,
 		},
 		"ekv-ekv-diff-2": {
-			path1: AttributePath{}.WithElementKeyValue(NewValue(List{
+			path1: NewAttributePath().WithElementKeyValue(NewValue(List{
 				ElementType: String,
 			}, []Value{
 				NewValue(String, "hello"),
 				NewValue(String, "world"),
 			})).WithElementKeyValue(NewValue(Bool, true)),
-			path2: AttributePath{}.WithElementKeyValue(NewValue(List{
+			path2: NewAttributePath().WithElementKeyValue(NewValue(List{
 				ElementType: String,
 			}, []Value{
 				NewValue(String, "hello"),
@@ -395,27 +402,27 @@ func TestAttributePathEqual(t *testing.T) {
 			equal: false,
 		},
 		"an-eks-eki-ekv-diff": {
-			path1: AttributePath{}.WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
-			path2: AttributePath{}.WithAttributeName("testing2").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
+			path1: NewAttributePath().WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
+			path2: NewAttributePath().WithAttributeName("testing2").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
 			equal: false,
 		},
 		"an-eks-eki-ekv-diff-2": {
-			path1: AttributePath{}.WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
-			path2: AttributePath{}.WithAttributeName("testing").WithElementKeyString("testing3").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
+			path1: NewAttributePath().WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
+			path2: NewAttributePath().WithAttributeName("testing").WithElementKeyString("testing3").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
 			equal: false,
 		},
 		"an-eks-eki-ekv-diff-3": {
-			path1: AttributePath{}.WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
-			path2: AttributePath{}.WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(1234).WithElementKeyValue(NewValue(String, "hello, world")),
+			path1: NewAttributePath().WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
+			path2: NewAttributePath().WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(1234).WithElementKeyValue(NewValue(String, "hello, world")),
 			equal: false,
 		},
 		"an-eks-eki-ekv-diff-4": {
-			path1: AttributePath{}.WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
-			path2: AttributePath{}.WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, friend")),
+			path1: NewAttributePath().WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, world")),
+			path2: NewAttributePath().WithAttributeName("testing").WithElementKeyString("testing2").WithElementKeyInt(123).WithElementKeyValue(NewValue(String, "hello, friend")),
 			equal: false,
 		},
 		"ekv-eki-eks-an-diff": {
-			path1: AttributePath{}.WithElementKeyValue(NewValue(Object{
+			path1: NewAttributePath().WithElementKeyValue(NewValue(Object{
 				AttributeTypes: map[string]Type{
 					"foo": Bool,
 					"bar": Number,
@@ -424,7 +431,7 @@ func TestAttributePathEqual(t *testing.T) {
 				"foo": NewValue(Bool, true),
 				"bar": NewValue(Number, big.NewFloat(1234)),
 			})).WithElementKeyInt(123).WithElementKeyString("testing").WithAttributeName("othertesting"),
-			path2: AttributePath{}.WithElementKeyValue(NewValue(Object{
+			path2: NewAttributePath().WithElementKeyValue(NewValue(Object{
 				AttributeTypes: map[string]Type{
 					"foo": Bool,
 					"bar": Number,
@@ -436,7 +443,7 @@ func TestAttributePathEqual(t *testing.T) {
 			equal: false,
 		},
 		"ekv-eki-eks-an-diff-2": {
-			path1: AttributePath{}.WithElementKeyValue(NewValue(Object{
+			path1: NewAttributePath().WithElementKeyValue(NewValue(Object{
 				AttributeTypes: map[string]Type{
 					"foo": Bool,
 					"bar": Number,
@@ -445,7 +452,7 @@ func TestAttributePathEqual(t *testing.T) {
 				"foo": NewValue(Bool, true),
 				"bar": NewValue(Number, big.NewFloat(1234)),
 			})).WithElementKeyInt(123).WithElementKeyString("testing").WithAttributeName("othertesting"),
-			path2: AttributePath{}.WithElementKeyValue(NewValue(Object{
+			path2: NewAttributePath().WithElementKeyValue(NewValue(Object{
 				AttributeTypes: map[string]Type{
 					"foo": Bool,
 					"bar": Number,
@@ -457,7 +464,7 @@ func TestAttributePathEqual(t *testing.T) {
 			equal: false,
 		},
 		"ekv-eki-eks-an-diff-3": {
-			path1: AttributePath{}.WithElementKeyValue(NewValue(Object{
+			path1: NewAttributePath().WithElementKeyValue(NewValue(Object{
 				AttributeTypes: map[string]Type{
 					"foo": Bool,
 					"bar": Number,
@@ -466,7 +473,7 @@ func TestAttributePathEqual(t *testing.T) {
 				"foo": NewValue(Bool, true),
 				"bar": NewValue(Number, big.NewFloat(1234)),
 			})).WithElementKeyInt(123).WithElementKeyString("testing").WithAttributeName("othertesting"),
-			path2: AttributePath{}.WithElementKeyValue(NewValue(Object{
+			path2: NewAttributePath().WithElementKeyValue(NewValue(Object{
 				AttributeTypes: map[string]Type{
 					"foo": Bool,
 					"bar": Number,
@@ -478,7 +485,7 @@ func TestAttributePathEqual(t *testing.T) {
 			equal: false,
 		},
 		"ekv-eki-eks-an-diff-4": {
-			path1: AttributePath{}.WithElementKeyValue(NewValue(Object{
+			path1: NewAttributePath().WithElementKeyValue(NewValue(Object{
 				AttributeTypes: map[string]Type{
 					"foo": Bool,
 					"bar": Number,
@@ -487,7 +494,7 @@ func TestAttributePathEqual(t *testing.T) {
 				"foo": NewValue(Bool, true),
 				"bar": NewValue(Number, big.NewFloat(1234)),
 			})).WithElementKeyInt(123).WithElementKeyString("testing").WithAttributeName("othertesting"),
-			path2: AttributePath{}.WithElementKeyValue(NewValue(Object{
+			path2: NewAttributePath().WithElementKeyValue(NewValue(Object{
 				AttributeTypes: map[string]Type{
 					"foo": Bool,
 					"bar": Number,

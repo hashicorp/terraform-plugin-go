@@ -23,12 +23,12 @@ func TestValueDiffEqual(t *testing.T) {
 	tests := map[string]testCase{
 		"pathDiff": {
 			diff1: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(String, "test")),
 				Value2: valuePointer(NewValue(String, "test 2")),
 			},
 			diff2: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyInt(123),
+				Path:   NewAttributePath().WithElementKeyInt(123),
 				Value1: valuePointer(NewValue(String, "test")),
 				Value2: valuePointer(NewValue(String, "test 2")),
 			},
@@ -36,12 +36,12 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"primitiveVal1Diff": {
 			diff1: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(String, "test")),
 				Value2: valuePointer(NewValue(String, "test 2")),
 			},
 			diff2: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(String, "test 3")),
 				Value2: valuePointer(NewValue(String, "test 2")),
 			},
@@ -49,12 +49,12 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"primitiveVal2Diff": {
 			diff1: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(String, "test")),
 				Value2: valuePointer(NewValue(String, "test 2")),
 			},
 			diff2: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(String, "test")),
 				Value2: valuePointer(NewValue(String, "test 3")),
 			},
@@ -62,12 +62,12 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"primitiveTypeDiff": {
 			diff1: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(String, "test")),
 				Value2: valuePointer(NewValue(String, "test 2")),
 			},
 			diff2: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(Number, big.NewFloat(123))),
 				Value2: valuePointer(NewValue(Number, big.NewFloat(1234))),
 			},
@@ -75,7 +75,7 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"complexVal1Diff": {
 			diff1: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: String,
 				}, []Value{
@@ -90,7 +90,7 @@ func TestValueDiffEqual(t *testing.T) {
 				})),
 			},
 			diff2: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: String,
 				}, []Value{
@@ -108,7 +108,7 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"complexVal2Diff": {
 			diff1: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: String,
 				}, []Value{
@@ -123,7 +123,7 @@ func TestValueDiffEqual(t *testing.T) {
 				})),
 			},
 			diff2: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: String,
 				}, []Value{
@@ -141,7 +141,7 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"complexTypeDiff": {
 			diff1: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: String,
 				}, []Value{
@@ -155,7 +155,7 @@ func TestValueDiffEqual(t *testing.T) {
 				})),
 			},
 			diff2: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: Bool,
 				}, []Value{
@@ -172,7 +172,7 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"val1NilDiff": {
 			diff1: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: nil,
 				Value2: valuePointer(NewValue(List{
 					ElementType: Bool,
@@ -182,7 +182,7 @@ func TestValueDiffEqual(t *testing.T) {
 				})),
 			},
 			diff2: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: Bool,
 				}, []Value{
@@ -199,7 +199,7 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"val2NilDiff": {
 			diff1: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: Bool,
 				}, []Value{
@@ -209,7 +209,7 @@ func TestValueDiffEqual(t *testing.T) {
 				Value2: nil,
 			},
 			diff2: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: Bool,
 				}, []Value{
@@ -226,12 +226,12 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"allValsNilDiff": {
 			diff1: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: nil,
 				Value2: nil,
 			},
 			diff2: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: Bool,
 				}, []Value{
@@ -248,12 +248,12 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"primitiveEqual": {
 			diff1: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(String, "test")),
 				Value2: valuePointer(NewValue(String, "test 2")),
 			},
 			diff2: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(String, "test")),
 				Value2: valuePointer(NewValue(String, "test 2")),
 			},
@@ -261,7 +261,7 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"complexEqual": {
 			diff1: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: String,
 				}, []Value{
@@ -276,7 +276,7 @@ func TestValueDiffEqual(t *testing.T) {
 				})),
 			},
 			diff2: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: String,
 				}, []Value{
@@ -294,7 +294,7 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"val1NilEqual": {
 			diff1: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: nil,
 				Value2: valuePointer(NewValue(List{
 					ElementType: Bool,
@@ -304,7 +304,7 @@ func TestValueDiffEqual(t *testing.T) {
 				})),
 			},
 			diff2: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: nil,
 				Value2: valuePointer(NewValue(List{
 					ElementType: Bool,
@@ -317,7 +317,7 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"val2NilEqual": {
 			diff1: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: Bool,
 				}, []Value{
@@ -327,7 +327,7 @@ func TestValueDiffEqual(t *testing.T) {
 				Value2: nil,
 			},
 			diff2: ValueDiff{
-				Path: AttributePath{}.WithElementKeyString("foo"),
+				Path: NewAttributePath().WithElementKeyString("foo"),
 				Value1: valuePointer(NewValue(List{
 					ElementType: Bool,
 				}, []Value{
@@ -340,12 +340,12 @@ func TestValueDiffEqual(t *testing.T) {
 		},
 		"allValsNilEqual": {
 			diff1: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: nil,
 				Value2: nil,
 			},
 			diff2: ValueDiff{
-				Path:   AttributePath{}.WithElementKeyString("foo"),
+				Path:   NewAttributePath().WithElementKeyString("foo"),
 				Value1: nil,
 				Value2: nil,
 			},
@@ -413,7 +413,7 @@ func TestValueDiffDiff(t *testing.T) {
 			}),
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithElementKeyInt(2),
+					Path:   NewAttributePath().WithElementKeyInt(2),
 					Value1: nil,
 					Value2: valuePointer(NewValue(String, "baz")),
 				},
@@ -465,7 +465,7 @@ func TestValueDiffDiff(t *testing.T) {
 					})),
 				},
 				{
-					Path:   AttributePath{}.WithElementKeyInt(2),
+					Path:   NewAttributePath().WithElementKeyInt(2),
 					Value1: valuePointer(NewValue(String, "baz")),
 					Value2: nil,
 				},
