@@ -1,0 +1,15 @@
+```release-note:breaking-change
+`tftypes.AttributePath` is now referenced as a pointer instead of a value pretty much everywhere it is used. This enables much more ergonomic use with `tfprotov5.Diagnostic` values.
+```
+
+```release-note:breaking-change
+`tftypes.AttributePath`'s `Steps` property is now internal-only. Use `tftypes.AttributePath.Steps()` to access the list of `tftypes.AttributePathSteps`, and `tftypes.NewAttributePath` or `tftypes.NewAttributePathWithSteps` to create a new `tftypes.AttributePath`.
+```
+
+```release-note:enhancement
+`tftypes.AttributePathError` is now exported. Provider developers can use `errors.Is` and `errors.As` to check for `tftypes.AttributePathError`s, `errors.Unwrap` to get to the underlying error, and the `Path` property on a `tftypes.AttributePathError` to access the `tftypes.AttributePath` the error is associated with. `tftypes.AttributePath.NewError` and `tftypes.AttributePath.NewErrorf` are still the supported ways to create a `tftypes.AttributePathError`.
+```
+
+```release-note:enhancement
+A number of methods in `tftypes` are benefitting from a better error message for `tftypes.AttributePathError`s, which are returned in various places, and will now surface the path associated with the error as part of the error message.
+```
