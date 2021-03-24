@@ -10,10 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 )
 
-func numberComparer(i, j *big.Float) bool {
-	return (i == nil && j == nil) || (i != nil && j != nil && i.Cmp(j) == 0)
-}
-
 func TestDynamicValueMsgPack(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
