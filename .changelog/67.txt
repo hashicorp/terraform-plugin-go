@@ -1,0 +1,23 @@
+```release-note:breaking-change
+Previously, `tftypes.NewValue` would panic if the Go type supplied wasn't a valid Go type for _any_ `tftypes.Type`. Now `tftypes.NewValue` will panic if the Go type supplied isn't a valid Go type for the _specific_ `tftypes.Type` supplied.
+```
+
+```release-note:enhancement
+Added a `tftypes.ValidateValue` function that returns an error if the combination of the `tftypes.Type` and Go type passed when panic when passed to `tftypes.NewValue`.
+```
+
+```release-note:breaking-change
+Removed the now-unnecessary `tftypes.ValueComparer` helper, which helped `github.com/google/go-cmp` compare `tftypes.Value`s. `tftypes.Value`s now have an `Equal` method that `go-cmp` can use, and don't need any special options passed anymore.
+```
+
+```release-note:bug
+Fixed a bug where `*uint8`, `*uint16`, and `*uint32` would be coerced to `int64`s as part of their conversion in `tftypes.NewValue`. This may have had no impact, as all those types can be represented in an `int64`, but to be sure our conversion is accurate, the conversion was fixed to convert them to a `uint64` instead.
+```
+
+```release-note:enhancement
+Added support for `uint`, `uint8`, `uint16`, `uint32`, `uint64`, `int`, `int8`, `int16`, `int32`, `int64`, and `float64` conversions when creating a `tftypes.Number` with `tftypes.NewValue`. These were mistakenly omitted previously.
+```
+
+```release-note:breaking-change
+Removed support for `*float32` (and `float32`, which was only documented and never implemented) when creating a `tftypes.Number` using `tftypes.NewValue`. We can't find a lossless way to convert a `float32` to a `*big.Float` and so require provider developers to choose the lossy conversion they find acceptable.
+```
