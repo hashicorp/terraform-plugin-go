@@ -1,0 +1,3 @@
+```release-note:bug
+Fixed a bug in `tftypes.Value.IsFullyKnown` that would cause a panic when calling `IsFullyKnown` on `tftypes.Value` with a `tftypes.Type` of Map, Object, List, Set, or Tuple if the `tftypes.Value` was null.
+```
