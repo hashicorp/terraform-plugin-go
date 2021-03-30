@@ -605,13 +605,13 @@ func (val Value) IsFullyKnown() bool {
 	if !val.IsKnown() {
 		return false
 	}
+	if val.value == nil {
+		return true
+	}
 	switch val.Type().(type) {
 	case primitive:
 		return true
 	case List, Set, Tuple:
-		if val.value == nil {
-			return true
-		}
 		for _, v := range val.value.([]Value) {
 			if !v.IsFullyKnown() {
 				return false
@@ -619,9 +619,6 @@ func (val Value) IsFullyKnown() bool {
 		}
 		return true
 	case Map, Object:
-		if val.value == nil {
-			return true
-		}
 		for _, v := range val.value.(map[string]Value) {
 			if !v.IsFullyKnown() {
 				return false
