@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 func jsonByteDecoder(buf []byte) *json.Decoder {
