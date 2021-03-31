@@ -396,7 +396,7 @@ func TestDynamicValueMsgPack(t *testing.T) {
 				t.Fatalf("unexpected error unmarshaling: %s", err)
 			}
 
-			if diff := cmp.Diff(test.value, val, cmp.Comparer(numberComparer), tftypes.ValueComparer()); diff != "" {
+			if diff := cmp.Diff(test.value, val); diff != "" {
 				t.Errorf("Unexpected results (-wanted +got): %s", diff)
 			}
 		})

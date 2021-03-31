@@ -177,7 +177,7 @@ func TestWalkAttributePath(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error walking attribute path, %v still remains in the path: %s", remaining, err)
 			}
-			if diff := cmp.Diff(test.expected, result, cmp.Comparer(numberComparer), ValueComparer()); diff != "" {
+			if diff := cmp.Diff(test.expected, result, cmp.Comparer(numberComparer)); diff != "" {
 				t.Errorf("Unexpected results (-wanted +got): %s", diff)
 			}
 		})

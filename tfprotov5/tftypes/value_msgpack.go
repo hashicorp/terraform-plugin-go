@@ -9,6 +9,14 @@ import (
 	"github.com/vmihailenco/msgpack"
 )
 
+type msgPackUnknownType struct{}
+
+var msgPackUnknownVal = msgPackUnknownType{}
+
+func (u msgPackUnknownType) MarshalMsgpack() ([]byte, error) {
+	return []byte{0xd4, 0, 0}, nil
+}
+
 func marshalMsgPack(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
 	if typ.Is(DynamicPseudoType) && !val.Type().Is(DynamicPseudoType) {
 		return marshalMsgPackDynamicPseudoType(val, typ, p, enc)

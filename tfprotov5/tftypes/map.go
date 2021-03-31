@@ -33,6 +33,10 @@ func (m Map) String() string {
 
 func (m Map) private() {}
 
+func (m Map) supportedGoTypes() []string {
+	return []string{"map[string]tftypes.Value"}
+}
+
 // MarshalJSON returns a JSON representation of the full type signature of `m`,
 // including its AttributeType.
 //
@@ -43,4 +47,22 @@ func (m Map) MarshalJSON() ([]byte, error) {
 		return nil, fmt.Errorf("error marshaling tftypes.Map's attribute type %T to JSON: %w", m.AttributeType, err)
 	}
 	return []byte(`["map",` + string(attributeType) + `]`), nil
+}
+
+func valueFromMap(typ Type, in interface{}) (Value, error) {
+	switch value := in.(type) {
+	case map[string]Value:
+		for k, v := range value {
+			if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
+				// TODO: make this an attribute path error?
+				return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value for %q in %s. Expected type is %s.", v.Type(), k, Map{AttributeType: typ}, typ)
+			}
+		}
+		return Value{
+			typ:   Map{AttributeType: typ},
+			value: value,
+		}, nil
+	default:
+		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Map. Expected types are: %s", in, formattedSupportedGoTypes(Map{}))
+	}
 }
