@@ -3,7 +3,9 @@ package tftypes
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strings"
 )
 
 // Type is an interface representing a Terraform type. It is only meant to be
@@ -29,6 +31,30 @@ type Type interface {
 	// private is meant to keep this interface from being implemented by
 	// types from other packages.
 	private()
+
+	// supportedGoTypes returns a list of string representations of the Go
+	// types that the Type supports for its values.
+	supportedGoTypes() []string
+}
+
+// TypeFromElements returns the common type that the passed elements all have
+// in common. An error will be returned if the passed elements are not of the
+// same type.
+func TypeFromElements(elements []Value) (Type, error) {
+	var typ Type
+	for _, el := range elements {
+		if typ == nil {
+			typ = el.Type()
+			continue
+		}
+		if !typ.Is(el.Type()) {
+			return nil, errors.New("elements do not all have the same types")
+		}
+	}
+	if typ == nil {
+		return DynamicPseudoType, nil
+	}
+	return typ, nil
 }
 
 type jsonType struct {
@@ -159,5 +185,20 @@ func (t *jsonType) UnmarshalJSON(buf []byte) error {
 
 	default:
 		return fmt.Errorf("invalid type description")
+	}
+}
+
+func formattedSupportedGoTypes(t Type) string {
+	sgt := t.supportedGoTypes()
+	switch len(sgt) {
+	case 0:
+		return "no supported Go types"
+	case 1:
+		return sgt[0]
+	case 2:
+		return sgt[0] + " or " + sgt[1]
+	default:
+		sgt[len(sgt)-1] = "or " + sgt[len(sgt)-1]
+		return strings.Join(sgt, ", ")
 	}
 }

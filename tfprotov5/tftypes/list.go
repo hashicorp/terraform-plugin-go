@@ -1,6 +1,8 @@
 package tftypes
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // List is a Terraform type representing an ordered collection of elements, all
 // of the same type.
@@ -33,6 +35,27 @@ func (l List) String() string {
 }
 
 func (l List) private() {}
+
+func (l List) supportedGoTypes() []string {
+	return []string{"[]tftypes.Value"}
+}
+
+func valueFromList(typ Type, in interface{}) (Value, error) {
+	switch value := in.(type) {
+	case []Value:
+		for pos, v := range value {
+			if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
+				return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value in position %d of %s. Expected type is %s.", v.Type(), pos, List{ElementType: typ}, typ)
+			}
+		}
+		return Value{
+			typ:   List{ElementType: typ},
+			value: value,
+		}, nil
+	default:
+		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.List. Expected types are: %s", in, formattedSupportedGoTypes(List{}))
+	}
+}
 
 // MarshalJSON returns a JSON representation of the full type signature of `l`,
 // including its ElementType.

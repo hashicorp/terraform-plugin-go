@@ -113,7 +113,7 @@ func TestWalk(t *testing.T) {
 		if !ok {
 			t.Errorf("no value at %q, expected %s", path, expected.String())
 		} else {
-			if diff := cmp.Diff(expected, got, ValueComparer()); diff != "" {
+			if diff := cmp.Diff(expected, got, cmp.Comparer(numberComparer)); diff != "" {
 				t.Errorf("wrong value at %q. (-wanted, +got): %s", path, diff)
 			}
 		}
@@ -130,21 +130,19 @@ func TestWalk(t *testing.T) {
 func TestTransform(t *testing.T) {
 	valType := Object{
 		AttributeTypes: map[string]Type{
-			"string":       String,
-			"number":       Number,
-			"bool":         Bool,
-			"list":         List{ElementType: Bool},
-			"list_empty":   List{ElementType: Bool},
-			"set":          Set{ElementType: Bool},
-			"set_empty":    Set{ElementType: Bool},
-			"tuple":        Tuple{ElementTypes: []Type{Bool}},
-			"tuple_empty":  Tuple{ElementTypes: []Type{}},
-			"map":          Map{AttributeType: Bool},
-			"map_empty":    Map{AttributeType: Bool},
-			"object":       Object{AttributeTypes: map[string]Type{"true": Bool}},
-			"object_empty": Object{AttributeTypes: map[string]Type{}},
-			"null":         List{ElementType: String},
-			"unknown":      Map{AttributeType: Bool},
+			"string":     String,
+			"number":     Number,
+			"bool":       Bool,
+			"list":       List{ElementType: Bool},
+			"list_empty": List{ElementType: Bool},
+			"set":        Set{ElementType: Bool},
+			"set_empty":  Set{ElementType: Bool},
+			"tuple":      Tuple{ElementTypes: []Type{Bool}},
+			"map":        Map{AttributeType: Bool},
+			"map_empty":  Map{AttributeType: Bool},
+			"object":     Object{AttributeTypes: map[string]Type{"true": Bool}},
+			"null":       List{ElementType: String},
+			"unknown":    Map{AttributeType: Bool},
 		},
 	}
 	valContent := map[string]Value{

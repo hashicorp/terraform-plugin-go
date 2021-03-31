@@ -10,10 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 )
 
-func numberComparer(i, j *big.Float) bool {
-	return (i == nil && j == nil) || (i != nil && j != nil && i.Cmp(j) == 0)
-}
-
 func TestDynamicValueMsgPack(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
@@ -396,7 +392,7 @@ func TestDynamicValueMsgPack(t *testing.T) {
 				t.Fatalf("unexpected error unmarshaling: %s", err)
 			}
 
-			if diff := cmp.Diff(test.value, val, cmp.Comparer(numberComparer), tftypes.ValueComparer()); diff != "" {
+			if diff := cmp.Diff(test.value, val); diff != "" {
 				t.Errorf("Unexpected results (-wanted +got): %s", diff)
 			}
 		})

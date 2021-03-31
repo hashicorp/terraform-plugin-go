@@ -2,6 +2,7 @@ package tftypes
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 )
 
@@ -56,6 +57,46 @@ func (tu Tuple) String() string {
 }
 
 func (tu Tuple) private() {}
+
+func (l Tuple) supportedGoTypes() []string {
+	return []string{"[]tftypes.Value"}
+}
+
+func valueCanBeTuple(val interface{}) bool {
+	switch val.(type) {
+	case []Value:
+		return true
+	default:
+		return false
+	}
+}
+
+func valueFromTuple(types []Type, in interface{}) (Value, error) {
+	switch value := in.(type) {
+	case []Value:
+		// types should only be null if the "Tuple" is actually a
+		// DynamicPseudoType being created from a []Value. In which
+		// case, we don't know what types it should have, or even how
+		// many there will be, so let's not validate that at all
+		if types != nil {
+			if len(types) != len(value) {
+				return Value{}, fmt.Errorf("can't create a tftypes.Value with %d elements, type %s requires %d elements", len(value), Tuple{ElementTypes: types}, len(types))
+			}
+			for pos, v := range value {
+				typ := types[pos]
+				if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
+					return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value at position %d in %s. Expected type is %s.", v.Type(), pos, Tuple{ElementTypes: types}, typ)
+				}
+			}
+		}
+		return Value{
+			typ:   Tuple{ElementTypes: types},
+			value: value,
+		}, nil
+	default:
+		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Tuple. Expected types are: %s", in, formattedSupportedGoTypes(Tuple{}))
+	}
+}
 
 // MarshalJSON returns a JSON representation of the full type signature of
 // `tu`, including the ElementTypes.

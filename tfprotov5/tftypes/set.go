@@ -1,6 +1,8 @@
 package tftypes
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Set is a Terraform type representing an unordered collection of unique
 // elements, all of the same type.
@@ -33,6 +35,27 @@ func (s Set) String() string {
 }
 
 func (s Set) private() {}
+
+func (s Set) supportedGoTypes() []string {
+	return []string{"[]tftypes.Value"}
+}
+
+func valueFromSet(typ Type, in interface{}) (Value, error) {
+	switch value := in.(type) {
+	case []Value:
+		for pos, v := range value {
+			if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
+				return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value in position %d of %s. Expected type is %s.", v.Type(), pos, Set{ElementType: typ}, typ)
+			}
+		}
+		return Value{
+			typ:   Set{ElementType: typ},
+			value: value,
+		}, nil
+	default:
+		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Set. Expected types are: %s", in, formattedSupportedGoTypes(Set{}))
+	}
+}
 
 // MarshalJSON returns a JSON representation of the full type signature of `s`,
 // including its ElementType.

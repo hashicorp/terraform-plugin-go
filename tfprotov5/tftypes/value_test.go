@@ -8,6 +8,10 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+func numberComparer(i, j *big.Float) bool {
+	return (i == nil && j == nil) || (i != nil && j != nil && i.Cmp(j) == 0)
+}
+
 func TestValueAs(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
@@ -23,42 +27,6 @@ func TestValueAs(t *testing.T) {
 		return &in
 	}
 	numberPointerPointer := func(in *big.Float) **big.Float {
-		return &in
-	}
-	float64Pointer := func(in float64) *float64 {
-		return &in
-	}
-	float32Pointer := func(in float32) *float32 {
-		return &in
-	}
-	int64Pointer := func(in int64) *int64 {
-		return &in
-	}
-	int32Pointer := func(in int32) *int32 {
-		return &in
-	}
-	int16Pointer := func(in int16) *int16 {
-		return &in
-	}
-	int8Pointer := func(in int8) *int8 {
-		return &in
-	}
-	intPointer := func(in int) *int {
-		return &in
-	}
-	uint64Pointer := func(in uint64) *uint64 {
-		return &in
-	}
-	uint32Pointer := func(in uint32) *uint32 {
-		return &in
-	}
-	uint16Pointer := func(in uint16) *uint16 {
-		return &in
-	}
-	uint8Pointer := func(in uint8) *uint8 {
-		return &in
-	}
-	uintPointer := func(in uint) *uint {
 		return &in
 	}
 	boolPointer := func(in bool) *bool {
@@ -114,126 +82,6 @@ func TestValueAs(t *testing.T) {
 			in:       NewValue(Number, big.NewFloat(123)),
 			as:       big.NewFloat(0),
 			expected: big.NewFloat(123),
-		},
-		"number-pointer-float64": {
-			in:       NewValue(Number, float64Pointer(123.4)),
-			as:       big.NewFloat(0),
-			expected: big.NewFloat(123.4),
-		},
-		"number-pointer-float64-null": {
-			in:       NewValue(Number, (*float64)(nil)),
-			as:       numberPointerPointer(big.NewFloat(123.4)),
-			expected: numberPointerPointer(nil),
-		},
-		"number-pointer-float32": {
-			in:       NewValue(Number, float32Pointer(0.125)),
-			as:       big.NewFloat(0),
-			expected: big.NewFloat(0.125),
-		},
-		"number-pointer-float32-null": {
-			in:       NewValue(Number, (*float32)(nil)),
-			as:       numberPointerPointer(big.NewFloat(0.125)),
-			expected: numberPointerPointer(nil),
-		},
-		"number-pointer-int64": {
-			in:       NewValue(Number, int64Pointer(123)),
-			as:       big.NewFloat(0),
-			expected: big.NewFloat(123),
-		},
-		"number-pointer-int64-null": {
-			in:       NewValue(Number, (*int64)(nil)),
-			as:       numberPointerPointer(big.NewFloat(123)),
-			expected: numberPointerPointer(nil),
-		},
-		"number-pointer-int32": {
-			in:       NewValue(Number, int32Pointer(123)),
-			as:       big.NewFloat(0),
-			expected: big.NewFloat(123),
-		},
-		"number-pointer-int32-null": {
-			in:       NewValue(Number, (*int32)(nil)),
-			as:       numberPointerPointer(big.NewFloat(123)),
-			expected: numberPointerPointer(nil),
-		},
-		"number-pointer-int16": {
-			in:       NewValue(Number, int16Pointer(123)),
-			as:       big.NewFloat(0),
-			expected: big.NewFloat(123),
-		},
-		"number-pointer-int16-null": {
-			in:       NewValue(Number, (*int16)(nil)),
-			as:       numberPointerPointer(big.NewFloat(123)),
-			expected: numberPointerPointer(nil),
-		},
-		"number-pointer-int8": {
-			in:       NewValue(Number, int8Pointer(123)),
-			as:       big.NewFloat(0),
-			expected: big.NewFloat(123),
-		},
-		"number-pointer-int8-null": {
-			in:       NewValue(Number, (*int8)(nil)),
-			as:       numberPointerPointer(big.NewFloat(123)),
-			expected: numberPointerPointer(nil),
-		},
-		"number-pointer-int": {
-			in:       NewValue(Number, intPointer(123)),
-			as:       big.NewFloat(0),
-			expected: big.NewFloat(123),
-		},
-		"number-pointer-int-null": {
-			in:       NewValue(Number, (*int)(nil)),
-			as:       numberPointerPointer(big.NewFloat(123)),
-			expected: numberPointerPointer(nil),
-		},
-		"number-pointer-uint64": {
-			in:       NewValue(Number, uint64Pointer(123)),
-			as:       big.NewFloat(0),
-			expected: big.NewFloat(123),
-		},
-		"number-pointer-uint64-null": {
-			in:       NewValue(Number, (*uint64)(nil)),
-			as:       numberPointerPointer(big.NewFloat(123)),
-			expected: numberPointerPointer(nil),
-		},
-		"number-pointer-uint32": {
-			in:       NewValue(Number, uint32Pointer(123)),
-			as:       big.NewFloat(0),
-			expected: big.NewFloat(123),
-		},
-		"number-pointer-uint32-null": {
-			in:       NewValue(Number, (*uint32)(nil)),
-			as:       numberPointerPointer(big.NewFloat(123)),
-			expected: numberPointerPointer(nil),
-		},
-		"number-pointer-uint16": {
-			in:       NewValue(Number, uint16Pointer(123)),
-			as:       big.NewFloat(0),
-			expected: big.NewFloat(123),
-		},
-		"number-pointer-uint16-null": {
-			in:       NewValue(Number, (*uint16)(nil)),
-			as:       numberPointerPointer(big.NewFloat(123)),
-			expected: numberPointerPointer(nil),
-		},
-		"number-pointer-uint8": {
-			in:       NewValue(Number, uint8Pointer(123)),
-			as:       big.NewFloat(0),
-			expected: big.NewFloat(123),
-		},
-		"number-pointer-uint8-null": {
-			in:       NewValue(Number, (*uint8)(nil)),
-			as:       numberPointerPointer(big.NewFloat(123)),
-			expected: numberPointerPointer(nil),
-		},
-		"number-pointer-uint": {
-			in:       NewValue(Number, uintPointer(123)),
-			as:       big.NewFloat(0),
-			expected: big.NewFloat(123),
-		},
-		"number-pointer-uint-null": {
-			in:       NewValue(Number, (*uint)(nil)),
-			as:       numberPointerPointer(big.NewFloat(123)),
-			expected: numberPointerPointer(nil),
 		},
 		"number-null": {
 			in:       NewValue(Number, nil),
@@ -474,8 +322,7 @@ func TestValueAs(t *testing.T) {
 				t.Fatalf("unexpected error: %s", err)
 			}
 			if diff := cmp.Diff(test.expected, test.as,
-				cmp.Comparer(numberComparer),
-				ValueComparer()); diff != "" {
+				cmp.Comparer(numberComparer)); diff != "" {
 				t.Errorf("Unexpected results (-wanted, +got): %s", diff)
 			}
 		})

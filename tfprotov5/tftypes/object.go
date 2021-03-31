@@ -2,6 +2,7 @@ package tftypes
 
 import (
 	"encoding/json"
+	"fmt"
 	"sort"
 	"strings"
 )
@@ -66,6 +67,51 @@ func (o Object) String() string {
 }
 
 func (o Object) private() {}
+
+func (o Object) supportedGoTypes() []string {
+	return []string{"map[string]tftypes.Value"}
+}
+
+func valueCanBeObject(val interface{}) bool {
+	switch val.(type) {
+	case map[string]Value:
+		return true
+	default:
+		return false
+	}
+}
+
+func valueFromObject(types map[string]Type, in interface{}) (Value, error) {
+	switch value := in.(type) {
+	case map[string]Value:
+		// types should only be null if the "Object" is actually a
+		// DynamicPseudoType being created from a map[string]Value. In
+		// which case, we don't know what types it should have, or even
+		// how many there will be, so let's not validate that at all
+		if types != nil {
+			for k := range types {
+				if _, ok := value[k]; !ok {
+					return Value{}, fmt.Errorf("can't create a tftypes.Value of type %s, required attribute %q not set", Object{AttributeTypes: types}, k)
+				}
+			}
+			for k, v := range value {
+				typ, ok := types[k]
+				if !ok {
+					return Value{}, fmt.Errorf("can't set a value on %q in tftypes.NewValue, key not part of the object type %s.", k, Object{AttributeTypes: types})
+				}
+				if !v.Type().Is(types[k]) && !types[k].Is(DynamicPseudoType) {
+					return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value for %q in %s. Expected type is %s.", v.Type(), k, Object{AttributeTypes: types}, typ)
+				}
+			}
+		}
+		return Value{
+			typ:   Object{AttributeTypes: types},
+			value: value,
+		}, nil
+	default:
+		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Object. Expected types are: %s", in, formattedSupportedGoTypes(Object{}))
+	}
+}
 
 // MarshalJSON returns a JSON representation of the full type signature of `o`,
 // including the AttributeTypes.
