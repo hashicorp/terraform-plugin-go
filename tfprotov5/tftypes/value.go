@@ -605,6 +605,9 @@ func (val Value) IsFullyKnown() bool {
 	if !val.IsKnown() {
 		return false
 	}
+	if val.value == nil {
+		return true
+	}
 	switch val.Type().(type) {
 	case primitive:
 		return true

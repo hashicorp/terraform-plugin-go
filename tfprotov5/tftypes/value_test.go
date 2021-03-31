@@ -705,6 +705,33 @@ func TestValueIsKnown(t *testing.T) {
 			known:      true,
 			fullyKnown: false,
 		},
+		"object-null": {
+			value: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": String,
+			}}, nil),
+			known:      true,
+			fullyKnown: true,
+		},
+		"map-null": {
+			value:      NewValue(Map{AttributeType: String}, nil),
+			known:      true,
+			fullyKnown: true,
+		},
+		"tuple-null": {
+			value:      NewValue(Tuple{ElementTypes: []Type{String}}, nil),
+			known:      true,
+			fullyKnown: true,
+		},
+		"list-null": {
+			value:      NewValue(List{ElementType: String}, nil),
+			known:      true,
+			fullyKnown: true,
+		},
+		"set-null": {
+			value:      NewValue(Set{ElementType: String}, nil),
+			known:      true,
+			fullyKnown: true,
+		},
 	}
 	for name, test := range tests {
 		name, test := name, test
