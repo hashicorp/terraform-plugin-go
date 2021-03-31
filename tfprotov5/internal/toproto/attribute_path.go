@@ -10,7 +10,10 @@ import (
 var ErrUnknownAttributePathStepType = errors.New("unknown type of AttributePath_Step")
 
 func AttributePath(in *tftypes.AttributePath) (*tfplugin5.AttributePath, error) {
-	steps, err := AttributePath_Steps(in.Steps)
+	if in == nil {
+		return nil, nil
+	}
+	steps, err := AttributePath_Steps(in.Steps())
 	if err != nil {
 		return nil, err
 	}

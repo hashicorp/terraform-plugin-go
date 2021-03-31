@@ -1506,27 +1506,27 @@ func TestValueWalkAttributePath(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
 		val      Value
-		path     AttributePath
+		path     *AttributePath
 		expected Value
 	}
 	tests := map[string]testCase{
 		"primitive": {
 			val:      NewValue(String, "hello"),
-			path:     AttributePath{},
+			path:     NewAttributePath(),
 			expected: NewValue(String, "hello"),
 		},
 		"list": {
 			val: NewValue(List{ElementType: String}, []Value{
 				NewValue(String, "foo"), NewValue(String, "bar"),
 			}),
-			path:     AttributePath{}.WithElementKeyInt(1),
+			path:     NewAttributePath().WithElementKeyInt(1),
 			expected: NewValue(String, "bar"),
 		},
 		"set": {
 			val: NewValue(Set{ElementType: String}, []Value{
 				NewValue(String, "foo"), NewValue(String, "bar"),
 			}),
-			path:     AttributePath{}.WithElementKeyValue(NewValue(String, "bar")),
+			path:     NewAttributePath().WithElementKeyValue(NewValue(String, "bar")),
 			expected: NewValue(String, "bar"),
 		},
 		"map": {
@@ -1534,7 +1534,7 @@ func TestValueWalkAttributePath(t *testing.T) {
 				"a": NewValue(String, "foo"),
 				"b": NewValue(String, "bar"),
 			}),
-			path:     AttributePath{}.WithElementKeyString("b"),
+			path:     NewAttributePath().WithElementKeyString("b"),
 			expected: NewValue(String, "bar"),
 		},
 		"object": {
@@ -1545,7 +1545,7 @@ func TestValueWalkAttributePath(t *testing.T) {
 				"a": NewValue(String, "foo"),
 				"b": NewValue(Number, big.NewFloat(123)),
 			}),
-			path:     AttributePath{}.WithAttributeName("b"),
+			path:     NewAttributePath().WithAttributeName("b"),
 			expected: NewValue(Number, big.NewFloat(123)),
 		},
 		"tuple": {
@@ -1555,7 +1555,7 @@ func TestValueWalkAttributePath(t *testing.T) {
 				NewValue(String, "foo"),
 				NewValue(Number, big.NewFloat(123)),
 			}),
-			path:     AttributePath{}.WithElementKeyInt(1),
+			path:     NewAttributePath().WithElementKeyInt(1),
 			expected: NewValue(Number, big.NewFloat(123)),
 		},
 		"complex": {
@@ -1589,7 +1589,7 @@ func TestValueWalkAttributePath(t *testing.T) {
 					}),
 				}),
 			}),
-			path:     AttributePath{}.WithAttributeName("a").WithElementKeyInt(1).WithElementKeyInt(2).WithElementKeyInt(1),
+			path:     NewAttributePath().WithAttributeName("a").WithElementKeyInt(1).WithElementKeyInt(2).WithElementKeyInt(1),
 			expected: NewValue(String, "world"),
 		},
 	}

@@ -14,9 +14,7 @@ func AttributePath(in *tfplugin5.AttributePath) (*tftypes.AttributePath, error) 
 	if err != nil {
 		return nil, err
 	}
-	return &tftypes.AttributePath{
-		Steps: steps,
-	}, nil
+	return tftypes.NewAttributePathWithSteps(steps), nil
 }
 
 func AttributePaths(in []*tfplugin5.AttributePath) ([]*tftypes.AttributePath, error) {

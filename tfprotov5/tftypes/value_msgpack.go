@@ -9,7 +9,7 @@ import (
 	"github.com/vmihailenco/msgpack"
 )
 
-func marshalMsgPack(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
+func marshalMsgPack(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
 	if typ.Is(DynamicPseudoType) && !val.Type().Is(DynamicPseudoType) {
 		return marshalMsgPackDynamicPseudoType(val, typ, p, enc)
 
@@ -49,7 +49,7 @@ func marshalMsgPack(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) 
 	return fmt.Errorf("unknown type %s", typ)
 }
 
-func marshalMsgPackDynamicPseudoType(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
+func marshalMsgPackDynamicPseudoType(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
 	typeJSON, err := val.Type().MarshalJSON()
 	if err != nil {
 		return p.NewErrorf("error generating JSON for type %s: %w", val.Type(), err)
@@ -69,7 +69,7 @@ func marshalMsgPackDynamicPseudoType(val Value, typ Type, p AttributePath, enc *
 	return nil
 }
 
-func marshalMsgPackString(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
+func marshalMsgPackString(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
 	s, ok := val.value.(string)
 	if !ok {
 		return unexpectedValueTypeError(p, s, val.value, typ)
@@ -81,7 +81,7 @@ func marshalMsgPackString(val Value, typ Type, p AttributePath, enc *msgpack.Enc
 	return nil
 }
 
-func marshalMsgPackNumber(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
+func marshalMsgPackNumber(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
 	n, ok := val.value.(*big.Float)
 	if !ok {
 		return unexpectedValueTypeError(p, n, val.value, typ)
@@ -119,7 +119,7 @@ func marshalMsgPackNumber(val Value, typ Type, p AttributePath, enc *msgpack.Enc
 	return nil
 }
 
-func marshalMsgPackBool(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
+func marshalMsgPackBool(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
 	b, ok := val.value.(bool)
 	if !ok {
 		return unexpectedValueTypeError(p, b, val.value, typ)
@@ -131,7 +131,7 @@ func marshalMsgPackBool(val Value, typ Type, p AttributePath, enc *msgpack.Encod
 	return nil
 }
 
-func marshalMsgPackList(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
+func marshalMsgPackList(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
 	l, ok := val.value.([]Value)
 	if !ok {
 		return unexpectedValueTypeError(p, l, val.value, typ)
@@ -149,7 +149,7 @@ func marshalMsgPackList(val Value, typ Type, p AttributePath, enc *msgpack.Encod
 	return nil
 }
 
-func marshalMsgPackSet(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
+func marshalMsgPackSet(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
 	s, ok := val.value.([]Value)
 	if !ok {
 		return unexpectedValueTypeError(p, s, val.value, typ)
@@ -167,7 +167,7 @@ func marshalMsgPackSet(val Value, typ Type, p AttributePath, enc *msgpack.Encode
 	return nil
 }
 
-func marshalMsgPackMap(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
+func marshalMsgPackMap(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
 	m, ok := val.value.(map[string]Value)
 	if !ok {
 		return unexpectedValueTypeError(p, m, val.value, typ)
@@ -189,7 +189,7 @@ func marshalMsgPackMap(val Value, typ Type, p AttributePath, enc *msgpack.Encode
 	return nil
 }
 
-func marshalMsgPackTuple(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
+func marshalMsgPackTuple(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
 	t, ok := val.value.([]Value)
 	if !ok {
 		return unexpectedValueTypeError(p, t, val.value, typ)
@@ -209,7 +209,7 @@ func marshalMsgPackTuple(val Value, typ Type, p AttributePath, enc *msgpack.Enco
 	return nil
 }
 
-func marshalMsgPackObject(val Value, typ Type, p AttributePath, enc *msgpack.Encoder) error {
+func marshalMsgPackObject(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
 	o, ok := val.value.(map[string]Value)
 	if !ok {
 		return unexpectedValueTypeError(p, o, val.value, typ)

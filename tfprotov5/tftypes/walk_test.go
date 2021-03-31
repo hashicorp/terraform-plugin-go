@@ -100,7 +100,7 @@ func TestWalk(t *testing.T) {
 		`AttributeName("unknown")`:                      valContent["unknown"],
 	}
 
-	err := Walk(val, func(path AttributePath, val Value) (bool, error) {
+	err := Walk(val, func(path *AttributePath, val Value) (bool, error) {
 		gotCalls[path.String()] = val
 		return true, nil
 	})
@@ -165,7 +165,7 @@ func TestTransform(t *testing.T) {
 	val := NewValue(valType, valContent)
 
 	type testCase struct {
-		f     func(AttributePath, Value) (Value, error)
+		f     func(*AttributePath, Value) (Value, error)
 		diffs []ValueDiff
 	}
 
@@ -176,8 +176,8 @@ func TestTransform(t *testing.T) {
 
 	tests := map[string]testCase{
 		"string": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("string")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("string")
 				if path.Equal(target) {
 					return NewValue(String, "hello, world"), nil
 				}
@@ -185,15 +185,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("string"),
+					Path:   NewAttributePath().WithAttributeName("string"),
 					Value1: newValuePointer(String, "hello"),
 					Value2: newValuePointer(String, "hello, world"),
 				},
 			},
 		},
 		"string:null": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("string")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("string")
 				if path.Equal(target) {
 					return NewValue(String, nil), nil
 				}
@@ -201,15 +201,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("string"),
+					Path:   NewAttributePath().WithAttributeName("string"),
 					Value1: newValuePointer(String, "hello"),
 					Value2: newValuePointer(String, nil),
 				},
 			},
 		},
 		"string:unknown": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("string")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("string")
 				if path.Equal(target) {
 					return NewValue(String, UnknownValue), nil
 				}
@@ -217,15 +217,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("string"),
+					Path:   NewAttributePath().WithAttributeName("string"),
 					Value1: newValuePointer(String, "hello"),
 					Value2: newValuePointer(String, UnknownValue),
 				},
 			},
 		},
 		"number": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("number")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("number")
 				if path.Equal(target) {
 					return NewValue(Number, big.NewFloat(123)), nil
 				}
@@ -233,15 +233,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("number"),
+					Path:   NewAttributePath().WithAttributeName("number"),
 					Value1: newValuePointer(Number, big.NewFloat(10)),
 					Value2: newValuePointer(Number, big.NewFloat(123)),
 				},
 			},
 		},
 		"number:null": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("number")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("number")
 				if path.Equal(target) {
 					return NewValue(Number, nil), nil
 				}
@@ -249,15 +249,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("number"),
+					Path:   NewAttributePath().WithAttributeName("number"),
 					Value1: newValuePointer(Number, big.NewFloat(10)),
 					Value2: newValuePointer(Number, nil),
 				},
 			},
 		},
 		"number:unknown": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("number")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("number")
 				if path.Equal(target) {
 					return NewValue(Number, UnknownValue), nil
 				}
@@ -265,15 +265,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("number"),
+					Path:   NewAttributePath().WithAttributeName("number"),
 					Value1: newValuePointer(Number, big.NewFloat(10)),
 					Value2: newValuePointer(Number, UnknownValue),
 				},
 			},
 		},
 		"bool": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("bool")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("bool")
 				if path.Equal(target) {
 					return NewValue(Bool, false), nil
 				}
@@ -281,15 +281,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("bool"),
+					Path:   NewAttributePath().WithAttributeName("bool"),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, false),
 				},
 			},
 		},
 		"bool:null": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("bool")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("bool")
 				if path.Equal(target) {
 					return NewValue(Bool, nil), nil
 				}
@@ -297,15 +297,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("bool"),
+					Path:   NewAttributePath().WithAttributeName("bool"),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, nil),
 				},
 			},
 		},
 		"bool:unknown": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("bool")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("bool")
 				if path.Equal(target) {
 					return NewValue(Bool, UnknownValue), nil
 				}
@@ -313,15 +313,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("bool"),
+					Path:   NewAttributePath().WithAttributeName("bool"),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, UnknownValue),
 				},
 			},
 		},
 		"list:null": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("list")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("list")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["list"], nil), nil
 				}
@@ -329,22 +329,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("list"),
+					Path: NewAttributePath().WithAttributeName("list"),
 					Value1: newValuePointer(valType.AttributeTypes["list"], []Value{
 						NewValue(Bool, true),
 					}),
 					Value2: newValuePointer(valType.AttributeTypes["list"], nil),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("list").WithElementKeyInt(0),
+					Path:   NewAttributePath().WithAttributeName("list").WithElementKeyInt(0),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 			},
 		},
 		"list:unknown": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("list")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("list")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["list"], UnknownValue), nil
 				}
@@ -352,22 +352,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("list"),
+					Path: NewAttributePath().WithAttributeName("list"),
 					Value1: newValuePointer(valType.AttributeTypes["list"], []Value{
 						NewValue(Bool, true),
 					}),
 					Value2: newValuePointer(valType.AttributeTypes["list"], UnknownValue),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("list").WithElementKeyInt(0),
+					Path:   NewAttributePath().WithAttributeName("list").WithElementKeyInt(0),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 			},
 		},
 		"list:nullElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("list").WithElementKeyInt(0)
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("list").WithElementKeyInt(0)
 				if path.Equal(target) {
 					return NewValue(Bool, nil), nil
 				}
@@ -375,15 +375,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("list").WithElementKeyInt(0),
+					Path:   NewAttributePath().WithAttributeName("list").WithElementKeyInt(0),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, nil),
 				},
 			},
 		},
 		"list:unknownElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("list").WithElementKeyInt(0)
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("list").WithElementKeyInt(0)
 				if path.Equal(target) {
 					return NewValue(Bool, UnknownValue), nil
 				}
@@ -391,15 +391,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("list").WithElementKeyInt(0),
+					Path:   NewAttributePath().WithAttributeName("list").WithElementKeyInt(0),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, UnknownValue),
 				},
 			},
 		},
 		"list:replaceElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("list").WithElementKeyInt(0)
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("list").WithElementKeyInt(0)
 				if path.Equal(target) {
 					return NewValue(Bool, false), nil
 				}
@@ -407,15 +407,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("list").WithElementKeyInt(0),
+					Path:   NewAttributePath().WithAttributeName("list").WithElementKeyInt(0),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, false),
 				},
 			},
 		},
 		"list:addElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("list")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("list")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["list"], []Value{
 						NewValue(Bool, true), NewValue(Bool, false),
@@ -425,7 +425,7 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("list"),
+					Path: NewAttributePath().WithAttributeName("list"),
 					Value1: newValuePointer(valType.AttributeTypes["list"], []Value{
 						NewValue(Bool, true),
 					}),
@@ -434,15 +434,15 @@ func TestTransform(t *testing.T) {
 					}),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("list").WithElementKeyInt(1),
+					Path:   NewAttributePath().WithAttributeName("list").WithElementKeyInt(1),
 					Value1: nil,
 					Value2: newValuePointer(Bool, false),
 				},
 			},
 		},
 		"list:removeElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("list")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("list")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["list"], []Value{}), nil
 				}
@@ -450,22 +450,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("list"),
+					Path: NewAttributePath().WithAttributeName("list"),
 					Value1: newValuePointer(valType.AttributeTypes["list"], []Value{
 						NewValue(Bool, true),
 					}),
 					Value2: newValuePointer(valType.AttributeTypes["list"], []Value{}),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("list").WithElementKeyInt(0),
+					Path:   NewAttributePath().WithAttributeName("list").WithElementKeyInt(0),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 			},
 		},
 		"list_empty": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("list_empty")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("list_empty")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["list_empty"], []Value{
 						NewValue(Bool, true),
@@ -475,22 +475,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("list_empty"),
+					Path:   NewAttributePath().WithAttributeName("list_empty"),
 					Value1: newValuePointer(valType.AttributeTypes["list_empty"], []Value{}),
 					Value2: newValuePointer(valType.AttributeTypes["list_empty"], []Value{
 						NewValue(Bool, true),
 					}),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("list_empty").WithElementKeyInt(0),
+					Path:   NewAttributePath().WithAttributeName("list_empty").WithElementKeyInt(0),
 					Value1: nil,
 					Value2: newValuePointer(Bool, true),
 				},
 			},
 		},
 		"set:null": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("set")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("set")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["set"], nil), nil
 				}
@@ -498,22 +498,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("set"),
+					Path: NewAttributePath().WithAttributeName("set"),
 					Value1: newValuePointer(valType.AttributeTypes["set"], []Value{
 						NewValue(Bool, true),
 					}),
 					Value2: newValuePointer(valType.AttributeTypes["set"], nil),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true)),
+					Path:   NewAttributePath().WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true)),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 			},
 		},
 		"set:unknown": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("set")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("set")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["set"], UnknownValue), nil
 				}
@@ -521,22 +521,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("set"),
+					Path: NewAttributePath().WithAttributeName("set"),
 					Value1: newValuePointer(valType.AttributeTypes["set"], []Value{
 						NewValue(Bool, true),
 					}),
 					Value2: newValuePointer(valType.AttributeTypes["set"], UnknownValue),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true)),
+					Path:   NewAttributePath().WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true)),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 			},
 		},
 		"set:nullElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true))
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true))
 				if path.Equal(target) {
 					return NewValue(Bool, nil), nil
 				}
@@ -544,20 +544,20 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true)),
+					Path:   NewAttributePath().WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true)),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("set").WithElementKeyValue(NewValue(Bool, nil)),
+					Path:   NewAttributePath().WithAttributeName("set").WithElementKeyValue(NewValue(Bool, nil)),
 					Value1: nil,
 					Value2: newValuePointer(Bool, nil),
 				},
 			},
 		},
 		"set:unknownElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true))
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true))
 				if path.Equal(target) {
 					return NewValue(Bool, UnknownValue), nil
 				}
@@ -565,20 +565,20 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true)),
+					Path:   NewAttributePath().WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true)),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("set").WithElementKeyValue(NewValue(Bool, UnknownValue)),
+					Path:   NewAttributePath().WithAttributeName("set").WithElementKeyValue(NewValue(Bool, UnknownValue)),
 					Value1: nil,
 					Value2: newValuePointer(Bool, UnknownValue),
 				},
 			},
 		},
 		"set:replaceElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true))
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true))
 				if path.Equal(target) {
 					return NewValue(Bool, false), nil
 				}
@@ -586,20 +586,20 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true)),
+					Path:   NewAttributePath().WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true)),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("set").WithElementKeyValue(NewValue(Bool, false)),
+					Path:   NewAttributePath().WithAttributeName("set").WithElementKeyValue(NewValue(Bool, false)),
 					Value1: nil,
 					Value2: newValuePointer(Bool, false),
 				},
 			},
 		},
 		"set:addElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("set")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("set")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["set"], []Value{
 						NewValue(Bool, true), NewValue(Bool, false),
@@ -609,7 +609,7 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("set"),
+					Path: NewAttributePath().WithAttributeName("set"),
 					Value1: newValuePointer(valType.AttributeTypes["set"], []Value{
 						NewValue(Bool, true),
 					}),
@@ -618,15 +618,15 @@ func TestTransform(t *testing.T) {
 					}),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("set").WithElementKeyValue(NewValue(Bool, false)),
+					Path:   NewAttributePath().WithAttributeName("set").WithElementKeyValue(NewValue(Bool, false)),
 					Value1: nil,
 					Value2: newValuePointer(Bool, false),
 				},
 			},
 		},
 		"set:removeElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("set")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("set")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["set"], []Value{}), nil
 				}
@@ -634,22 +634,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("set"),
+					Path: NewAttributePath().WithAttributeName("set"),
 					Value1: newValuePointer(valType.AttributeTypes["set"], []Value{
 						NewValue(Bool, true),
 					}),
 					Value2: newValuePointer(valType.AttributeTypes["set"], []Value{}),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true)),
+					Path:   NewAttributePath().WithAttributeName("set").WithElementKeyValue(NewValue(Bool, true)),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 			},
 		},
 		"set_empty": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("set_empty")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("set_empty")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["set_empty"], []Value{
 						NewValue(Bool, true),
@@ -659,22 +659,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("set_empty"),
+					Path:   NewAttributePath().WithAttributeName("set_empty"),
 					Value1: newValuePointer(valType.AttributeTypes["set_empty"], []Value{}),
 					Value2: newValuePointer(valType.AttributeTypes["set_empty"], []Value{
 						NewValue(Bool, true),
 					}),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("set_empty").WithElementKeyValue(NewValue(Bool, true)),
+					Path:   NewAttributePath().WithAttributeName("set_empty").WithElementKeyValue(NewValue(Bool, true)),
 					Value1: nil,
 					Value2: newValuePointer(Bool, true),
 				},
 			},
 		},
 		"tuple:null": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("tuple")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("tuple")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["tuple"], nil), nil
 				}
@@ -682,22 +682,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("tuple"),
+					Path: NewAttributePath().WithAttributeName("tuple"),
 					Value1: newValuePointer(valType.AttributeTypes["tuple"], []Value{
 						NewValue(Bool, true),
 					}),
 					Value2: newValuePointer(valType.AttributeTypes["tuple"], nil),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("tuple").WithElementKeyInt(0),
+					Path:   NewAttributePath().WithAttributeName("tuple").WithElementKeyInt(0),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 			},
 		},
 		"tuple:unknown": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("tuple")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("tuple")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["tuple"], UnknownValue), nil
 				}
@@ -705,22 +705,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("tuple"),
+					Path: NewAttributePath().WithAttributeName("tuple"),
 					Value1: newValuePointer(valType.AttributeTypes["tuple"], []Value{
 						NewValue(Bool, true),
 					}),
 					Value2: newValuePointer(valType.AttributeTypes["tuple"], UnknownValue),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("tuple").WithElementKeyInt(0),
+					Path:   NewAttributePath().WithAttributeName("tuple").WithElementKeyInt(0),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 			},
 		},
 		"tuple:nullElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("tuple").WithElementKeyInt(0)
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("tuple").WithElementKeyInt(0)
 				if path.Equal(target) {
 					return NewValue(Bool, nil), nil
 				}
@@ -728,15 +728,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("tuple").WithElementKeyInt(0),
+					Path:   NewAttributePath().WithAttributeName("tuple").WithElementKeyInt(0),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, nil),
 				},
 			},
 		},
 		"tuple:unknownElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("tuple").WithElementKeyInt(0)
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("tuple").WithElementKeyInt(0)
 				if path.Equal(target) {
 					return NewValue(Bool, UnknownValue), nil
 				}
@@ -744,15 +744,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("tuple").WithElementKeyInt(0),
+					Path:   NewAttributePath().WithAttributeName("tuple").WithElementKeyInt(0),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, UnknownValue),
 				},
 			},
 		},
 		"tuple:replaceElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("tuple").WithElementKeyInt(0)
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("tuple").WithElementKeyInt(0)
 				if path.Equal(target) {
 					return NewValue(Bool, false), nil
 				}
@@ -760,15 +760,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("tuple").WithElementKeyInt(0),
+					Path:   NewAttributePath().WithAttributeName("tuple").WithElementKeyInt(0),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, false),
 				},
 			},
 		},
 		"map:null": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("map")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("map")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["map"], nil), nil
 				}
@@ -776,22 +776,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("map"),
+					Path: NewAttributePath().WithAttributeName("map"),
 					Value1: newValuePointer(valType.AttributeTypes["map"], map[string]Value{
 						"true": NewValue(Bool, true),
 					}),
 					Value2: newValuePointer(valType.AttributeTypes["map"], nil),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("map").WithElementKeyString("true"),
+					Path:   NewAttributePath().WithAttributeName("map").WithElementKeyString("true"),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 			},
 		},
 		"map:unknown": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("map")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("map")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["map"], UnknownValue), nil
 				}
@@ -799,22 +799,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("map"),
+					Path: NewAttributePath().WithAttributeName("map"),
 					Value1: newValuePointer(valType.AttributeTypes["map"], map[string]Value{
 						"true": NewValue(Bool, true),
 					}),
 					Value2: newValuePointer(valType.AttributeTypes["map"], UnknownValue),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("map").WithElementKeyString("true"),
+					Path:   NewAttributePath().WithAttributeName("map").WithElementKeyString("true"),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 			},
 		},
 		"map:nullElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("map").WithElementKeyString("true")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("map").WithElementKeyString("true")
 				if path.Equal(target) {
 					return NewValue(Bool, nil), nil
 				}
@@ -822,15 +822,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("map").WithElementKeyString("true"),
+					Path:   NewAttributePath().WithAttributeName("map").WithElementKeyString("true"),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, nil),
 				},
 			},
 		},
 		"map:unknownElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("map").WithElementKeyString("true")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("map").WithElementKeyString("true")
 				if path.Equal(target) {
 					return NewValue(Bool, UnknownValue), nil
 				}
@@ -838,15 +838,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("map").WithElementKeyString("true"),
+					Path:   NewAttributePath().WithAttributeName("map").WithElementKeyString("true"),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, UnknownValue),
 				},
 			},
 		},
 		"map:replaceElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("map").WithElementKeyString("true")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("map").WithElementKeyString("true")
 				if path.Equal(target) {
 					return NewValue(Bool, false), nil
 				}
@@ -854,15 +854,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("map").WithElementKeyString("true"),
+					Path:   NewAttributePath().WithAttributeName("map").WithElementKeyString("true"),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, false),
 				},
 			},
 		},
 		"map:addElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("map")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("map")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["map"], map[string]Value{
 						"true":  NewValue(Bool, true),
@@ -873,7 +873,7 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("map"),
+					Path: NewAttributePath().WithAttributeName("map"),
 					Value1: newValuePointer(valType.AttributeTypes["map"], map[string]Value{
 						"true": NewValue(Bool, true),
 					}),
@@ -883,15 +883,15 @@ func TestTransform(t *testing.T) {
 					}),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("map").WithElementKeyString("false"),
+					Path:   NewAttributePath().WithAttributeName("map").WithElementKeyString("false"),
 					Value1: nil,
 					Value2: newValuePointer(Bool, false),
 				},
 			},
 		},
 		"map:removeElement": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("map")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("map")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["map"], map[string]Value{}), nil
 				}
@@ -899,22 +899,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path: AttributePath{}.WithAttributeName("map"),
+					Path: NewAttributePath().WithAttributeName("map"),
 					Value1: newValuePointer(valType.AttributeTypes["map"], map[string]Value{
 						"true": NewValue(Bool, true),
 					}),
 					Value2: newValuePointer(valType.AttributeTypes["map"], map[string]Value{}),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("map").WithElementKeyString("true"),
+					Path:   NewAttributePath().WithAttributeName("map").WithElementKeyString("true"),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 			},
 		},
 		"map_empty": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("map_empty")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("map_empty")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["map_empty"], map[string]Value{
 						"foo": NewValue(Bool, true),
@@ -924,22 +924,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("map_empty"),
+					Path:   NewAttributePath().WithAttributeName("map_empty"),
 					Value1: newValuePointer(valType.AttributeTypes["map_empty"], map[string]Value{}),
 					Value2: newValuePointer(valType.AttributeTypes["map_empty"], map[string]Value{
 						"foo": NewValue(Bool, true),
 					}),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("map_empty").WithElementKeyString("foo"),
+					Path:   NewAttributePath().WithAttributeName("map_empty").WithElementKeyString("foo"),
 					Value1: nil,
 					Value2: newValuePointer(Bool, true),
 				},
 			},
 		},
 		"object:unknown": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("object")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("object")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["object"], UnknownValue), nil
 				}
@@ -947,12 +947,12 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("object").WithAttributeName("true"),
+					Path:   NewAttributePath().WithAttributeName("object").WithAttributeName("true"),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 				{
-					Path: AttributePath{}.WithAttributeName("object"),
+					Path: NewAttributePath().WithAttributeName("object"),
 					Value1: newValuePointer(valType.AttributeTypes["object"], map[string]Value{
 						"true": NewValue(Bool, true),
 					}),
@@ -961,8 +961,8 @@ func TestTransform(t *testing.T) {
 			},
 		},
 		"object:null": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("object")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("object")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["object"], nil), nil
 				}
@@ -970,12 +970,12 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("object").WithAttributeName("true"),
+					Path:   NewAttributePath().WithAttributeName("object").WithAttributeName("true"),
 					Value1: newValuePointer(Bool, true),
 					Value2: nil,
 				},
 				{
-					Path: AttributePath{}.WithAttributeName("object"),
+					Path: NewAttributePath().WithAttributeName("object"),
 					Value1: newValuePointer(valType.AttributeTypes["object"], map[string]Value{
 						"true": NewValue(Bool, true),
 					}),
@@ -984,8 +984,8 @@ func TestTransform(t *testing.T) {
 			},
 		},
 		"object:attributeNull": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("object").WithAttributeName("true")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("object").WithAttributeName("true")
 				if path.Equal(target) {
 					return NewValue(Bool, nil), nil
 				}
@@ -993,15 +993,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("object").WithAttributeName("true"),
+					Path:   NewAttributePath().WithAttributeName("object").WithAttributeName("true"),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, nil),
 				},
 			},
 		},
 		"object:attributeUnknown": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("object").WithAttributeName("true")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("object").WithAttributeName("true")
 				if path.Equal(target) {
 					return NewValue(Bool, UnknownValue), nil
 				}
@@ -1009,15 +1009,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("object").WithAttributeName("true"),
+					Path:   NewAttributePath().WithAttributeName("object").WithAttributeName("true"),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, UnknownValue),
 				},
 			},
 		},
 		"object:replaceAttribute": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("object").WithAttributeName("true")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("object").WithAttributeName("true")
 				if path.Equal(target) {
 					return NewValue(Bool, false), nil
 				}
@@ -1025,15 +1025,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("object").WithAttributeName("true"),
+					Path:   NewAttributePath().WithAttributeName("object").WithAttributeName("true"),
 					Value1: newValuePointer(Bool, true),
 					Value2: newValuePointer(Bool, false),
 				},
 			},
 		},
 		"null:unknown": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("null")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("null")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["null"], UnknownValue), nil
 				}
@@ -1041,15 +1041,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("null"),
+					Path:   NewAttributePath().WithAttributeName("null"),
 					Value1: newValuePointer(valType.AttributeTypes["null"], nil),
 					Value2: newValuePointer(valType.AttributeTypes["null"], UnknownValue),
 				},
 			},
 		},
 		"null:set": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("null")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("null")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["null"], []Value{
 						NewValue(String, "testing"),
@@ -1059,22 +1059,22 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("null"),
+					Path:   NewAttributePath().WithAttributeName("null"),
 					Value1: newValuePointer(valType.AttributeTypes["null"], nil),
 					Value2: newValuePointer(valType.AttributeTypes["null"], []Value{
 						NewValue(String, "testing"),
 					}),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("null").WithElementKeyInt(0),
+					Path:   NewAttributePath().WithAttributeName("null").WithElementKeyInt(0),
 					Value1: nil,
 					Value2: newValuePointer(String, "testing"),
 				},
 			},
 		},
 		"unknown:null": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("unknown")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("unknown")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["unknown"], nil), nil
 				}
@@ -1082,15 +1082,15 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("unknown"),
+					Path:   NewAttributePath().WithAttributeName("unknown"),
 					Value1: newValuePointer(valType.AttributeTypes["unknown"], UnknownValue),
 					Value2: newValuePointer(valType.AttributeTypes["unknown"], nil),
 				},
 			},
 		},
 		"unknown:set": {
-			f: func(path AttributePath, v Value) (Value, error) {
-				target := AttributePath{}.WithAttributeName("unknown")
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("unknown")
 				if path.Equal(target) {
 					return NewValue(valType.AttributeTypes["unknown"], map[string]Value{
 						"testing": NewValue(Bool, true),
@@ -1100,21 +1100,21 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("unknown"),
+					Path:   NewAttributePath().WithAttributeName("unknown"),
 					Value1: newValuePointer(valType.AttributeTypes["unknown"], UnknownValue),
 					Value2: newValuePointer(valType.AttributeTypes["unknown"], map[string]Value{
 						"testing": NewValue(Bool, true),
 					}),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("unknown").WithElementKeyString("testing"),
+					Path:   NewAttributePath().WithAttributeName("unknown").WithElementKeyString("testing"),
 					Value1: nil,
 					Value2: newValuePointer(Bool, true),
 				},
 			},
 		},
 		"null:byValue": {
-			f: func(_ AttributePath, v Value) (Value, error) {
+			f: func(_ *AttributePath, v Value) (Value, error) {
 				if v.IsNull() {
 					return NewValue(v.Type(), UnknownValue), nil
 				}
@@ -1125,12 +1125,12 @@ func TestTransform(t *testing.T) {
 			},
 			diffs: []ValueDiff{
 				{
-					Path:   AttributePath{}.WithAttributeName("unknown"),
+					Path:   NewAttributePath().WithAttributeName("unknown"),
 					Value1: newValuePointer(valType.AttributeTypes["unknown"], UnknownValue),
 					Value2: newValuePointer(valType.AttributeTypes["unknown"], nil),
 				},
 				{
-					Path:   AttributePath{}.WithAttributeName("null"),
+					Path:   NewAttributePath().WithAttributeName("null"),
 					Value1: newValuePointer(valType.AttributeTypes["null"], nil),
 					Value2: newValuePointer(valType.AttributeTypes["null"], UnknownValue),
 				},
