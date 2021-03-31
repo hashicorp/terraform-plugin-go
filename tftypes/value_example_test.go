@@ -3,7 +3,7 @@ package tftypes_test
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 func ExampleValue_As_string() {
