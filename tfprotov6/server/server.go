@@ -173,7 +173,7 @@ func (s *server) ConfigureProvider(ctx context.Context, req *tfplugin6.Configure
 	return ret, nil
 }
 
-func (s server) ValidateProviderConfig(ctx context.Context, req *tfplugin6.ValidateProviderConfig_Request) (*tfplugin6.ValidateProviderConfig_Response, error) {
+func (s *server) ValidateProviderConfig(ctx context.Context, req *tfplugin6.ValidateProviderConfig_Request) (*tfplugin6.ValidateProviderConfig_Response, error) {
 	r, err := fromproto.ValidateProviderConfigRequest(req)
 	if err != nil {
 		return nil, err
