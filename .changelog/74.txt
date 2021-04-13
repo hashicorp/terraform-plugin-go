@@ -1,0 +1,3 @@
+```release-note:enhancement
+Added support for OptionalAttributes to tftypes.Objects, allowing for objects with attributes that can be set or can be omitted. See https://www.terraform.io/docs/language/expressions/type-constraints.html#experimental-optional-object-type-attributes for more information on optional attributes in objects.
+```
