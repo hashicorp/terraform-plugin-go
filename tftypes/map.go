@@ -13,18 +13,41 @@ type Map struct {
 	_ []struct{}
 }
 
+// Equal returns true if the two Maps are exactly equal. Unlike Is, passing in
+// a Map with no AttributeType will always return false.
+func (m Map) Equal(o Map) bool {
+	return m.equals(o, true)
+}
+
 // Is returns whether `t` is a Map type or not. If `t` is an instance of the
 // Map type and its AttributeType property is not nil, it will only return true
 // if its AttributeType is considered the same type as `m`'s AttributeType.
 func (m Map) Is(t Type) bool {
+	return m.equals(t, false)
+}
+
+func (m Map) equals(t Type, exact bool) bool {
 	v, ok := t.(Map)
 	if !ok {
 		return false
 	}
-	if v.AttributeType != nil {
-		return m.AttributeType.Is(v.AttributeType)
+	if v.AttributeType == nil || m.AttributeType == nil {
+		// when doing exact comparisons, we can't compare types that
+		// don't have element types set, so we just consider them not
+		// equal
+		//
+		// when doing inexact comparisons, the absence of an element
+		// type just means "is this a Map?" We know it is, so return
+		// true if and only if m has an ElementType and t doesn't. This
+		// behavior only makes sense if the user is trying to see if a
+		// proper type is a map, so we want to ensure that the method
+		// receiver always has an element type.
+		if exact {
+			return false
+		}
+		return m.AttributeType != nil
 	}
-	return ok
+	return m.AttributeType.equals(v.AttributeType, exact)
 }
 
 func (m Map) String() string {
@@ -55,7 +78,7 @@ func valueFromMap(typ Type, in interface{}) (Value, error) {
 		for k, v := range value {
 			if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
 				// TODO: make this an attribute path error?
-				return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value for %q in %s. Expected type is %s.", v.Type(), k, Map{AttributeType: typ}, typ)
+				return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value for %q in %s; expected type is %s", v.Type(), k, Map{AttributeType: typ}, typ)
 			}
 		}
 		return Value{
@@ -63,6 +86,6 @@ func valueFromMap(typ Type, in interface{}) (Value, error) {
 			value: value,
 		}, nil
 	default:
-		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Map. Expected types are: %s", in, formattedSupportedGoTypes(Map{}))
+		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Map; expected types are: %s", in, formattedSupportedGoTypes(Map{}))
 	}
 }

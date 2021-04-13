@@ -51,6 +51,48 @@ func TestTypeJSON(t *testing.T) {
 				"baz": Bool,
 			}},
 		},
+		"object-string_number_bool-optional_string": {
+			json: `["object",{"foo":"string","bar":"number","baz":"bool"},["foo"]]`,
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"foo": String,
+					"bar": Number,
+					"baz": Bool,
+				},
+				OptionalAttributes: map[string]struct{}{
+					"foo": {},
+				},
+			},
+		},
+		"object-string_number_bool-optional_string-number": {
+			json: `["object",{"foo":"string","bar":"number","baz":"bool"},["bar", "foo"]]`,
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"foo": String,
+					"bar": Number,
+					"baz": Bool,
+				},
+				OptionalAttributes: map[string]struct{}{
+					"foo": {},
+					"bar": {},
+				},
+			},
+		},
+		"object-string_number_bool-optional_string-number-bool": {
+			json: `["object",{"foo":"string","bar":"number","baz":"bool"},["bar","baz","foo"]]`,
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"foo": String,
+					"bar": Number,
+					"baz": Bool,
+				},
+				OptionalAttributes: map[string]struct{}{
+					"foo": {},
+					"bar": {},
+					"baz": {},
+				},
+			},
+		},
 		"tuple-string_number_bool": {
 			json: `["tuple",["string","number","bool"]]`,
 			typ: Tuple{ElementTypes: []Type{

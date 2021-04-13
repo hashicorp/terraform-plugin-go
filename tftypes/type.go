@@ -35,6 +35,9 @@ type Type interface {
 	// supportedGoTypes returns a list of string representations of the Go
 	// types that the Type supports for its values.
 	supportedGoTypes() []string
+
+	// equals allows for exact or inexact type comparisons.
+	equals(Type, bool) bool
 }
 
 // TypeFromElements returns the common type that the passed elements all have
@@ -153,9 +156,21 @@ func (t *jsonType) UnmarshalJSON(buf []byte) error {
 			for k, v := range atys {
 				types[k] = v.t
 			}
-			t.t = Object{
-				AttributeTypes: types,
+			o := Object{
+				AttributeTypes:     types,
+				OptionalAttributes: map[string]struct{}{},
 			}
+			if dec.More() {
+				var optionals []string
+				err = dec.Decode(&optionals)
+				if err != nil {
+					return err
+				}
+				for _, attr := range optionals {
+					o.OptionalAttributes[attr] = struct{}{}
+				}
+			}
+			t.t = o
 		case "tuple":
 			var etys []jsonType
 			err = dec.Decode(&etys)

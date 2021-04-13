@@ -200,6 +200,9 @@ func (val Value) ApplyTerraform5AttributePathStep(step AttributePathStep) (inter
 // considered equal if their types are considered equal and if they represent
 // data that is considered equal.
 func (val Value) Equal(o Value) bool {
+	if val.typ == nil && o.typ == nil && val.value == nil && o.value == nil {
+		return true
+	}
 	if !val.Type().Is(o.Type()) {
 		return false
 	}
@@ -321,7 +324,7 @@ func newValue(t Type, val interface{}) (Value, error) {
 		}
 		return v, nil
 	case t.Is(Object{}):
-		v, err := valueFromObject(t.(Object).AttributeTypes, val)
+		v, err := valueFromObject(t.(Object).AttributeTypes, t.(Object).OptionalAttributes, val)
 		if err != nil {
 			return Value{}, err
 		}

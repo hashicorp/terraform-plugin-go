@@ -272,7 +272,7 @@ func msgpackUnmarshalObject(dec *msgpack.Decoder, types map[string]tftypes.Type,
 	case length == 0:
 		return tftypes.NewValue(tftypes.Object{
 			// no attributes means no types
-			AttributeTypes: nil,
+			AttributeTypes: map[string]tftypes.Type{},
 		}, map[string]tftypes.Value{}), nil
 	case length != len(types):
 		return tftypes.Value{}, path.NewErrorf("error decoding object; expected %d attributes, got %d", len(types), length)
