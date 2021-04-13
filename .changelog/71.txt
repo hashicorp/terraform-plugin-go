@@ -1,0 +1,3 @@
+```release-note:enhancement
+Added support for version 6 of the Terraform protocol, in a new tfprotov6 package.
+```
