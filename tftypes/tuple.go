@@ -84,6 +84,7 @@ func valueFromTuple(types []Type, in interface{}) (Value, error) {
 			}
 			for pos, v := range value {
 				typ := types[pos]
+				//TODO: this needs to be a recursive check to allow for nested dynamic
 				if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
 					return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value at position %d in %s. Expected type is %s.", v.Type(), pos, Tuple{ElementTypes: types}, typ)
 				}

@@ -99,6 +99,7 @@ func valueFromObject(types map[string]Type, in interface{}) (Value, error) {
 				if !ok {
 					return Value{}, fmt.Errorf("can't set a value on %q in tftypes.NewValue, key not part of the object type %s.", k, Object{AttributeTypes: types})
 				}
+				//TODO: this needs to be a recursive check to allow for nested dynamic
 				if !v.Type().Is(types[k]) && !types[k].Is(DynamicPseudoType) {
 					return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value for %q in %s. Expected type is %s.", v.Type(), k, Object{AttributeTypes: types}, typ)
 				}
