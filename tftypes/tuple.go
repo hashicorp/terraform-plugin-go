@@ -19,6 +19,12 @@ type Tuple struct {
 	_ []struct{}
 }
 
+// Equal returns true if the two Tuples are exactly equal. Unlike Is, passing
+// in a Tuple with no ElementTypes will always return false.
+func (tu Tuple) Equal(o Tuple) bool {
+	return tu.equals(o, true)
+}
+
 // Is returns whether `t` is a Tuple type or not. If `t` is an instance of the
 // Tuple type and its ElementTypes property is not nil, it will only return
 // true if the ElementTypes are considered the same. To be considered the same,
@@ -26,21 +32,33 @@ type Tuple struct {
 // and the types in each position must be considered the same as the type in
 // the same position in the other Tuple.
 func (tu Tuple) Is(t Type) bool {
+	return tu.equals(t, false)
+}
+
+func (tu Tuple) equals(t Type, exact bool) bool {
 	v, ok := t.(Tuple)
 	if !ok {
 		return false
 	}
-	if v.ElementTypes != nil {
-		if len(v.ElementTypes) != len(tu.ElementTypes) {
+	if v.ElementTypes == nil || tu.ElementTypes == nil {
+		// when doing exact comparisons, we can't compare types that
+		// don't have element types set, so we just consider them not
+		// equal
+		//
+		// when doing inexact comparisons, the absence of an element
+		// type just means "is this a Tuple?" We know it is, so return
+		// true
+		return !exact
+	}
+	if len(v.ElementTypes) != len(tu.ElementTypes) {
+		return false
+	}
+	for pos, typ := range tu.ElementTypes {
+		if !typ.equals(v.ElementTypes[pos], exact) {
 			return false
 		}
-		for pos, typ := range tu.ElementTypes {
-			if !typ.Is(v.ElementTypes[pos]) {
-				return false
-			}
-		}
 	}
-	return ok
+	return true
 }
 
 func (tu Tuple) String() string {
@@ -58,7 +76,7 @@ func (tu Tuple) String() string {
 
 func (tu Tuple) private() {}
 
-func (l Tuple) supportedGoTypes() []string {
+func (tu Tuple) supportedGoTypes() []string {
 	return []string{"[]tftypes.Value"}
 }
 
@@ -85,7 +103,7 @@ func valueFromTuple(types []Type, in interface{}) (Value, error) {
 			for pos, v := range value {
 				typ := types[pos]
 				if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
-					return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value at position %d in %s. Expected type is %s.", v.Type(), pos, Tuple{ElementTypes: types}, typ)
+					return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value at position %d in %s; expected type is %s", v.Type(), pos, Tuple{ElementTypes: types}, typ)
 				}
 			}
 		}
@@ -94,7 +112,7 @@ func valueFromTuple(types []Type, in interface{}) (Value, error) {
 			value: value,
 		}, nil
 	default:
-		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Tuple. Expected types are: %s", in, formattedSupportedGoTypes(Tuple{}))
+		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Tuple; expected types are: %s", in, formattedSupportedGoTypes(Tuple{}))
 	}
 }
 

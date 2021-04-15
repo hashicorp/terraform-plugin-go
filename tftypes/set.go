@@ -15,19 +15,42 @@ type Set struct {
 	_ []struct{}
 }
 
+// Equal returns true if the two Sets are exactly equal. Unlike Is, passing in
+// a Set with no ElementType will always return false.
+func (s Set) Equal(o Set) bool {
+	return s.equals(o, true)
+}
+
 // Is returns whether `t` is a Set type or not. If `t` is an instance of the
 // Set type and its ElementType property is nil, it will return true. If `t`'s
 // ElementType property is not nil, it will only return true if its ElementType
 // is considered the same type as `s`'s ElementType.
 func (s Set) Is(t Type) bool {
+	return s.equals(t, false)
+}
+
+func (s Set) equals(t Type, exact bool) bool {
 	v, ok := t.(Set)
 	if !ok {
 		return false
 	}
-	if v.ElementType != nil {
-		return s.ElementType.Is(v.ElementType)
+	if v.ElementType == nil || s.ElementType == nil {
+		// when doing exact comparisons, we can't compare types that
+		// don't have element types set, so we just consider them not
+		// equal
+		//
+		// when doing inexact comparisons, the absence of an element
+		// type just means "is this a Set?" We know it is, so return
+		// true if and only if s has an ElementType and t doesn't. This
+		// behavior only makes sense if the user is trying to see if a
+		// proper type is a set, so we want to ensure that the method
+		// receiver always has an element type.
+		if exact {
+			return false
+		}
+		return s.ElementType != nil
 	}
-	return ok
+	return s.ElementType.equals(v.ElementType, exact)
 }
 
 func (s Set) String() string {
@@ -45,7 +68,7 @@ func valueFromSet(typ Type, in interface{}) (Value, error) {
 	case []Value:
 		for pos, v := range value {
 			if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
-				return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value in position %d of %s. Expected type is %s.", v.Type(), pos, Set{ElementType: typ}, typ)
+				return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value in position %d of %s; expected type is %s", v.Type(), pos, Set{ElementType: typ}, typ)
 			}
 		}
 		return Value{
@@ -53,7 +76,7 @@ func valueFromSet(typ Type, in interface{}) (Value, error) {
 			value: value,
 		}, nil
 	default:
-		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Set. Expected types are: %s", in, formattedSupportedGoTypes(Set{}))
+		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Set; expected types are: %s", in, formattedSupportedGoTypes(Set{}))
 	}
 }
 

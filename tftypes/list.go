@@ -15,19 +15,42 @@ type List struct {
 	_ []struct{}
 }
 
+// Equal returns true if the two Lists are exactly equal. Unlike Is, passing in
+// a List with no ElementType will always return false.
+func (l List) Equal(o List) bool {
+	return l.equals(o, true)
+}
+
 // Is returns whether `t` is a List type or not. If `t` is an instance of the
 // List type and its ElementType property is nil, it will return true. If `t`'s
 // ElementType property is not nil, it will only return true if its ElementType
 // is considered the same type as `l`'s ElementType.
 func (l List) Is(t Type) bool {
+	return l.equals(t, false)
+}
+
+func (l List) equals(t Type, exact bool) bool {
 	v, ok := t.(List)
 	if !ok {
 		return false
 	}
-	if v.ElementType != nil {
-		return l.ElementType.Is(v.ElementType)
+	if l.ElementType == nil || v.ElementType == nil {
+		// when doing exact comparisons, we can't compare types that
+		// don't have element types set, so we just consider them not
+		// equal
+		//
+		// when doing inexact comparisons, the absence of an element
+		// type just means "is this a List?" We know it is, so return
+		// true if and only if l has an ElementType and t doesn't. This
+		// behavior only makes sense if the user is trying to see if a
+		// proper type is a list, so we want to ensure that the method
+		// receiver always has an element type.
+		if exact {
+			return false
+		}
+		return l.ElementType != nil
 	}
-	return ok
+	return l.ElementType.equals(v.ElementType, exact)
 }
 
 func (l List) String() string {
@@ -45,7 +68,7 @@ func valueFromList(typ Type, in interface{}) (Value, error) {
 	case []Value:
 		for pos, v := range value {
 			if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
-				return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value in position %d of %s. Expected type is %s.", v.Type(), pos, List{ElementType: typ}, typ)
+				return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value in position %d of %s; expected type is %s", v.Type(), pos, List{ElementType: typ}, typ)
 			}
 		}
 		return Value{
@@ -53,7 +76,7 @@ func valueFromList(typ Type, in interface{}) (Value, error) {
 			value: value,
 		}, nil
 	default:
-		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.List. Expected types are: %s", in, formattedSupportedGoTypes(List{}))
+		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.List; expected types are: %s", in, formattedSupportedGoTypes(List{}))
 	}
 }
 

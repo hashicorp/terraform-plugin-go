@@ -37,7 +37,15 @@ type primitive struct {
 	_ []struct{}
 }
 
+func (p primitive) Equal(o primitive) bool {
+	return p.equals(o, true)
+}
+
 func (p primitive) Is(t Type) bool {
+	return p.equals(t, false)
+}
+
+func (p primitive) equals(t Type, exact bool) bool {
 	v, ok := t.(primitive)
 	if !ok {
 		return false
@@ -130,7 +138,7 @@ func valueFromString(in interface{}) (Value, error) {
 			value: value,
 		}, nil
 	default:
-		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.String. Expected types are: %s", in, formattedSupportedGoTypes(String))
+		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.String; expected types are: %s", in, formattedSupportedGoTypes(String))
 	}
 }
 
@@ -164,7 +172,7 @@ func valueFromBool(in interface{}) (Value, error) {
 			value: value,
 		}, nil
 	default:
-		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Bool. Expected types are: %s", in, formattedSupportedGoTypes(Bool))
+		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Bool; expected types are: %s", in, formattedSupportedGoTypes(Bool))
 	}
 }
 
@@ -371,7 +379,7 @@ func valueFromNumber(in interface{}) (Value, error) {
 			value: big.NewFloat(*value),
 		}, nil
 	default:
-		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Number. Expected types are: %s", in, formattedSupportedGoTypes(Number))
+		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Number; expected types are: %s", in, formattedSupportedGoTypes(Number))
 	}
 }
 
@@ -399,7 +407,7 @@ func valueFromDynamicPseudoType(val interface{}) (Value, error) {
 		v.typ = DynamicPseudoType
 		return v, nil
 	case valueCanBeObject(val):
-		v, err := valueFromObject(nil, val)
+		v, err := valueFromObject(nil, nil, val)
 		if err != nil {
 			return Value{}, err
 		}
@@ -413,6 +421,6 @@ func valueFromDynamicPseudoType(val interface{}) (Value, error) {
 		v.typ = DynamicPseudoType
 		return v, nil
 	default:
-		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.DynamicPseudoType. Expected types are: %s", val, formattedSupportedGoTypes(DynamicPseudoType))
+		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.DynamicPseudoType; expected types are: %s", val, formattedSupportedGoTypes(DynamicPseudoType))
 	}
 }
