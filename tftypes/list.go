@@ -67,6 +67,7 @@ func valueFromList(typ Type, in interface{}) (Value, error) {
 	switch value := in.(type) {
 	case []Value:
 		for pos, v := range value {
+			//TODO: this needs to be a recursive check to allow for nested dynamic
 			if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
 				return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value in position %d of %s; expected type is %s", v.Type(), pos, List{ElementType: typ}, typ)
 			}
