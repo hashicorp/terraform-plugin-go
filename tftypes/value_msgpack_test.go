@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestDynamicValueMsgPack(t *testing.T) {
+func TestValueFromMsgPack(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
 		hex   string

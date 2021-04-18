@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestDynamicValueJSON(t *testing.T) {
+func TestValueFromJSON(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
 		value Value
@@ -304,7 +304,7 @@ func TestDynamicValueJSON(t *testing.T) {
 		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			val, err := jsonUnmarshal([]byte(test.json), test.typ, AttributePath{})
+			val, err := ValueFromJSON([]byte(test.json), test.typ)
 			if err != nil {
 				t.Fatalf("unexpected error unmarshaling: %s", err)
 			}
