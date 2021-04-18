@@ -76,10 +76,8 @@ func valueFromMap(typ Type, in interface{}) (Value, error) {
 	switch value := in.(type) {
 	case map[string]Value:
 		for k, v := range value {
-			//TODO: this needs to be a recursive check to allow for nested dynamic
-			if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
-				// TODO: make this an attribute path error?
-				return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value for %q in %s; expected type is %s", v.Type(), k, Map{AttributeType: typ}, typ)
+			if err := useTypeAs(v.Type(), typ, NewAttributePath().WithElementKeyString(k)); err != nil {
+				return Value{}, err
 			}
 		}
 		return Value{
