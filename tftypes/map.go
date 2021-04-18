@@ -1,6 +1,9 @@
 package tftypes
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 // Map is a Terraform type representing an unordered collection of elements,
 // all of the same type, each identifiable with a unique string key.
@@ -75,9 +78,22 @@ func (m Map) MarshalJSON() ([]byte, error) {
 func valueFromMap(typ Type, in interface{}) (Value, error) {
 	switch value := in.(type) {
 	case map[string]Value:
-		for k, v := range value {
+		keys := make([]string, 0, len(value))
+		for k := range value {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		var elType Type
+		for _, k := range keys {
+			v := value[k]
 			if err := useTypeAs(v.Type(), typ, NewAttributePath().WithElementKeyString(k)); err != nil {
 				return Value{}, err
+			}
+			if elType == nil {
+				elType = v.Type()
+			}
+			if !elType.equals(v.Type(), true) {
+				return Value{}, fmt.Errorf("maps must only contain one type of element, saw %s and %s", elType, v.Type())
 			}
 		}
 		return Value{

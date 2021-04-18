@@ -66,9 +66,16 @@ func (s Set) supportedGoTypes() []string {
 func valueFromSet(typ Type, in interface{}) (Value, error) {
 	switch value := in.(type) {
 	case []Value:
+		var elType Type
 		for _, v := range value {
 			if err := useTypeAs(v.Type(), typ, NewAttributePath().WithElementKeyValue(v)); err != nil {
 				return Value{}, err
+			}
+			if elType == nil {
+				elType = v.Type()
+			}
+			if !elType.equals(v.Type(), true) {
+				return Value{}, fmt.Errorf("sets must only contain one type of element, saw %s and %s", elType, v.Type())
 			}
 		}
 		return Value{
