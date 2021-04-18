@@ -7,6 +7,14 @@ import (
 	"strings"
 )
 
+// ValueFromJSON returns a Value from the JSON-encoded bytes, using the
+// provided Type to determine what shape the Value should be.
+// DynamicPseudoTypes will be transparently parsed into the types they
+// represent.
+//
+// Deprecated: this function is exported for internal use in
+// terraform-plugin-go.  Third parties should not use it, and its behavior is
+// not covered under the API compatibility guarantees. Don't use this.
 func ValueFromJSON(data []byte, typ Type) (Value, error) {
 	return jsonUnmarshal(data, typ, AttributePath{})
 }

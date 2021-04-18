@@ -19,6 +19,14 @@ func (u msgPackUnknownType) MarshalMsgpack() ([]byte, error) {
 	return []byte{0xd4, 0, 0}, nil
 }
 
+// ValueFromMsgPack returns a Value from the MsgPack-encoded bytes, using the
+// provided Type to determine what shape the Value should be.
+// DynamicPseudoTypes will be transparently parsed into the types they
+// represent.
+//
+// Deprecated: this function is exported for internal use in
+// terraform-plugin-go.  Third parties should not use it, and its behavior is
+// not covered under the API compatibility guarantees. Don't use this.
 func ValueFromMsgPack(data []byte, typ Type) (Value, error) {
 	r := bytes.NewReader(data)
 	dec := msgpack.NewDecoder(r)

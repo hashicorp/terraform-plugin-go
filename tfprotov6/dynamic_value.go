@@ -78,10 +78,10 @@ type DynamicValue struct {
 // received from RPC requests.
 func (d DynamicValue) Unmarshal(typ tftypes.Type) (tftypes.Value, error) {
 	if d.JSON != nil {
-		return tftypes.ValueFromJSON(d.JSON, typ)
+		return tftypes.ValueFromJSON(d.JSON, typ) //nolint:staticcheck
 	}
 	if d.MsgPack != nil {
-		return tftypes.ValueFromMsgPack(d.MsgPack, typ)
+		return tftypes.ValueFromMsgPack(d.MsgPack, typ) //nolint:staticcheck
 	}
 	return tftypes.Value{}, ErrUnknownDynamicValueType
 }
