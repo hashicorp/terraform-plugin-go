@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+func ValueFromJSON(data []byte, typ Type) (Value, error) {
+	return jsonUnmarshal(data, typ, AttributePath{})
+}
+
 func jsonByteDecoder(buf []byte) *json.Decoder {
 	r := bytes.NewReader(buf)
 	dec := json.NewDecoder(r)

@@ -1,11 +1,18 @@
 package tftypes
 
 import (
+	"bytes"
 	"math/big"
 
 	"github.com/vmihailenco/msgpack"
 	msgpackCodes "github.com/vmihailenco/msgpack/codes"
 )
+
+func ValueFromMsgPack(data []byte, typ Type) (Value, error) {
+	r := bytes.NewReader(data)
+	dec := msgpack.NewDecoder(r)
+	return msgpackUnmarshal(dec, typ, AttributePath{})
+}
 
 func msgpackUnmarshal(dec *msgpack.Decoder, typ Type, path AttributePath) (Value, error) {
 	peek, err := dec.PeekCode()
