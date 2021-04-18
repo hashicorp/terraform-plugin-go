@@ -118,7 +118,7 @@ func useTypeAs(candidate, usedAs Type, path *AttributePath) error {
 		for attr, uAttr := range usedAs.(Object).AttributeTypes {
 			cAttr, ok := candidate.(Object).AttributeTypes[attr]
 			if !ok {
-				path.NewErrorf("can't use %s as %s", candidate, usedAs)
+				return path.NewErrorf("can't use %s as %s", candidate, usedAs)
 			}
 			err := useTypeAs(cAttr, uAttr, path.WithAttributeName(attr))
 			if err != nil {
