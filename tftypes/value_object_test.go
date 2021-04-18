@@ -177,6 +177,42 @@ func Test_newValue_object(t *testing.T) {
 			},
 			err: regexp.MustCompile(`AttributeName\("c"\): can't use tftypes.String as tftypes.Bool`),
 		},
+		"dynamic-attribute": {
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"a": String,
+					"b": Number,
+					"c": DynamicPseudoType,
+				},
+			},
+			val: map[string]Value{
+				"a": NewValue(String, "foo"),
+				"b": NewValue(Number, 123),
+				"c": NewValue(String, "false"),
+			},
+			expected: Value{
+				typ: Object{AttributeTypes: map[string]Type{
+					"a": String,
+					"b": Number,
+					"c": DynamicPseudoType,
+				}},
+				value: map[string]Value{
+					"a": {
+						typ:   String,
+						value: "foo",
+					},
+					"b": {
+						typ:   Number,
+						value: big.NewFloat(123),
+					},
+					"c": {
+						typ:   String,
+						value: "false",
+					},
+				},
+			},
+			err: nil,
+		},
 	}
 	for name, test := range tests {
 		name, test := name, test
