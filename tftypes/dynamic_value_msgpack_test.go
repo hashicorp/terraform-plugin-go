@@ -1,4 +1,4 @@
-package tfprotov5
+package tftypes
 
 import (
 	"encoding/hex"
@@ -7,15 +7,14 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 func TestDynamicValueMsgPack(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
 		hex   string
-		value tftypes.Value
-		typ   tftypes.Type
+		value Value
+		typ   Type
 	}
 	bigNumber, _, err := big.ParseFloat("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999", 10, 512, big.ToNearestEven)
 	if err != nil {
@@ -28,343 +27,343 @@ func TestDynamicValueMsgPack(t *testing.T) {
 	tests := map[string]testCase{
 		"hello-string": {
 			hex:   "a568656c6c6f",
-			value: tftypes.NewValue(tftypes.String, "hello"),
-			typ:   tftypes.String,
+			value: NewValue(String, "hello"),
+			typ:   String,
 		},
 		"empty-string": {
 			hex:   "a0",
-			value: tftypes.NewValue(tftypes.String, ""),
-			typ:   tftypes.String,
+			value: NewValue(String, ""),
+			typ:   String,
 		},
 		"null-string": {
 			hex:   "c0",
-			value: tftypes.NewValue(tftypes.String, nil),
-			typ:   tftypes.String,
+			value: NewValue(String, nil),
+			typ:   String,
 		},
 		"unknown-string": {
 			hex:   "d40000",
-			value: tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
-			typ:   tftypes.String,
+			value: NewValue(String, UnknownValue),
+			typ:   String,
 		},
 		"true-bool": {
 			hex:   "c3",
-			value: tftypes.NewValue(tftypes.Bool, true),
-			typ:   tftypes.Bool,
+			value: NewValue(Bool, true),
+			typ:   Bool,
 		},
 		"false-bool": {
 			hex:   "c2",
-			value: tftypes.NewValue(tftypes.Bool, false),
-			typ:   tftypes.Bool,
+			value: NewValue(Bool, false),
+			typ:   Bool,
 		},
 		"null-bool": {
 			hex:   "c0",
-			value: tftypes.NewValue(tftypes.Bool, nil),
-			typ:   tftypes.Bool,
+			value: NewValue(Bool, nil),
+			typ:   Bool,
 		},
 		"unknown-bool": {
 			hex:   "d40000",
-			value: tftypes.NewValue(tftypes.Bool, tftypes.UnknownValue),
-			typ:   tftypes.Bool,
+			value: NewValue(Bool, UnknownValue),
+			typ:   Bool,
 		},
 		"int-number": {
 			hex:   "01",
-			value: tftypes.NewValue(tftypes.Number, big.NewFloat(1)),
-			typ:   tftypes.Number,
+			value: NewValue(Number, big.NewFloat(1)),
+			typ:   Number,
 		},
 		"float-number": {
 			hex:   "cb3ff8000000000000",
-			value: tftypes.NewValue(tftypes.Number, big.NewFloat(1.5)),
-			typ:   tftypes.Number,
+			value: NewValue(Number, big.NewFloat(1.5)),
+			typ:   Number,
 		},
 		"big-number": {
 			hex:   "d96439393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939393939",
-			value: tftypes.NewValue(tftypes.Number, bigNumber),
-			typ:   tftypes.Number,
+			value: NewValue(Number, bigNumber),
+			typ:   Number,
 		},
 		"awkward-fraction-number": {
 			hex:   "a3302e38",
-			value: tftypes.NewValue(tftypes.Number, awkwardFraction),
-			typ:   tftypes.Number,
+			value: NewValue(Number, awkwardFraction),
+			typ:   Number,
 		},
 		"positive-infinity-number": {
 			hex:   "cb7ff0000000000000",
-			value: tftypes.NewValue(tftypes.Number, big.NewFloat(math.Inf(1))),
-			typ:   tftypes.Number,
+			value: NewValue(Number, big.NewFloat(math.Inf(1))),
+			typ:   Number,
 		},
 		"negative-infinity-number": {
 			hex:   "cbfff0000000000000",
-			value: tftypes.NewValue(tftypes.Number, big.NewFloat(math.Inf(-1))),
-			typ:   tftypes.Number,
+			value: NewValue(Number, big.NewFloat(math.Inf(-1))),
+			typ:   Number,
 		},
 		"list-string-hello": {
 			hex: "91a568656c6c6f",
-			value: tftypes.NewValue(tftypes.List{
-				ElementType: tftypes.String,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.String, "hello"),
+			value: NewValue(List{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, "hello"),
 			}),
-			typ: tftypes.List{ElementType: tftypes.String},
+			typ: List{ElementType: String},
 		},
 		"list-string-unknown": {
 			hex: "91d40000",
-			value: tftypes.NewValue(tftypes.List{
-				ElementType: tftypes.String,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+			value: NewValue(List{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, UnknownValue),
 			}),
-			typ: tftypes.List{ElementType: tftypes.String},
+			typ: List{ElementType: String},
 		},
 		"list-string-null-string": {
 			hex: "91c0",
-			value: tftypes.NewValue(tftypes.List{
-				ElementType: tftypes.String,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.String, nil),
+			value: NewValue(List{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, nil),
 			}),
-			typ: tftypes.List{ElementType: tftypes.String},
+			typ: List{ElementType: String},
 		},
 		"list-string-null": {
 			hex: "c0",
-			value: tftypes.NewValue(tftypes.List{
-				ElementType: tftypes.String,
+			value: NewValue(List{
+				ElementType: String,
 			}, nil),
-			typ: tftypes.List{ElementType: tftypes.String},
+			typ: List{ElementType: String},
 		},
 		"list-string-empty": {
 			hex: "90",
-			value: tftypes.NewValue(tftypes.List{
-				ElementType: tftypes.String,
-			}, []tftypes.Value{}),
-			typ: tftypes.List{ElementType: tftypes.String},
+			value: NewValue(List{
+				ElementType: String,
+			}, []Value{}),
+			typ: List{ElementType: String},
 		},
 		"set-string-hello": {
 			hex: "91a568656c6c6f",
-			value: tftypes.NewValue(tftypes.Set{
-				ElementType: tftypes.String,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.String, "hello"),
+			value: NewValue(Set{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, "hello"),
 			}),
-			typ: tftypes.Set{ElementType: tftypes.String},
+			typ: Set{ElementType: String},
 		},
 		"set-string-unknown": {
 			hex: "91d40000",
-			value: tftypes.NewValue(tftypes.Set{
-				ElementType: tftypes.String,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+			value: NewValue(Set{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, UnknownValue),
 			}),
-			typ: tftypes.Set{ElementType: tftypes.String},
+			typ: Set{ElementType: String},
 		},
 		"set-string-null-string": {
 			hex: "91c0",
-			value: tftypes.NewValue(tftypes.Set{
-				ElementType: tftypes.String,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.String, nil),
+			value: NewValue(Set{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, nil),
 			}),
-			typ: tftypes.Set{ElementType: tftypes.String},
+			typ: Set{ElementType: String},
 		},
 		"set-string-empty": {
 			hex: "90",
-			value: tftypes.NewValue(tftypes.Set{
-				ElementType: tftypes.String,
-			}, []tftypes.Value{}),
-			typ: tftypes.Set{ElementType: tftypes.String},
+			value: NewValue(Set{
+				ElementType: String,
+			}, []Value{}),
+			typ: Set{ElementType: String},
 		},
 		"map-string-hello": {
 			hex: "81a86772656574696e67a568656c6c6f",
-			value: tftypes.NewValue(tftypes.Map{
-				AttributeType: tftypes.String,
-			}, map[string]tftypes.Value{
-				"greeting": tftypes.NewValue(tftypes.String, "hello"),
+			value: NewValue(Map{
+				AttributeType: String,
+			}, map[string]Value{
+				"greeting": NewValue(String, "hello"),
 			}),
-			typ: tftypes.Map{AttributeType: tftypes.String},
+			typ: Map{AttributeType: String},
 		},
 		"map-string-unknown": {
 			hex: "81a86772656574696e67d40000",
-			value: tftypes.NewValue(tftypes.Map{
-				AttributeType: tftypes.String,
-			}, map[string]tftypes.Value{
-				"greeting": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+			value: NewValue(Map{
+				AttributeType: String,
+			}, map[string]Value{
+				"greeting": NewValue(String, UnknownValue),
 			}),
-			typ: tftypes.Map{AttributeType: tftypes.String},
+			typ: Map{AttributeType: String},
 		},
 		"map-string-null": {
 			hex: "81a86772656574696e67c0",
-			value: tftypes.NewValue(tftypes.Map{
-				AttributeType: tftypes.String,
-			}, map[string]tftypes.Value{
-				"greeting": tftypes.NewValue(tftypes.String, nil),
+			value: NewValue(Map{
+				AttributeType: String,
+			}, map[string]Value{
+				"greeting": NewValue(String, nil),
 			}),
-			typ: tftypes.Map{AttributeType: tftypes.String},
+			typ: Map{AttributeType: String},
 		},
 		"map-string-empty": {
 			hex: "80",
-			value: tftypes.NewValue(tftypes.Map{
-				AttributeType: tftypes.String,
-			}, map[string]tftypes.Value{}),
-			typ: tftypes.Map{AttributeType: tftypes.String},
+			value: NewValue(Map{
+				AttributeType: String,
+			}, map[string]Value{}),
+			typ: Map{AttributeType: String},
 		},
 		"tuple-string-hello": {
 			hex: "91a568656c6c6f",
-			value: tftypes.NewValue(tftypes.Tuple{
-				ElementTypes: []tftypes.Type{tftypes.String},
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.String, "hello"),
+			value: NewValue(Tuple{
+				ElementTypes: []Type{String},
+			}, []Value{
+				NewValue(String, "hello"),
 			}),
-			typ: tftypes.Tuple{ElementTypes: []tftypes.Type{tftypes.String}},
+			typ: Tuple{ElementTypes: []Type{String}},
 		},
 		"tuple-string-unknown": {
 			hex: "91d40000",
-			value: tftypes.NewValue(tftypes.Tuple{
-				ElementTypes: []tftypes.Type{tftypes.String},
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+			value: NewValue(Tuple{
+				ElementTypes: []Type{String},
+			}, []Value{
+				NewValue(String, UnknownValue),
 			}),
-			typ: tftypes.Tuple{ElementTypes: []tftypes.Type{tftypes.String}},
+			typ: Tuple{ElementTypes: []Type{String}},
 		},
 		"tuple-string-null": {
 			hex: "91c0",
-			value: tftypes.NewValue(tftypes.Tuple{
-				ElementTypes: []tftypes.Type{tftypes.String},
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.String, nil),
+			value: NewValue(Tuple{
+				ElementTypes: []Type{String},
+			}, []Value{
+				NewValue(String, nil),
 			}),
-			typ: tftypes.Tuple{ElementTypes: []tftypes.Type{tftypes.String}},
+			typ: Tuple{ElementTypes: []Type{String}},
 		},
 		"tuple-empty": {
 			hex: "90",
-			value: tftypes.NewValue(tftypes.Tuple{
-				ElementTypes: []tftypes.Type{},
-			}, []tftypes.Value{}),
-			typ: tftypes.Tuple{ElementTypes: []tftypes.Type{}},
+			value: NewValue(Tuple{
+				ElementTypes: []Type{},
+			}, []Value{}),
+			typ: Tuple{ElementTypes: []Type{}},
 		},
 		"object-string-hello": {
 			hex: "81a86772656574696e67a568656c6c6f",
-			value: tftypes.NewValue(tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"greeting": tftypes.String,
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"greeting": String,
 				},
-			}, map[string]tftypes.Value{
-				"greeting": tftypes.NewValue(tftypes.String, "hello"),
+			}, map[string]Value{
+				"greeting": NewValue(String, "hello"),
 			}),
-			typ: tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"greeting": tftypes.String,
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"greeting": String,
 				},
 			},
 		},
 		"object-string-unknown": {
 			hex: "81a86772656574696e67d40000",
-			value: tftypes.NewValue(tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"greeting": tftypes.String,
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"greeting": String,
 				},
-			}, map[string]tftypes.Value{
-				"greeting": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+			}, map[string]Value{
+				"greeting": NewValue(String, UnknownValue),
 			}),
-			typ: tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"greeting": tftypes.String,
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"greeting": String,
 				},
 			},
 		},
 		"object-string-null": {
 			hex: "81a86772656574696e67c0",
-			value: tftypes.NewValue(tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"greeting": tftypes.String,
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"greeting": String,
 				},
-			}, map[string]tftypes.Value{
-				"greeting": tftypes.NewValue(tftypes.String, nil),
+			}, map[string]Value{
+				"greeting": NewValue(String, nil),
 			}),
-			typ: tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"greeting": tftypes.String,
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"greeting": String,
 				},
 			},
 		},
 		"object-string-multi-null": {
 			hex: "82a161c0a162c0",
-			value: tftypes.NewValue(tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"a": tftypes.String,
-					"b": tftypes.String,
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"a": String,
+					"b": String,
 				},
-			}, map[string]tftypes.Value{
-				"a": tftypes.NewValue(tftypes.String, nil),
-				"b": tftypes.NewValue(tftypes.String, nil),
+			}, map[string]Value{
+				"a": NewValue(String, nil),
+				"b": NewValue(String, nil),
 			}),
-			typ: tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"a": tftypes.String,
-					"b": tftypes.String,
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"a": String,
+					"b": String,
 				},
 			},
 		},
 		"object-string-multi-unknown": {
 			hex: "82a161d40000a162d40000",
-			value: tftypes.NewValue(tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"a": tftypes.String,
-					"b": tftypes.String,
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"a": String,
+					"b": String,
 				},
-			}, map[string]tftypes.Value{
-				"a": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
-				"b": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+			}, map[string]Value{
+				"a": NewValue(String, UnknownValue),
+				"b": NewValue(String, UnknownValue),
 			}),
-			typ: tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"a": tftypes.String,
-					"b": tftypes.String,
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"a": String,
+					"b": String,
 				},
 			},
 		},
 		"object-empty": {
 			hex: "80",
-			value: tftypes.NewValue(tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{},
-			}, map[string]tftypes.Value{}),
-			typ: tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{},
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{},
+			}, map[string]Value{}),
+			typ: Object{
+				AttributeTypes: map[string]Type{},
 			},
 		},
 		"string-dynamic-null": {
 			hex:   "92c40822737472696e6722c0",
-			value: tftypes.NewValue(tftypes.String, nil),
-			typ:   tftypes.DynamicPseudoType,
+			value: NewValue(String, nil),
+			typ:   DynamicPseudoType,
 		},
 		"dynamic-unknown": {
 			hex:   "d40000",
-			value: tftypes.NewValue(tftypes.DynamicPseudoType, tftypes.UnknownValue),
-			typ:   tftypes.DynamicPseudoType,
+			value: NewValue(DynamicPseudoType, UnknownValue),
+			typ:   DynamicPseudoType,
 		},
 		"dynamic-list-string-hello": {
 			hex: "9192c40822737472696e6722a568656c6c6f",
-			value: tftypes.NewValue(tftypes.List{
-				ElementType: tftypes.String,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.String, "hello"),
+			value: NewValue(List{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, "hello"),
 			}),
-			typ: tftypes.List{ElementType: tftypes.DynamicPseudoType},
+			typ: List{ElementType: DynamicPseudoType},
 		},
 		"dynamic-list-string-null": {
 			hex: "9192c40822737472696e6722c0",
-			value: tftypes.NewValue(tftypes.List{
-				ElementType: tftypes.String,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.String, nil),
+			value: NewValue(List{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, nil),
 			}),
-			typ: tftypes.List{ElementType: tftypes.DynamicPseudoType},
+			typ: List{ElementType: DynamicPseudoType},
 		},
 		"dynamic-list-unknown": {
 			hex: "91d40000",
-			value: tftypes.NewValue(tftypes.List{
-				ElementType: tftypes.DynamicPseudoType,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.DynamicPseudoType, tftypes.UnknownValue),
+			value: NewValue(List{
+				ElementType: DynamicPseudoType,
+			}, []Value{
+				NewValue(DynamicPseudoType, UnknownValue),
 			}),
-			typ: tftypes.List{ElementType: tftypes.DynamicPseudoType},
+			typ: List{ElementType: DynamicPseudoType},
 		},
 	}
 	for name, test := range tests {

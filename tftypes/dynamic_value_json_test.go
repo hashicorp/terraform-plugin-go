@@ -1,231 +1,230 @@
-package tfprotov5
+package tftypes
 
 import (
 	"math/big"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 func TestDynamicValueJSON(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
-		value tftypes.Value
-		typ   tftypes.Type
+		value Value
+		typ   Type
 		json  string
 	}
 	tests := map[string]testCase{
 		// Primitives
 		"string": {
-			value: tftypes.NewValue(tftypes.String, "hello"),
-			typ:   tftypes.String,
+			value: NewValue(String, "hello"),
+			typ:   String,
 			json:  `"hello"`,
 		},
 		"string-empty": {
-			value: tftypes.NewValue(tftypes.String, ""),
-			typ:   tftypes.String,
+			value: NewValue(String, ""),
+			typ:   String,
 			json:  `""`,
 		},
 		"string-from-number": {
-			value: tftypes.NewValue(tftypes.String, "15"),
-			typ:   tftypes.String,
+			value: NewValue(String, "15"),
+			typ:   String,
 			json:  `15`,
 		},
 		"string-from-bool": {
-			value: tftypes.NewValue(tftypes.String, "true"),
-			typ:   tftypes.String,
+			value: NewValue(String, "true"),
+			typ:   String,
 			json:  "true",
 		},
 		"string-null": {
-			value: tftypes.NewValue(tftypes.String, nil),
-			typ:   tftypes.String,
+			value: NewValue(String, nil),
+			typ:   String,
 			json:  "null",
 		},
 		"number-from-int": {
-			value: tftypes.NewValue(tftypes.Number, big.NewFloat(2)),
-			typ:   tftypes.Number,
+			value: NewValue(Number, big.NewFloat(2)),
+			typ:   Number,
 			json:  `2`,
 		},
 		"number-from-float": {
-			value: tftypes.NewValue(tftypes.Number, big.NewFloat(2.5)),
-			typ:   tftypes.Number,
+			value: NewValue(Number, big.NewFloat(2.5)),
+			typ:   Number,
 			json:  `2.5`,
 		},
 		"number-from-string": {
-			value: tftypes.NewValue(tftypes.Number, big.NewFloat(5)),
-			typ:   tftypes.Number,
+			value: NewValue(Number, big.NewFloat(5)),
+			typ:   Number,
 			json:  `"5"`,
 		},
 		"bool-true": {
-			value: tftypes.NewValue(tftypes.Bool, true),
-			typ:   tftypes.Bool,
+			value: NewValue(Bool, true),
+			typ:   Bool,
 			json:  `true`,
 		},
 		"bool-false": {
-			value: tftypes.NewValue(tftypes.Bool, false),
-			typ:   tftypes.Bool,
+			value: NewValue(Bool, false),
+			typ:   Bool,
 			json:  `false`,
 		},
 		"bool-from-string": {
-			value: tftypes.NewValue(tftypes.Bool, true),
-			typ:   tftypes.Bool,
+			value: NewValue(Bool, true),
+			typ:   Bool,
 			json:  `"true"`,
 		},
 		"bool-from-string_int": {
-			value: tftypes.NewValue(tftypes.Bool, true),
-			typ:   tftypes.Bool,
+			value: NewValue(Bool, true),
+			typ:   Bool,
 			json:  `"1"`,
 		},
 		"bool-from-int": {
-			value: tftypes.NewValue(tftypes.Bool, true),
-			typ:   tftypes.Bool,
+			value: NewValue(Bool, true),
+			typ:   Bool,
 			json:  `1`,
 		},
 
 		// Lists
 		"list-of-bools": {
-			value: tftypes.NewValue(tftypes.List{
-				ElementType: tftypes.Bool,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.Bool, true),
-				tftypes.NewValue(tftypes.Bool, false),
+			value: NewValue(List{
+				ElementType: Bool,
+			}, []Value{
+				NewValue(Bool, true),
+				NewValue(Bool, false),
 			}),
-			typ: tftypes.List{
-				ElementType: tftypes.Bool,
+			typ: List{
+				ElementType: Bool,
 			},
 			json: `[true,false]`,
 		},
 		"list-empty": {
-			value: tftypes.NewValue(tftypes.List{
-				ElementType: tftypes.Bool,
-			}, []tftypes.Value{}),
-			typ: tftypes.List{
-				ElementType: tftypes.Bool,
+			value: NewValue(List{
+				ElementType: Bool,
+			}, []Value{}),
+			typ: List{
+				ElementType: Bool,
 			},
 			json: `[]`,
 		},
 		"list-of-bools-from-strings": {
-			value: tftypes.NewValue(tftypes.List{
-				ElementType: tftypes.Bool,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.Bool, true),
-				tftypes.NewValue(tftypes.Bool, false),
+			value: NewValue(List{
+				ElementType: Bool,
+			}, []Value{
+				NewValue(Bool, true),
+				NewValue(Bool, false),
 			}),
-			typ: tftypes.List{
-				ElementType: tftypes.Bool,
+			typ: List{
+				ElementType: Bool,
 			},
 			json: `["true","false"]`,
 		},
 
 		// Sets
 		"set-of-bools": {
-			value: tftypes.NewValue(tftypes.Set{
-				ElementType: tftypes.Bool,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.Bool, false),
-				tftypes.NewValue(tftypes.Bool, true),
+			value: NewValue(Set{
+				ElementType: Bool,
+			}, []Value{
+				NewValue(Bool, false),
+				NewValue(Bool, true),
 			}),
-			typ: tftypes.Set{
-				ElementType: tftypes.Bool,
+			typ: Set{
+				ElementType: Bool,
 			},
 			json: `[false,true]`,
 		},
 		"set-empty": {
-			value: tftypes.NewValue(tftypes.Set{
-				ElementType: tftypes.Bool,
-			}, []tftypes.Value{}),
-			typ: tftypes.Set{
-				ElementType: tftypes.Bool,
+			value: NewValue(Set{
+				ElementType: Bool,
+			}, []Value{}),
+			typ: Set{
+				ElementType: Bool,
 			},
 			json: `[]`,
 		},
 
 		// Tuples
 		"tuple-of-bool_number": {
-			value: tftypes.NewValue(tftypes.Tuple{
-				ElementTypes: []tftypes.Type{
-					tftypes.Bool,
-					tftypes.Number,
+			value: NewValue(Tuple{
+				ElementTypes: []Type{
+					Bool,
+					Number,
 				},
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.Bool, true),
-				tftypes.NewValue(tftypes.Number, big.NewFloat(5)),
+			}, []Value{
+				NewValue(Bool, true),
+				NewValue(Number, big.NewFloat(5)),
 			}),
-			typ: tftypes.Tuple{
-				ElementTypes: []tftypes.Type{
-					tftypes.Bool,
-					tftypes.Number,
+			typ: Tuple{
+				ElementTypes: []Type{
+					Bool,
+					Number,
 				},
 			},
 			json: `[true,5]`,
 		},
 		"tuple-empty": {
-			value: tftypes.NewValue(tftypes.Tuple{
-				ElementTypes: []tftypes.Type{},
-			}, []tftypes.Value{}),
-			typ: tftypes.Tuple{
-				ElementTypes: []tftypes.Type{},
+			value: NewValue(Tuple{
+				ElementTypes: []Type{},
+			}, []Value{}),
+			typ: Tuple{
+				ElementTypes: []Type{},
 			},
 			json: `[]`,
 		},
 
 		// Maps
 		"map-empty": {
-			value: tftypes.NewValue(tftypes.Map{
-				AttributeType: tftypes.Bool,
-			}, map[string]tftypes.Value{}),
-			typ: tftypes.Map{
-				AttributeType: tftypes.Bool,
+			value: NewValue(Map{
+				AttributeType: Bool,
+			}, map[string]Value{}),
+			typ: Map{
+				AttributeType: Bool,
 			},
 			json: `{}`,
 		},
 		"map-of-bools": {
-			value: tftypes.NewValue(tftypes.Map{
-				AttributeType: tftypes.Bool,
-			}, map[string]tftypes.Value{
-				"yes": tftypes.NewValue(tftypes.Bool, true),
-				"no":  tftypes.NewValue(tftypes.Bool, false),
+			value: NewValue(Map{
+				AttributeType: Bool,
+			}, map[string]Value{
+				"yes": NewValue(Bool, true),
+				"no":  NewValue(Bool, false),
 			}),
-			typ: tftypes.Map{
-				AttributeType: tftypes.Bool,
+			typ: Map{
+				AttributeType: Bool,
 			},
 			json: `{"no":false,"yes":true}`,
 		},
 		"map-null": {
-			value: tftypes.NewValue(tftypes.Map{
-				AttributeType: tftypes.Bool,
+			value: NewValue(Map{
+				AttributeType: Bool,
 			}, nil),
-			typ: tftypes.Map{
-				AttributeType: tftypes.Bool,
+			typ: Map{
+				AttributeType: Bool,
 			},
 			json: `null`,
 		},
 
 		// Objects
 		"object-empty": {
-			value: tftypes.NewValue(tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{},
-			}, map[string]tftypes.Value{}),
-			typ: tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{},
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{},
+			}, map[string]Value{}),
+			typ: Object{
+				AttributeTypes: map[string]Type{},
 			},
 			json: `{}`,
 		},
 		"object-of-bool_number": {
-			value: tftypes.NewValue(tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"bool":   tftypes.Bool,
-					"number": tftypes.Number,
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"bool":   Bool,
+					"number": Number,
 				},
-			}, map[string]tftypes.Value{
-				"bool":   tftypes.NewValue(tftypes.Bool, true),
-				"number": tftypes.NewValue(tftypes.Number, big.NewFloat(0)),
+			}, map[string]Value{
+				"bool":   NewValue(Bool, true),
+				"number": NewValue(Number, big.NewFloat(0)),
 			}),
-			typ: tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"bool":   tftypes.Bool,
-					"number": tftypes.Number,
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"bool":   Bool,
+					"number": Number,
 				},
 			},
 			json: `{"bool":true,"number":0}`,
@@ -233,71 +232,71 @@ func TestDynamicValueJSON(t *testing.T) {
 
 		// Encoding into dynamic produces type information wrapper
 		"dynamic-bool": {
-			value: tftypes.NewValue(tftypes.Bool, true),
-			typ:   tftypes.DynamicPseudoType,
+			value: NewValue(Bool, true),
+			typ:   DynamicPseudoType,
 			json:  `{"value":true,"type":"bool"}`,
 		},
 		"dynamic-string": {
-			value: tftypes.NewValue(tftypes.String, "hello"),
-			typ:   tftypes.DynamicPseudoType,
+			value: NewValue(String, "hello"),
+			typ:   DynamicPseudoType,
 			json:  `{"value":"hello","type":"string"}`,
 		},
 		"dynamic-number": {
-			value: tftypes.NewValue(tftypes.Number, big.NewFloat(5)),
-			typ:   tftypes.DynamicPseudoType,
+			value: NewValue(Number, big.NewFloat(5)),
+			typ:   DynamicPseudoType,
 			json:  `{"value":5,"type":"number"}`,
 		},
 		"dynamic-list-of-bools": {
-			value: tftypes.NewValue(tftypes.List{
-				ElementType: tftypes.Bool,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.Bool, true),
-				tftypes.NewValue(tftypes.Bool, false),
+			value: NewValue(List{
+				ElementType: Bool,
+			}, []Value{
+				NewValue(Bool, true),
+				NewValue(Bool, false),
 			}),
-			typ:  tftypes.DynamicPseudoType,
+			typ:  DynamicPseudoType,
 			json: `{"value":[true,false],"type":["list","bool"]}`,
 		},
 		"list-of-dynamic-bools": {
-			value: tftypes.NewValue(tftypes.List{
-				ElementType: tftypes.Bool,
-			}, []tftypes.Value{
-				tftypes.NewValue(tftypes.Bool, true),
-				tftypes.NewValue(tftypes.Bool, false),
+			value: NewValue(List{
+				ElementType: Bool,
+			}, []Value{
+				NewValue(Bool, true),
+				NewValue(Bool, false),
 			}),
-			typ: tftypes.List{
-				ElementType: tftypes.DynamicPseudoType,
+			typ: List{
+				ElementType: DynamicPseudoType,
 			},
 			json: `[{"value":true,"type":"bool"},{"value":false,"type":"bool"}]`,
 		},
 		"object-of-bool_dynamic": {
-			value: tftypes.NewValue(tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"static":  tftypes.Bool,
-					"dynamic": tftypes.DynamicPseudoType,
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"static":  Bool,
+					"dynamic": DynamicPseudoType,
 				},
-			}, map[string]tftypes.Value{
-				"static":  tftypes.NewValue(tftypes.Bool, true),
-				"dynamic": tftypes.NewValue(tftypes.Bool, true),
+			}, map[string]Value{
+				"static":  NewValue(Bool, true),
+				"dynamic": NewValue(Bool, true),
 			}),
-			typ: tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"static":  tftypes.Bool,
-					"dynamic": tftypes.DynamicPseudoType,
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"static":  Bool,
+					"dynamic": DynamicPseudoType,
 				},
 			},
 			json: `{"dynamic":{"value":true,"type":"bool"},"static":true}`,
 		},
 		"dynamic-object": {
-			value: tftypes.NewValue(tftypes.Object{
-				AttributeTypes: map[string]tftypes.Type{
-					"static":  tftypes.Bool,
-					"dynamic": tftypes.Bool,
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"static":  Bool,
+					"dynamic": Bool,
 				},
-			}, map[string]tftypes.Value{
-				"static":  tftypes.NewValue(tftypes.Bool, true),
-				"dynamic": tftypes.NewValue(tftypes.Bool, true),
+			}, map[string]Value{
+				"static":  NewValue(Bool, true),
+				"dynamic": NewValue(Bool, true),
 			}),
-			typ:  tftypes.DynamicPseudoType,
+			typ:  DynamicPseudoType,
 			json: `{"value":{"dynamic":true,"static":true},"type":["object",{"dynamic":"bool","static":"bool"}]}`,
 		},
 	}

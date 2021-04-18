@@ -1,12 +1,10 @@
-package tfprotov5
+package tftypes
 
 import (
 	"bytes"
 	"encoding/json"
 	"math/big"
 	"strings"
-
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 func jsonByteDecoder(buf []byte) *json.Decoder {
@@ -16,195 +14,195 @@ func jsonByteDecoder(buf []byte) *json.Decoder {
 	return dec
 }
 
-func jsonUnmarshal(buf []byte, typ tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
+func jsonUnmarshal(buf []byte, typ Type, p AttributePath) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 
 	if tok == nil {
-		return tftypes.NewValue(typ, nil), nil
+		return NewValue(typ, nil), nil
 	}
 
 	switch {
-	case typ.Is(tftypes.String):
+	case typ.Is(String):
 		return jsonUnmarshalString(buf, typ, p)
-	case typ.Is(tftypes.Number):
+	case typ.Is(Number):
 		return jsonUnmarshalNumber(buf, typ, p)
-	case typ.Is(tftypes.Bool):
+	case typ.Is(Bool):
 		return jsonUnmarshalBool(buf, typ, p)
-	case typ.Is(tftypes.DynamicPseudoType):
+	case typ.Is(DynamicPseudoType):
 		return jsonUnmarshalDynamicPseudoType(buf, typ, p)
-	case typ.Is(tftypes.List{}):
-		return jsonUnmarshalList(buf, typ.(tftypes.List).ElementType, p)
-	case typ.Is(tftypes.Set{}):
-		return jsonUnmarshalSet(buf, typ.(tftypes.Set).ElementType, p)
+	case typ.Is(List{}):
+		return jsonUnmarshalList(buf, typ.(List).ElementType, p)
+	case typ.Is(Set{}):
+		return jsonUnmarshalSet(buf, typ.(Set).ElementType, p)
 
-	case typ.Is(tftypes.Map{}):
-		return jsonUnmarshalMap(buf, typ.(tftypes.Map).AttributeType, p)
-	case typ.Is(tftypes.Tuple{}):
-		return jsonUnmarshalTuple(buf, typ.(tftypes.Tuple).ElementTypes, p)
-	case typ.Is(tftypes.Object{}):
-		return jsonUnmarshalObject(buf, typ.(tftypes.Object).AttributeTypes, p)
+	case typ.Is(Map{}):
+		return jsonUnmarshalMap(buf, typ.(Map).AttributeType, p)
+	case typ.Is(Tuple{}):
+		return jsonUnmarshalTuple(buf, typ.(Tuple).ElementTypes, p)
+	case typ.Is(Object{}):
+		return jsonUnmarshalObject(buf, typ.(Object).AttributeTypes, p)
 	}
-	return tftypes.Value{}, p.NewErrorf("unknown type %s", typ)
+	return Value{}, p.NewErrorf("unknown type %s", typ)
 }
 
-func jsonUnmarshalString(buf []byte, typ tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
+func jsonUnmarshalString(buf []byte, typ Type, p AttributePath) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	switch v := tok.(type) {
 	case string:
-		return tftypes.NewValue(tftypes.String, v), nil
+		return NewValue(String, v), nil
 	case json.Number:
-		return tftypes.NewValue(tftypes.String, string(v)), nil
+		return NewValue(String, string(v)), nil
 	case bool:
 		if v {
-			return tftypes.NewValue(tftypes.String, "true"), nil
+			return NewValue(String, "true"), nil
 		}
-		return tftypes.NewValue(tftypes.String, "false"), nil
+		return NewValue(String, "false"), nil
 	}
-	return tftypes.Value{}, p.NewErrorf("unsupported type %T sent as %s", tok, tftypes.String)
+	return Value{}, p.NewErrorf("unsupported type %T sent as %s", tok, String)
 }
 
-func jsonUnmarshalNumber(buf []byte, typ tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
+func jsonUnmarshalNumber(buf []byte, typ Type, p AttributePath) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	switch numTok := tok.(type) {
 	case json.Number:
 		f, _, err := big.ParseFloat(string(numTok), 10, 512, big.ToNearestEven)
 		if err != nil {
-			return tftypes.Value{}, p.NewErrorf("error parsing number: %w", err)
+			return Value{}, p.NewErrorf("error parsing number: %w", err)
 		}
-		return tftypes.NewValue(typ, f), nil
+		return NewValue(typ, f), nil
 	case string:
 		f, _, err := big.ParseFloat(string(numTok), 10, 512, big.ToNearestEven)
 		if err != nil {
-			return tftypes.Value{}, p.NewErrorf("error parsing number: %w", err)
+			return Value{}, p.NewErrorf("error parsing number: %w", err)
 		}
-		return tftypes.NewValue(typ, f), nil
+		return NewValue(typ, f), nil
 	}
-	return tftypes.Value{}, p.NewErrorf("unsupported type %T sent as %s", tok, tftypes.Number)
+	return Value{}, p.NewErrorf("unsupported type %T sent as %s", tok, Number)
 }
 
-func jsonUnmarshalBool(buf []byte, typ tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
+func jsonUnmarshalBool(buf []byte, typ Type, p AttributePath) (Value, error) {
 	dec := jsonByteDecoder(buf)
 	tok, err := dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	switch v := tok.(type) {
 	case bool:
-		return tftypes.NewValue(tftypes.Bool, v), nil
+		return NewValue(Bool, v), nil
 	case string:
 		switch v {
 		case "true", "1":
-			return tftypes.NewValue(tftypes.Bool, true), nil
+			return NewValue(Bool, true), nil
 		case "false", "0":
-			return tftypes.NewValue(tftypes.Bool, false), nil
+			return NewValue(Bool, false), nil
 		}
 		switch strings.ToLower(string(v)) {
 		case "true":
-			return tftypes.Value{}, p.NewErrorf("to convert from string, use lowercase \"true\"")
+			return Value{}, p.NewErrorf("to convert from string, use lowercase \"true\"")
 		case "false":
-			return tftypes.Value{}, p.NewErrorf("to convert from string, use lowercase \"false\"")
+			return Value{}, p.NewErrorf("to convert from string, use lowercase \"false\"")
 		}
 	case json.Number:
 		switch v {
 		case "1":
-			return tftypes.NewValue(tftypes.Bool, true), nil
+			return NewValue(Bool, true), nil
 		case "0":
-			return tftypes.NewValue(tftypes.Bool, false), nil
+			return NewValue(Bool, false), nil
 		}
 	}
-	return tftypes.Value{}, p.NewErrorf("unsupported type %T sent as %s", tok, tftypes.Bool)
+	return Value{}, p.NewErrorf("unsupported type %T sent as %s", tok, Bool)
 }
 
-func jsonUnmarshalDynamicPseudoType(buf []byte, typ tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
+func jsonUnmarshalDynamicPseudoType(buf []byte, typ Type, p AttributePath) (Value, error) {
 	dec := jsonByteDecoder(buf)
 	tok, err := dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	if tok != json.Delim('{') {
-		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('{'), tok)
+		return Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('{'), tok)
 	}
-	var t tftypes.Type
+	var t Type
 	var valBody []byte
 	for dec.More() {
 		tok, err = dec.Token()
 		if err != nil {
-			return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+			return Value{}, p.NewErrorf("error reading token: %w", err)
 		}
 		key, ok := tok.(string)
 		if !ok {
-			return tftypes.Value{}, p.NewErrorf("expected key to be a string, got %T", tok)
+			return Value{}, p.NewErrorf("expected key to be a string, got %T", tok)
 		}
 		var rawVal json.RawMessage
 		err = dec.Decode(&rawVal)
 		if err != nil {
-			return tftypes.Value{}, p.NewErrorf("error decoding value: %w", err)
+			return Value{}, p.NewErrorf("error decoding value: %w", err)
 		}
 		switch key {
 		case "type":
-			t, err = tftypes.ParseJSONType(rawVal) //nolint:staticcheck
+			t, err = ParseJSONType(rawVal) //nolint:staticcheck
 			if err != nil {
-				return tftypes.Value{}, p.NewErrorf("error decoding type information: %w", err)
+				return Value{}, p.NewErrorf("error decoding type information: %w", err)
 			}
 		case "value":
 			valBody = rawVal
 		default:
-			return tftypes.Value{}, p.NewErrorf("invalid key %q in dynamically-typed value", key)
+			return Value{}, p.NewErrorf("invalid key %q in dynamically-typed value", key)
 		}
 	}
 	tok, err = dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	if tok != json.Delim('}') {
-		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('}'), tok)
+		return Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('}'), tok)
 	}
 	if t == nil {
-		return tftypes.Value{}, p.NewErrorf("missing type in dynamically-typed value")
+		return Value{}, p.NewErrorf("missing type in dynamically-typed value")
 	}
 	if valBody == nil {
-		return tftypes.Value{}, p.NewErrorf("missing value in dynamically-typed value")
+		return Value{}, p.NewErrorf("missing value in dynamically-typed value")
 	}
 	return jsonUnmarshal(valBody, t, p)
 }
 
-func jsonUnmarshalList(buf []byte, elementType tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
+func jsonUnmarshalList(buf []byte, elementType Type, p AttributePath) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	if tok != json.Delim('[') {
-		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('['), tok)
+		return Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('['), tok)
 	}
 
 	// we want to have a value for this always, even if there are no
 	// elements, because no elements is *technically* different than empty,
 	// and we want to preserve that distinction
 	//
-	// var vals []tftypes.Value
+	// var vals []Value
 	// would evaluate as nil if the list is empty
 	//
 	// while generally in Go it's undesirable to treat empty and nil slices
 	// separately, in this case we're surfacing a non-Go-in-origin
 	// distinction, so we'll allow it.
-	vals := []tftypes.Value{}
+	vals := []Value{}
 
 	var idx int64
 	for dec.More() {
@@ -215,11 +213,11 @@ func jsonUnmarshalList(buf []byte, elementType tftypes.Type, p tftypes.Attribute
 		var rawVal json.RawMessage
 		err = dec.Decode(&rawVal)
 		if err != nil {
-			return tftypes.Value{}, p.NewErrorf("error decoding value: %w", err)
+			return Value{}, p.NewErrorf("error decoding value: %w", err)
 		}
 		val, err := jsonUnmarshal(rawVal, elementType, p)
 		if err != nil {
-			return tftypes.Value{}, err
+			return Value{}, err
 		}
 		vals = append(vals, val)
 		p.WithoutLastStep()
@@ -227,102 +225,102 @@ func jsonUnmarshalList(buf []byte, elementType tftypes.Type, p tftypes.Attribute
 
 	tok, err = dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	if tok != json.Delim(']') {
-		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim(']'), tok)
+		return Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim(']'), tok)
 	}
 
 	elTyp := elementType
-	if elTyp.Is(tftypes.DynamicPseudoType) {
-		elTyp, err = tftypes.TypeFromElements(vals)
+	if elTyp.Is(DynamicPseudoType) {
+		elTyp, err = TypeFromElements(vals)
 		if err != nil {
-			return tftypes.Value{}, p.NewErrorf("invalid elements for list: %w", err)
+			return Value{}, p.NewErrorf("invalid elements for list: %w", err)
 		}
 	}
-	return tftypes.NewValue(tftypes.List{
+	return NewValue(List{
 		ElementType: elTyp,
 	}, vals), nil
 }
 
-func jsonUnmarshalSet(buf []byte, elementType tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
+func jsonUnmarshalSet(buf []byte, elementType Type, p AttributePath) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	if tok != json.Delim('[') {
-		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('['), tok)
+		return Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('['), tok)
 	}
 
 	// we want to have a value for this always, even if there are no
 	// elements, because no elements is *technically* different than empty,
 	// and we want to preserve that distinction
 	//
-	// var vals []tftypes.Value
+	// var vals []Value
 	// would evaluate as nil if the set is empty
 	//
 	// while generally in Go it's undesirable to treat empty and nil slices
 	// separately, in this case we're surfacing a non-Go-in-origin
 	// distinction, so we'll allow it.
-	vals := []tftypes.Value{}
+	vals := []Value{}
 
 	for dec.More() {
-		p.WithElementKeyValue(tftypes.NewValue(elementType, tftypes.UnknownValue))
+		p.WithElementKeyValue(NewValue(elementType, UnknownValue))
 		var rawVal json.RawMessage
 		err = dec.Decode(&rawVal)
 		if err != nil {
-			return tftypes.Value{}, p.NewErrorf("error decoding value: %w", err)
+			return Value{}, p.NewErrorf("error decoding value: %w", err)
 		}
 		val, err := jsonUnmarshal(rawVal, elementType, p)
 		if err != nil {
-			return tftypes.Value{}, err
+			return Value{}, err
 		}
 		vals = append(vals, val)
 		p.WithoutLastStep()
 	}
 	tok, err = dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	if tok != json.Delim(']') {
-		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim(']'), tok)
+		return Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim(']'), tok)
 	}
 
 	elTyp := elementType
-	if elTyp.Is(tftypes.DynamicPseudoType) {
-		elTyp, err = tftypes.TypeFromElements(vals)
+	if elTyp.Is(DynamicPseudoType) {
+		elTyp, err = TypeFromElements(vals)
 		if err != nil {
-			return tftypes.Value{}, p.NewErrorf("invalid elements for list: %w", err)
+			return Value{}, p.NewErrorf("invalid elements for list: %w", err)
 		}
 	}
-	return tftypes.NewValue(tftypes.Set{
+	return NewValue(Set{
 		ElementType: elTyp,
 	}, vals), nil
 }
 
-func jsonUnmarshalMap(buf []byte, attrType tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
+func jsonUnmarshalMap(buf []byte, attrType Type, p AttributePath) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	if tok != json.Delim('{') {
-		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('{'), tok)
+		return Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('{'), tok)
 	}
 
-	vals := map[string]tftypes.Value{}
+	vals := map[string]Value{}
 	for dec.More() {
-		p.WithElementKeyValue(tftypes.NewValue(attrType, tftypes.UnknownValue))
+		p.WithElementKeyValue(NewValue(attrType, UnknownValue))
 		tok, err := dec.Token()
 		if err != nil {
-			return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+			return Value{}, p.NewErrorf("error reading token: %w", err)
 		}
 		key, ok := tok.(string)
 		if !ok {
-			return tftypes.Value{}, p.NewErrorf("expected map key to be a string, got %T", tok)
+			return Value{}, p.NewErrorf("expected map key to be a string, got %T", tok)
 		}
 
 		//fix the path value, we have an actual key now
@@ -332,55 +330,55 @@ func jsonUnmarshalMap(buf []byte, attrType tftypes.Type, p tftypes.AttributePath
 		var rawVal json.RawMessage
 		err = dec.Decode(&rawVal)
 		if err != nil {
-			return tftypes.Value{}, p.NewErrorf("error decoding value: %w", err)
+			return Value{}, p.NewErrorf("error decoding value: %w", err)
 		}
 		val, err := jsonUnmarshal(rawVal, attrType, p)
 		if err != nil {
-			return tftypes.Value{}, err
+			return Value{}, err
 		}
 		vals[key] = val
 		p.WithoutLastStep()
 	}
 	tok, err = dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	if tok != json.Delim('}') {
-		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('}'), tok)
+		return Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('}'), tok)
 	}
 
-	return tftypes.NewValue(tftypes.Map{
+	return NewValue(Map{
 		AttributeType: attrType,
 	}, vals), nil
 }
 
-func jsonUnmarshalTuple(buf []byte, elementTypes []tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
+func jsonUnmarshalTuple(buf []byte, elementTypes []Type, p AttributePath) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	if tok != json.Delim('[') {
-		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('['), tok)
+		return Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('['), tok)
 	}
 
 	// we want to have a value for this always, even if there are no
 	// elements, because no elements is *technically* different than empty,
 	// and we want to preserve that distinction
 	//
-	// var vals []tftypes.Value
+	// var vals []Value
 	// would evaluate as nil if the tuple is empty
 	//
 	// while generally in Go it's undesirable to treat empty and nil slices
 	// separately, in this case we're surfacing a non-Go-in-origin
 	// distinction, so we'll allow it.
-	vals := []tftypes.Value{}
+	vals := []Value{}
 
 	var idx int64
 	for dec.More() {
 		if idx >= int64(len(elementTypes)) {
-			return tftypes.Value{}, p.NewErrorf("too many tuple elements (only have types for %d)", len(elementTypes))
+			return Value{}, p.NewErrorf("too many tuple elements (only have types for %d)", len(elementTypes))
 		}
 
 		p.WithElementKeyInt(idx)
@@ -390,11 +388,11 @@ func jsonUnmarshalTuple(buf []byte, elementTypes []tftypes.Type, p tftypes.Attri
 		var rawVal json.RawMessage
 		err = dec.Decode(&rawVal)
 		if err != nil {
-			return tftypes.Value{}, p.NewErrorf("error decoding value: %w", err)
+			return Value{}, p.NewErrorf("error decoding value: %w", err)
 		}
 		val, err := jsonUnmarshal(rawVal, elementType, p)
 		if err != nil {
-			return tftypes.Value{}, err
+			return Value{}, err
 		}
 		vals = append(vals, val)
 		p.WithoutLastStep()
@@ -402,46 +400,46 @@ func jsonUnmarshalTuple(buf []byte, elementTypes []tftypes.Type, p tftypes.Attri
 
 	tok, err = dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	if tok != json.Delim(']') {
-		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim(']'), tok)
+		return Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim(']'), tok)
 	}
 
 	if len(vals) != len(elementTypes) {
-		return tftypes.Value{}, p.NewErrorf("not enough tuple elements (only have %d, have types for %d)", len(vals), len(elementTypes))
+		return Value{}, p.NewErrorf("not enough tuple elements (only have %d, have types for %d)", len(vals), len(elementTypes))
 	}
 
-	return tftypes.NewValue(tftypes.Tuple{
+	return NewValue(Tuple{
 		ElementTypes: elementTypes,
 	}, vals), nil
 }
 
-func jsonUnmarshalObject(buf []byte, attrTypes map[string]tftypes.Type, p tftypes.AttributePath) (tftypes.Value, error) {
+func jsonUnmarshalObject(buf []byte, attrTypes map[string]Type, p AttributePath) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	if tok != json.Delim('{') {
-		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('{'), tok)
+		return Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('{'), tok)
 	}
 
-	vals := map[string]tftypes.Value{}
+	vals := map[string]Value{}
 	for dec.More() {
-		p.WithElementKeyValue(tftypes.NewValue(tftypes.String, tftypes.UnknownValue))
+		p.WithElementKeyValue(NewValue(String, UnknownValue))
 		tok, err := dec.Token()
 		if err != nil {
-			return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+			return Value{}, p.NewErrorf("error reading token: %w", err)
 		}
 		key, ok := tok.(string)
 		if !ok {
-			return tftypes.Value{}, p.NewErrorf("object attribute key was %T, not string", tok)
+			return Value{}, p.NewErrorf("object attribute key was %T, not string", tok)
 		}
 		attrType, ok := attrTypes[key]
 		if !ok {
-			return tftypes.Value{}, p.NewErrorf("unsupported attribute %q", key)
+			return Value{}, p.NewErrorf("unsupported attribute %q", key)
 		}
 		p.WithoutLastStep()
 		p.WithAttributeName(key)
@@ -449,11 +447,11 @@ func jsonUnmarshalObject(buf []byte, attrTypes map[string]tftypes.Type, p tftype
 		var rawVal json.RawMessage
 		err = dec.Decode(&rawVal)
 		if err != nil {
-			return tftypes.Value{}, p.NewErrorf("error decoding value: %w", err)
+			return Value{}, p.NewErrorf("error decoding value: %w", err)
 		}
 		val, err := jsonUnmarshal(rawVal, attrType, p)
 		if err != nil {
-			return tftypes.Value{}, err
+			return Value{}, err
 		}
 		vals[key] = val
 		p.WithoutLastStep()
@@ -461,20 +459,20 @@ func jsonUnmarshalObject(buf []byte, attrTypes map[string]tftypes.Type, p tftype
 
 	tok, err = dec.Token()
 	if err != nil {
-		return tftypes.Value{}, p.NewErrorf("error reading token: %w", err)
+		return Value{}, p.NewErrorf("error reading token: %w", err)
 	}
 	if tok != json.Delim('}') {
-		return tftypes.Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('}'), tok)
+		return Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('}'), tok)
 	}
 
 	// make sure we have a value for every attribute
 	for k, typ := range attrTypes {
 		if _, ok := vals[k]; !ok {
-			vals[k] = tftypes.NewValue(typ, nil)
+			vals[k] = NewValue(typ, nil)
 		}
 	}
 
-	return tftypes.NewValue(tftypes.Object{
+	return NewValue(Object{
 		AttributeTypes: attrTypes,
 	}, vals), nil
 }
