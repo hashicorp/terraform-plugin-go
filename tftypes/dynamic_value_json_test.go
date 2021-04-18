@@ -304,10 +304,7 @@ func TestDynamicValueJSON(t *testing.T) {
 		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			dv := DynamicValue{
-				JSON: []byte(test.json),
-			}
-			val, err := dv.Unmarshal(test.typ)
+			val, err := jsonUnmarshal([]byte(test.json), test.typ, AttributePath{})
 			if err != nil {
 				t.Fatalf("unexpected error unmarshaling: %s", err)
 			}

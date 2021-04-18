@@ -1,12 +1,14 @@
 package tftypes
 
 import (
+	"bytes"
 	"encoding/hex"
 	"math"
 	"math/big"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/vmihailenco/msgpack"
 )
 
 func TestDynamicValueMsgPack(t *testing.T) {
@@ -383,10 +385,9 @@ func TestDynamicValueMsgPack(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error parsing hex: %s", err)
 			}
-			dv := DynamicValue{
-				MsgPack: b,
-			}
-			val, err := dv.Unmarshal(test.typ)
+			r := bytes.NewReader(b)
+			dec := msgpack.NewDecoder(r)
+			val, err := msgpackUnmarshal(dec, test.typ, AttributePath{})
 			if err != nil {
 				t.Fatalf("unexpected error unmarshaling: %s", err)
 			}
