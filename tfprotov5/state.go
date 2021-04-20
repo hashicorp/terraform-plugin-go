@@ -70,7 +70,7 @@ type RawState struct {
 // cannot be unmarshaled, and must have their Flatmap property read directly.
 func (s RawState) Unmarshal(typ tftypes.Type) (tftypes.Value, error) {
 	if s.JSON != nil {
-		return jsonUnmarshal(s.JSON, typ, tftypes.AttributePath{})
+		return tftypes.ValueFromJSON(s.JSON, typ) //nolint:staticcheck
 	}
 	if s.Flatmap != nil {
 		return tftypes.Value{}, fmt.Errorf("flatmap states cannot be unmarshaled, only states written by Terraform 0.12 and higher can be unmarshaled")
