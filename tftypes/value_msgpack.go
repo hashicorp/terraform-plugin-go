@@ -30,10 +30,10 @@ func (u msgPackUnknownType) MarshalMsgpack() ([]byte, error) {
 func ValueFromMsgPack(data []byte, typ Type) (Value, error) {
 	r := bytes.NewReader(data)
 	dec := msgpack.NewDecoder(r)
-	return msgpackUnmarshal(dec, typ, AttributePath{})
+	return msgpackUnmarshal(dec, typ, NewAttributePath())
 }
 
-func msgpackUnmarshal(dec *msgpack.Decoder, typ Type, path AttributePath) (Value, error) {
+func msgpackUnmarshal(dec *msgpack.Decoder, typ Type, path *AttributePath) (Value, error) {
 	peek, err := dec.PeekCode()
 	if err != nil {
 		return Value{}, path.NewErrorf("error peeking next byte: %w", err)
@@ -131,7 +131,7 @@ func msgpackUnmarshal(dec *msgpack.Decoder, typ Type, path AttributePath) (Value
 	return Value{}, path.NewErrorf("unsupported type %s", typ.String())
 }
 
-func msgpackUnmarshalList(dec *msgpack.Decoder, typ Type, path AttributePath) (Value, error) {
+func msgpackUnmarshalList(dec *msgpack.Decoder, typ Type, path *AttributePath) (Value, error) {
 	length, err := dec.DecodeArrayLen()
 	if err != nil {
 		return Value{}, path.NewErrorf("error decoding list length: %w", err)
@@ -150,13 +150,12 @@ func msgpackUnmarshalList(dec *msgpack.Decoder, typ Type, path AttributePath) (V
 
 	vals := make([]Value, 0, length)
 	for i := 0; i < length; i++ {
-		path.WithElementKeyInt(int64(i))
-		val, err := msgpackUnmarshal(dec, typ, path)
+		innerPath := path.WithElementKeyInt(int64(i))
+		val, err := msgpackUnmarshal(dec, typ, innerPath)
 		if err != nil {
 			return Value{}, err
 		}
 		vals = append(vals, val)
-		path.WithoutLastStep()
 	}
 
 	elTyp := typ
@@ -172,7 +171,7 @@ func msgpackUnmarshalList(dec *msgpack.Decoder, typ Type, path AttributePath) (V
 	}, vals), nil
 }
 
-func msgpackUnmarshalSet(dec *msgpack.Decoder, typ Type, path AttributePath) (Value, error) {
+func msgpackUnmarshalSet(dec *msgpack.Decoder, typ Type, path *AttributePath) (Value, error) {
 	length, err := dec.DecodeArrayLen()
 	if err != nil {
 		return Value{}, path.NewErrorf("error decoding set length: %w", err)
@@ -191,13 +190,12 @@ func msgpackUnmarshalSet(dec *msgpack.Decoder, typ Type, path AttributePath) (Va
 
 	vals := make([]Value, 0, length)
 	for i := 0; i < length; i++ {
-		path.WithElementKeyInt(int64(i))
-		val, err := msgpackUnmarshal(dec, typ, path)
+		innerPath := path.WithElementKeyInt(int64(i))
+		val, err := msgpackUnmarshal(dec, typ, innerPath)
 		if err != nil {
 			return Value{}, err
 		}
 		vals = append(vals, val)
-		path.WithoutLastStep()
 	}
 
 	elTyp, err := TypeFromElements(vals)
@@ -210,7 +208,7 @@ func msgpackUnmarshalSet(dec *msgpack.Decoder, typ Type, path AttributePath) (Va
 	}, vals), nil
 }
 
-func msgpackUnmarshalMap(dec *msgpack.Decoder, typ Type, path AttributePath) (Value, error) {
+func msgpackUnmarshalMap(dec *msgpack.Decoder, typ Type, path *AttributePath) (Value, error) {
 	length, err := dec.DecodeMapLen()
 	if err != nil {
 		return Value{}, path.NewErrorf("error decoding map length: %w", err)
@@ -233,20 +231,19 @@ func msgpackUnmarshalMap(dec *msgpack.Decoder, typ Type, path AttributePath) (Va
 		if err != nil {
 			return Value{}, path.NewErrorf("error decoding map key: %w", err)
 		}
-		path.WithElementKeyString(key)
-		val, err := msgpackUnmarshal(dec, typ, path)
+		innerPath := path.WithElementKeyString(key)
+		val, err := msgpackUnmarshal(dec, typ, innerPath)
 		if err != nil {
 			return Value{}, err
 		}
 		vals[key] = val
-		path.WithoutLastStep()
 	}
 	return NewValue(Map{
 		AttributeType: typ,
 	}, vals), nil
 }
 
-func msgpackUnmarshalTuple(dec *msgpack.Decoder, types []Type, path AttributePath) (Value, error) {
+func msgpackUnmarshalTuple(dec *msgpack.Decoder, types []Type, path *AttributePath) (Value, error) {
 	length, err := dec.DecodeArrayLen()
 	if err != nil {
 		return Value{}, path.NewErrorf("error decoding tuple length: %w", err)
@@ -268,14 +265,13 @@ func msgpackUnmarshalTuple(dec *msgpack.Decoder, types []Type, path AttributePat
 
 	vals := make([]Value, 0, length)
 	for i := 0; i < length; i++ {
-		path.WithElementKeyInt(int64(i))
+		innerPath := path.WithElementKeyInt(int64(i))
 		typ := types[i]
-		val, err := msgpackUnmarshal(dec, typ, path)
+		val, err := msgpackUnmarshal(dec, typ, innerPath)
 		if err != nil {
 			return Value{}, err
 		}
 		vals = append(vals, val)
-		path.WithoutLastStep()
 	}
 
 	return NewValue(Tuple{
@@ -283,7 +279,7 @@ func msgpackUnmarshalTuple(dec *msgpack.Decoder, types []Type, path AttributePat
 	}, vals), nil
 }
 
-func msgpackUnmarshalObject(dec *msgpack.Decoder, types map[string]Type, path AttributePath) (Value, error) {
+func msgpackUnmarshalObject(dec *msgpack.Decoder, types map[string]Type, path *AttributePath) (Value, error) {
 	length, err := dec.DecodeMapLen()
 	if err != nil {
 		return Value{}, path.NewErrorf("error decoding object length: %w", err)
@@ -313,13 +309,12 @@ func msgpackUnmarshalObject(dec *msgpack.Decoder, types map[string]Type, path At
 		if !exists {
 			return Value{}, path.NewErrorf("unknown attribute %q", key)
 		}
-		path.WithAttributeName(key)
-		val, err := msgpackUnmarshal(dec, typ, path)
+		innerPath := path.WithAttributeName(key)
+		val, err := msgpackUnmarshal(dec, typ, innerPath)
 		if err != nil {
 			return Value{}, err
 		}
 		vals[key] = val
-		path.WithoutLastStep()
 	}
 
 	return NewValue(Object{
@@ -327,7 +322,7 @@ func msgpackUnmarshalObject(dec *msgpack.Decoder, types map[string]Type, path At
 	}, vals), nil
 }
 
-func msgpackUnmarshalDynamic(dec *msgpack.Decoder, path AttributePath) (Value, error) {
+func msgpackUnmarshalDynamic(dec *msgpack.Decoder, path *AttributePath) (Value, error) {
 	length, err := dec.DecodeArrayLen()
 	if err != nil {
 		return Value{}, path.NewErrorf("error checking length of DynamicPseudoType value: %w", err)
