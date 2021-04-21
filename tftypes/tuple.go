@@ -102,8 +102,9 @@ func valueFromTuple(types []Type, in interface{}) (Value, error) {
 			}
 			for pos, v := range value {
 				typ := types[pos]
-				if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
-					return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value at position %d in %s; expected type is %s", v.Type(), pos, Tuple{ElementTypes: types}, typ)
+				err := useTypeAs(v.Type(), typ, NewAttributePath().WithElementKeyInt(int64(pos)))
+				if err != nil {
+					return Value{}, err
 				}
 			}
 		}

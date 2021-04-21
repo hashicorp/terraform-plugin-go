@@ -66,9 +66,16 @@ func (l List) supportedGoTypes() []string {
 func valueFromList(typ Type, in interface{}) (Value, error) {
 	switch value := in.(type) {
 	case []Value:
+		var valType Type
 		for pos, v := range value {
-			if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
-				return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value in position %d of %s; expected type is %s", v.Type(), pos, List{ElementType: typ}, typ)
+			if err := useTypeAs(v.Type(), typ, NewAttributePath().WithElementKeyInt(int64(pos))); err != nil {
+				return Value{}, err
+			}
+			if valType == nil {
+				valType = v.Type()
+			}
+			if !v.Type().equals(valType, true) {
+				return Value{}, fmt.Errorf("lists must only contain one type of element, saw %s and %s", valType, v.Type())
 			}
 		}
 		return Value{

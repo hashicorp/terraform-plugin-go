@@ -169,8 +169,9 @@ func valueFromObject(types map[string]Type, optionalAttrs map[string]struct{}, i
 				if !ok {
 					return Value{}, fmt.Errorf("can't set a value on %q in tftypes.NewValue, key not part of the object type %s", k, Object{AttributeTypes: types})
 				}
-				if !v.Type().Is(types[k]) && !types[k].Is(DynamicPseudoType) {
-					return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value for %q in %s; expected type is %s", v.Type(), k, Object{AttributeTypes: types}, typ)
+				err := useTypeAs(v.Type(), typ, NewAttributePath().WithAttributeName(k))
+				if err != nil {
+					return Value{}, err
 				}
 			}
 		}

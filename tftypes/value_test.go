@@ -165,6 +165,11 @@ func TestValueAs(t *testing.T) {
 			as:       slicePointer([]Value{}),
 			expected: slicePointer([]Value{NewValue(String, "hello")}),
 		},
+		"list-dynamic": {
+			in:       NewValue(List{ElementType: DynamicPseudoType}, []Value{NewValue(String, "hello")}),
+			as:       slicePointer([]Value{}),
+			expected: slicePointer([]Value{NewValue(String, "hello")}),
+		},
 		"list-null": {
 			in:       NewValue(List{ElementType: String}, nil),
 			as:       slicePointer([]Value{NewValue(String, "hello")}),
@@ -180,8 +185,38 @@ func TestValueAs(t *testing.T) {
 			as:       slicePointerPointer(slicePointer([]Value{NewValue(String, "hello")})),
 			expected: slicePointerPointer(nil),
 		},
+		"list-object": {
+			in: NewValue(List{ElementType: Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}}, []Value{NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}, map[string]Value{
+				"foo": NewValue(String, "hello"),
+				"bar": NewValue(Number, big.NewFloat(123)),
+				"baz": NewValue(Bool, true),
+			})}),
+			as: slicePointer([]Value{}),
+			expected: slicePointer([]Value{NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}, map[string]Value{
+				"foo": NewValue(String, "hello"),
+				"bar": NewValue(Number, big.NewFloat(123)),
+				"baz": NewValue(Bool, true),
+			})}),
+		},
 		"set": {
 			in:       NewValue(Set{ElementType: String}, []Value{NewValue(String, "hello")}),
+			as:       slicePointer([]Value{}),
+			expected: slicePointer([]Value{NewValue(String, "hello")}),
+		},
+		"set-dynamic": {
+			in:       NewValue(Set{ElementType: DynamicPseudoType}, []Value{NewValue(String, "hello")}),
 			as:       slicePointer([]Value{}),
 			expected: slicePointer([]Value{NewValue(String, "hello")}),
 		},
@@ -205,6 +240,23 @@ func TestValueAs(t *testing.T) {
 				"foo": String,
 				"bar": Number,
 				"baz": Bool,
+			}}, map[string]Value{
+				"foo": NewValue(String, "hello"),
+				"bar": NewValue(Number, big.NewFloat(123)),
+				"baz": NewValue(Bool, true),
+			}),
+			as: mapPointer(map[string]Value{}),
+			expected: mapPointer(map[string]Value{
+				"foo": NewValue(String, "hello"),
+				"bar": NewValue(Number, big.NewFloat(123)),
+				"baz": NewValue(Bool, true),
+			}),
+		},
+		"object-dynamic": {
+			in: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": DynamicPseudoType,
+				"bar": DynamicPseudoType,
+				"baz": DynamicPseudoType,
 			}}, map[string]Value{
 				"foo": NewValue(String, "hello"),
 				"bar": NewValue(Number, big.NewFloat(123)),
@@ -311,6 +363,28 @@ func TestValueAs(t *testing.T) {
 				NewValue(Bool, true),
 			})),
 			expected: slicePointerPointer(nil),
+		},
+
+		"object-list-dynamic": {
+			in: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"result": List{ElementType: DynamicPseudoType},
+				},
+			}, map[string]Value{
+				"result": NewValue(List{ElementType: Object{
+					AttributeTypes: map[string]Type{
+						"testcol": String,
+					},
+				}}, []Value{}),
+			}),
+			as: mapPointer(map[string]Value{}),
+			expected: mapPointer(map[string]Value{
+				"result": NewValue(List{ElementType: Object{
+					AttributeTypes: map[string]Type{
+						"testcol": String,
+					},
+				}}, []Value{}),
+			}),
 		},
 	}
 

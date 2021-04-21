@@ -66,9 +66,16 @@ func (s Set) supportedGoTypes() []string {
 func valueFromSet(typ Type, in interface{}) (Value, error) {
 	switch value := in.(type) {
 	case []Value:
-		for pos, v := range value {
-			if !v.Type().Is(typ) && !typ.Is(DynamicPseudoType) {
-				return Value{}, fmt.Errorf("tftypes.NewValue can't use type %s as a value in position %d of %s; expected type is %s", v.Type(), pos, Set{ElementType: typ}, typ)
+		var elType Type
+		for _, v := range value {
+			if err := useTypeAs(v.Type(), typ, NewAttributePath().WithElementKeyValue(v)); err != nil {
+				return Value{}, err
+			}
+			if elType == nil {
+				elType = v.Type()
+			}
+			if !elType.equals(v.Type(), true) {
+				return Value{}, fmt.Errorf("sets must only contain one type of element, saw %s and %s", elType, v.Type())
 			}
 		}
 		return Value{

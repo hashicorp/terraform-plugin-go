@@ -175,7 +175,43 @@ func Test_newValue_object(t *testing.T) {
 				"b": NewValue(Number, 123),
 				"c": NewValue(String, "false"),
 			},
-			err: regexp.MustCompile(`can't use type tftypes.String as a value for "c" in tftypes.Object\["a":tftypes.String, "b":tftypes.Number, "c":tftypes.Bool\]; expected type is tftypes.Bool`),
+			err: regexp.MustCompile(`AttributeName\("c"\): can't use tftypes.String as tftypes.Bool`),
+		},
+		"dynamic-attribute": {
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"a": String,
+					"b": Number,
+					"c": DynamicPseudoType,
+				},
+			},
+			val: map[string]Value{
+				"a": NewValue(String, "foo"),
+				"b": NewValue(Number, 123),
+				"c": NewValue(String, "false"),
+			},
+			expected: Value{
+				typ: Object{AttributeTypes: map[string]Type{
+					"a": String,
+					"b": Number,
+					"c": DynamicPseudoType,
+				}},
+				value: map[string]Value{
+					"a": {
+						typ:   String,
+						value: "foo",
+					},
+					"b": {
+						typ:   Number,
+						value: big.NewFloat(123),
+					},
+					"c": {
+						typ:   String,
+						value: "false",
+					},
+				},
+			},
+			err: nil,
 		},
 	}
 	for name, test := range tests {
@@ -189,7 +225,7 @@ func Test_newValue_object(t *testing.T) {
 			} else if err != nil && test.err == nil {
 				t.Errorf("Expected error to be nil, got %q", err)
 			} else if err != nil && test.err != nil && !test.err.MatchString(err.Error()) {
-				t.Errorf("Expected error to match %s, got %q", test.err, err.Error())
+				t.Errorf("Expected error to match %q, got %q", test.err, err.Error())
 			}
 			if !res.Equal(test.expected) {
 				t.Errorf("Expected value to be %s, got %s", test.expected, res)
