@@ -1,4 +1,4 @@
-# 0.3.0 (Unreleased)
+# 0.3.0 (April 21, 2021)
 
 BREAKING CHANGES:
 * Previously, `tftypes.NewValue` would panic if the Go type supplied wasn't a valid Go type for _any_ `tftypes.Type`. Now `tftypes.NewValue` will panic if the Go type supplied isn't a valid Go type for the _specific_ `tftypes.Type` supplied. ([#67](https://github.com/hashicorp/terraform-plugin-go/issues/67))
