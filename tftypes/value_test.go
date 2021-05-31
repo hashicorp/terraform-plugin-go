@@ -93,6 +93,11 @@ func TestValueAs(t *testing.T) {
 			as:       numberPointerPointer(big.NewFloat(0)),
 			expected: numberPointerPointer(big.NewFloat(123)),
 		},
+		"uninstantiated-number-pointer": {
+			in:       NewValue(Number, big.NewFloat(123)),
+			as:       numberPointerPointer(nil),
+			expected: numberPointerPointer(big.NewFloat(123)),
+		},
 		"number-pointer-null": {
 			in:       NewValue(Number, nil),
 			as:       numberPointerPointer(big.NewFloat(123)),
