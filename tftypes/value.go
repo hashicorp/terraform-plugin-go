@@ -432,6 +432,9 @@ func (val Value) As(dst interface{}) error {
 			*target = nil
 			return nil
 		}
+		if *target == nil {
+			*target = big.NewFloat(0)
+		}
 		return val.As(*target)
 	case *bool:
 		if val.IsNull() {
