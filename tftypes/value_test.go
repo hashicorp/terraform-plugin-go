@@ -1547,7 +1547,7 @@ func TestValueString(t *testing.T) {
 	tests := map[string]testCase{
 		"nil": {
 			in:       Value{},
-			expected: "",
+			expected: "tftypes.Value<>",
 		},
 		"string": {
 			in:       NewValue(String, "hello"),

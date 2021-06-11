@@ -46,6 +46,10 @@ type Value struct {
 func (val Value) String() string {
 	typ := val.Type()
 
+	if typ == nil {
+		return "tftypes.Value<>"
+	}
+
 	// null and unknown values we use static strings for
 	if val.IsNull() {
 		return typ.String() + "<null>"
