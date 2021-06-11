@@ -1536,3 +1536,160 @@ func TestValueWalkAttributePath(t *testing.T) {
 		})
 	}
 }
+
+func TestValueString(t *testing.T) {
+	t.Parallel()
+	type testCase struct {
+		in       Value
+		expected string
+	}
+
+	tests := map[string]testCase{
+		"string": {
+			in:       NewValue(String, "hello"),
+			expected: "tftypes.String<\"hello\">",
+		},
+		"string-null": {
+			in:       NewValue(String, nil),
+			expected: "tftypes.String<null>",
+		},
+		"number": {
+			in:       NewValue(Number, big.NewFloat(123)),
+			expected: "tftypes.Number<\"123\">",
+		},
+		"number-null": {
+			in:       NewValue(Number, nil),
+			expected: "tftypes.Number<null>",
+		},
+		"bool": {
+			in:       NewValue(Bool, true),
+			expected: "tftypes.Bool<\"true\">",
+		},
+		"bool-null": {
+			in:       NewValue(Bool, nil),
+			expected: "tftypes.Bool<null>",
+		},
+		"map": {
+			in: NewValue(Map{AttributeType: String}, map[string]Value{
+				"hello": NewValue(String, "world"),
+			}),
+			expected: `tftypes.Map[tftypes.String]<"hello":tftypes.String<"world">>`,
+		},
+		"map-null": {
+			in:       NewValue(Map{AttributeType: String}, nil),
+			expected: "tftypes.Map[tftypes.String]<null>",
+		},
+		"list": {
+			in:       NewValue(List{ElementType: String}, []Value{NewValue(String, "hello")}),
+			expected: `tftypes.List[tftypes.String]<tftypes.String<"hello">>`,
+		},
+		"list-dynamic": {
+			in:       NewValue(List{ElementType: DynamicPseudoType}, []Value{NewValue(String, "hello")}),
+			expected: `tftypes.List[tftypes.DynamicPseudoType]<tftypes.String<"hello">>`,
+		},
+		"list-null": {
+			in:       NewValue(List{ElementType: String}, nil),
+			expected: "tftypes.List[tftypes.String]<null>",
+		},
+		"list-object": {
+			in: NewValue(List{ElementType: Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}}, []Value{NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}, map[string]Value{
+				"foo": NewValue(String, "hello"),
+				"bar": NewValue(Number, big.NewFloat(123)),
+				"baz": NewValue(Bool, true),
+			})}),
+			expected: `tftypes.List[tftypes.Object["bar":tftypes.Number, "baz":tftypes.Bool, "foo":tftypes.String]]<tftypes.Object["bar":tftypes.Number, "baz":tftypes.Bool, "foo":tftypes.String]<"bar":tftypes.Number<"123">, "baz":tftypes.Bool<"true">, "foo":tftypes.String<"hello">>>`,
+		},
+		"set": {
+			in:       NewValue(Set{ElementType: String}, []Value{NewValue(String, "hello")}),
+			expected: `tftypes.Set[tftypes.String]<tftypes.String<"hello">>`,
+		},
+		"set-dynamic": {
+			in:       NewValue(Set{ElementType: DynamicPseudoType}, []Value{NewValue(String, "hello")}),
+			expected: `tftypes.Set[tftypes.DynamicPseudoType]<tftypes.String<"hello">>`,
+		},
+		"set-null": {
+			in:       NewValue(Set{ElementType: String}, nil),
+			expected: "tftypes.Set[tftypes.String]<null>",
+		},
+		"object": {
+			in: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}, map[string]Value{
+				"foo": NewValue(String, "hello"),
+				"bar": NewValue(Number, big.NewFloat(123)),
+				"baz": NewValue(Bool, true),
+			}),
+			expected: `tftypes.Object["bar":tftypes.Number, "baz":tftypes.Bool, "foo":tftypes.String]<"bar":tftypes.Number<"123">, "baz":tftypes.Bool<"true">, "foo":tftypes.String<"hello">>`,
+		},
+		"object-dynamic": {
+			in: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": DynamicPseudoType,
+				"bar": DynamicPseudoType,
+				"baz": DynamicPseudoType,
+			}}, map[string]Value{
+				"foo": NewValue(String, "hello"),
+				"bar": NewValue(Number, big.NewFloat(123)),
+				"baz": NewValue(Bool, true),
+			}),
+			expected: `tftypes.Object["bar":tftypes.DynamicPseudoType, "baz":tftypes.DynamicPseudoType, "foo":tftypes.DynamicPseudoType]<"bar":tftypes.Number<"123">, "baz":tftypes.Bool<"true">, "foo":tftypes.String<"hello">>`,
+		},
+		"object-null": {
+			in: NewValue(Object{AttributeTypes: map[string]Type{
+				"foo": String,
+				"bar": Number,
+				"baz": Bool,
+			}}, nil),
+			expected: `tftypes.Object["bar":tftypes.Number, "baz":tftypes.Bool, "foo":tftypes.String]<null>`,
+		},
+		"tuple": {
+			in: NewValue(Tuple{ElementTypes: []Type{
+				String, Number, Bool,
+			}}, []Value{
+				NewValue(String, "hello"),
+				NewValue(Number, big.NewFloat(123)),
+				NewValue(Bool, true),
+			}),
+			expected: `tftypes.Tuple[tftypes.String, tftypes.Number, tftypes.Bool]<tftypes.String<"hello">, tftypes.Number<"123">, tftypes.Bool<"true">>`,
+		},
+		"tuple-null": {
+			in: NewValue(Tuple{ElementTypes: []Type{
+				String, Number, Bool,
+			}}, nil),
+			expected: "tftypes.Tuple[tftypes.String, tftypes.Number, tftypes.Bool]<null>",
+		},
+		"object-list-dynamic": {
+			in: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"result": List{ElementType: DynamicPseudoType},
+				},
+			}, map[string]Value{
+				"result": NewValue(List{ElementType: Object{
+					AttributeTypes: map[string]Type{
+						"testcol": String,
+					},
+				}}, []Value{}),
+			}),
+			expected: `tftypes.Object["result":tftypes.List[tftypes.DynamicPseudoType]]<"result":tftypes.List[tftypes.Object["testcol":tftypes.String]]<>>`,
+		},
+	}
+
+	for name, test := range tests {
+		name, test := name, test
+		t.Run(name, func(t *testing.T) {
+			str := test.in.String()
+			if diff := cmp.Diff(test.expected, str); diff != "" {
+				t.Errorf("Unexpected results (-wanted, +got): %s", diff)
+			}
+		})
+	}
+}
