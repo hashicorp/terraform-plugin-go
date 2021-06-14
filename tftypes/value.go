@@ -47,7 +47,7 @@ func (val Value) String() string {
 	typ := val.Type()
 
 	if typ == nil {
-		return "tftypes.Value<>"
+		return "invalid typeless tftypes.Value<>"
 	}
 
 	// null and unknown values we use static strings for
