@@ -79,8 +79,8 @@ func TestValueAs(t *testing.T) {
 			expected: strPointerPointer(nil),
 		},
 		"uninstanciated-string-pointer": {
-			in: NewValue(String, "hello"),
-			as: strPointerPointer(nil),
+			in:       NewValue(String, "hello"),
+			as:       strPointerPointer(nil),
 			expected: strPointerPointer(strPointer("hello")),
 		},
 		"number": {
@@ -139,8 +139,8 @@ func TestValueAs(t *testing.T) {
 			expected: boolPointerPointer(nil),
 		},
 		"uninstanciated-bool-pointer": {
-			in: NewValue(Bool, true),
-			as: boolPointerPointer(nil),
+			in:       NewValue(Bool, true),
+			as:       boolPointerPointer(nil),
 			expected: boolPointerPointer(boolPointer(true)),
 		},
 		"map": {
