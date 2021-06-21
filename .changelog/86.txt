@@ -1,0 +1,3 @@
+```release-note:bug
+Fixed a panic when `.String()` is called on an empty `tftypes.Value`.
+```
