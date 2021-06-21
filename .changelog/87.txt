@@ -1,0 +1,3 @@
+```release-note:bug
+Fixed AttributePaths pointing to the root of the value to be prefixed with `<root>:` instead of just with `:`.
+```
