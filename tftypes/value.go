@@ -419,6 +419,10 @@ func (val Value) As(dst interface{}) error {
 			*target = nil
 			return nil
 		}
+		if *target == nil {
+			var s string
+			*target = &s
+		}
 		return val.As(*target)
 	case *big.Float:
 		if val.IsNull() {
@@ -456,6 +460,10 @@ func (val Value) As(dst interface{}) error {
 			*target = nil
 			return nil
 		}
+		if *target == nil {
+			var b bool
+			*target = &b
+		}
 		return val.As(*target)
 	case *map[string]Value:
 		if val.IsNull() {
@@ -473,6 +481,10 @@ func (val Value) As(dst interface{}) error {
 			*target = nil
 			return nil
 		}
+		if *target == nil {
+			m := map[string]Value{}
+			*target = &m
+		}
 		return val.As(*target)
 	case *[]Value:
 		if val.IsNull() {
@@ -489,6 +501,10 @@ func (val Value) As(dst interface{}) error {
 		if val.IsNull() {
 			*target = nil
 			return nil
+		}
+		if *target == nil {
+			l := []Value{}
+			*target = &l
 		}
 		return val.As(*target)
 	}

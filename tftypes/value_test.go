@@ -78,6 +78,11 @@ func TestValueAs(t *testing.T) {
 			as:       strPointerPointer(strPointer("this value should be removed")),
 			expected: strPointerPointer(nil),
 		},
+		"uninstanciated-string-pointer": {
+			in: NewValue(String, "hello"),
+			as: strPointerPointer(nil),
+			expected: strPointerPointer(strPointer("hello")),
+		},
 		"number": {
 			in:       NewValue(Number, big.NewFloat(123)),
 			as:       big.NewFloat(0),
@@ -133,6 +138,11 @@ func TestValueAs(t *testing.T) {
 			as:       boolPointerPointer(boolPointer(true)),
 			expected: boolPointerPointer(nil),
 		},
+		"uninstanciated-bool-pointer": {
+			in: NewValue(Bool, true),
+			as: boolPointerPointer(nil),
+			expected: boolPointerPointer(boolPointer(true)),
+		},
 		"map": {
 			in: NewValue(Map{AttributeType: String}, map[string]Value{
 				"hello": NewValue(String, "world"),
@@ -164,6 +174,15 @@ func TestValueAs(t *testing.T) {
 				"a": NewValue(String, "this should be removed"),
 			})),
 			expected: mapPointerPointer(nil),
+		},
+		"uninstanciated-map-pointer": {
+			in: NewValue(Map{AttributeType: String}, map[string]Value{
+				"hello": NewValue(String, "world"),
+			}),
+			as: mapPointerPointer(nil),
+			expected: mapPointerPointer(mapPointer(map[string]Value{
+				"hello": NewValue(String, "world"),
+			})),
 		},
 		"list": {
 			in:       NewValue(List{ElementType: String}, []Value{NewValue(String, "hello")}),
@@ -214,6 +233,11 @@ func TestValueAs(t *testing.T) {
 				"bar": NewValue(Number, big.NewFloat(123)),
 				"baz": NewValue(Bool, true),
 			})}),
+		},
+		"uninstanciated-list": {
+			in:       NewValue(List{ElementType: String}, []Value{NewValue(String, "hello")}),
+			as:       slicePointerPointer(nil),
+			expected: slicePointerPointer(slicePointer([]Value{NewValue(String, "hello")})),
 		},
 		"set": {
 			in:       NewValue(Set{ElementType: String}, []Value{NewValue(String, "hello")}),
