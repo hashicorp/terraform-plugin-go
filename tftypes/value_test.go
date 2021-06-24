@@ -1053,6 +1053,15 @@ func TestValueEqual(t *testing.T) {
 			val2:  NewValue(String, "hello"),
 			equal: false,
 		},
+		"empty": {
+			val1:  Value{},
+			val2:  Value{},
+			equal: true,
+		},
+		"emptyDiff": {
+			val1: Value{},
+			val2: NewValue(String, "hello"),
+		},
 	}
 	for name, test := range tests {
 		name, test := name, test
