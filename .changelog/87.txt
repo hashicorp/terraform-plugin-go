@@ -1,0 +1,3 @@
+```release-note:bug
+Fixed AttributePaths pointing to the root of the value to be omitted instead of prefixing the error with `: `.
+```
