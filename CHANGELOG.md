@@ -1,3 +1,12 @@
+# 0.3.1 (Unreleased)
+
+BUG FIXES:
+* Fixed AttributePaths pointing to the root of the value to be omitted instead of prefixing the error with `: `. ([#87](https://github.com/hashicorp/terraform-plugin-go/issues/87))
+* Fixed a panic when `.String()` is called on an empty `tftypes.Value`. ([#86](https://github.com/hashicorp/terraform-plugin-go/issues/86))
+* Fixed a panic when calling `tftypes.Value.As` and passing a pointer to an uninstantiated *big.Float. ([#85](https://github.com/hashicorp/terraform-plugin-go/issues/85))
+* Fixed a panic when calling `tftypes.Value.As` and passing a pointer to an uninstantiated *bool, *string, *map[string]Value or *[]Value. ([#88](https://github.com/hashicorp/terraform-plugin-go/issues/88))
+* Fixed a panic when comparing the empty value of a tftypes.Value to a non-empty value. ([#90](https://github.com/hashicorp/terraform-plugin-go/issues/90))
+
 # 0.3.0 (April 21, 2021)
 
 BREAKING CHANGES:
