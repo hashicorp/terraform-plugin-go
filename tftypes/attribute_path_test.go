@@ -522,3 +522,66 @@ func TestAttributePathEqual(t *testing.T) {
 		})
 	}
 }
+
+func TestAttributePathString(t *testing.T) {
+	t.Parallel()
+	type testCase struct {
+		path     *AttributePath
+		expected string
+	}
+
+	tests := map[string]testCase{
+		"empty": {
+			path:     NewAttributePath(),
+			expected: "",
+		},
+		"nil": {
+			path:     nil,
+			expected: "",
+		},
+		"attribute-name": {
+			path:     NewAttributePath().WithAttributeName("testing"),
+			expected: `AttributeName("testing")`,
+		},
+		"element-key-string": {
+			path:     NewAttributePath().WithElementKeyString("testing"),
+			expected: `ElementKeyString("testing")`,
+		},
+		"element-key-int": {
+			path:     NewAttributePath().WithElementKeyInt(1234),
+			expected: `ElementKeyInt(1234)`,
+		},
+		"element-key-value": {
+			path:     NewAttributePath().WithElementKeyValue(NewValue(String, "testing")),
+			expected: `ElementKeyValue(tftypes.String<"testing">)`,
+		},
+		"an-an": {
+			path:     NewAttributePath().WithAttributeName("testing").WithAttributeName("testing2"),
+			expected: `AttributeName("testing").AttributeName("testing2")`,
+		},
+		"long": {
+			path:     NewAttributePath().WithElementKeyString("testing").WithElementKeyInt(20).WithAttributeName("testing2"),
+			expected: `ElementKeyString("testing").ElementKeyInt(20).AttributeName("testing2")`,
+		},
+		"ekv-complex": {
+			path: NewAttributePath().WithElementKeyValue(NewValue(List{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, "hello"),
+				NewValue(String, "world"),
+			})),
+			expected: `ElementKeyValue(tftypes.List[tftypes.String]<tftypes.String<"hello">, tftypes.String<"world">>)`,
+		},
+	}
+
+	for name, test := range tests {
+		name, test := name, test
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			str := test.path.String()
+			if diff := cmp.Diff(test.expected, str); diff != "" {
+				t.Errorf("Unexpected results (-wanted, +got): %s", diff)
+			}
+		})
+	}
+}
