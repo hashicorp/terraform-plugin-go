@@ -1,4 +1,4 @@
-# 0.3.1 (Unreleased)
+# 0.3.1 (June 24, 2021)
 
 BUG FIXES:
 * Fixed AttributePaths pointing to the root of the value to be omitted instead of prefixing the error with `: `. ([#87](https://github.com/hashicorp/terraform-plugin-go/issues/87))
