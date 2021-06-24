@@ -14,7 +14,7 @@ type AttributePathError struct {
 func (a AttributePathError) Error() string {
 	var path string
 	if len(a.Path.Steps()) > 0 {
-		path = ":" + a.Path.String() + " "
+		path = a.Path.String() + ": "
 	}
 	return fmt.Sprintf("%s%s", path, a.err)
 }
