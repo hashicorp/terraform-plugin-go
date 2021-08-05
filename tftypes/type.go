@@ -15,7 +15,17 @@ type Type interface {
 	// Is is used to determine what type a Type implementation is. It is
 	// the recommended method for determining whether two types are
 	// equivalent or not.
+
+	// shallow kind comparison: is this an object, list, or string? doesn't
+	// check attribute/element types
 	Is(Type) bool
+
+	// deep equals: is this a 1:1 match, including attribute/element types
+	// and whether attributes are optional or not
+	Equal(Type) bool
+
+	// conformance testing: can this be used as the passed type
+	UsableAs(Type) bool
 
 	// String returns a string representation of the Type's name.
 	String() string
@@ -36,7 +46,6 @@ type Type interface {
 	// types that the Type supports for its values.
 	supportedGoTypes() []string
 
-	// equals allows for exact or inexact type comparisons.
 	equals(Type, bool) bool
 }
 

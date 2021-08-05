@@ -40,8 +40,12 @@ type Object struct {
 
 // Equal returns true if the two Objects are exactly equal. Unlike Is, passing
 // in an Object with no AttributeTypes will always return false.
-func (o Object) Equal(other Object) bool {
+func (o Object) Equal(other Type) bool {
 	return o.equals(other, true)
+}
+
+func (o Object) UsableAs(other Type) bool {
+	panic("not implemented yet")
 }
 
 // Is returns whether `t` is an Object type or not. If `t` is an instance of

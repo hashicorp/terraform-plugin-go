@@ -18,8 +18,12 @@ type Map struct {
 
 // Equal returns true if the two Maps are exactly equal. Unlike Is, passing in
 // a Map with no AttributeType will always return false.
-func (m Map) Equal(o Map) bool {
+func (m Map) Equal(o Type) bool {
 	return m.equals(o, true)
+}
+
+func (m Map) UsableAs(o Type) bool {
+	panic("not implemented yet")
 }
 
 // Is returns whether `t` is a Map type or not. If `t` is an instance of the

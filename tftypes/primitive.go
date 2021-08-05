@@ -37,20 +37,42 @@ type primitive struct {
 	_ []struct{}
 }
 
-func (p primitive) Equal(o primitive) bool {
-	return p.equals(o, true)
+func (p primitive) equals(o Type, _ bool) bool {
+	v, ok := o.(primitive)
+	if !ok {
+		return false
+	}
+	return p.name == v.name
+}
+
+func (p primitive) Equal(o Type) bool {
+	v, ok := o.(primitive)
+	if !ok {
+		return false
+	}
+	return p.name == v.name
 }
 
 func (p primitive) Is(t Type) bool {
-	return p.equals(t, false)
-}
-
-func (p primitive) equals(t Type, exact bool) bool {
 	v, ok := t.(primitive)
 	if !ok {
 		return false
 	}
 	return p.name == v.name
+}
+
+func (p primitive) UsableAs(t Type) bool {
+	if p.name == DynamicPseudoType.name {
+		panic("DynamicPseudoTypes are not usable. Use a known type.")
+	}
+	v, ok := t.(primitive)
+	if !ok {
+		return false
+	}
+	if v.name == DynamicPseudoType.name {
+		return true
+	}
+	return v.name == p.name
 }
 
 func (p primitive) String() string {

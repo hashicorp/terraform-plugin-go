@@ -17,8 +17,12 @@ type List struct {
 
 // Equal returns true if the two Lists are exactly equal. Unlike Is, passing in
 // a List with no ElementType will always return false.
-func (l List) Equal(o List) bool {
+func (l List) Equal(o Type) bool {
 	return l.equals(o, true)
+}
+
+func (l List) UsableAs(o Type) bool {
+	panic("not implemented yet")
 }
 
 // Is returns whether `t` is a List type or not. If `t` is an instance of the

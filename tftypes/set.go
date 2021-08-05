@@ -17,8 +17,12 @@ type Set struct {
 
 // Equal returns true if the two Sets are exactly equal. Unlike Is, passing in
 // a Set with no ElementType will always return false.
-func (s Set) Equal(o Set) bool {
+func (s Set) Equal(o Type) bool {
 	return s.equals(o, true)
+}
+
+func (s Set) UsableAs(o Type) bool {
+	panic("not implemented yet")
 }
 
 // Is returns whether `t` is a Set type or not. If `t` is an instance of the

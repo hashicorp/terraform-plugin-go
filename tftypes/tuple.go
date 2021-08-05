@@ -21,8 +21,12 @@ type Tuple struct {
 
 // Equal returns true if the two Tuples are exactly equal. Unlike Is, passing
 // in a Tuple with no ElementTypes will always return false.
-func (tu Tuple) Equal(o Tuple) bool {
+func (tu Tuple) Equal(o Type) bool {
 	return tu.equals(o, true)
+}
+
+func (tu Tuple) UsableAs(o Type) bool {
+	panic("not implemented yet")
 }
 
 // Is returns whether `t` is a Tuple type or not. If `t` is an instance of the
