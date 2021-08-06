@@ -46,11 +46,8 @@ func (p primitive) Equal(o Type) bool {
 }
 
 func (p primitive) Is(t Type) bool {
-	v, ok := t.(primitive)
-	if !ok {
-		return false
-	}
-	return p.name == v.name
+	_, ok := t.(primitive)
+	return ok
 }
 
 func (p primitive) UsableAs(t Type) bool {

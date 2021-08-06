@@ -115,51 +115,11 @@ func (o Object) UsableAs(other Type) bool {
 	return true
 }
 
-// Is returns whether `t` is an Object type or not. If `t` is an instance of
-// the Object type and its AttributeTypes property is not nil, it will only
-// return true the AttributeTypes are considered the same. To be considered
-// equal, the same set of keys must be present in each, and each key's value
-// needs to be considered the same type between the two Objects.
+// Is returns whether `t` is an Object type or not. It does not perform any
+// AttributeTypes checks.
 func (o Object) Is(t Type) bool {
-	v, ok := t.(Object)
-	if !ok {
-		return false
-	}
-	if v.AttributeTypes == nil || o.AttributeTypes == nil {
-		// when doing inexact comparisons, the absence of an attribute
-		// type just means "is this a Object?" We know it is, so return
-		// true if and only if o has AttributeTypes and t doesn't. This
-		// behavior only makes sense if the user is trying to see if a
-		// proper type is a object, so we want to ensure that the
-		// method receiver always has attribute types.
-		return o.AttributeTypes != nil
-	}
-
-	// if the don't have the exact same optional attributes, they're not
-	// the same type.
-	if len(v.OptionalAttributes) != len(o.OptionalAttributes) {
-		return false
-	}
-	for attr := range o.OptionalAttributes {
-		if !v.attrIsOptional(attr) {
-			return false
-		}
-	}
-
-	// if they don't have the same attribute types, they're not the
-	// same type.
-	if len(v.AttributeTypes) != len(o.AttributeTypes) {
-		return false
-	}
-	for k, typ := range o.AttributeTypes {
-		if _, ok := v.AttributeTypes[k]; !ok {
-			return false
-		}
-		if !typ.Is(v.AttributeTypes[k]) {
-			return false
-		}
-	}
-	return true
+	_, ok := t.(Object)
+	return ok
 }
 
 func (o Object) attrIsOptional(attr string) bool {

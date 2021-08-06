@@ -48,25 +48,11 @@ func (l List) UsableAs(o Type) bool {
 	return l.ElementType.UsableAs(v.ElementType)
 }
 
-// Is returns whether `t` is a List type or not. If `t` is an instance of the
-// List type and its ElementType property is nil, it will return true. If `t`'s
-// ElementType property is not nil, it will only return true if its ElementType
-// is considered the same type as `l`'s ElementType.
+// Is returns whether `t` is a List type or not. It does not perform any
+// ElementType checks.
 func (l List) Is(t Type) bool {
-	v, ok := t.(List)
-	if !ok {
-		return false
-	}
-	if l.ElementType == nil || v.ElementType == nil {
-		// when doing inexact comparisons, the absence of an element
-		// type just means "is this a List?" We know it is, so return
-		// true if and only if l has an ElementType and t doesn't. This
-		// behavior only makes sense if the user is trying to see if a
-		// proper type is a list, so we want to ensure that the method
-		// receiver always has an element type.
-		return l.ElementType != nil
-	}
-	return l.ElementType.Is(v.ElementType)
+	_, ok := t.(List)
+	return ok
 }
 
 func (l List) String() string {

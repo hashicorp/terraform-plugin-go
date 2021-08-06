@@ -70,32 +70,11 @@ func (tu Tuple) UsableAs(o Type) bool {
 	return true
 }
 
-// Is returns whether `t` is a Tuple type or not. If `t` is an instance of the
-// Tuple type and its ElementTypes property is not nil, it will only return
-// true if the ElementTypes are considered the same. To be considered the same,
-// there must be the same number of ElementTypes, arranged in the same order,
-// and the types in each position must be considered the same as the type in
-// the same position in the other Tuple.
+// Is returns whether `t` is a Tuple type or not. It does not perform any
+// ElementTypes checks.
 func (tu Tuple) Is(t Type) bool {
-	v, ok := t.(Tuple)
-	if !ok {
-		return false
-	}
-	if v.ElementTypes == nil || tu.ElementTypes == nil {
-		// when doing inexact comparisons, the absence of an element
-		// type just means "is this a Tuple?" We know it is, so return
-		// true
-		return true
-	}
-	if len(v.ElementTypes) != len(tu.ElementTypes) {
-		return false
-	}
-	for pos, typ := range tu.ElementTypes {
-		if !typ.Is(v.ElementTypes[pos]) {
-			return false
-		}
-	}
-	return true
+	_, ok := t.(Tuple)
+	return ok
 }
 
 func (tu Tuple) String() string {

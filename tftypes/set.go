@@ -48,25 +48,11 @@ func (s Set) UsableAs(o Type) bool {
 	return s.ElementType.UsableAs(v.ElementType)
 }
 
-// Is returns whether `t` is a Set type or not. If `t` is an instance of the
-// Set type and its ElementType property is nil, it will return true. If `t`'s
-// ElementType property is not nil, it will only return true if its ElementType
-// is considered the same type as `s`'s ElementType.
+// Is returns whether `t` is a Set type or not. It does not perform any
+// ElementType checks.
 func (s Set) Is(t Type) bool {
-	v, ok := t.(Set)
-	if !ok {
-		return false
-	}
-	if v.ElementType == nil || s.ElementType == nil {
-		// when doing inexact comparisons, the absence of an element
-		// type just means "is this a Set?" We know it is, so return
-		// true if and only if s has an ElementType and t doesn't. This
-		// behavior only makes sense if the user is trying to see if a
-		// proper type is a set, so we want to ensure that the method
-		// receiver always has an element type.
-		return s.ElementType != nil
-	}
-	return s.ElementType.Is(v.ElementType)
+	_, ok := t.(Set)
+	return ok
 }
 
 func (s Set) String() string {

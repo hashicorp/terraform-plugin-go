@@ -49,25 +49,11 @@ func (m Map) UsableAs(o Type) bool {
 	return m.AttributeType.UsableAs(v.AttributeType)
 }
 
-// Is returns whether `t` is a Map type or not. If `t` is an instance of the
-// Map type and its AttributeType property is not nil, it will only return true
-// if its AttributeType is considered the same type as `m`'s AttributeType.
+// Is returns whether `t` is a Map type or not. It does not perform any
+// AttributeType checks.
 func (m Map) Is(t Type) bool {
-	// return m.equals(t, false)
-	v, ok := t.(Map)
-	if !ok {
-		return false
-	}
-	if v.AttributeType == nil || m.AttributeType == nil {
-		// when doing inexact comparisons, the absence of an element
-		// type just means "is this a Map?" We know it is, so return
-		// true if and only if m has an ElementType and t doesn't. This
-		// behavior only makes sense if the user is trying to see if a
-		// proper type is a map, so we want to ensure that the method
-		// receiver always has an element type.
-		return m.AttributeType != nil
-	}
-	return m.AttributeType.Is(v.AttributeType)
+	_, ok := t.(Map)
+	return ok
 }
 
 func (m Map) String() string {
