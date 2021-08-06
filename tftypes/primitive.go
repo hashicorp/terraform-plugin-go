@@ -46,8 +46,7 @@ func (p primitive) Equal(o Type) bool {
 }
 
 func (p primitive) Is(t Type) bool {
-	_, ok := t.(primitive)
-	return ok
+	return p.Equal(t)
 }
 
 func (p primitive) UsableAs(t Type) bool {
