@@ -118,9 +118,8 @@ func valueFromTuple(types []Type, in interface{}) (Value, error) {
 			}
 			for pos, v := range value {
 				typ := types[pos]
-				err := useTypeAs(v.Type(), typ, NewAttributePath().WithElementKeyInt(int64(pos)))
-				if err != nil {
-					return Value{}, err
+				if !v.Type().UsableAs(typ) {
+					return Value{}, NewAttributePath().WithElementKeyInt(int64(pos)).NewErrorf("cannot use %s as %s", v.Type(), typ)
 				}
 			}
 		}

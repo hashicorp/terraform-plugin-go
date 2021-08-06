@@ -189,9 +189,8 @@ func valueFromObject(types map[string]Type, optionalAttrs map[string]struct{}, i
 				if !ok {
 					return Value{}, fmt.Errorf("can't set a value on %q in tftypes.NewValue, key not part of the object type %s", k, Object{AttributeTypes: types})
 				}
-				err := useTypeAs(v.Type(), typ, NewAttributePath().WithAttributeName(k))
-				if err != nil {
-					return Value{}, err
+				if !v.Type().UsableAs(typ) {
+					return Value{}, NewAttributePath().WithAttributeName(k).NewErrorf("cannot use %s as %s", v.Type(), typ)
 				}
 			}
 		}

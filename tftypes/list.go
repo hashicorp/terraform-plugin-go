@@ -70,8 +70,8 @@ func valueFromList(typ Type, in interface{}) (Value, error) {
 	case []Value:
 		var valType Type
 		for pos, v := range value {
-			if err := useTypeAs(v.Type(), typ, NewAttributePath().WithElementKeyInt(int64(pos))); err != nil {
-				return Value{}, err
+			if !v.Type().UsableAs(typ) {
+				return Value{}, NewAttributePath().WithElementKeyInt(int64(pos)).NewErrorf("cannot use %s as %s", v.Type(), typ)
 			}
 			if valType == nil {
 				valType = v.Type()
