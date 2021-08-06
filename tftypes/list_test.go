@@ -3,6 +3,8 @@ package tftypes
 import "testing"
 
 func TestListEqual(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
 		l1    List
 		l2    List
@@ -64,6 +66,8 @@ func TestListEqual(t *testing.T) {
 	for name, tc := range tests {
 		name, tc := name, tc
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			res := tc.l1.Equal(tc.l2)
 			revRes := tc.l2.Equal(tc.l1)
 			if res != revRes {
@@ -77,68 +81,86 @@ func TestListEqual(t *testing.T) {
 }
 
 func TestListIs(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
-		l1    List
-		l2    List
+		list  List
+		other Type
 		equal bool
 	}
 	tests := map[string]testCase{
 		"equal": {
-			l1:    List{ElementType: String},
-			l2:    List{ElementType: String},
+			list:  List{ElementType: String},
+			other: List{ElementType: String},
 			equal: true,
 		},
-		"unequal": {
-			l1:    List{ElementType: String},
-			l2:    List{ElementType: Number},
-			equal: false,
+		"different-elementtype": {
+			list:  List{ElementType: String},
+			other: List{ElementType: Number},
+			equal: true,
 		},
 		"equal-complex": {
-			l1: List{ElementType: Object{AttributeTypes: map[string]Type{
+			list: List{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
 			}}},
-			l2: List{ElementType: Object{AttributeTypes: map[string]Type{
+			other: List{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
 			}}},
 			equal: true,
 		},
-		"unequal-complex": {
-			l1: List{ElementType: Object{AttributeTypes: map[string]Type{
+		"different-elementtype-complex": {
+			list: List{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
 			}}},
-			l2: List{ElementType: Object{AttributeTypes: map[string]Type{
+			other: List{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
 				"d": DynamicPseudoType,
 			}}},
-			equal: false,
-		},
-		"unequal-empty": {
-			l1:    List{ElementType: String},
-			l2:    List{},
 			equal: true,
 		},
-		"unequal-complex-empty": {
-			l1: List{ElementType: Object{AttributeTypes: map[string]Type{
+		"equal-empty": {
+			list:  List{ElementType: String},
+			other: List{},
+			equal: true,
+		},
+		"unequal-set": {
+			list:  List{ElementType: String},
+			other: Set{ElementType: String},
+			equal: false,
+		},
+		"equal-complex-empty": {
+			list: List{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
 			}}},
-			l2:    List{ElementType: Object{}},
+			other: List{ElementType: Object{}},
+			equal: true,
+		},
+		"equal-complex-nil": {
+			list: List{ElementType: Object{AttributeTypes: map[string]Type{
+				"a": Number,
+				"b": String,
+				"c": Bool,
+			}}},
+			other: List{},
 			equal: true,
 		},
 	}
 	for name, tc := range tests {
 		name, tc := name, tc
 		t.Run(name, func(t *testing.T) {
-			res := tc.l1.Is(tc.l2)
+			t.Parallel()
+
+			res := tc.list.Is(tc.other)
 			if res != tc.equal {
 				t.Errorf("Expected result to be %v, got %v", tc.equal, res)
 			}

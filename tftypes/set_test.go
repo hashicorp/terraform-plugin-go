@@ -3,6 +3,8 @@ package tftypes
 import "testing"
 
 func TestSetEqual(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
 		s1    Set
 		s2    Set
@@ -64,6 +66,8 @@ func TestSetEqual(t *testing.T) {
 	for name, tc := range tests {
 		name, tc := name, tc
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			res := tc.s1.Equal(tc.s2)
 			revRes := tc.s2.Equal(tc.s1)
 			if res != revRes {
@@ -77,6 +81,8 @@ func TestSetEqual(t *testing.T) {
 }
 
 func TestSetIs(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
 		s1    Set
 		s2    Set
@@ -88,10 +94,10 @@ func TestSetIs(t *testing.T) {
 			s2:    Set{ElementType: String},
 			equal: true,
 		},
-		"unequal": {
+		"different-elementtype": {
 			s1:    Set{ElementType: String},
 			s2:    Set{ElementType: Number},
-			equal: false,
+			equal: true,
 		},
 		"equal-complex": {
 			s1: Set{ElementType: Object{AttributeTypes: map[string]Type{
@@ -106,7 +112,7 @@ func TestSetIs(t *testing.T) {
 			}}},
 			equal: true,
 		},
-		"unequal-complex": {
+		"different-elementtype-complex": {
 			s1: Set{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
@@ -118,14 +124,14 @@ func TestSetIs(t *testing.T) {
 				"c": Bool,
 				"d": DynamicPseudoType,
 			}}},
-			equal: false,
+			equal: true,
 		},
-		"unequal-empty": {
+		"equal-empty": {
 			s1:    Set{ElementType: String},
 			s2:    Set{},
 			equal: true,
 		},
-		"unequal-complex-empty": {
+		"equal-complex-empty": {
 			s1: Set{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
@@ -134,10 +140,21 @@ func TestSetIs(t *testing.T) {
 			s2:    Set{ElementType: Object{}},
 			equal: true,
 		},
+		"equal-complex-nil": {
+			s1: Set{ElementType: Object{AttributeTypes: map[string]Type{
+				"a": Number,
+				"b": String,
+				"c": Bool,
+			}}},
+			s2:    Set{},
+			equal: true,
+		},
 	}
 	for name, tc := range tests {
 		name, tc := name, tc
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			res := tc.s1.Is(tc.s2)
 			if res != tc.equal {
 				t.Errorf("Expected result to be %v, got %v", tc.equal, res)
