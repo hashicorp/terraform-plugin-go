@@ -45,8 +45,6 @@ type Type interface {
 	// supportedGoTypes returns a list of string representations of the Go
 	// types that the Type supports for its values.
 	supportedGoTypes() []string
-
-	equals(Type, bool) bool
 }
 
 // TypeFromElements returns the common type that the passed elements all have

@@ -37,14 +37,6 @@ type primitive struct {
 	_ []struct{}
 }
 
-func (p primitive) equals(o Type, _ bool) bool {
-	v, ok := o.(primitive)
-	if !ok {
-		return false
-	}
-	return p.name == v.name
-}
-
 func (p primitive) Equal(o Type) bool {
 	v, ok := o.(primitive)
 	if !ok {

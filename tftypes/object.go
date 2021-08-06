@@ -41,7 +41,42 @@ type Object struct {
 // Equal returns true if the two Objects are exactly equal. Unlike Is, passing
 // in an Object with no AttributeTypes will always return false.
 func (o Object) Equal(other Type) bool {
-	return o.equals(other, true)
+	v, ok := other.(Object)
+	if !ok {
+		return false
+	}
+	if v.AttributeTypes == nil || o.AttributeTypes == nil {
+		// when doing exact comparisons, we can't compare types that
+		// don't have attribute types set, so we just consider them not
+		// equal
+		return false
+	}
+
+	// if the don't have the exact same optional attributes, they're not
+	// the same type.
+	if len(v.OptionalAttributes) != len(o.OptionalAttributes) {
+		return false
+	}
+	for attr := range o.OptionalAttributes {
+		if !v.attrIsOptional(attr) {
+			return false
+		}
+	}
+
+	// if they don't have the same attribute types, they're not the
+	// same type.
+	if len(v.AttributeTypes) != len(o.AttributeTypes) {
+		return false
+	}
+	for k, typ := range o.AttributeTypes {
+		if _, ok := v.AttributeTypes[k]; !ok {
+			return false
+		}
+		if !typ.Equal(v.AttributeTypes[k]) {
+			return false
+		}
+	}
+	return true
 }
 
 // UsableAs returns whether the two Objects are type compatible.
@@ -86,28 +121,17 @@ func (o Object) UsableAs(other Type) bool {
 // equal, the same set of keys must be present in each, and each key's value
 // needs to be considered the same type between the two Objects.
 func (o Object) Is(t Type) bool {
-	return o.equals(t, false)
-}
-
-func (o Object) equals(t Type, exact bool) bool {
 	v, ok := t.(Object)
 	if !ok {
 		return false
 	}
 	if v.AttributeTypes == nil || o.AttributeTypes == nil {
-		// when doing exact comparisons, we can't compare types that
-		// don't have attribute types set, so we just consider them not
-		// equal
-		//
 		// when doing inexact comparisons, the absence of an attribute
 		// type just means "is this a Object?" We know it is, so return
 		// true if and only if o has AttributeTypes and t doesn't. This
 		// behavior only makes sense if the user is trying to see if a
 		// proper type is a object, so we want to ensure that the
 		// method receiver always has attribute types.
-		if exact {
-			return false
-		}
 		return o.AttributeTypes != nil
 	}
 
@@ -131,7 +155,7 @@ func (o Object) equals(t Type, exact bool) bool {
 		if _, ok := v.AttributeTypes[k]; !ok {
 			return false
 		}
-		if !typ.equals(v.AttributeTypes[k], exact) {
+		if !typ.Is(v.AttributeTypes[k]) {
 			return false
 		}
 	}

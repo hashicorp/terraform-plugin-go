@@ -22,7 +22,25 @@ type Tuple struct {
 // Equal returns true if the two Tuples are exactly equal. Unlike Is, passing
 // in a Tuple with no ElementTypes will always return false.
 func (tu Tuple) Equal(o Type) bool {
-	return tu.equals(o, true)
+	v, ok := o.(Tuple)
+	if !ok {
+		return false
+	}
+	if v.ElementTypes == nil || tu.ElementTypes == nil {
+		// when doing exact comparisons, we can't compare types that
+		// don't have element types set, so we just consider them not
+		// equal
+		return false
+	}
+	if len(v.ElementTypes) != len(tu.ElementTypes) {
+		return false
+	}
+	for pos, typ := range tu.ElementTypes {
+		if !typ.Equal(v.ElementTypes[pos]) {
+			return false
+		}
+	}
+	return true
 }
 
 // UsableAs returns whether the two Tuples are type compatible.
@@ -59,29 +77,21 @@ func (tu Tuple) UsableAs(o Type) bool {
 // and the types in each position must be considered the same as the type in
 // the same position in the other Tuple.
 func (tu Tuple) Is(t Type) bool {
-	return tu.equals(t, false)
-}
-
-func (tu Tuple) equals(t Type, exact bool) bool {
 	v, ok := t.(Tuple)
 	if !ok {
 		return false
 	}
 	if v.ElementTypes == nil || tu.ElementTypes == nil {
-		// when doing exact comparisons, we can't compare types that
-		// don't have element types set, so we just consider them not
-		// equal
-		//
 		// when doing inexact comparisons, the absence of an element
 		// type just means "is this a Tuple?" We know it is, so return
 		// true
-		return !exact
+		return true
 	}
 	if len(v.ElementTypes) != len(tu.ElementTypes) {
 		return false
 	}
 	for pos, typ := range tu.ElementTypes {
-		if !typ.equals(v.ElementTypes[pos], exact) {
+		if !typ.Is(v.ElementTypes[pos]) {
 			return false
 		}
 	}

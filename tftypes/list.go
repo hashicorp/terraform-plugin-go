@@ -18,7 +18,17 @@ type List struct {
 // Equal returns true if the two Lists are exactly equal. Unlike Is, passing in
 // a List with no ElementType will always return false.
 func (l List) Equal(o Type) bool {
-	return l.equals(o, true)
+	v, ok := o.(List)
+	if !ok {
+		return false
+	}
+	if l.ElementType == nil || v.ElementType == nil {
+		// when doing exact comparisons, we can't compare types that
+		// don't have element types set, so we just consider them not
+		// equal
+		return false
+	}
+	return l.ElementType.Equal(v.ElementType)
 }
 
 // UsableAs returns whether the two Lists are type compatible.
@@ -43,31 +53,20 @@ func (l List) UsableAs(o Type) bool {
 // ElementType property is not nil, it will only return true if its ElementType
 // is considered the same type as `l`'s ElementType.
 func (l List) Is(t Type) bool {
-	return l.equals(t, false)
-}
-
-func (l List) equals(t Type, exact bool) bool {
 	v, ok := t.(List)
 	if !ok {
 		return false
 	}
 	if l.ElementType == nil || v.ElementType == nil {
-		// when doing exact comparisons, we can't compare types that
-		// don't have element types set, so we just consider them not
-		// equal
-		//
 		// when doing inexact comparisons, the absence of an element
 		// type just means "is this a List?" We know it is, so return
 		// true if and only if l has an ElementType and t doesn't. This
 		// behavior only makes sense if the user is trying to see if a
 		// proper type is a list, so we want to ensure that the method
 		// receiver always has an element type.
-		if exact {
-			return false
-		}
 		return l.ElementType != nil
 	}
-	return l.ElementType.equals(v.ElementType, exact)
+	return l.ElementType.Is(v.ElementType)
 }
 
 func (l List) String() string {
@@ -91,7 +90,7 @@ func valueFromList(typ Type, in interface{}) (Value, error) {
 			if valType == nil {
 				valType = v.Type()
 			}
-			if !v.Type().equals(valType, true) {
+			if !v.Type().Equal(valType) {
 				return Value{}, fmt.Errorf("lists must only contain one type of element, saw %s and %s", valType, v.Type())
 			}
 		}
