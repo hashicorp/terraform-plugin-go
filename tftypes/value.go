@@ -213,7 +213,7 @@ func (val Value) Equal(o Value) bool {
 	if o.Type() == nil {
 		return false
 	}
-	if !val.Type().Is(o.Type()) {
+	if !val.Type().Equal(o.Type()) {
 		return false
 	}
 	diff, err := val.Diff(o)
