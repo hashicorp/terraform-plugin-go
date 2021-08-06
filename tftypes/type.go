@@ -16,15 +16,16 @@ type Type interface {
 	// the recommended method for determining whether two types are
 	// equivalent or not.
 
-	// shallow kind comparison: is this an object, list, or string? doesn't
-	// check attribute/element types
+	// Is performs shallow type equality checks, in that the root type is
+	// compared, but underlying attribute/element types are not.
 	Is(Type) bool
 
-	// deep equals: is this a 1:1 match, including attribute/element types
-	// and whether attributes are optional or not
+	// Equal performs deep type equality checks, including attribute/element
+	// types and whether attributes are optional or not.
 	Equal(Type) bool
 
-	// conformance testing: can this be used as the passed type
+	// UsableAs performs type conformance checks. This primarily checks if the
+	// target implements DynamicPsuedoType in a compatible manner.
 	UsableAs(Type) bool
 
 	// String returns a string representation of the Type's name.
