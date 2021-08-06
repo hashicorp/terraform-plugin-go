@@ -254,11 +254,6 @@ func msgpackUnmarshalTuple(dec *msgpack.Decoder, types []Type, path *AttributePa
 		return NewValue(Tuple{
 			ElementTypes: types,
 		}, nil), nil
-	case length == 0:
-		return NewValue(Tuple{
-			// no elements means no types
-			ElementTypes: nil,
-		}, []Value{}), nil
 	case length != len(types):
 		return Value{}, path.NewErrorf("error decoding tuple; expected %d items, got %d", len(types), length)
 	}
@@ -290,11 +285,6 @@ func msgpackUnmarshalObject(dec *msgpack.Decoder, types map[string]Type, path *A
 		return NewValue(Object{
 			AttributeTypes: types,
 		}, nil), nil
-	case length == 0:
-		return NewValue(Object{
-			// no attributes means no types
-			AttributeTypes: map[string]Type{},
-		}, map[string]Value{}), nil
 	case length != len(types):
 		return Value{}, path.NewErrorf("error decoding object; expected %d attributes, got %d", len(types), length)
 	}
