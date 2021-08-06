@@ -22,8 +22,21 @@ func (m Map) Equal(o Type) bool {
 	return m.equals(o, true)
 }
 
+// UsableAs returns whether the two Maps are type compatible.
+//
+// If the other type is DynamicPseudoType, it will return true.
+// If the other type is not a Map, it will return false.
+// If the other Map does not have a type compatible AttributeType, it will
+// return false.
 func (m Map) UsableAs(o Type) bool {
-	panic("not implemented yet")
+	if o.Is(DynamicPseudoType) {
+		return true
+	}
+	v, ok := o.(Map)
+	if !ok {
+		return false
+	}
+	return m.AttributeType.UsableAs(v.AttributeType)
 }
 
 // Is returns whether `t` is a Map type or not. If `t` is an instance of the

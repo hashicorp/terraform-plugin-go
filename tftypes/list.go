@@ -21,8 +21,21 @@ func (l List) Equal(o Type) bool {
 	return l.equals(o, true)
 }
 
+// UsableAs returns whether the two Lists are type compatible.
+//
+// If the other type is DynamicPseudoType, it will return true.
+// If the other type is not a List, it will return false.
+// If the other List does not have a type compatible ElementType, it will
+// return false.
 func (l List) UsableAs(o Type) bool {
-	panic("not implemented yet")
+	if o.Is(DynamicPseudoType) {
+		return true
+	}
+	v, ok := o.(List)
+	if !ok {
+		return false
+	}
+	return l.ElementType.UsableAs(v.ElementType)
 }
 
 // Is returns whether `t` is a List type or not. If `t` is an instance of the

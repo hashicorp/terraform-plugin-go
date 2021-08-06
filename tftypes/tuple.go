@@ -25,8 +25,31 @@ func (tu Tuple) Equal(o Type) bool {
 	return tu.equals(o, true)
 }
 
+// UsableAs returns whether the two Tuples are type compatible.
+//
+// If the other type is DynamicPseudoType, it will return true.
+// If the other type is not a Tuple, it will return false.
+// If the other Tuple does not have matching ElementTypes length, it will
+// return false.
+// If the other Tuple does not have type compatible ElementTypes in each
+// position, it will return false.
 func (tu Tuple) UsableAs(o Type) bool {
-	panic("not implemented yet")
+	if o.Is(DynamicPseudoType) {
+		return true
+	}
+	v, ok := o.(Tuple)
+	if !ok {
+		return false
+	}
+	if len(v.ElementTypes) != len(tu.ElementTypes) {
+		return false
+	}
+	for pos, typ := range tu.ElementTypes {
+		if !typ.UsableAs(v.ElementTypes[pos]) {
+			return false
+		}
+	}
+	return true
 }
 
 // Is returns whether `t` is a Tuple type or not. If `t` is an instance of the

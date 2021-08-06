@@ -155,3 +155,101 @@ func TestTupleIs(t *testing.T) {
 		})
 	}
 }
+
+func TestTupleUsableAs(t *testing.T) {
+	t.Parallel()
+
+	type testCase struct {
+		tuple    Tuple
+		other    Type
+		expected bool
+	}
+	tests := map[string]testCase{
+		"tuple-tuple-string-tuple-string": {
+			tuple:    Tuple{ElementTypes: []Type{Tuple{ElementTypes: []Type{String}}}},
+			other:    Tuple{ElementTypes: []Type{String}},
+			expected: false,
+		},
+		"tuple-tuple-string-tuple-tuple-string": {
+			tuple:    Tuple{ElementTypes: []Type{Tuple{ElementTypes: []Type{String}}}},
+			other:    Tuple{ElementTypes: []Type{Tuple{ElementTypes: []Type{String}}}},
+			expected: true,
+		},
+		"tuple-tuple-string-dpt": {
+			tuple:    Tuple{ElementTypes: []Type{Tuple{ElementTypes: []Type{String}}}},
+			other:    DynamicPseudoType,
+			expected: true,
+		},
+		"tuple-tuple-string-tuple-dpt": {
+			tuple:    Tuple{ElementTypes: []Type{Tuple{ElementTypes: []Type{String}}}},
+			other:    Tuple{ElementTypes: []Type{DynamicPseudoType}},
+			expected: true,
+		},
+		"tuple-tuple-string-tuple-tuple-dpt": {
+			tuple:    Tuple{ElementTypes: []Type{Tuple{ElementTypes: []Type{String}}}},
+			other:    Tuple{ElementTypes: []Type{Tuple{ElementTypes: []Type{DynamicPseudoType}}}},
+			expected: true,
+		},
+		"tuple-string-dpt": {
+			tuple:    Tuple{ElementTypes: []Type{String}},
+			other:    DynamicPseudoType,
+			expected: true,
+		},
+		"tuple-string-list-string": {
+			tuple:    Tuple{ElementTypes: []Type{String}},
+			other:    List{ElementType: String},
+			expected: false,
+		},
+		"tuple-string-map": {
+			tuple:    Tuple{ElementTypes: []Type{String}},
+			other:    Map{AttributeType: String},
+			expected: false,
+		},
+		"tuple-string-object": {
+			tuple:    Tuple{ElementTypes: []Type{String}},
+			other:    Object{AttributeTypes: map[string]Type{"test": String}},
+			expected: false,
+		},
+		"tuple-string-primitive": {
+			tuple:    Tuple{ElementTypes: []Type{String}},
+			other:    String,
+			expected: false,
+		},
+		"tuple-string-set-string": {
+			tuple:    Tuple{ElementTypes: []Type{String}},
+			other:    Set{ElementType: String},
+			expected: false,
+		},
+		"tuple-string-tuple-bool": {
+			tuple:    Tuple{ElementTypes: []Type{String}},
+			other:    Tuple{ElementTypes: []Type{Bool}},
+			expected: false,
+		},
+		"tuple-string-tuple-bool-string": {
+			tuple:    Tuple{ElementTypes: []Type{String}},
+			other:    Tuple{ElementTypes: []Type{Bool, String}},
+			expected: false,
+		},
+		"tuple-string-tuple-dpt": {
+			tuple:    Tuple{ElementTypes: []Type{String}},
+			other:    Tuple{ElementTypes: []Type{DynamicPseudoType}},
+			expected: true,
+		},
+		"tuple-string-tuple-string": {
+			tuple:    Tuple{ElementTypes: []Type{String}},
+			other:    Tuple{ElementTypes: []Type{String}},
+			expected: true,
+		},
+	}
+	for name, tc := range tests {
+		name, tc := name, tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			res := tc.tuple.UsableAs(tc.other)
+			if res != tc.expected {
+				t.Fatalf("Expected result to be %v, got %v", tc.expected, res)
+			}
+		})
+	}
+}

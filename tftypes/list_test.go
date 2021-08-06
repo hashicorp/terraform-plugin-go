@@ -145,3 +145,96 @@ func TestListIs(t *testing.T) {
 		})
 	}
 }
+
+func TestListUsableAs(t *testing.T) {
+	t.Parallel()
+
+	type testCase struct {
+		list     List
+		other    Type
+		expected bool
+	}
+	tests := map[string]testCase{
+		"list-list-string-list-string": {
+			list:     List{ElementType: List{ElementType: String}},
+			other:    List{ElementType: String},
+			expected: false,
+		},
+		"list-list-string-list-list-string": {
+			list:     List{ElementType: List{ElementType: String}},
+			other:    List{ElementType: List{ElementType: String}},
+			expected: true,
+		},
+		"list-list-string-dpt": {
+			list:     List{ElementType: List{ElementType: String}},
+			other:    DynamicPseudoType,
+			expected: true,
+		},
+		"list-list-string-list-dpt": {
+			list:     List{ElementType: List{ElementType: String}},
+			other:    List{ElementType: DynamicPseudoType},
+			expected: true,
+		},
+		"list-list-string-list-list-dpt": {
+			list:     List{ElementType: List{ElementType: String}},
+			other:    List{ElementType: List{ElementType: DynamicPseudoType}},
+			expected: true,
+		},
+		"list-string-dpt": {
+			list:     List{ElementType: String},
+			other:    DynamicPseudoType,
+			expected: true,
+		},
+		"list-string-list-bool": {
+			list:     List{ElementType: String},
+			other:    List{ElementType: Bool},
+			expected: false,
+		},
+		"list-string-list-dpt": {
+			list:     List{ElementType: String},
+			other:    List{ElementType: DynamicPseudoType},
+			expected: true,
+		},
+		"list-string-list-string": {
+			list:     List{ElementType: String},
+			other:    List{ElementType: String},
+			expected: true,
+		},
+		"list-string-map": {
+			list:     List{ElementType: String},
+			other:    Map{AttributeType: String},
+			expected: false,
+		},
+		"list-string-object": {
+			list:     List{ElementType: String},
+			other:    Object{AttributeTypes: map[string]Type{"test": String}},
+			expected: false,
+		},
+		"list-string-primitive": {
+			list:     List{ElementType: String},
+			other:    String,
+			expected: false,
+		},
+		"list-string-set-string": {
+			list:     List{ElementType: String},
+			other:    Set{ElementType: String},
+			expected: false,
+		},
+		"list-string-tuple-string": {
+			list:     List{ElementType: String},
+			other:    Tuple{ElementTypes: []Type{String}},
+			expected: false,
+		},
+	}
+	for name, tc := range tests {
+		name, tc := name, tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			res := tc.list.UsableAs(tc.other)
+			if res != tc.expected {
+				t.Fatalf("Expected result to be %v, got %v", tc.expected, res)
+			}
+		})
+	}
+}

@@ -345,3 +345,210 @@ func TestObjectIs(t *testing.T) {
 		})
 	}
 }
+
+func TestObjectUsableAs(t *testing.T) {
+	t.Parallel()
+
+	type testCase struct {
+		object      Object
+		other       Type
+		expected    bool
+		shouldPanic bool
+	}
+	tests := map[string]testCase{
+		"object-dpt": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"test": String,
+				},
+			},
+			other:    DynamicPseudoType,
+			expected: true,
+		},
+		"object-primitive": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"test": String,
+				},
+			},
+			other:    String,
+			expected: false,
+		},
+		"object-object-dpt": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"dpt":     String,
+					"non-dpt": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"dpt":     DynamicPseudoType,
+					"non-dpt": String,
+				},
+			},
+			expected: true,
+		},
+		"object-object-type-inequality": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"test": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"test": Number,
+				},
+			},
+			expected: false,
+		},
+		"object-object-type-length": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"test": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"test":  String,
+					"test2": String,
+				},
+			},
+			expected: false,
+		},
+		"object-object-type-missing": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"test": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"test2": String,
+				},
+			},
+			expected: false,
+		},
+		"object-object-object-dpt": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"object": Object{
+						AttributeTypes: map[string]Type{
+							"dpt": String,
+						},
+					},
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"object": Object{
+						AttributeTypes: map[string]Type{
+							"dpt": DynamicPseudoType,
+						},
+					},
+				},
+			},
+			expected: true,
+		},
+		"object-object-optional": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"optional": String,
+					"required": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"optional": String,
+					"required": String,
+				},
+				OptionalAttributes: map[string]struct{}{
+					"optional": {},
+				},
+			},
+			expected: true,
+		},
+		"object-object-optional-inequality": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"optional": String,
+					"required": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"optional": Number,
+					"required": String,
+				},
+				OptionalAttributes: map[string]struct{}{
+					"optional": {},
+				},
+			},
+			expected: false,
+		},
+		"object-object-required": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"required": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"required": String,
+				},
+			},
+			expected: true,
+		},
+		"object-OptionalAttributes-panic": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"optional": String,
+					"required": String,
+				},
+				OptionalAttributes: map[string]struct{}{
+					"optional": {},
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"optional": String,
+					"required": String,
+				},
+				OptionalAttributes: map[string]struct{}{
+					"optional": {},
+				},
+			},
+			shouldPanic: true,
+		},
+	}
+	for name, tc := range tests {
+		name, tc := name, tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			var gotPanic string
+			var res bool
+			func() {
+				defer func() {
+					if ex := recover(); ex != nil {
+						if s, ok := ex.(string); ok {
+							gotPanic = s
+						} else {
+							panic(ex)
+						}
+					}
+				}()
+				res = tc.object.UsableAs(tc.other)
+			}()
+			if (gotPanic != "") != tc.shouldPanic {
+				if gotPanic != "" {
+					t.Fatalf("Unexpected panic: %s", gotPanic)
+				}
+				t.Fatalf("Expected panic, but did not panic.")
+			}
+			if res != tc.expected {
+				t.Fatalf("Expected result to be %v, got %v", tc.expected, res)
+			}
+		})
+	}
+}

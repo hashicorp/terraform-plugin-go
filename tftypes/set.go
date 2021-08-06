@@ -21,8 +21,21 @@ func (s Set) Equal(o Type) bool {
 	return s.equals(o, true)
 }
 
+// UsableAs returns whether the two Sets are type compatible.
+//
+// If the other type is DynamicPseudoType, it will return true.
+// If the other type is not a Set, it will return false.
+// If the other Set does not have a type compatible ElementType, it will
+// return false.
 func (s Set) UsableAs(o Type) bool {
-	panic("not implemented yet")
+	if o.Is(DynamicPseudoType) {
+		return true
+	}
+	v, ok := o.(Set)
+	if !ok {
+		return false
+	}
+	return s.ElementType.UsableAs(v.ElementType)
 }
 
 // Is returns whether `t` is a Set type or not. If `t` is an instance of the

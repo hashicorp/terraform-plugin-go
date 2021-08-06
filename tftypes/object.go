@@ -44,8 +44,40 @@ func (o Object) Equal(other Type) bool {
 	return o.equals(other, true)
 }
 
+// UsableAs returns whether the two Objects are type compatible.
+//
+// If the other type is DynamicPseudoType, it will return true.
+// If the other type is not a Object, it will return false.
+// If the other Object does not have matching AttributeTypes length, it will
+// return false.
+// If the other Object does not have a type compatible AttributeType for every
+// nested attribute, it will return false.
+//
+// If the current type contains OptionalAttributes, it will panic.
 func (o Object) UsableAs(other Type) bool {
-	panic("not implemented yet")
+	if other.Is(DynamicPseudoType) {
+		return true
+	}
+	v, ok := other.(Object)
+	if !ok {
+		return false
+	}
+	if len(o.OptionalAttributes) > 0 {
+		panic("Objects with OptionalAttributes cannot be used.")
+	}
+	if len(v.AttributeTypes) != len(o.AttributeTypes) {
+		return false
+	}
+	for k, typ := range o.AttributeTypes {
+		otherTyp, ok := v.AttributeTypes[k]
+		if !ok {
+			return false
+		}
+		if !typ.UsableAs(otherTyp) {
+			return false
+		}
+	}
+	return true
 }
 
 // Is returns whether `t` is an Object type or not. If `t` is an instance of
