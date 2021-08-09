@@ -68,10 +68,9 @@ func TestPrimitiveIs(t *testing.T) {
 
 func TestPrimitiveUsableAs(t *testing.T) {
 	type testCase struct {
-		p           primitive
-		o           Type
-		expected    bool
-		shouldPanic bool
+		p        primitive
+		o        Type
+		expected bool
 	}
 	tests := map[string]testCase{
 		"string-string": {
@@ -100,29 +99,29 @@ func TestPrimitiveUsableAs(t *testing.T) {
 			expected: false,
 		},
 		"dpt-string": {
-			p:           DynamicPseudoType,
-			o:           String,
-			shouldPanic: true,
+			p:        DynamicPseudoType,
+			o:        String,
+			expected: false,
 		},
 		"dpt-number": {
-			p:           DynamicPseudoType,
-			o:           String,
-			shouldPanic: true,
+			p:        DynamicPseudoType,
+			o:        Number,
+			expected: false,
 		},
 		"dpt-bool": {
-			p:           DynamicPseudoType,
-			o:           Bool,
-			shouldPanic: true,
+			p:        DynamicPseudoType,
+			o:        Bool,
+			expected: false,
 		},
 		"dpt-dpt": {
-			p:           DynamicPseudoType,
-			o:           DynamicPseudoType,
-			shouldPanic: true,
+			p:        DynamicPseudoType,
+			o:        DynamicPseudoType,
+			expected: true,
 		},
 		"dpt-list": {
-			p:           DynamicPseudoType,
-			o:           List{ElementType: String},
-			shouldPanic: true,
+			p:        DynamicPseudoType,
+			o:        List{ElementType: String},
+			expected: false,
 		},
 	}
 	for name, tc := range tests {
@@ -130,26 +129,7 @@ func TestPrimitiveUsableAs(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			var gotPanic string
-			var res bool
-			func() {
-				defer func() {
-					if ex := recover(); ex != nil {
-						if s, ok := ex.(string); ok {
-							gotPanic = s
-						} else {
-							panic(ex)
-						}
-					}
-				}()
-				res = tc.p.UsableAs(tc.o)
-			}()
-			if (gotPanic != "") != tc.shouldPanic {
-				if gotPanic != "" {
-					t.Fatalf("Unexpected panic: %s", gotPanic)
-				}
-				t.Fatalf("Expected panic, but did not panic.")
-			}
+			res := tc.p.UsableAs(tc.o)
 			if res != tc.expected {
 				t.Fatalf("Expected result to be %v, got %v", tc.expected, res)
 			}
