@@ -50,9 +50,6 @@ func (p primitive) Is(t Type) bool {
 }
 
 func (p primitive) UsableAs(t Type) bool {
-	// DynamicPseudoType must be usable to allow bidirectional
-	// unknown values in plans.
-	// e.g. do not panic on p.name == DynamicPseudoType.name
 	v, ok := t.(primitive)
 	if !ok {
 		return false

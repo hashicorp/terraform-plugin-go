@@ -433,6 +433,7 @@ func jsonUnmarshalObject(buf []byte, attrTypes map[string]Type, p *AttributePath
 		return Value{}, p.NewErrorf("invalid JSON, expected %q, got %q", json.Delim('{'), tok)
 	}
 
+	types := map[string]Type{}
 	vals := map[string]Value{}
 	for dec.More() {
 		innerPath := p.WithElementKeyValue(NewValue(String, UnknownValue))
@@ -459,6 +460,7 @@ func jsonUnmarshalObject(buf []byte, attrTypes map[string]Type, p *AttributePath
 		if err != nil {
 			return Value{}, err
 		}
+		types[key] = val.Type()
 		vals[key] = val
 	}
 
@@ -478,6 +480,6 @@ func jsonUnmarshalObject(buf []byte, attrTypes map[string]Type, p *AttributePath
 	}
 
 	return NewValue(Object{
-		AttributeTypes: attrTypes,
+		AttributeTypes: types,
 	}, vals), nil
 }

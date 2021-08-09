@@ -2,6 +2,7 @@ package tftypes
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"math/big"
 	"sort"
@@ -288,6 +289,9 @@ func ValidateValue(t Type, val interface{}) error {
 }
 
 func newValue(t Type, val interface{}) (Value, error) {
+	if t.Is(DynamicPseudoType) && val != UnknownValue {
+		return Value{}, errors.New("cannot have DynamicPseudoType with known value, DynamicPseudoType can only contain unknown values")
+	}
 	if val == nil || val == UnknownValue {
 		return Value{
 			typ:   t,

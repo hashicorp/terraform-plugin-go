@@ -272,7 +272,7 @@ func TestValueFromJSON(t *testing.T) {
 			value: NewValue(Object{
 				AttributeTypes: map[string]Type{
 					"static":  Bool,
-					"dynamic": DynamicPseudoType,
+					"dynamic": Bool,
 				},
 			}, map[string]Value{
 				"static":  NewValue(Bool, true),

@@ -70,7 +70,9 @@ func valueFromList(typ Type, in interface{}) (Value, error) {
 	case []Value:
 		var valType Type
 		for pos, v := range value {
-			if !v.Type().UsableAs(typ) {
+			if v.Type().Is(DynamicPseudoType) && v.IsKnown() {
+				return Value{}, NewAttributePath().WithElementKeyInt(int64(pos)).NewErrorf("invalid value %s for %s", v, v.Type())
+			} else if !v.Type().Is(DynamicPseudoType) && !v.Type().UsableAs(typ) {
 				return Value{}, NewAttributePath().WithElementKeyInt(int64(pos)).NewErrorf("can't use %s as %s", v.Type(), typ)
 			}
 			if valType == nil {
