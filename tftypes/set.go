@@ -71,7 +71,7 @@ func valueFromSet(typ Type, in interface{}) (Value, error) {
 		var elType Type
 		for _, v := range value {
 			if !v.Type().UsableAs(typ) {
-				return Value{}, NewAttributePath().WithElementKeyValue(v).NewErrorf("cannot use %s as %s", v.Type(), typ)
+				return Value{}, NewAttributePath().WithElementKeyValue(v).NewErrorf("can't use %s as %s", v.Type(), typ)
 			}
 			if elType == nil {
 				elType = v.Type()

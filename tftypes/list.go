@@ -71,7 +71,7 @@ func valueFromList(typ Type, in interface{}) (Value, error) {
 		var valType Type
 		for pos, v := range value {
 			if !v.Type().UsableAs(typ) {
-				return Value{}, NewAttributePath().WithElementKeyInt(int64(pos)).NewErrorf("cannot use %s as %s", v.Type(), typ)
+				return Value{}, NewAttributePath().WithElementKeyInt(int64(pos)).NewErrorf("can't use %s as %s", v.Type(), typ)
 			}
 			if valType == nil {
 				valType = v.Type()

@@ -90,7 +90,7 @@ func valueFromMap(typ Type, in interface{}) (Value, error) {
 		for _, k := range keys {
 			v := value[k]
 			if !v.Type().UsableAs(typ) {
-				return Value{}, NewAttributePath().WithElementKeyString(k).NewErrorf("cannot use %s as %s", v.Type(), typ)
+				return Value{}, NewAttributePath().WithElementKeyString(k).NewErrorf("can't use %s as %s", v.Type(), typ)
 			}
 			if elType == nil {
 				elType = v.Type()
