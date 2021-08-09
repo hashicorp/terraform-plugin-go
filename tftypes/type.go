@@ -58,7 +58,7 @@ func TypeFromElements(elements []Value) (Type, error) {
 			typ = el.Type()
 			continue
 		}
-		if !typ.Is(el.Type()) {
+		if !typ.Equal(el.Type()) {
 			return nil, errors.New("elements do not all have the same types")
 		}
 	}
