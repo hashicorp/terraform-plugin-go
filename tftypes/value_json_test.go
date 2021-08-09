@@ -268,6 +268,72 @@ func TestValueFromJSON(t *testing.T) {
 			},
 			json: `[{"value":true,"type":"bool"},{"value":false,"type":"bool"}]`,
 		},
+		"dynamic-set-of-bools": {
+			value: NewValue(Set{
+				ElementType: Bool,
+			}, []Value{
+				NewValue(Bool, true),
+				NewValue(Bool, false),
+			}),
+			typ:  DynamicPseudoType,
+			json: `{"value":[true,false],"type":["set","bool"]}`,
+		},
+		"set-of-dynamic-bools": {
+			value: NewValue(Set{
+				ElementType: Bool,
+			}, []Value{
+				NewValue(Bool, true),
+				NewValue(Bool, false),
+			}),
+			typ: Set{
+				ElementType: DynamicPseudoType,
+			},
+			json: `[{"value":true,"type":"bool"},{"value":false,"type":"bool"}]`,
+		},
+		"dynamic-tuple-of-bools": {
+			value: NewValue(Tuple{
+				ElementTypes: []Type{Bool, Bool},
+			}, []Value{
+				NewValue(Bool, true),
+				NewValue(Bool, false),
+			}),
+			typ:  DynamicPseudoType,
+			json: `{"value":[true,false],"type":["tuple",["bool","bool"]]}`,
+		},
+		"tuple-of-dynamic-bools": {
+			value: NewValue(Tuple{
+				ElementTypes: []Type{Bool, Bool},
+			}, []Value{
+				NewValue(Bool, true),
+				NewValue(Bool, false),
+			}),
+			typ: Tuple{
+				ElementTypes: []Type{DynamicPseudoType, DynamicPseudoType},
+			},
+			json: `[{"value":true,"type":"bool"},{"value":false,"type":"bool"}]`,
+		},
+		"dynamic-map-of-bools": {
+			value: NewValue(Map{
+				AttributeType: Bool,
+			}, map[string]Value{
+				"true":  NewValue(Bool, true),
+				"false": NewValue(Bool, false),
+			}),
+			typ:  DynamicPseudoType,
+			json: `{"value":{"true":true,"false":false},"type":["map","bool"]}`,
+		},
+		"map-of-dynamic-bools": {
+			value: NewValue(Map{
+				AttributeType: Bool,
+			}, map[string]Value{
+				"true":  NewValue(Bool, true),
+				"false": NewValue(Bool, false),
+			}),
+			typ: Map{
+				AttributeType: DynamicPseudoType,
+			},
+			json: `{"true":{"value":true,"type":"bool"},"false":{"value":false,"type":"bool"}}`,
+		},
 		"object-of-bool_dynamic": {
 			value: NewValue(Object{
 				AttributeTypes: map[string]Type{
