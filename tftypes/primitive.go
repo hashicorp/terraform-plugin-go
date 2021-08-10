@@ -102,28 +102,9 @@ func (p primitive) supportedGoTypes() []string {
 	case Bool.name:
 		return []string{"bool", "*bool"}
 	case DynamicPseudoType.name:
-		possibleTypes := []Type{
-			String, Bool, Number,
-			Tuple{}, Object{},
-		}
-		results := []string{}
-		for _, t := range possibleTypes {
-			results = append(results, t.supportedGoTypes()...)
-		}
-		return results
+		return []string{"nil"}
 	}
 	panic(fmt.Sprintf("unknown primitive type %q", p.name))
-}
-
-func valueCanBeString(val interface{}) bool {
-	switch val.(type) {
-	case string:
-		return true
-	case *string:
-		return true
-	default:
-		return false
-	}
 }
 
 func valueFromString(in interface{}) (Value, error) {
@@ -149,17 +130,6 @@ func valueFromString(in interface{}) (Value, error) {
 	}
 }
 
-func valueCanBeBool(val interface{}) bool {
-	switch val.(type) {
-	case bool:
-		return true
-	case *bool:
-		return true
-	default:
-		return false
-	}
-}
-
 func valueFromBool(in interface{}) (Value, error) {
 	switch value := in.(type) {
 	case *bool:
@@ -180,25 +150,6 @@ func valueFromBool(in interface{}) (Value, error) {
 		}, nil
 	default:
 		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Bool; expected types are: %s", in, formattedSupportedGoTypes(Bool))
-	}
-}
-
-func valueCanBeNumber(val interface{}) bool {
-	switch val.(type) {
-	case uint, uint8, uint16, uint32, uint64:
-		return true
-	case *uint, *uint8, *uint16, *uint32, *uint64:
-		return true
-	case int, int8, int16, int32, int64:
-		return true
-	case *int, *int8, *int16, *int32, *int64:
-		return true
-	case float64, *float64:
-		return true
-	case *big.Float:
-		return true
-	default:
-		return false
 	}
 }
 
