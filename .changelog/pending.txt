@@ -1,0 +1,3 @@
+```release-note:bug
+tftypes: Prevent potential panic unmarshaling null DynamicPseudoType in msgpack
+```

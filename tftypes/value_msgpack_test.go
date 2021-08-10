@@ -333,6 +333,11 @@ func TestValueFromMsgPack(t *testing.T) {
 			value: NewValue(String, nil),
 			typ:   DynamicPseudoType,
 		},
+		"dynamic-null": {
+			hex:   "c0",
+			value: NewValue(DynamicPseudoType, nil),
+			typ:   DynamicPseudoType,
+		},
 		"dynamic-unknown": {
 			hex:   "d40000",
 			value: NewValue(DynamicPseudoType, UnknownValue),
