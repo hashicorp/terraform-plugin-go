@@ -1,0 +1,15 @@
+```release-note:breaking-change
+tftypes: The `Is()` method on types implementing the `Type` interface now only perform a shallow type check, no longer comparing any underlying attribute or element type(s). Use the `Equal()` method for deep type checking.
+```
+
+```release-note:enhancement
+tftypes: All types implementing the `Type` interface now provide an `Equal()` method for deep type checking and `UsableAs()` method for type conformance checking.
+```
+
+```release-note:bug
+tftypes: Ensure `NewValue()` panics on `DynamicPseudoType` and known values.
+```
+
+```release-note:bug
+tftypes: Fixed elements of `Tuple` and `Map` and attributes of `Object` having `DynamicPseudoType` as their type when unmarshaling JSON values from Terraform.
+```

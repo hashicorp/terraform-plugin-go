@@ -146,7 +146,7 @@ func TestTypeJSON(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error parsing JSON: %s", err)
 			}
-			if !typ.Is(test.typ) {
+			if !typ.Equal(test.typ) {
 				t.Fatalf("Unexpected parsing results (-wanted +got): %s", cmp.Diff(test.typ, typ))
 			}
 

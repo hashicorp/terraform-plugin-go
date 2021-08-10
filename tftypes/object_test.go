@@ -3,6 +3,8 @@ package tftypes
 import "testing"
 
 func TestObjectEqual(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
 		o1    Object
 		o2    Object
@@ -164,6 +166,8 @@ func TestObjectEqual(t *testing.T) {
 	for name, tc := range tests {
 		name, tc := name, tc
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			res := tc.o1.Equal(tc.o2)
 			revRes := tc.o2.Equal(tc.o1)
 			if res != revRes {
@@ -177,6 +181,8 @@ func TestObjectEqual(t *testing.T) {
 }
 
 func TestObjectIs(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
 		o1    Object
 		o2    Object
@@ -196,7 +202,7 @@ func TestObjectIs(t *testing.T) {
 			}},
 			equal: true,
 		},
-		"unequal": {
+		"different-attributetypes": {
 			o1: Object{AttributeTypes: map[string]Type{
 				"a": String,
 				"b": Number,
@@ -207,9 +213,9 @@ func TestObjectIs(t *testing.T) {
 				"b": String,
 				"c": Bool,
 			}},
-			equal: false,
+			equal: true,
 		},
-		"unequal-lengths": {
+		"equal-lengths": {
 			o1: Object{AttributeTypes: map[string]Type{
 				"a": String,
 				"b": Number,
@@ -219,9 +225,9 @@ func TestObjectIs(t *testing.T) {
 				"a": String,
 				"b": Number,
 			}},
-			equal: false,
+			equal: true,
 		},
-		"unequal-different-keys": {
+		"equal-different-keys": {
 			o1: Object{AttributeTypes: map[string]Type{
 				"a": String,
 				"b": Number,
@@ -232,9 +238,9 @@ func TestObjectIs(t *testing.T) {
 				"b": Number,
 				"d": Bool,
 			}},
-			equal: false,
+			equal: true,
 		},
-		"unequal-optional-lengths": {
+		"equal-optional-lengths": {
 			o1: Object{
 				AttributeTypes: map[string]Type{
 					"a": String,
@@ -256,9 +262,9 @@ func TestObjectIs(t *testing.T) {
 					"b": {},
 				},
 			},
-			equal: false,
+			equal: true,
 		},
-		"unequal-optional-attrs": {
+		"equal-optional-attrs": {
 			o1: Object{
 				AttributeTypes: map[string]Type{
 					"a": String,
@@ -279,7 +285,7 @@ func TestObjectIs(t *testing.T) {
 					"b": {},
 				},
 			},
-			equal: false,
+			equal: true,
 		},
 		"equal-complex": {
 			o1: Object{AttributeTypes: map[string]Type{
@@ -298,7 +304,7 @@ func TestObjectIs(t *testing.T) {
 				}}}},
 			equal: true,
 		},
-		"unequal-complex": {
+		"different-attributetypes-complex": {
 			o1: Object{AttributeTypes: map[string]Type{
 				"list": List{ElementType: String},
 				"object": Object{AttributeTypes: map[string]Type{
@@ -314,16 +320,34 @@ func TestObjectIs(t *testing.T) {
 					"c": Bool,
 					"d": DynamicPseudoType,
 				}}}},
-			equal: false,
+			equal: true,
 		},
-		"unequal-empty": {
+		"equal-empty": {
+			o1: Object{AttributeTypes: map[string]Type{
+				"a": String,
+			}},
+			o2:    Object{AttributeTypes: map[string]Type{}},
+			equal: true,
+		},
+		"equal-nil": {
 			o1: Object{AttributeTypes: map[string]Type{
 				"a": String,
 			}},
 			o2:    Object{},
 			equal: true,
 		},
-		"unequal-complex-empty": {
+		"equal-complex-empty": {
+			o1: Object{AttributeTypes: map[string]Type{
+				"list": List{ElementType: String},
+				"object": Object{AttributeTypes: map[string]Type{
+					"a": Number,
+					"b": String,
+					"c": Bool,
+				}}}},
+			o2:    Object{AttributeTypes: map[string]Type{}},
+			equal: true,
+		},
+		"equal-complex-nil": {
 			o1: Object{AttributeTypes: map[string]Type{
 				"list": List{ElementType: String},
 				"object": Object{AttributeTypes: map[string]Type{
@@ -338,9 +362,218 @@ func TestObjectIs(t *testing.T) {
 	for name, tc := range tests {
 		name, tc := name, tc
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			res := tc.o1.Is(tc.o2)
 			if res != tc.equal {
 				t.Errorf("Expected result to be %v, got %v", tc.equal, res)
+			}
+		})
+	}
+}
+
+func TestObjectUsableAs(t *testing.T) {
+	t.Parallel()
+
+	type testCase struct {
+		object      Object
+		other       Type
+		expected    bool
+		shouldPanic bool
+	}
+	tests := map[string]testCase{
+		"object-dpt": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"test": String,
+				},
+			},
+			other:    DynamicPseudoType,
+			expected: true,
+		},
+		"object-primitive": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"test": String,
+				},
+			},
+			other:    String,
+			expected: false,
+		},
+		"object-object-dpt": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"dpt":     String,
+					"non-dpt": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"dpt":     DynamicPseudoType,
+					"non-dpt": String,
+				},
+			},
+			expected: true,
+		},
+		"object-object-type-inequality": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"test": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"test": Number,
+				},
+			},
+			expected: false,
+		},
+		"object-object-type-length": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"test": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"test":  String,
+					"test2": String,
+				},
+			},
+			expected: false,
+		},
+		"object-object-type-missing": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"test": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"test2": String,
+				},
+			},
+			expected: false,
+		},
+		"object-object-object-dpt": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"object": Object{
+						AttributeTypes: map[string]Type{
+							"dpt": String,
+						},
+					},
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"object": Object{
+						AttributeTypes: map[string]Type{
+							"dpt": DynamicPseudoType,
+						},
+					},
+				},
+			},
+			expected: true,
+		},
+		"object-object-optional": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"optional": String,
+					"required": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"optional": String,
+					"required": String,
+				},
+				OptionalAttributes: map[string]struct{}{
+					"optional": {},
+				},
+			},
+			expected: true,
+		},
+		"object-object-optional-inequality": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"optional": String,
+					"required": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"optional": Number,
+					"required": String,
+				},
+				OptionalAttributes: map[string]struct{}{
+					"optional": {},
+				},
+			},
+			expected: false,
+		},
+		"object-object-required": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"required": String,
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"required": String,
+				},
+			},
+			expected: true,
+		},
+		"object-OptionalAttributes-panic": {
+			object: Object{
+				AttributeTypes: map[string]Type{
+					"optional": String,
+					"required": String,
+				},
+				OptionalAttributes: map[string]struct{}{
+					"optional": {},
+				},
+			},
+			other: Object{
+				AttributeTypes: map[string]Type{
+					"optional": String,
+					"required": String,
+				},
+				OptionalAttributes: map[string]struct{}{
+					"optional": {},
+				},
+			},
+			shouldPanic: true,
+		},
+	}
+	for name, tc := range tests {
+		name, tc := name, tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			var gotPanic string
+			var res bool
+			func() {
+				defer func() {
+					if ex := recover(); ex != nil {
+						if s, ok := ex.(string); ok {
+							gotPanic = s
+						} else {
+							panic(ex)
+						}
+					}
+				}()
+				res = tc.object.UsableAs(tc.other)
+			}()
+			if (gotPanic != "") != tc.shouldPanic {
+				if gotPanic != "" {
+					t.Fatalf("Unexpected panic: %s", gotPanic)
+				}
+				t.Fatalf("Expected panic, but did not panic.")
+			}
+			if res != tc.expected {
+				t.Fatalf("Expected result to be %v, got %v", tc.expected, res)
 			}
 		})
 	}

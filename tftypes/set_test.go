@@ -3,6 +3,8 @@ package tftypes
 import "testing"
 
 func TestSetEqual(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
 		s1    Set
 		s2    Set
@@ -64,6 +66,8 @@ func TestSetEqual(t *testing.T) {
 	for name, tc := range tests {
 		name, tc := name, tc
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			res := tc.s1.Equal(tc.s2)
 			revRes := tc.s2.Equal(tc.s1)
 			if res != revRes {
@@ -77,6 +81,8 @@ func TestSetEqual(t *testing.T) {
 }
 
 func TestSetIs(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
 		s1    Set
 		s2    Set
@@ -88,10 +94,10 @@ func TestSetIs(t *testing.T) {
 			s2:    Set{ElementType: String},
 			equal: true,
 		},
-		"unequal": {
+		"different-elementtype": {
 			s1:    Set{ElementType: String},
 			s2:    Set{ElementType: Number},
-			equal: false,
+			equal: true,
 		},
 		"equal-complex": {
 			s1: Set{ElementType: Object{AttributeTypes: map[string]Type{
@@ -106,7 +112,7 @@ func TestSetIs(t *testing.T) {
 			}}},
 			equal: true,
 		},
-		"unequal-complex": {
+		"different-elementtype-complex": {
 			s1: Set{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
@@ -118,14 +124,14 @@ func TestSetIs(t *testing.T) {
 				"c": Bool,
 				"d": DynamicPseudoType,
 			}}},
-			equal: false,
+			equal: true,
 		},
-		"unequal-empty": {
+		"equal-empty": {
 			s1:    Set{ElementType: String},
 			s2:    Set{},
 			equal: true,
 		},
-		"unequal-complex-empty": {
+		"equal-complex-empty": {
 			s1: Set{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
@@ -134,13 +140,117 @@ func TestSetIs(t *testing.T) {
 			s2:    Set{ElementType: Object{}},
 			equal: true,
 		},
+		"equal-complex-nil": {
+			s1: Set{ElementType: Object{AttributeTypes: map[string]Type{
+				"a": Number,
+				"b": String,
+				"c": Bool,
+			}}},
+			s2:    Set{},
+			equal: true,
+		},
 	}
 	for name, tc := range tests {
 		name, tc := name, tc
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			res := tc.s1.Is(tc.s2)
 			if res != tc.equal {
 				t.Errorf("Expected result to be %v, got %v", tc.equal, res)
+			}
+		})
+	}
+}
+
+func TestSetUsableAs(t *testing.T) {
+	t.Parallel()
+
+	type testCase struct {
+		set      Set
+		other    Type
+		expected bool
+	}
+	tests := map[string]testCase{
+		"set-set-string-set-string": {
+			set:      Set{ElementType: Set{ElementType: String}},
+			other:    Set{ElementType: String},
+			expected: false,
+		},
+		"set-set-string-set-set-string": {
+			set:      Set{ElementType: Set{ElementType: String}},
+			other:    Set{ElementType: Set{ElementType: String}},
+			expected: true,
+		},
+		"set-set-string-dpt": {
+			set:      Set{ElementType: Set{ElementType: String}},
+			other:    DynamicPseudoType,
+			expected: true,
+		},
+		"set-set-string-set-dpt": {
+			set:      Set{ElementType: Set{ElementType: String}},
+			other:    Set{ElementType: DynamicPseudoType},
+			expected: true,
+		},
+		"set-set-string-set-set-dpt": {
+			set:      Set{ElementType: Set{ElementType: String}},
+			other:    Set{ElementType: Set{ElementType: DynamicPseudoType}},
+			expected: true,
+		},
+		"set-string-dpt": {
+			set:      Set{ElementType: String},
+			other:    DynamicPseudoType,
+			expected: true,
+		},
+		"set-string-set-bool": {
+			set:      Set{ElementType: String},
+			other:    Set{ElementType: Bool},
+			expected: false,
+		},
+		"set-string-set-dpt": {
+			set:      Set{ElementType: String},
+			other:    Set{ElementType: DynamicPseudoType},
+			expected: true,
+		},
+		"set-string-list-string": {
+			set:      Set{ElementType: String},
+			other:    List{ElementType: String},
+			expected: false,
+		},
+		"set-string-map": {
+			set:      Set{ElementType: String},
+			other:    Map{AttributeType: String},
+			expected: false,
+		},
+		"set-string-object": {
+			set:      Set{ElementType: String},
+			other:    Object{AttributeTypes: map[string]Type{"test": String}},
+			expected: false,
+		},
+		"set-string-primitive": {
+			set:      Set{ElementType: String},
+			other:    String,
+			expected: false,
+		},
+		"set-string-set-string": {
+			set:      Set{ElementType: String},
+			other:    Set{ElementType: String},
+			expected: true,
+		},
+		"set-string-tuple-string": {
+			set:      Set{ElementType: String},
+			other:    Tuple{ElementTypes: []Type{String}},
+			expected: false,
+		},
+	}
+	for name, tc := range tests {
+		name, tc := name, tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			res := tc.set.UsableAs(tc.other)
+			if res != tc.expected {
+				t.Fatalf("Expected result to be %v, got %v", tc.expected, res)
 			}
 		})
 	}

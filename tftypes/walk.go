@@ -176,7 +176,7 @@ func transform(path *AttributePath, val Value, cb func(*AttributePath, Value) (V
 	if err != nil {
 		return res, path.NewError(err)
 	}
-	if !newVal.Type().Is(ty) {
+	if !newVal.Type().UsableAs(ty) {
 		return val, path.NewError(errors.New("invalid transform: value changed type"))
 	}
 	return res, err
