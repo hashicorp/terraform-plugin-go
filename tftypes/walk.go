@@ -67,7 +67,7 @@ func walk(path *AttributePath, val Value, cb func(*AttributePath, Value) (bool, 
 			if ty.Is(Set{}) {
 				path = path.WithElementKeyValue(el)
 			} else {
-				path = path.WithElementKeyInt(int64(pos))
+				path = path.WithElementKeyInt(pos)
 			}
 			err = walk(path, el, cb)
 			if err != nil {
@@ -133,7 +133,7 @@ func transform(path *AttributePath, val Value, cb func(*AttributePath, Value) (V
 				if ty.Is(Set{}) {
 					path = path.WithElementKeyValue(el)
 				} else {
-					path = path.WithElementKeyInt(int64(pos))
+					path = path.WithElementKeyInt(pos)
 				}
 				newEl, err := transform(path, el, cb)
 				if err != nil {

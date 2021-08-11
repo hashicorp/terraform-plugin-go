@@ -220,6 +220,11 @@ func TestAttributePathEqual(t *testing.T) {
 			path2: NewAttributePath().WithAttributeName("testing"),
 			equal: false,
 		},
+		"eki64-different-types": {
+			path1: NewAttributePath().WithElementKeyInt64(1234),
+			path2: NewAttributePath().WithAttributeName("testing"),
+			equal: false,
+		},
 		"ekv-different-types": {
 			path1: NewAttributePath().WithElementKeyValue(NewValue(String, "testing")),
 			path2: NewAttributePath().WithAttributeName("testing"),
@@ -253,6 +258,21 @@ func TestAttributePathEqual(t *testing.T) {
 		"eki-eki": {
 			path1: NewAttributePath().WithElementKeyInt(123).WithElementKeyInt(456),
 			path2: NewAttributePath().WithElementKeyInt(123).WithElementKeyInt(456),
+			equal: true,
+		},
+		"eki-eki64": {
+			path1: NewAttributePath().WithElementKeyInt(123),
+			path2: NewAttributePath().WithElementKeyInt64(123),
+			equal: true,
+		},
+		"eki64": {
+			path1: NewAttributePath().WithElementKeyInt64(123),
+			path2: NewAttributePath().WithElementKeyInt64(123),
+			equal: true,
+		},
+		"eki64-eki64": {
+			path1: NewAttributePath().WithElementKeyInt64(123).WithElementKeyInt64(456),
+			path2: NewAttributePath().WithElementKeyInt64(123).WithElementKeyInt64(456),
 			equal: true,
 		},
 		"ekv": {
@@ -354,6 +374,21 @@ func TestAttributePathEqual(t *testing.T) {
 		"eki-eki-diff-2": {
 			path1: NewAttributePath().WithElementKeyInt(123).WithElementKeyInt(456),
 			path2: NewAttributePath().WithElementKeyInt(123).WithElementKeyInt(4567),
+			equal: false,
+		},
+		"eki64-diff": {
+			path1: NewAttributePath().WithElementKeyInt64(123),
+			path2: NewAttributePath().WithElementKeyInt64(1234),
+			equal: false,
+		},
+		"eki64-eki64-diff": {
+			path1: NewAttributePath().WithElementKeyInt64(123).WithElementKeyInt64(456),
+			path2: NewAttributePath().WithElementKeyInt64(1234).WithElementKeyInt64(456),
+			equal: false,
+		},
+		"eki64-eki64-diff-2": {
+			path1: NewAttributePath().WithElementKeyInt64(123).WithElementKeyInt64(456),
+			path2: NewAttributePath().WithElementKeyInt64(123).WithElementKeyInt64(4567),
 			equal: false,
 		},
 		"ekv-diff": {
@@ -549,6 +584,10 @@ func TestAttributePathString(t *testing.T) {
 		},
 		"element-key-int": {
 			path:     NewAttributePath().WithElementKeyInt(1234),
+			expected: `ElementKeyInt(1234)`,
+		},
+		"element-key-int64": {
+			path:     NewAttributePath().WithElementKeyInt64(1234),
 			expected: `ElementKeyInt(1234)`,
 		},
 		"element-key-value": {
