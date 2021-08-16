@@ -216,7 +216,7 @@ func jsonUnmarshalList(buf []byte, elementType Type, p *AttributePath) (Value, e
 	// distinction, so we'll allow it.
 	vals := []Value{}
 
-	var idx int64
+	var idx int
 	for dec.More() {
 		innerPath := p.WithElementKeyInt(idx)
 		// update the index
@@ -396,9 +396,9 @@ func jsonUnmarshalTuple(buf []byte, elementTypes []Type, p *AttributePath) (Valu
 	types := []Type{}
 	vals := []Value{}
 
-	var idx int64
+	var idx int
 	for dec.More() {
-		if idx >= int64(len(elementTypes)) {
+		if idx >= len(elementTypes) {
 			return Value{}, p.NewErrorf("too many tuple elements (only have types for %d)", len(elementTypes))
 		}
 

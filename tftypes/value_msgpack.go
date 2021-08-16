@@ -150,7 +150,7 @@ func msgpackUnmarshalList(dec *msgpack.Decoder, typ Type, path *AttributePath) (
 
 	vals := make([]Value, 0, length)
 	for i := 0; i < length; i++ {
-		innerPath := path.WithElementKeyInt(int64(i))
+		innerPath := path.WithElementKeyInt(i)
 		val, err := msgpackUnmarshal(dec, typ, innerPath)
 		if err != nil {
 			return Value{}, err
@@ -190,7 +190,7 @@ func msgpackUnmarshalSet(dec *msgpack.Decoder, typ Type, path *AttributePath) (V
 
 	vals := make([]Value, 0, length)
 	for i := 0; i < length; i++ {
-		innerPath := path.WithElementKeyInt(int64(i))
+		innerPath := path.WithElementKeyInt(i)
 		val, err := msgpackUnmarshal(dec, typ, innerPath)
 		if err != nil {
 			return Value{}, err
@@ -278,7 +278,7 @@ func msgpackUnmarshalTuple(dec *msgpack.Decoder, types []Type, path *AttributePa
 	elTypes := make([]Type, 0, length)
 	vals := make([]Value, 0, length)
 	for i := 0; i < length; i++ {
-		innerPath := path.WithElementKeyInt(int64(i))
+		innerPath := path.WithElementKeyInt(i)
 		typ := types[i]
 		val, err := msgpackUnmarshal(dec, typ, innerPath)
 		if err != nil {
@@ -489,7 +489,7 @@ func marshalMsgPackList(val Value, typ Type, p *AttributePath, enc *msgpack.Enco
 		return p.NewErrorf("error encoding list length: %w", err)
 	}
 	for pos, i := range l {
-		err := marshalMsgPack(i, typ.(List).ElementType, p.WithElementKeyInt(int64(pos)), enc)
+		err := marshalMsgPack(i, typ.(List).ElementType, p.WithElementKeyInt(pos), enc)
 		if err != nil {
 			return err
 		}
@@ -549,7 +549,7 @@ func marshalMsgPackTuple(val Value, typ Type, p *AttributePath, enc *msgpack.Enc
 	}
 	for pos, v := range t {
 		ty := types[pos]
-		err := marshalMsgPack(v, ty, p.WithElementKeyInt(int64(pos)), enc)
+		err := marshalMsgPack(v, ty, p.WithElementKeyInt(pos), enc)
 		if err != nil {
 			return err
 		}
