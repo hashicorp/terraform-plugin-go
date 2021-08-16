@@ -1,7 +1,3 @@
 ```release-note:breaking-change
-tftypes: `(AttributePath).WithElementKeyInt()` now has an `int` parameter instead of `int64`.
-```
-
-```release-note:note
-tftypes: Using `(AttributePath).WithElementKeyInt()` within `for ... range` loops no longer requires `int64()` conversion.
+tftypes: `(AttributePath).WithElementKeyInt()` now has an `int` parameter instead of `int64`. Using `(AttributePath).WithElementKeyInt()` within `for ... range` loops no longer requires `int64()` conversion.
 ```
