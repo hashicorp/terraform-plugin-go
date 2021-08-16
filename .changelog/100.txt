@@ -1,0 +1,3 @@
+```release-note:bug
+tftypes: Fixed elements of `Tuple` and `Map` and attributes of `Object` having `DynamicPseudoType` as their type when unmarshaling msgpack values from Terraform.
+```
