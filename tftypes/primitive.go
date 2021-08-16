@@ -102,7 +102,7 @@ func (p primitive) supportedGoTypes() []string {
 	case Bool.name:
 		return []string{"bool", "*bool"}
 	case DynamicPseudoType.name:
-		return []string{"nil"}
+		return []string{"nil", "UnknownValue"}
 	}
 	panic(fmt.Sprintf("unknown primitive type %q", p.name))
 }
