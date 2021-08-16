@@ -1,11 +1,7 @@
 ```release-note:breaking-change
-tftypes: `(AttributePath).WithElementKeyInt()` now has an `int` parameter instead of `int64`. A separate `WithElementKeyInt64()` method that accepts an `int64` is available.
+tftypes: `(AttributePath).WithElementKeyInt()` now has an `int` parameter instead of `int64`.
 ```
 
 ```release-note:note
 tftypes: Using `(AttributePath).WithElementKeyInt()` within `for ... range` loops no longer requires `int64()` conversion.
-```
-
-```release-note:enhancement
-tftypes: Added `(AttributePath).WithElementKeyInt64()` method.
 ```

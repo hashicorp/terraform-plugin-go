@@ -156,15 +156,6 @@ func (a *AttributePath) WithElementKeyInt(key int) *AttributePath {
 	}
 }
 
-// WithElementKeyInt64 adds an ElementKeyInt step to `a`, using `key` as the
-// element's key. `a` is copied, not modified.
-func (a *AttributePath) WithElementKeyInt64(key int64) *AttributePath {
-	steps := a.Steps()
-	return &AttributePath{
-		steps: append(steps, ElementKeyInt(key)),
-	}
-}
-
 // WithElementKeyValue adds an ElementKeyValue to `a`, using `key` as the
 // element's key. `a` is copied, not modified.
 func (a *AttributePath) WithElementKeyValue(key Value) *AttributePath {
