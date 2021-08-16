@@ -341,7 +341,7 @@ func msgpackUnmarshalDynamic(dec *msgpack.Decoder, path *AttributePath) (Value, 
 
 	switch {
 	case length == -1:
-		return NewValue(DynamicPseudoType, nil), nil
+		return newValue(DynamicPseudoType, nil)
 	case length != 2:
 		return Value{}, path.NewErrorf("expected %d elements in DynamicPseudoType array, got %d", 2, length)
 	}
