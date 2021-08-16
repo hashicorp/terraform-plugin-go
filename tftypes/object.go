@@ -158,15 +158,6 @@ func (o Object) supportedGoTypes() []string {
 	return []string{"map[string]tftypes.Value"}
 }
 
-func valueCanBeObject(val interface{}) bool {
-	switch val.(type) {
-	case map[string]Value:
-		return true
-	default:
-		return false
-	}
-}
-
 func valueFromObject(types map[string]Type, optionalAttrs map[string]struct{}, in interface{}) (Value, error) {
 	switch value := in.(type) {
 	case map[string]Value:

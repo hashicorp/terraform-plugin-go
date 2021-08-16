@@ -289,15 +289,17 @@ func ValidateValue(t Type, val interface{}) error {
 }
 
 func newValue(t Type, val interface{}) (Value, error) {
-	if t.Is(DynamicPseudoType) && val != UnknownValue {
-		return Value{}, errors.New("cannot have DynamicPseudoType with known value, DynamicPseudoType can only contain unknown values")
-	}
 	if val == nil || val == UnknownValue {
 		return Value{
 			typ:   t,
 			value: val,
 		}, nil
 	}
+
+	if t.Is(DynamicPseudoType) {
+		return Value{}, errors.New("cannot have DynamicPseudoType with known value, DynamicPseudoType can only contain null or unknown values")
+	}
+
 	if creator, ok := val.(ValueCreator); ok {
 		var err error
 		val, err = creator.ToTerraform5Value()
@@ -307,12 +309,6 @@ func newValue(t Type, val interface{}) (Value, error) {
 	}
 
 	switch {
-	case t.Is(DynamicPseudoType):
-		v, err := valueFromDynamicPseudoType(val)
-		if err != nil {
-			return Value{}, err
-		}
-		return v, nil
 	case t.Is(String):
 		v, err := valueFromString(val)
 		if err != nil {

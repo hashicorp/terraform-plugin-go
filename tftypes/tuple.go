@@ -96,15 +96,6 @@ func (tu Tuple) supportedGoTypes() []string {
 	return []string{"[]tftypes.Value"}
 }
 
-func valueCanBeTuple(val interface{}) bool {
-	switch val.(type) {
-	case []Value:
-		return true
-	default:
-		return false
-	}
-}
-
 func valueFromTuple(types []Type, in interface{}) (Value, error) {
 	switch value := in.(type) {
 	case []Value:

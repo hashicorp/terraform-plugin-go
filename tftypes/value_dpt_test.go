@@ -14,7 +14,20 @@ func Test_newValue_dpt(t *testing.T) {
 		expected Value
 	}
 	tests := map[string]testCase{
-		"normal": {
+		"known": {
+			typ: DynamicPseudoType,
+			val: "hello",
+			err: regexp.MustCompile(`cannot have DynamicPseudoType with known value, DynamicPseudoType can only contain null or unknown values`),
+		},
+		"null": {
+			typ: DynamicPseudoType,
+			val: nil,
+			expected: Value{
+				typ:   DynamicPseudoType,
+				value: nil,
+			},
+		},
+		"unknown": {
 			typ: DynamicPseudoType,
 			val: UnknownValue,
 			expected: Value{
@@ -22,11 +35,6 @@ func Test_newValue_dpt(t *testing.T) {
 				value: UnknownValue,
 			},
 			err: nil,
-		},
-		"dynamic-known": {
-			typ: DynamicPseudoType,
-			val: "hello",
-			err: regexp.MustCompile(`cannot have DynamicPseudoType with known value, DynamicPseudoType can only contain unknown values`),
 		},
 	}
 	for name, test := range tests {

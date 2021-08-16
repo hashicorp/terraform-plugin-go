@@ -238,8 +238,25 @@ func msgpackUnmarshalMap(dec *msgpack.Decoder, typ Type, path *AttributePath) (V
 		}
 		vals[key] = val
 	}
+
+	elTyp := typ
+
+	if typ.Is(DynamicPseudoType) {
+		var elements []Value
+
+		for _, val := range vals {
+			elements = append(elements, val)
+		}
+
+		elTyp, err = TypeFromElements(elements)
+
+		if err != nil {
+			return Value{}, path.NewErrorf("invalid elements for map: %w", err)
+		}
+	}
+
 	return NewValue(Map{
-		AttributeType: typ,
+		AttributeType: elTyp,
 	}, vals), nil
 }
 
@@ -258,6 +275,7 @@ func msgpackUnmarshalTuple(dec *msgpack.Decoder, types []Type, path *AttributePa
 		return Value{}, path.NewErrorf("error decoding tuple; expected %d items, got %d", len(types), length)
 	}
 
+	elTypes := make([]Type, 0, length)
 	vals := make([]Value, 0, length)
 	for i := 0; i < length; i++ {
 		innerPath := path.WithElementKeyInt(i)
@@ -266,11 +284,12 @@ func msgpackUnmarshalTuple(dec *msgpack.Decoder, types []Type, path *AttributePa
 		if err != nil {
 			return Value{}, err
 		}
+		elTypes = append(elTypes, val.Type())
 		vals = append(vals, val)
 	}
 
 	return NewValue(Tuple{
-		ElementTypes: types,
+		ElementTypes: elTypes,
 	}, vals), nil
 }
 
@@ -289,6 +308,7 @@ func msgpackUnmarshalObject(dec *msgpack.Decoder, types map[string]Type, path *A
 		return Value{}, path.NewErrorf("error decoding object; expected %d attributes, got %d", len(types), length)
 	}
 
+	attrTypes := make(map[string]Type, length)
 	vals := make(map[string]Value, length)
 	for i := 0; i < length; i++ {
 		key, err := dec.DecodeString()
@@ -304,11 +324,12 @@ func msgpackUnmarshalObject(dec *msgpack.Decoder, types map[string]Type, path *A
 		if err != nil {
 			return Value{}, err
 		}
+		attrTypes[key] = val.Type()
 		vals[key] = val
 	}
 
 	return NewValue(Object{
-		AttributeTypes: types,
+		AttributeTypes: attrTypes,
 	}, vals), nil
 }
 
@@ -320,7 +341,7 @@ func msgpackUnmarshalDynamic(dec *msgpack.Decoder, path *AttributePath) (Value, 
 
 	switch {
 	case length == -1:
-		return NewValue(DynamicPseudoType, nil), nil
+		return newValue(DynamicPseudoType, nil)
 	case length != 2:
 		return Value{}, path.NewErrorf("expected %d elements in DynamicPseudoType array, got %d", 2, length)
 	}

@@ -95,6 +95,72 @@ func TestValueFromMsgPack(t *testing.T) {
 			value: NewValue(Number, big.NewFloat(math.Inf(-1))),
 			typ:   Number,
 		},
+		"dynamic-bool": {
+			hex:   "92c40622626f6f6c22c3",
+			value: NewValue(Bool, true),
+			typ:   DynamicPseudoType,
+		},
+		"dynamic-list": {
+			hex: "92c4115b226c697374222c22737472696e67225d91a568656c6c6f",
+			value: NewValue(List{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, "hello"),
+			}),
+			typ: DynamicPseudoType,
+		},
+		"dynamic-map": {
+			hex: "92c4105b226d6170222c22737472696e67225d81a568656c6c6fa568656c6c6f",
+			value: NewValue(Map{
+				AttributeType: String,
+			}, map[string]Value{
+				"hello": NewValue(String, "hello"),
+			}),
+			typ: DynamicPseudoType,
+		},
+		"dynamic-number": {
+			hex:   "92c408226e756d6265722201",
+			value: NewValue(Number, big.NewFloat(1)),
+			typ:   DynamicPseudoType,
+		},
+		"dynamic-object": {
+			hex: "81a86772656574696e6792c40822737472696e6722a568656c6c6f",
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"greeting": String,
+				},
+			}, map[string]Value{
+				"greeting": NewValue(String, "hello"),
+			}),
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"greeting": DynamicPseudoType,
+				},
+			},
+		},
+		"dynamic-set": {
+			hex: "92c4105b22736574222c22737472696e67225d91a568656c6c6f",
+			value: NewValue(Set{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, "hello"),
+			}),
+			typ: DynamicPseudoType,
+		},
+		"dynamic-string": {
+			hex:   "92c40822737472696e6722a568656c6c6f",
+			value: NewValue(String, "hello"),
+			typ:   DynamicPseudoType,
+		},
+		"list-dynamic": {
+			hex: "9192c40822737472696e6722a568656c6c6f",
+			value: NewValue(List{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, "hello"),
+			}),
+			typ: List{ElementType: DynamicPseudoType},
+		},
 		"list-string-hello": {
 			hex: "91a568656c6c6f",
 			value: NewValue(List{
@@ -136,6 +202,15 @@ func TestValueFromMsgPack(t *testing.T) {
 			}, []Value{}),
 			typ: List{ElementType: String},
 		},
+		"set-dynamic": {
+			hex: "9192c40822737472696e6722a568656c6c6f",
+			value: NewValue(Set{
+				ElementType: String,
+			}, []Value{
+				NewValue(String, "hello"),
+			}),
+			typ: Set{ElementType: DynamicPseudoType},
+		},
 		"set-string-hello": {
 			hex: "91a568656c6c6f",
 			value: NewValue(Set{
@@ -169,6 +244,15 @@ func TestValueFromMsgPack(t *testing.T) {
 				ElementType: String,
 			}, []Value{}),
 			typ: Set{ElementType: String},
+		},
+		"map-dynamic": {
+			hex: "81a86772656574696e6792c40822737472696e6722a568656c6c6f",
+			value: NewValue(Map{
+				AttributeType: String,
+			}, map[string]Value{
+				"greeting": NewValue(String, "hello"),
+			}),
+			typ: Map{AttributeType: DynamicPseudoType},
 		},
 		"map-string-hello": {
 			hex: "81a86772656574696e67a568656c6c6f",
@@ -204,6 +288,16 @@ func TestValueFromMsgPack(t *testing.T) {
 			}, map[string]Value{}),
 			typ: Map{AttributeType: String},
 		},
+		"tuple-dynamic": {
+			hex: "9292c40822737472696e6722a568656c6c6f92c40822737472696e6722a5776f726c64",
+			value: NewValue(Tuple{
+				ElementTypes: []Type{String, String},
+			}, []Value{
+				NewValue(String, "hello"),
+				NewValue(String, "world"),
+			}),
+			typ: Tuple{ElementTypes: []Type{DynamicPseudoType, DynamicPseudoType}},
+		},
 		"tuple-string-hello": {
 			hex: "91a568656c6c6f",
 			value: NewValue(Tuple{
@@ -237,6 +331,21 @@ func TestValueFromMsgPack(t *testing.T) {
 				ElementTypes: []Type{},
 			}, []Value{}),
 			typ: Tuple{ElementTypes: []Type{}},
+		},
+		"object-dynamic": {
+			hex: "81a86772656574696e6792c40822737472696e6722a568656c6c6f",
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"greeting": String,
+				},
+			}, map[string]Value{
+				"greeting": NewValue(String, "hello"),
+			}),
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"greeting": DynamicPseudoType,
+				},
+			},
 		},
 		"object-string-hello": {
 			hex: "81a86772656574696e67a568656c6c6f",
@@ -331,6 +440,11 @@ func TestValueFromMsgPack(t *testing.T) {
 		"string-dynamic-null": {
 			hex:   "92c40822737472696e6722c0",
 			value: NewValue(String, nil),
+			typ:   DynamicPseudoType,
+		},
+		"dynamic-null": {
+			hex:   "c0",
+			value: NewValue(DynamicPseudoType, nil),
 			typ:   DynamicPseudoType,
 		},
 		"dynamic-unknown": {

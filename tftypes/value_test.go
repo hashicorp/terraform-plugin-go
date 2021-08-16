@@ -470,6 +470,11 @@ func TestValueIsKnown(t *testing.T) {
 			known:      false,
 			fullyKnown: false,
 		},
+		"dynamic-unknown": {
+			value:      NewValue(DynamicPseudoType, UnknownValue),
+			known:      false,
+			fullyKnown: false,
+		},
 		"list-string-known": {
 			value:      NewValue(List{ElementType: String}, []Value{NewValue(String, "hello")}),
 			known:      true,
@@ -654,6 +659,11 @@ func TestValueIsKnown(t *testing.T) {
 			}),
 			known:      true,
 			fullyKnown: false,
+		},
+		"dynamic-null": {
+			value:      NewValue(DynamicPseudoType, nil),
+			known:      true,
+			fullyKnown: true,
 		},
 		"object-null": {
 			value: NewValue(Object{AttributeTypes: map[string]Type{
@@ -1605,6 +1615,10 @@ func TestValueString(t *testing.T) {
 		"bool-null": {
 			in:       NewValue(Bool, nil),
 			expected: "tftypes.Bool<null>",
+		},
+		"dynamic-null": {
+			in:       NewValue(DynamicPseudoType, nil),
+			expected: "tftypes.DynamicPseudoType<null>",
 		},
 		"map": {
 			in: NewValue(Map{AttributeType: String}, map[string]Value{
