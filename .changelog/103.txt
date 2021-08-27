@@ -1,0 +1,6 @@
+```release-note:breaking-change
+The `tf5server` package's import path is now `github.com/hashicorp/terraform-plugin-go/tfprotov5/tf5server` instead of `github.com/hashicorp/terraform-plugin-go/tfprotov5/server`.
+```
+```release-note:breaking-change
+The `tf6server` package's import path is now `github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server` instead of `github.com/hashicorp/terraform-plugin-go/tfprotov6/server`.
+```
