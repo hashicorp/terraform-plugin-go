@@ -1,0 +1,7 @@
+```release-note:bug
+tftypes: Return error instead of panic when calling `Transform()` with `Value` missing type
+```
+
+```release-note:bug
+tftypes: Return error instead of panic when calling `(Value).Diff()` with either `Value` missing type
+```

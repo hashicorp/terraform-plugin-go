@@ -11,6 +11,14 @@ type AttributePathError struct {
 	err  error
 }
 
+func (a AttributePathError) Equal(o AttributePathError) bool {
+	if !a.Path.Equal(o.Path) {
+		return false
+	}
+
+	return a.err.Error() == o.err.Error()
+}
+
 func (a AttributePathError) Error() string {
 	var path string
 	if len(a.Path.Steps()) > 0 {

@@ -131,9 +131,10 @@ func TestTransform(t *testing.T) {
 	t.Parallel()
 
 	type testCase struct {
-		val   Value
-		f     func(*AttributePath, Value) (Value, error)
-		diffs []ValueDiff
+		val         Value
+		f           func(*AttributePath, Value) (Value, error)
+		diffs       []ValueDiff
+		expectedErr error
 	}
 
 	newValuePointer := func(typ Type, v interface{}) *Value {
@@ -1638,6 +1639,69 @@ func TestTransform(t *testing.T) {
 				},
 			},
 		},
+		"empty:valueMissingTypeError": {
+			val: Value{},
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("bool")
+				if path.Equal(target) {
+					return NewValue(Bool, false), nil
+				}
+				return v, nil
+			},
+			diffs: []ValueDiff{},
+			expectedErr: AttributePathError{
+				Path: NewAttributePath(),
+				err:  fmt.Errorf("invalid transform: value missing type"),
+			},
+		},
+		"string:missingValueTypeError": {
+			val: NewValue(
+				Object{
+					AttributeTypes: map[string]Type{
+						"test": String,
+					},
+				},
+				map[string]Value{
+					"test": NewValue(String, "hello"),
+				},
+			),
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("test")
+				if path.Equal(target) {
+					return Value{}, nil
+				}
+				return v, nil
+			},
+			diffs: []ValueDiff{},
+			expectedErr: AttributePathError{
+				Path: NewAttributePath().WithAttributeName("test"),
+				err:  fmt.Errorf("missing value type"),
+			},
+		},
+		"string:wrongTypeError": {
+			val: NewValue(
+				Object{
+					AttributeTypes: map[string]Type{
+						"test": String,
+					},
+				},
+				map[string]Value{
+					"test": NewValue(String, "hello"),
+				},
+			),
+			f: func(path *AttributePath, v Value) (Value, error) {
+				target := NewAttributePath().WithAttributeName("test")
+				if path.Equal(target) {
+					return NewValue(Bool, false), nil
+				}
+				return v, nil
+			},
+			diffs: []ValueDiff{},
+			expectedErr: AttributePathError{
+				Path: NewAttributePath().WithAttributeName("test"),
+				err:  fmt.Errorf("can't use tftypes.Bool as tftypes.String"),
+			},
+		},
 	}
 
 	for name, testCase := range tests {
@@ -1646,13 +1710,17 @@ func TestTransform(t *testing.T) {
 			t.Parallel()
 
 			gotVal, err := Transform(testCase.val.Copy(), testCase.f)
-			if err != nil {
-				t.Fatalf("unexpected error: %s", err)
+
+			if diff := cmp.Diff(testCase.expectedErr, err); diff != "" {
+				t.Fatalf("Unexpected error (-wanted, +got): %s", diff)
 			}
+
 			diffs, err := testCase.val.Diff(gotVal)
+
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err)
 			}
+
 			wantedDiffs := map[string]ValueDiff{}
 			for _, diff := range testCase.diffs {
 				wantedDiffs[diff.Path.String()] = diff
