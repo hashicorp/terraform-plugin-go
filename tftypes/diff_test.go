@@ -351,6 +351,65 @@ func TestValueDiffEqual(t *testing.T) {
 			},
 			equal: true,
 		},
+		"val1EmptyEqual": {
+			diff1: ValueDiff{
+				Path:   NewAttributePath().WithElementKeyString("foo"),
+				Value1: &Value{},
+				Value2: valuePointer(NewValue(List{
+					ElementType: Bool,
+				}, []Value{
+					NewValue(Bool, true),
+					NewValue(Bool, false),
+				})),
+			},
+			diff2: ValueDiff{
+				Path:   NewAttributePath().WithElementKeyString("foo"),
+				Value1: &Value{},
+				Value2: valuePointer(NewValue(List{
+					ElementType: Bool,
+				}, []Value{
+					NewValue(Bool, true),
+					NewValue(Bool, false),
+				})),
+			},
+			equal: true,
+		},
+		"val2EmptyEqual": {
+			diff1: ValueDiff{
+				Path: NewAttributePath().WithElementKeyString("foo"),
+				Value1: valuePointer(NewValue(List{
+					ElementType: Bool,
+				}, []Value{
+					NewValue(Bool, false),
+					NewValue(Bool, true),
+				})),
+				Value2: &Value{},
+			},
+			diff2: ValueDiff{
+				Path: NewAttributePath().WithElementKeyString("foo"),
+				Value1: valuePointer(NewValue(List{
+					ElementType: Bool,
+				}, []Value{
+					NewValue(Bool, false),
+					NewValue(Bool, true),
+				})),
+				Value2: &Value{},
+			},
+			equal: true,
+		},
+		"allValsEmptyEqual": {
+			diff1: ValueDiff{
+				Path:   NewAttributePath().WithElementKeyString("foo"),
+				Value1: &Value{},
+				Value2: &Value{},
+			},
+			diff2: ValueDiff{
+				Path:   NewAttributePath().WithElementKeyString("foo"),
+				Value1: &Value{},
+				Value2: &Value{},
+			},
+			equal: true,
+		},
 	}
 	for name, test := range tests {
 		name, test := name, test
@@ -378,6 +437,30 @@ func TestValueDiffDiff(t *testing.T) {
 	}
 
 	tests := map[string]testCase{
+		"val1Empty": {
+			val1: Value{},
+			val2: NewValue(String, "bar"),
+			err:  errors.New("cannot diff value missing type"),
+		},
+		"val1EmptyTypeWithValue": {
+			val1: Value{value: "foo"},
+			val2: NewValue(String, "bar"),
+			err:  errors.New("cannot diff value missing type"),
+		},
+		"val2Empty": {
+			val1: NewValue(String, "foo"),
+			val2: Value{},
+			err:  errors.New("cannot diff value missing type"),
+		},
+		"val2EmptyTypeWithValue": {
+			val1: NewValue(String, "foo"),
+			val2: Value{value: "bar"},
+			err:  errors.New("cannot diff value missing type"),
+		},
+		"valsEmptyNoDiff": {
+			val1: Value{},
+			val2: Value{},
+		},
 		"primitiveDiff": {
 			val1: NewValue(String, "foo"),
 			val2: NewValue(String, "bar"),

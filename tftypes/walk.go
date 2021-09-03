@@ -116,6 +116,10 @@ func transform(path *AttributePath, val Value, cb func(*AttributePath, Value) (V
 	var newVal Value
 	ty := val.Type()
 
+	if ty == nil {
+		return val, path.NewError(errors.New("invalid transform: value missing type"))
+	}
+
 	switch {
 	case val.IsNull() || !val.IsKnown():
 		newVal = val
@@ -142,7 +146,10 @@ func transform(path *AttributePath, val Value, cb func(*AttributePath, Value) (V
 				elems = append(elems, newEl)
 				path = path.WithoutLastStep()
 			}
-			newVal = NewValue(ty, elems)
+			newVal, err = newValue(ty, elems)
+			if err != nil {
+				return val, path.NewError(err)
+			}
 		}
 	case ty.Is(Map{}), ty.Is(Object{}):
 		v := map[string]Value{}
@@ -167,7 +174,10 @@ func transform(path *AttributePath, val Value, cb func(*AttributePath, Value) (V
 				elems[k] = newEl
 				path = path.WithoutLastStep()
 			}
-			newVal = NewValue(ty, elems)
+			newVal, err = newValue(ty, elems)
+			if err != nil {
+				return val, path.NewError(err)
+			}
 		}
 	default:
 		newVal = val
@@ -176,7 +186,11 @@ func transform(path *AttributePath, val Value, cb func(*AttributePath, Value) (V
 	if err != nil {
 		return res, path.NewError(err)
 	}
-	if !newVal.Type().UsableAs(ty) {
+	newTy := newVal.Type()
+	if newTy == nil {
+		return val, path.NewError(errors.New("invalid transform: new value missing type"))
+	}
+	if !newTy.UsableAs(ty) {
 		return val, path.NewError(errors.New("invalid transform: value changed type"))
 	}
 	return res, err
