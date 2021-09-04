@@ -41,7 +41,7 @@ func TestTypeJSON(t *testing.T) {
 		},
 		"map-string": {
 			json: `["map","string"]`,
-			typ:  Map{AttributeType: String},
+			typ:  Map{ElementType: String},
 		},
 		"object-string_number_bool": {
 			json: `["object",{"foo":"string","bar":"number","baz":"bool"}]`,

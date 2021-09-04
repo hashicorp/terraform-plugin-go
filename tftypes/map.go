@@ -8,7 +8,7 @@ import (
 // Map is a Terraform type representing an unordered collection of elements,
 // all of the same type, each identifiable with a unique string key.
 type Map struct {
-	AttributeType Type
+	ElementType Type
 
 	// used to make this type uncomparable
 	// see https://golang.org/ref/spec#Comparison_operators
@@ -17,26 +17,26 @@ type Map struct {
 }
 
 // Equal returns true if the two Maps are exactly equal. Unlike Is, passing in
-// a Map with no AttributeType will always return false.
+// a Map with no ElementType will always return false.
 func (m Map) Equal(o Type) bool {
 	v, ok := o.(Map)
 	if !ok {
 		return false
 	}
-	if v.AttributeType == nil || m.AttributeType == nil {
+	if v.ElementType == nil || m.ElementType == nil {
 		// when doing exact comparisons, we can't compare types that
 		// don't have element types set, so we just consider them not
 		// equal
 		return false
 	}
-	return m.AttributeType.Equal(v.AttributeType)
+	return m.ElementType.Equal(v.ElementType)
 }
 
 // UsableAs returns whether the two Maps are type compatible.
 //
 // If the other type is DynamicPseudoType, it will return true.
 // If the other type is not a Map, it will return false.
-// If the other Map does not have a type compatible AttributeType, it will
+// If the other Map does not have a type compatible ElementType, it will
 // return false.
 func (m Map) UsableAs(o Type) bool {
 	if o.Is(DynamicPseudoType) {
@@ -46,18 +46,18 @@ func (m Map) UsableAs(o Type) bool {
 	if !ok {
 		return false
 	}
-	return m.AttributeType.UsableAs(v.AttributeType)
+	return m.ElementType.UsableAs(v.ElementType)
 }
 
 // Is returns whether `t` is a Map type or not. It does not perform any
-// AttributeType checks.
+// ElementType checks.
 func (m Map) Is(t Type) bool {
 	_, ok := t.(Map)
 	return ok
 }
 
 func (m Map) String() string {
-	return "tftypes.Map[" + m.AttributeType.String() + "]"
+	return "tftypes.Map[" + m.ElementType.String() + "]"
 }
 
 func (m Map) private() {}
@@ -67,13 +67,13 @@ func (m Map) supportedGoTypes() []string {
 }
 
 // MarshalJSON returns a JSON representation of the full type signature of `m`,
-// including its AttributeType.
+// including its ElementType.
 //
 // Deprecated: this is not meant to be called by third-party code.
 func (m Map) MarshalJSON() ([]byte, error) {
-	attributeType, err := m.AttributeType.MarshalJSON()
+	attributeType, err := m.ElementType.MarshalJSON()
 	if err != nil {
-		return nil, fmt.Errorf("error marshaling tftypes.Map's attribute type %T to JSON: %w", m.AttributeType, err)
+		return nil, fmt.Errorf("error marshaling tftypes.Map's attribute type %T to JSON: %w", m.ElementType, err)
 	}
 	return []byte(`["map",` + string(attributeType) + `]`), nil
 }
@@ -102,7 +102,7 @@ func valueFromMap(typ Type, in interface{}) (Value, error) {
 			}
 		}
 		return Value{
-			typ:   Map{AttributeType: typ},
+			typ:   Map{ElementType: typ},
 			value: value,
 		}, nil
 	default:

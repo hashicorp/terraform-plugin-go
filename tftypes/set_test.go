@@ -219,7 +219,7 @@ func TestSetUsableAs(t *testing.T) {
 		},
 		"set-string-map": {
 			set:      Set{ElementType: String},
-			other:    Map{AttributeType: String},
+			other:    Map{ElementType: String},
 			expected: false,
 		},
 		"set-string-object": {

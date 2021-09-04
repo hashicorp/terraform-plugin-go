@@ -328,7 +328,7 @@ func newValue(t Type, val interface{}) (Value, error) {
 		}
 		return v, nil
 	case t.Is(Map{}):
-		v, err := valueFromMap(t.(Map).AttributeType, val)
+		v, err := valueFromMap(t.(Map).ElementType, val)
 		if err != nil {
 			return Value{}, err
 		}

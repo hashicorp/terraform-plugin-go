@@ -144,7 +144,7 @@ func TestValueAs(t *testing.T) {
 			expected: boolPointerPointer(boolPointer(true)),
 		},
 		"map": {
-			in: NewValue(Map{AttributeType: String}, map[string]Value{
+			in: NewValue(Map{ElementType: String}, map[string]Value{
 				"hello": NewValue(String, "world"),
 			}),
 			as: mapPointer(map[string]Value{}),
@@ -153,14 +153,14 @@ func TestValueAs(t *testing.T) {
 			}),
 		},
 		"map-null": {
-			in: NewValue(Map{AttributeType: String}, nil),
+			in: NewValue(Map{ElementType: String}, nil),
 			as: mapPointer(map[string]Value{
 				"a": NewValue(String, "this should be removed"),
 			}),
 			expected: mapPointer(map[string]Value{}),
 		},
 		"map-pointer": {
-			in: NewValue(Map{AttributeType: String}, map[string]Value{
+			in: NewValue(Map{ElementType: String}, map[string]Value{
 				"hello": NewValue(String, "world"),
 			}),
 			as: mapPointerPointer(mapPointer(map[string]Value{})),
@@ -169,14 +169,14 @@ func TestValueAs(t *testing.T) {
 			})),
 		},
 		"map-pointer-null": {
-			in: NewValue(Map{AttributeType: String}, nil),
+			in: NewValue(Map{ElementType: String}, nil),
 			as: mapPointerPointer(mapPointer(map[string]Value{
 				"a": NewValue(String, "this should be removed"),
 			})),
 			expected: mapPointerPointer(nil),
 		},
 		"uninstantiated-map-pointer": {
-			in: NewValue(Map{AttributeType: String}, map[string]Value{
+			in: NewValue(Map{ElementType: String}, map[string]Value{
 				"hello": NewValue(String, "world"),
 			}),
 			as: mapPointerPointer(nil),
@@ -506,17 +506,17 @@ func TestValueIsKnown(t *testing.T) {
 			fullyKnown: false,
 		},
 		"map-string-known": {
-			value:      NewValue(Map{AttributeType: String}, map[string]Value{"foo": NewValue(String, "hello")}),
+			value:      NewValue(Map{ElementType: String}, map[string]Value{"foo": NewValue(String, "hello")}),
 			known:      true,
 			fullyKnown: true,
 		},
 		"map-string-partially-known": {
-			value:      NewValue(Map{AttributeType: String}, map[string]Value{"foo": NewValue(String, UnknownValue)}),
+			value:      NewValue(Map{ElementType: String}, map[string]Value{"foo": NewValue(String, UnknownValue)}),
 			known:      true,
 			fullyKnown: false,
 		},
 		"map-string-unknown": {
-			value:      NewValue(Map{AttributeType: String}, UnknownValue),
+			value:      NewValue(Map{ElementType: String}, UnknownValue),
 			known:      false,
 			fullyKnown: false,
 		},
@@ -588,29 +588,29 @@ func TestValueIsKnown(t *testing.T) {
 			value: NewValue(Object{AttributeTypes: map[string]Type{
 				"foo": Tuple{ElementTypes: []Type{
 					String, Bool, List{ElementType: Map{
-						AttributeType: String,
+						ElementType: String,
 					}},
 				}},
 			}}, map[string]Value{
 				"foo": NewValue(Tuple{ElementTypes: []Type{
 					String, Bool, List{ElementType: Map{
-						AttributeType: String,
+						ElementType: String,
 					}},
 				}}, []Value{
 					NewValue(String, "hello"),
 					NewValue(Bool, false),
 					NewValue(List{ElementType: Map{
-						AttributeType: String,
+						ElementType: String,
 					}}, []Value{
 						NewValue(Map{
-							AttributeType: String,
+							ElementType: String,
 						}, map[string]Value{
 							"red":    NewValue(String, "orange"),
 							"yellow": NewValue(String, "green"),
 							"blue":   NewValue(String, nil),
 						}),
 						NewValue(Map{
-							AttributeType: String,
+							ElementType: String,
 						}, map[string]Value{
 							"a": NewValue(String, "apple"),
 							"b": NewValue(String, "banana"),
@@ -626,29 +626,29 @@ func TestValueIsKnown(t *testing.T) {
 			value: NewValue(Object{AttributeTypes: map[string]Type{
 				"foo": Tuple{ElementTypes: []Type{
 					String, Bool, List{ElementType: Map{
-						AttributeType: String,
+						ElementType: String,
 					}},
 				}},
 			}}, map[string]Value{
 				"foo": NewValue(Tuple{ElementTypes: []Type{
 					String, Bool, List{ElementType: Map{
-						AttributeType: String,
+						ElementType: String,
 					}},
 				}}, []Value{
 					NewValue(String, "hello"),
 					NewValue(Bool, false),
 					NewValue(List{ElementType: Map{
-						AttributeType: String,
+						ElementType: String,
 					}}, []Value{
 						NewValue(Map{
-							AttributeType: String,
+							ElementType: String,
 						}, map[string]Value{
 							"red":    NewValue(String, "orange"),
 							"yellow": NewValue(String, "green"),
 							"blue":   NewValue(String, nil),
 						}),
 						NewValue(Map{
-							AttributeType: String,
+							ElementType: String,
 						}, map[string]Value{
 							"a": NewValue(String, "apple"),
 							"b": NewValue(String, UnknownValue),
@@ -673,7 +673,7 @@ func TestValueIsKnown(t *testing.T) {
 			fullyKnown: true,
 		},
 		"map-null": {
-			value:      NewValue(Map{AttributeType: String}, nil),
+			value:      NewValue(Map{ElementType: String}, nil),
 			known:      true,
 			fullyKnown: true,
 		},
@@ -916,12 +916,12 @@ func TestValueEqual(t *testing.T) {
 			equal: false,
 		},
 		"mapEqual": {
-			val1: NewValue(Map{AttributeType: Number}, map[string]Value{
+			val1: NewValue(Map{ElementType: Number}, map[string]Value{
 				"one":   NewValue(Number, big.NewFloat(1)),
 				"two":   NewValue(Number, big.NewFloat(2)),
 				"three": NewValue(Number, big.NewFloat(3)),
 			}),
-			val2: NewValue(Map{AttributeType: Number}, map[string]Value{
+			val2: NewValue(Map{ElementType: Number}, map[string]Value{
 				"one":   NewValue(Number, big.NewFloat(1)),
 				"two":   NewValue(Number, big.NewFloat(2)),
 				"three": NewValue(Number, big.NewFloat(3)),
@@ -929,24 +929,24 @@ func TestValueEqual(t *testing.T) {
 			equal: true,
 		},
 		"mapDiffLength": {
-			val1: NewValue(Map{AttributeType: Number}, map[string]Value{
+			val1: NewValue(Map{ElementType: Number}, map[string]Value{
 				"one":   NewValue(Number, big.NewFloat(1)),
 				"two":   NewValue(Number, big.NewFloat(2)),
 				"three": NewValue(Number, big.NewFloat(3)),
 			}),
-			val2: NewValue(Map{AttributeType: Number}, map[string]Value{
+			val2: NewValue(Map{ElementType: Number}, map[string]Value{
 				"one":   NewValue(Number, big.NewFloat(1)),
 				"three": NewValue(Number, big.NewFloat(3)),
 			}),
 			equal: false,
 		},
 		"mapDiffValue": {
-			val1: NewValue(Map{AttributeType: Number}, map[string]Value{
+			val1: NewValue(Map{ElementType: Number}, map[string]Value{
 				"one":   NewValue(Number, big.NewFloat(1)),
 				"two":   NewValue(Number, big.NewFloat(2)),
 				"three": NewValue(Number, big.NewFloat(3)),
 			}),
-			val2: NewValue(Map{AttributeType: Number}, map[string]Value{
+			val2: NewValue(Map{ElementType: Number}, map[string]Value{
 				"one":   NewValue(Number, big.NewFloat(1)),
 				"two":   NewValue(Number, big.NewFloat(2)),
 				"three": NewValue(Number, big.NewFloat(4)),
@@ -954,12 +954,12 @@ func TestValueEqual(t *testing.T) {
 			equal: false,
 		},
 		"mapDiffKeys": {
-			val1: NewValue(Map{AttributeType: Number}, map[string]Value{
+			val1: NewValue(Map{ElementType: Number}, map[string]Value{
 				"one":   NewValue(Number, big.NewFloat(1)),
 				"two":   NewValue(Number, big.NewFloat(2)),
 				"three": NewValue(Number, big.NewFloat(3)),
 			}),
-			val2: NewValue(Map{AttributeType: Number}, map[string]Value{
+			val2: NewValue(Map{ElementType: Number}, map[string]Value{
 				"one":  NewValue(Number, big.NewFloat(1)),
 				"two":  NewValue(Number, big.NewFloat(2)),
 				"four": NewValue(Number, big.NewFloat(3)),
@@ -1410,7 +1410,7 @@ func TestValueApplyTerraform5AttributePathStep(t *testing.T) {
 			err:  ErrInvalidStep,
 		},
 		"map_attr": {
-			val: NewValue(Map{AttributeType: Number}, map[string]Value{
+			val: NewValue(Map{ElementType: Number}, map[string]Value{
 				"one":   NewValue(Number, big.NewFloat(1)),
 				"two":   NewValue(Number, big.NewFloat(2)),
 				"three": NewValue(Number, big.NewFloat(3)),
@@ -1419,7 +1419,7 @@ func TestValueApplyTerraform5AttributePathStep(t *testing.T) {
 			err:  ErrInvalidStep,
 		},
 		"map_eki": {
-			val: NewValue(Map{AttributeType: Number}, map[string]Value{
+			val: NewValue(Map{ElementType: Number}, map[string]Value{
 				"one":   NewValue(Number, big.NewFloat(1)),
 				"two":   NewValue(Number, big.NewFloat(2)),
 				"three": NewValue(Number, big.NewFloat(3)),
@@ -1428,7 +1428,7 @@ func TestValueApplyTerraform5AttributePathStep(t *testing.T) {
 			err:  ErrInvalidStep,
 		},
 		"map_eks": {
-			val: NewValue(Map{AttributeType: Number}, map[string]Value{
+			val: NewValue(Map{ElementType: Number}, map[string]Value{
 				"one":   NewValue(Number, big.NewFloat(1)),
 				"two":   NewValue(Number, big.NewFloat(2)),
 				"three": NewValue(Number, big.NewFloat(3)),
@@ -1437,7 +1437,7 @@ func TestValueApplyTerraform5AttributePathStep(t *testing.T) {
 			res:  NewValue(Number, big.NewFloat(2)),
 		},
 		"map_eks_invalid_key": {
-			val: NewValue(Map{AttributeType: Number}, map[string]Value{
+			val: NewValue(Map{ElementType: Number}, map[string]Value{
 				"one":   NewValue(Number, big.NewFloat(1)),
 				"two":   NewValue(Number, big.NewFloat(2)),
 				"three": NewValue(Number, big.NewFloat(3)),
@@ -1446,7 +1446,7 @@ func TestValueApplyTerraform5AttributePathStep(t *testing.T) {
 			err:  ErrInvalidStep,
 		},
 		"map_ekv": {
-			val: NewValue(Map{AttributeType: Number}, map[string]Value{
+			val: NewValue(Map{ElementType: Number}, map[string]Value{
 				"one":   NewValue(Number, big.NewFloat(1)),
 				"two":   NewValue(Number, big.NewFloat(2)),
 				"three": NewValue(Number, big.NewFloat(3)),
@@ -1499,7 +1499,7 @@ func TestValueWalkAttributePath(t *testing.T) {
 			expected: NewValue(String, "bar"),
 		},
 		"map": {
-			val: NewValue(Map{AttributeType: String}, map[string]Value{
+			val: NewValue(Map{ElementType: String}, map[string]Value{
 				"a": NewValue(String, "foo"),
 				"b": NewValue(String, "bar"),
 			}),
@@ -1621,13 +1621,13 @@ func TestValueString(t *testing.T) {
 			expected: "tftypes.DynamicPseudoType<null>",
 		},
 		"map": {
-			in: NewValue(Map{AttributeType: String}, map[string]Value{
+			in: NewValue(Map{ElementType: String}, map[string]Value{
 				"hello": NewValue(String, "world"),
 			}),
 			expected: `tftypes.Map[tftypes.String]<"hello":tftypes.String<"world">>`,
 		},
 		"map-null": {
-			in:       NewValue(Map{AttributeType: String}, nil),
+			in:       NewValue(Map{ElementType: String}, nil),
 			expected: "tftypes.Map[tftypes.String]<null>",
 		},
 		"list": {

@@ -143,7 +143,7 @@ func (t *jsonType) UnmarshalJSON(buf []byte) error {
 				return err
 			}
 			t.t = Map{
-				AttributeType: ety.t,
+				ElementType: ety.t,
 			}
 		case "set":
 			var ety jsonType

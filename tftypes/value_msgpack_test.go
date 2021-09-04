@@ -112,7 +112,7 @@ func TestValueFromMsgPack(t *testing.T) {
 		"dynamic-map": {
 			hex: "92c4105b226d6170222c22737472696e67225d81a568656c6c6fa568656c6c6f",
 			value: NewValue(Map{
-				AttributeType: String,
+				ElementType: String,
 			}, map[string]Value{
 				"hello": NewValue(String, "hello"),
 			}),
@@ -248,45 +248,45 @@ func TestValueFromMsgPack(t *testing.T) {
 		"map-dynamic": {
 			hex: "81a86772656574696e6792c40822737472696e6722a568656c6c6f",
 			value: NewValue(Map{
-				AttributeType: String,
+				ElementType: String,
 			}, map[string]Value{
 				"greeting": NewValue(String, "hello"),
 			}),
-			typ: Map{AttributeType: DynamicPseudoType},
+			typ: Map{ElementType: DynamicPseudoType},
 		},
 		"map-string-hello": {
 			hex: "81a86772656574696e67a568656c6c6f",
 			value: NewValue(Map{
-				AttributeType: String,
+				ElementType: String,
 			}, map[string]Value{
 				"greeting": NewValue(String, "hello"),
 			}),
-			typ: Map{AttributeType: String},
+			typ: Map{ElementType: String},
 		},
 		"map-string-unknown": {
 			hex: "81a86772656574696e67d40000",
 			value: NewValue(Map{
-				AttributeType: String,
+				ElementType: String,
 			}, map[string]Value{
 				"greeting": NewValue(String, UnknownValue),
 			}),
-			typ: Map{AttributeType: String},
+			typ: Map{ElementType: String},
 		},
 		"map-string-null": {
 			hex: "81a86772656574696e67c0",
 			value: NewValue(Map{
-				AttributeType: String,
+				ElementType: String,
 			}, map[string]Value{
 				"greeting": NewValue(String, nil),
 			}),
-			typ: Map{AttributeType: String},
+			typ: Map{ElementType: String},
 		},
 		"map-string-empty": {
 			hex: "80",
 			value: NewValue(Map{
-				AttributeType: String,
+				ElementType: String,
 			}, map[string]Value{}),
-			typ: Map{AttributeType: String},
+			typ: Map{ElementType: String},
 		},
 		"tuple-dynamic": {
 			hex: "9292c40822737472696e6722a568656c6c6f92c40822737472696e6722a5776f726c64",

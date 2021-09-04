@@ -15,13 +15,13 @@ func Test_newValue_map(t *testing.T) {
 	}
 	tests := map[string]testCase{
 		"normal": {
-			typ: Map{AttributeType: String},
+			typ: Map{ElementType: String},
 			val: map[string]Value{
 				"a": NewValue(String, "hello"),
 				"b": NewValue(String, "world"),
 			},
 			expected: Value{
-				typ: Map{AttributeType: String},
+				typ: Map{ElementType: String},
 				value: map[string]Value{
 					"a": {
 						typ:   String,
@@ -36,13 +36,13 @@ func Test_newValue_map(t *testing.T) {
 			err: nil,
 		},
 		"dynamic": {
-			typ: Map{AttributeType: DynamicPseudoType},
+			typ: Map{ElementType: DynamicPseudoType},
 			val: map[string]Value{
 				"a": NewValue(String, "hello"),
 				"b": NewValue(String, "world"),
 			},
 			expected: Value{
-				typ: Map{AttributeType: DynamicPseudoType},
+				typ: Map{ElementType: DynamicPseudoType},
 				value: map[string]Value{
 					"a": {
 						typ:   String,
@@ -57,7 +57,7 @@ func Test_newValue_map(t *testing.T) {
 			err: nil,
 		},
 		"dynamic-different-types": {
-			typ: Map{AttributeType: DynamicPseudoType},
+			typ: Map{ElementType: DynamicPseudoType},
 			val: map[string]Value{
 				"a": NewValue(String, "hello"),
 				"b": NewValue(Number, 123),
@@ -65,7 +65,7 @@ func Test_newValue_map(t *testing.T) {
 			err: regexp.MustCompile(`maps must only contain one type of element, saw tftypes.String and tftypes.Number`),
 		},
 		"wrong-type": {
-			typ: Map{AttributeType: String},
+			typ: Map{ElementType: String},
 			val: map[string]Value{
 				"a": NewValue(String, "foo"),
 				"b": NewValue(Number, 123),

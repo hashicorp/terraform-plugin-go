@@ -122,7 +122,7 @@ func msgpackUnmarshal(dec *msgpack.Decoder, typ Type, path *AttributePath) (Valu
 	case typ.Is(Set{}):
 		return msgpackUnmarshalSet(dec, typ.(Set).ElementType, path)
 	case typ.Is(Map{}):
-		return msgpackUnmarshalMap(dec, typ.(Map).AttributeType, path)
+		return msgpackUnmarshalMap(dec, typ.(Map).ElementType, path)
 	case typ.Is(Tuple{}):
 		return msgpackUnmarshalTuple(dec, typ.(Tuple).ElementTypes, path)
 	case typ.Is(Object{}):
@@ -217,11 +217,11 @@ func msgpackUnmarshalMap(dec *msgpack.Decoder, typ Type, path *AttributePath) (V
 	switch {
 	case length < 0:
 		return NewValue(Map{
-			AttributeType: typ,
+			ElementType: typ,
 		}, nil), nil
 	case length == 0:
 		return NewValue(Map{
-			AttributeType: typ,
+			ElementType: typ,
 		}, map[string]Value{}), nil
 	}
 
@@ -256,7 +256,7 @@ func msgpackUnmarshalMap(dec *msgpack.Decoder, typ Type, path *AttributePath) (V
 	}
 
 	return NewValue(Map{
-		AttributeType: elTyp,
+		ElementType: elTyp,
 	}, vals), nil
 }
 
@@ -529,7 +529,7 @@ func marshalMsgPackMap(val Value, typ Type, p *AttributePath, enc *msgpack.Encod
 		if err != nil {
 			return p.NewErrorf("error encoding map key: %w", err)
 		}
-		err = marshalMsgPack(v, typ.(Map).AttributeType, p, enc)
+		err = marshalMsgPack(v, typ.(Map).ElementType, p, enc)
 		if err != nil {
 			return err
 		}

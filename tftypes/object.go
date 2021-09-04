@@ -85,7 +85,7 @@ func (o Object) Equal(other Type) bool {
 // If the other type is not a Object, it will return false.
 // If the other Object does not have matching AttributeTypes length, it will
 // return false.
-// If the other Object does not have a type compatible AttributeType for every
+// If the other Object does not have a type compatible ElementType for every
 // nested attribute, it will return false.
 //
 // If the current type contains OptionalAttributes, it will panic.
