@@ -172,31 +172,31 @@ func TestValueFromJSON(t *testing.T) {
 		// Maps
 		"map-empty": {
 			value: NewValue(Map{
-				AttributeType: Bool,
+				ElementType: Bool,
 			}, map[string]Value{}),
 			typ: Map{
-				AttributeType: Bool,
+				ElementType: Bool,
 			},
 			json: `{}`,
 		},
 		"map-of-bools": {
 			value: NewValue(Map{
-				AttributeType: Bool,
+				ElementType: Bool,
 			}, map[string]Value{
 				"yes": NewValue(Bool, true),
 				"no":  NewValue(Bool, false),
 			}),
 			typ: Map{
-				AttributeType: Bool,
+				ElementType: Bool,
 			},
 			json: `{"no":false,"yes":true}`,
 		},
 		"map-null": {
 			value: NewValue(Map{
-				AttributeType: Bool,
+				ElementType: Bool,
 			}, nil),
 			typ: Map{
-				AttributeType: Bool,
+				ElementType: Bool,
 			},
 			json: `null`,
 		},
@@ -314,7 +314,7 @@ func TestValueFromJSON(t *testing.T) {
 		},
 		"dynamic-map-of-bools": {
 			value: NewValue(Map{
-				AttributeType: Bool,
+				ElementType: Bool,
 			}, map[string]Value{
 				"true":  NewValue(Bool, true),
 				"false": NewValue(Bool, false),
@@ -324,13 +324,13 @@ func TestValueFromJSON(t *testing.T) {
 		},
 		"map-of-dynamic-bools": {
 			value: NewValue(Map{
-				AttributeType: Bool,
+				ElementType: Bool,
 			}, map[string]Value{
 				"true":  NewValue(Bool, true),
 				"false": NewValue(Bool, false),
 			}),
 			typ: Map{
-				AttributeType: DynamicPseudoType,
+				ElementType: DynamicPseudoType,
 			},
 			json: `{"true":{"value":true,"type":"bool"},"false":{"value":false,"type":"bool"}}`,
 		},

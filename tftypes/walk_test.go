@@ -43,12 +43,12 @@ func TestWalk(t *testing.T) {
 			"set_empty":    Set{ElementType: Bool},
 			"tuple":        Tuple{ElementTypes: []Type{Bool}},
 			"tuple_empty":  Tuple{ElementTypes: []Type{}},
-			"map":          Map{AttributeType: Bool},
-			"map_empty":    Map{AttributeType: Bool},
+			"map":          Map{ElementType: Bool},
+			"map_empty":    Map{ElementType: Bool},
 			"object":       Object{AttributeTypes: map[string]Type{"true": Bool}},
 			"object_empty": Object{AttributeTypes: map[string]Type{}},
 			"null":         List{ElementType: String},
-			"unknown":      Map{AttributeType: Bool},
+			"unknown":      Map{ElementType: Bool},
 		},
 	}
 	listContent := []Value{NewValue(Bool, true)}
@@ -1038,12 +1038,12 @@ func TestTransform(t *testing.T) {
 			val: NewValue(
 				Object{
 					AttributeTypes: map[string]Type{
-						"map": Map{AttributeType: Bool},
+						"map": Map{ElementType: Bool},
 					},
 				},
 				map[string]Value{
 					"map": NewValue(
-						Map{AttributeType: Bool},
+						Map{ElementType: Bool},
 						map[string]Value{
 							"true": NewValue(Bool, true),
 						},
@@ -1053,17 +1053,17 @@ func TestTransform(t *testing.T) {
 			f: func(path *AttributePath, v Value) (Value, error) {
 				target := NewAttributePath().WithAttributeName("map")
 				if path.Equal(target) {
-					return NewValue(Map{AttributeType: Bool}, nil), nil
+					return NewValue(Map{ElementType: Bool}, nil), nil
 				}
 				return v, nil
 			},
 			diffs: []ValueDiff{
 				{
 					Path: NewAttributePath().WithAttributeName("map"),
-					Value1: newValuePointer(Map{AttributeType: Bool}, map[string]Value{
+					Value1: newValuePointer(Map{ElementType: Bool}, map[string]Value{
 						"true": NewValue(Bool, true),
 					}),
-					Value2: newValuePointer(Map{AttributeType: Bool}, nil),
+					Value2: newValuePointer(Map{ElementType: Bool}, nil),
 				},
 				{
 					Path:   NewAttributePath().WithAttributeName("map").WithElementKeyString("true"),
@@ -1076,12 +1076,12 @@ func TestTransform(t *testing.T) {
 			val: NewValue(
 				Object{
 					AttributeTypes: map[string]Type{
-						"map": Map{AttributeType: Bool},
+						"map": Map{ElementType: Bool},
 					},
 				},
 				map[string]Value{
 					"map": NewValue(
-						Map{AttributeType: Bool},
+						Map{ElementType: Bool},
 						map[string]Value{
 							"true": NewValue(Bool, true),
 						},
@@ -1091,17 +1091,17 @@ func TestTransform(t *testing.T) {
 			f: func(path *AttributePath, v Value) (Value, error) {
 				target := NewAttributePath().WithAttributeName("map")
 				if path.Equal(target) {
-					return NewValue(Map{AttributeType: Bool}, UnknownValue), nil
+					return NewValue(Map{ElementType: Bool}, UnknownValue), nil
 				}
 				return v, nil
 			},
 			diffs: []ValueDiff{
 				{
 					Path: NewAttributePath().WithAttributeName("map"),
-					Value1: newValuePointer(Map{AttributeType: Bool}, map[string]Value{
+					Value1: newValuePointer(Map{ElementType: Bool}, map[string]Value{
 						"true": NewValue(Bool, true),
 					}),
-					Value2: newValuePointer(Map{AttributeType: Bool}, UnknownValue),
+					Value2: newValuePointer(Map{ElementType: Bool}, UnknownValue),
 				},
 				{
 					Path:   NewAttributePath().WithAttributeName("map").WithElementKeyString("true"),
@@ -1114,12 +1114,12 @@ func TestTransform(t *testing.T) {
 			val: NewValue(
 				Object{
 					AttributeTypes: map[string]Type{
-						"map": Map{AttributeType: Bool},
+						"map": Map{ElementType: Bool},
 					},
 				},
 				map[string]Value{
 					"map": NewValue(
-						Map{AttributeType: Bool},
+						Map{ElementType: Bool},
 						map[string]Value{
 							"true": NewValue(Bool, true),
 						},
@@ -1145,12 +1145,12 @@ func TestTransform(t *testing.T) {
 			val: NewValue(
 				Object{
 					AttributeTypes: map[string]Type{
-						"map": Map{AttributeType: Bool},
+						"map": Map{ElementType: Bool},
 					},
 				},
 				map[string]Value{
 					"map": NewValue(
-						Map{AttributeType: Bool},
+						Map{ElementType: Bool},
 						map[string]Value{
 							"true": NewValue(Bool, true),
 						},
@@ -1176,12 +1176,12 @@ func TestTransform(t *testing.T) {
 			val: NewValue(
 				Object{
 					AttributeTypes: map[string]Type{
-						"map": Map{AttributeType: Bool},
+						"map": Map{ElementType: Bool},
 					},
 				},
 				map[string]Value{
 					"map": NewValue(
-						Map{AttributeType: Bool},
+						Map{ElementType: Bool},
 						map[string]Value{
 							"true": NewValue(Bool, true),
 						},
@@ -1207,12 +1207,12 @@ func TestTransform(t *testing.T) {
 			val: NewValue(
 				Object{
 					AttributeTypes: map[string]Type{
-						"map": Map{AttributeType: Bool},
+						"map": Map{ElementType: Bool},
 					},
 				},
 				map[string]Value{
 					"map": NewValue(
-						Map{AttributeType: Bool},
+						Map{ElementType: Bool},
 						map[string]Value{
 							"true": NewValue(Bool, true),
 						},
@@ -1222,7 +1222,7 @@ func TestTransform(t *testing.T) {
 			f: func(path *AttributePath, v Value) (Value, error) {
 				target := NewAttributePath().WithAttributeName("map")
 				if path.Equal(target) {
-					return NewValue(Map{AttributeType: Bool}, map[string]Value{
+					return NewValue(Map{ElementType: Bool}, map[string]Value{
 						"true":  NewValue(Bool, true),
 						"false": NewValue(Bool, false),
 					}), nil
@@ -1232,10 +1232,10 @@ func TestTransform(t *testing.T) {
 			diffs: []ValueDiff{
 				{
 					Path: NewAttributePath().WithAttributeName("map"),
-					Value1: newValuePointer(Map{AttributeType: Bool}, map[string]Value{
+					Value1: newValuePointer(Map{ElementType: Bool}, map[string]Value{
 						"true": NewValue(Bool, true),
 					}),
-					Value2: newValuePointer(Map{AttributeType: Bool}, map[string]Value{
+					Value2: newValuePointer(Map{ElementType: Bool}, map[string]Value{
 						"true":  NewValue(Bool, true),
 						"false": NewValue(Bool, false),
 					}),
@@ -1251,12 +1251,12 @@ func TestTransform(t *testing.T) {
 			val: NewValue(
 				Object{
 					AttributeTypes: map[string]Type{
-						"map": Map{AttributeType: Bool},
+						"map": Map{ElementType: Bool},
 					},
 				},
 				map[string]Value{
 					"map": NewValue(
-						Map{AttributeType: Bool},
+						Map{ElementType: Bool},
 						map[string]Value{
 							"true": NewValue(Bool, true),
 						},
@@ -1266,17 +1266,17 @@ func TestTransform(t *testing.T) {
 			f: func(path *AttributePath, v Value) (Value, error) {
 				target := NewAttributePath().WithAttributeName("map")
 				if path.Equal(target) {
-					return NewValue(Map{AttributeType: Bool}, map[string]Value{}), nil
+					return NewValue(Map{ElementType: Bool}, map[string]Value{}), nil
 				}
 				return v, nil
 			},
 			diffs: []ValueDiff{
 				{
 					Path: NewAttributePath().WithAttributeName("map"),
-					Value1: newValuePointer(Map{AttributeType: Bool}, map[string]Value{
+					Value1: newValuePointer(Map{ElementType: Bool}, map[string]Value{
 						"true": NewValue(Bool, true),
 					}),
-					Value2: newValuePointer(Map{AttributeType: Bool}, map[string]Value{}),
+					Value2: newValuePointer(Map{ElementType: Bool}, map[string]Value{}),
 				},
 				{
 					Path:   NewAttributePath().WithAttributeName("map").WithElementKeyString("true"),
@@ -1289,12 +1289,12 @@ func TestTransform(t *testing.T) {
 			val: NewValue(
 				Object{
 					AttributeTypes: map[string]Type{
-						"map_empty": Map{AttributeType: Bool},
+						"map_empty": Map{ElementType: Bool},
 					},
 				},
 				map[string]Value{
 					"map_empty": NewValue(
-						Map{AttributeType: Bool},
+						Map{ElementType: Bool},
 						map[string]Value{},
 					),
 				},
@@ -1302,7 +1302,7 @@ func TestTransform(t *testing.T) {
 			f: func(path *AttributePath, v Value) (Value, error) {
 				target := NewAttributePath().WithAttributeName("map_empty")
 				if path.Equal(target) {
-					return NewValue(Map{AttributeType: Bool}, map[string]Value{
+					return NewValue(Map{ElementType: Bool}, map[string]Value{
 						"foo": NewValue(Bool, true),
 					}), nil
 				}
@@ -1311,8 +1311,8 @@ func TestTransform(t *testing.T) {
 			diffs: []ValueDiff{
 				{
 					Path:   NewAttributePath().WithAttributeName("map_empty"),
-					Value1: newValuePointer(Map{AttributeType: Bool}, map[string]Value{}),
-					Value2: newValuePointer(Map{AttributeType: Bool}, map[string]Value{
+					Value1: newValuePointer(Map{ElementType: Bool}, map[string]Value{}),
+					Value2: newValuePointer(Map{ElementType: Bool}, map[string]Value{
 						"foo": NewValue(Bool, true),
 					}),
 				},
@@ -1547,25 +1547,25 @@ func TestTransform(t *testing.T) {
 			val: NewValue(
 				Object{
 					AttributeTypes: map[string]Type{
-						"unknown": Map{AttributeType: Bool},
+						"unknown": Map{ElementType: Bool},
 					},
 				},
 				map[string]Value{
-					"unknown": NewValue(Map{AttributeType: Bool}, UnknownValue),
+					"unknown": NewValue(Map{ElementType: Bool}, UnknownValue),
 				},
 			),
 			f: func(path *AttributePath, v Value) (Value, error) {
 				target := NewAttributePath().WithAttributeName("unknown")
 				if path.Equal(target) {
-					return NewValue(Map{AttributeType: Bool}, nil), nil
+					return NewValue(Map{ElementType: Bool}, nil), nil
 				}
 				return v, nil
 			},
 			diffs: []ValueDiff{
 				{
 					Path:   NewAttributePath().WithAttributeName("unknown"),
-					Value1: newValuePointer(Map{AttributeType: Bool}, UnknownValue),
-					Value2: newValuePointer(Map{AttributeType: Bool}, nil),
+					Value1: newValuePointer(Map{ElementType: Bool}, UnknownValue),
+					Value2: newValuePointer(Map{ElementType: Bool}, nil),
 				},
 			},
 		},
@@ -1573,17 +1573,17 @@ func TestTransform(t *testing.T) {
 			val: NewValue(
 				Object{
 					AttributeTypes: map[string]Type{
-						"unknown": Map{AttributeType: Bool},
+						"unknown": Map{ElementType: Bool},
 					},
 				},
 				map[string]Value{
-					"unknown": NewValue(Map{AttributeType: Bool}, UnknownValue),
+					"unknown": NewValue(Map{ElementType: Bool}, UnknownValue),
 				},
 			),
 			f: func(path *AttributePath, v Value) (Value, error) {
 				target := NewAttributePath().WithAttributeName("unknown")
 				if path.Equal(target) {
-					return NewValue(Map{AttributeType: Bool}, map[string]Value{
+					return NewValue(Map{ElementType: Bool}, map[string]Value{
 						"testing": NewValue(Bool, true),
 					}), nil
 				}
@@ -1592,8 +1592,8 @@ func TestTransform(t *testing.T) {
 			diffs: []ValueDiff{
 				{
 					Path:   NewAttributePath().WithAttributeName("unknown"),
-					Value1: newValuePointer(Map{AttributeType: Bool}, UnknownValue),
-					Value2: newValuePointer(Map{AttributeType: Bool}, map[string]Value{
+					Value1: newValuePointer(Map{ElementType: Bool}, UnknownValue),
+					Value2: newValuePointer(Map{ElementType: Bool}, map[string]Value{
 						"testing": NewValue(Bool, true),
 					}),
 				},
@@ -1609,12 +1609,12 @@ func TestTransform(t *testing.T) {
 				Object{
 					AttributeTypes: map[string]Type{
 						"null":    List{ElementType: String},
-						"unknown": Map{AttributeType: Bool},
+						"unknown": Map{ElementType: Bool},
 					},
 				},
 				map[string]Value{
 					"null":    NewValue(List{ElementType: String}, nil),
-					"unknown": NewValue(Map{AttributeType: Bool}, UnknownValue),
+					"unknown": NewValue(Map{ElementType: Bool}, UnknownValue),
 				},
 			),
 			f: func(_ *AttributePath, v Value) (Value, error) {
@@ -1629,8 +1629,8 @@ func TestTransform(t *testing.T) {
 			diffs: []ValueDiff{
 				{
 					Path:   NewAttributePath().WithAttributeName("unknown"),
-					Value1: newValuePointer(Map{AttributeType: Bool}, UnknownValue),
-					Value2: newValuePointer(Map{AttributeType: Bool}, nil),
+					Value1: newValuePointer(Map{ElementType: Bool}, UnknownValue),
+					Value2: newValuePointer(Map{ElementType: Bool}, nil),
 				},
 				{
 					Path:   NewAttributePath().WithAttributeName("null"),

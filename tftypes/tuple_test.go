@@ -219,7 +219,7 @@ func TestTupleUsableAs(t *testing.T) {
 		},
 		"tuple-string-map": {
 			tuple:    Tuple{ElementTypes: []Type{String}},
-			other:    Map{AttributeType: String},
+			other:    Map{ElementType: String},
 			expected: false,
 		},
 		"tuple-string-object": {

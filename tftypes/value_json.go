@@ -53,7 +53,7 @@ func jsonUnmarshal(buf []byte, typ Type, p *AttributePath) (Value, error) {
 		return jsonUnmarshalSet(buf, typ.(Set).ElementType, p)
 
 	case typ.Is(Map{}):
-		return jsonUnmarshalMap(buf, typ.(Map).AttributeType, p)
+		return jsonUnmarshalMap(buf, typ.(Map).ElementType, p)
 	case typ.Is(Tuple{}):
 		return jsonUnmarshalTuple(buf, typ.(Tuple).ElementTypes, p)
 	case typ.Is(Object{}):
@@ -368,7 +368,7 @@ func jsonUnmarshalMap(buf []byte, attrType Type, p *AttributePath) (Value, error
 	}
 
 	return NewValue(Map{
-		AttributeType: elTyp,
+		ElementType: elTyp,
 	}, vals), nil
 }
 

@@ -224,7 +224,7 @@ func TestListUsableAs(t *testing.T) {
 		},
 		"list-string-map": {
 			list:     List{ElementType: String},
-			other:    Map{AttributeType: String},
+			other:    Map{ElementType: String},
 			expected: false,
 		},
 		"list-string-object": {

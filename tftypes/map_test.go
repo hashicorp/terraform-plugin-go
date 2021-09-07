@@ -12,22 +12,22 @@ func TestMapEqual(t *testing.T) {
 	}
 	tests := map[string]testCase{
 		"equal": {
-			m1:    Map{AttributeType: String},
-			m2:    Map{AttributeType: String},
+			m1:    Map{ElementType: String},
+			m2:    Map{ElementType: String},
 			equal: true,
 		},
 		"unequal": {
-			m1:    Map{AttributeType: String},
-			m2:    Map{AttributeType: Number},
+			m1:    Map{ElementType: String},
+			m2:    Map{ElementType: Number},
 			equal: false,
 		},
 		"equal-complex": {
-			m1: Map{AttributeType: Object{AttributeTypes: map[string]Type{
+			m1: Map{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
 			}}},
-			m2: Map{AttributeType: Object{AttributeTypes: map[string]Type{
+			m2: Map{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
@@ -35,12 +35,12 @@ func TestMapEqual(t *testing.T) {
 			equal: true,
 		},
 		"unequal-complex": {
-			m1: Map{AttributeType: Object{AttributeTypes: map[string]Type{
+			m1: Map{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
 			}}},
-			m2: Map{AttributeType: Object{AttributeTypes: map[string]Type{
+			m2: Map{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
@@ -49,17 +49,17 @@ func TestMapEqual(t *testing.T) {
 			equal: false,
 		},
 		"unequal-empty": {
-			m1:    Map{AttributeType: String},
+			m1:    Map{ElementType: String},
 			m2:    Map{},
 			equal: false,
 		},
 		"unequal-complex-empty": {
-			m1: Map{AttributeType: Object{AttributeTypes: map[string]Type{
+			m1: Map{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
 			}}},
-			m2:    Map{AttributeType: Object{}},
+			m2:    Map{ElementType: Object{}},
 			equal: false,
 		},
 	}
@@ -90,22 +90,22 @@ func TestMapIs(t *testing.T) {
 	}
 	tests := map[string]testCase{
 		"equal": {
-			m1:    Map{AttributeType: String},
-			m2:    Map{AttributeType: String},
+			m1:    Map{ElementType: String},
+			m2:    Map{ElementType: String},
 			equal: true,
 		},
 		"different-attributetype": {
-			m1:    Map{AttributeType: String},
-			m2:    Map{AttributeType: Number},
+			m1:    Map{ElementType: String},
+			m2:    Map{ElementType: Number},
 			equal: true,
 		},
 		"equal-complex": {
-			m1: Map{AttributeType: Object{AttributeTypes: map[string]Type{
+			m1: Map{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
 			}}},
-			m2: Map{AttributeType: Object{AttributeTypes: map[string]Type{
+			m2: Map{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
@@ -113,12 +113,12 @@ func TestMapIs(t *testing.T) {
 			equal: true,
 		},
 		"different-attributetype-complex": {
-			m1: Map{AttributeType: Object{AttributeTypes: map[string]Type{
+			m1: Map{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
 			}}},
-			m2: Map{AttributeType: Object{AttributeTypes: map[string]Type{
+			m2: Map{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
@@ -127,21 +127,21 @@ func TestMapIs(t *testing.T) {
 			equal: true,
 		},
 		"equal-empty": {
-			m1:    Map{AttributeType: String},
+			m1:    Map{ElementType: String},
 			m2:    Map{},
 			equal: true,
 		},
 		"equal-complex-empty": {
-			m1: Map{AttributeType: Object{AttributeTypes: map[string]Type{
+			m1: Map{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
 			}}},
-			m2:    Map{AttributeType: Object{}},
+			m2:    Map{ElementType: Object{}},
 			equal: true,
 		},
 		"equal-complex-nil": {
-			m1: Map{AttributeType: Object{AttributeTypes: map[string]Type{
+			m1: Map{ElementType: Object{AttributeTypes: map[string]Type{
 				"a": Number,
 				"b": String,
 				"c": Bool,
@@ -173,72 +173,72 @@ func TestMapUsableAs(t *testing.T) {
 	}
 	tests := map[string]testCase{
 		"map-map-string-map-string": {
-			m:        Map{AttributeType: Map{AttributeType: String}},
-			other:    Map{AttributeType: String},
+			m:        Map{ElementType: Map{ElementType: String}},
+			other:    Map{ElementType: String},
 			expected: false,
 		},
 		"map-map-string-map-map-string": {
-			m:        Map{AttributeType: Map{AttributeType: String}},
-			other:    Map{AttributeType: Map{AttributeType: String}},
+			m:        Map{ElementType: Map{ElementType: String}},
+			other:    Map{ElementType: Map{ElementType: String}},
 			expected: true,
 		},
 		"map-map-string-dpt": {
-			m:        Map{AttributeType: Map{AttributeType: String}},
+			m:        Map{ElementType: Map{ElementType: String}},
 			other:    DynamicPseudoType,
 			expected: true,
 		},
 		"map-map-string-map-dpt": {
-			m:        Map{AttributeType: Map{AttributeType: String}},
-			other:    Map{AttributeType: DynamicPseudoType},
+			m:        Map{ElementType: Map{ElementType: String}},
+			other:    Map{ElementType: DynamicPseudoType},
 			expected: true,
 		},
 		"map-map-string-map-map-dpt": {
-			m:        Map{AttributeType: Map{AttributeType: String}},
-			other:    Map{AttributeType: Map{AttributeType: DynamicPseudoType}},
+			m:        Map{ElementType: Map{ElementType: String}},
+			other:    Map{ElementType: Map{ElementType: DynamicPseudoType}},
 			expected: true,
 		},
 		"map-string-dpt": {
-			m:        Map{AttributeType: String},
+			m:        Map{ElementType: String},
 			other:    DynamicPseudoType,
 			expected: true,
 		},
 		"map-string-list-string": {
-			m:        Map{AttributeType: String},
+			m:        Map{ElementType: String},
 			other:    List{ElementType: String},
 			expected: false,
 		},
 		"map-string-map-bool": {
-			m:        Map{AttributeType: String},
-			other:    Map{AttributeType: Bool},
+			m:        Map{ElementType: String},
+			other:    Map{ElementType: Bool},
 			expected: false,
 		},
 		"map-string-map-dpt": {
-			m:        Map{AttributeType: String},
-			other:    Map{AttributeType: DynamicPseudoType},
+			m:        Map{ElementType: String},
+			other:    Map{ElementType: DynamicPseudoType},
 			expected: true,
 		},
 		"map-string-map-string": {
-			m:        Map{AttributeType: String},
-			other:    Map{AttributeType: String},
+			m:        Map{ElementType: String},
+			other:    Map{ElementType: String},
 			expected: true,
 		},
 		"map-string-object": {
-			m:        Map{AttributeType: String},
+			m:        Map{ElementType: String},
 			other:    Object{AttributeTypes: map[string]Type{"test": String}},
 			expected: false,
 		},
 		"map-string-primitive": {
-			m:        Map{AttributeType: String},
+			m:        Map{ElementType: String},
 			other:    String,
 			expected: false,
 		},
 		"map-string-set-string": {
-			m:        Map{AttributeType: String},
+			m:        Map{ElementType: String},
 			other:    Set{ElementType: String},
 			expected: false,
 		},
 		"map-string-tuple-string": {
-			m:        Map{AttributeType: String},
+			m:        Map{ElementType: String},
 			other:    Tuple{ElementTypes: []Type{String}},
 			expected: false,
 		},
