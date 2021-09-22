@@ -1,6 +1,6 @@
-// Terraform Plugin RPC protocol version 6.0
+// Terraform Plugin RPC protocol version 6.1
 //
-// This file defines version 6.0 of the RPC protocol. To implement a plugin
+// This file defines version 6.1 of the RPC protocol. To implement a plugin
 // against this protocol, copy this definition into your own codebase and
 // use protoc to generate stubs for your target language.
 //
@@ -132,13 +132,26 @@ message Schema {
         int64 max_items = 5;
     }
 
+    message Capabilities {
+        // Enable the use of nested object types, implicitly disabling the use
+        // of blocks-as-attributes.
+        bool structural_attrs = 1;
+    }
+
     // The version of the schema.
     // Schemas are versioned, so that providers can upgrade a saved resource
-    // state when the schema is changed. 
+    // state when the schema is changed.
     int64 version = 1;
 
     // Block is the top level configuration block for this schema.
     Block block = 2;
+
+    // Capabilities allows providers to communicate extra information regarding
+    // the behavior of individual resources. This is used to indicate
+    // forward-compatible changes which cannot be directly tested by the plugin
+    // client, allowing protocol5 resources to be muxed with strict protocol6
+    // resources from the same provider.
+    Capabilities capabilities = 3;
 }
 
 service Provider {
@@ -262,14 +275,14 @@ message PlanResourceChange {
         DynamicValue prior_state = 2;
         DynamicValue proposed_new_state = 3;
         DynamicValue config = 4;
-        bytes prior_private = 5; 
+        bytes prior_private = 5;
         DynamicValue provider_meta = 6;
     }
 
     message Response {
         DynamicValue planned_state = 1;
         repeated AttributePath requires_replace = 2;
-        bytes planned_private = 3; 
+        bytes planned_private = 3;
         repeated Diagnostic diagnostics = 4;
     }
 }
@@ -280,12 +293,12 @@ message ApplyResourceChange {
         DynamicValue prior_state = 2;
         DynamicValue planned_state = 3;
         DynamicValue config = 4;
-        bytes planned_private = 5; 
+        bytes planned_private = 5;
         DynamicValue provider_meta = 6;
     }
     message Response {
         DynamicValue new_state = 1;
-        bytes private = 2; 
+        bytes private = 2;
         repeated Diagnostic diagnostics = 3;
     }
 }
