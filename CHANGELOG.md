@@ -1,3 +1,24 @@
+# 0.4.0 (Unreleased)
+
+BREAKING CHANGES:
+* The `AttributeType` property of `tftypes.Map` has been renamed to `ElementType`. ([#105](https://github.com/hashicorp/terraform-plugin-go/issues/105))
+* The `tf5server` package's import path is now `github.com/hashicorp/terraform-plugin-go/tfprotov5/tf5server` instead of `github.com/hashicorp/terraform-plugin-go/tfprotov5/server`. ([#103](https://github.com/hashicorp/terraform-plugin-go/issues/103))
+* The `tf6server` package's import path is now `github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server` instead of `github.com/hashicorp/terraform-plugin-go/tfprotov6/server`. ([#103](https://github.com/hashicorp/terraform-plugin-go/issues/103))
+* With the release of Go 1.17, Go 1.16 is now the lowest supported version of Go to use with terraform-plugin-go. ([#102](https://github.com/hashicorp/terraform-plugin-go/issues/102))
+* tftypes: The `Is()` method on types implementing the `Type` interface now only perform a shallow type check, no longer comparing any underlying attribute or element type(s). Use the `Equal()` method for deep type checking. ([#94](https://github.com/hashicorp/terraform-plugin-go/issues/94))
+* tftypes: `(AttributePath).WithElementKeyInt()` now has an `int` parameter instead of `int64`. Using `(AttributePath).WithElementKeyInt()` within `for ... range` loops no longer requires `int64()` conversion. ([#101](https://github.com/hashicorp/terraform-plugin-go/issues/101))
+
+ENHANCEMENTS:
+* tftypes: All types implementing the `Type` interface now provide an `Equal()` method for deep type checking and `UsableAs()` method for type conformance checking. ([#94](https://github.com/hashicorp/terraform-plugin-go/issues/94))
+
+BUG FIXES:
+* tftypes: Ensure `NewValue()` panics on `DynamicPseudoType` and known values. ([#94](https://github.com/hashicorp/terraform-plugin-go/issues/94))
+* tftypes: Fixed elements of `Tuple` and `Map` and attributes of `Object` having `DynamicPseudoType` as their type when unmarshaling JSON values from Terraform. ([#94](https://github.com/hashicorp/terraform-plugin-go/issues/94))
+* tftypes: Fixed elements of `Tuple` and `Map` and attributes of `Object` having `DynamicPseudoType` as their type when unmarshaling msgpack values from Terraform. ([#100](https://github.com/hashicorp/terraform-plugin-go/issues/100))
+* tftypes: Prevent potential panic unmarshaling null DynamicPseudoType in msgpack ([#99](https://github.com/hashicorp/terraform-plugin-go/issues/99))
+* tftypes: Return error instead of panic when calling `(Value).Diff()` with either `Value` missing type ([#104](https://github.com/hashicorp/terraform-plugin-go/issues/104))
+* tftypes: Return error instead of panic when calling `Transform()` with `Value` missing type ([#104](https://github.com/hashicorp/terraform-plugin-go/issues/104))
+
 # 0.3.1 (June 24, 2021)
 
 BUG FIXES:
