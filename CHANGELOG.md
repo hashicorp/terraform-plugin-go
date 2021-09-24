@@ -1,4 +1,4 @@
-# 0.4.0 (Unreleased)
+# 0.4.0 (September 24, 2021)
 
 BREAKING CHANGES:
 * The `AttributeType` property of `tftypes.Map` has been renamed to `ElementType`. ([#105](https://github.com/hashicorp/terraform-plugin-go/issues/105))
