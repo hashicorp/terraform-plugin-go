@@ -129,6 +129,18 @@ func (a *AttributePath) NewError(err error) error {
 	}
 }
 
+// LastStep returns the last step in the path. If the path was
+// empty, nil is returned.
+func (a *AttributePath) LastStep() AttributePathStep {
+	steps := a.Steps()
+
+	if len(steps) == 0 {
+		return nil
+	}
+
+	return steps[len(steps)-1]
+}
+
 // WithAttributeName adds an AttributeName step to `a`, using `name` as the
 // attribute's name. `a` is copied, not modified.
 func (a *AttributePath) WithAttributeName(name string) *AttributePath {

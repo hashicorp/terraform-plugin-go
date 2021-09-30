@@ -523,6 +523,62 @@ func TestAttributePathEqual(t *testing.T) {
 	}
 }
 
+func TestAttributePathLastStep(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		path     *AttributePath
+		expected AttributePathStep
+	}{
+		"empty": {
+			path:     NewAttributePath(),
+			expected: nil,
+		},
+		"nil": {
+			path:     nil,
+			expected: nil,
+		},
+		"AttributeName": {
+			path:     NewAttributePath().WithAttributeName("testing"),
+			expected: AttributeName("testing"),
+		},
+		"AttributeName-AttributeName": {
+			path:     NewAttributePath().WithAttributeName("testing").WithAttributeName("testing2"),
+			expected: AttributeName("testing2"),
+		},
+		"AttributeName-AttributeName-AttributeName": {
+			path:     NewAttributePath().WithElementKeyString("testing").WithAttributeName("testing2").WithAttributeName("testing3"),
+			expected: AttributeName("testing3"),
+		},
+		"ElementKeyInt": {
+			path:     NewAttributePath().WithElementKeyInt(1234),
+			expected: ElementKeyInt(1234),
+		},
+		"ElementKeyString": {
+			path:     NewAttributePath().WithElementKeyString("testing"),
+			expected: ElementKeyString("testing"),
+		},
+		"ElementKeyValue": {
+			path:     NewAttributePath().WithElementKeyValue(NewValue(String, "testing")),
+			expected: ElementKeyValue(NewValue(String, "testing")),
+		},
+	}
+
+	for name, tc := range testCases {
+		name, tc := name, tc
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := tc.path.LastStep()
+
+			if diff := cmp.Diff(tc.expected, got, cmp.Comparer(attributePathStepComparer)); diff != "" {
+				t.Errorf("Unexpected results (-wanted, +got): %s", diff)
+			}
+		})
+	}
+}
+
 func TestAttributePathString(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
@@ -583,5 +639,40 @@ func TestAttributePathString(t *testing.T) {
 				t.Errorf("Unexpected results (-wanted, +got): %s", diff)
 			}
 		})
+	}
+}
+
+func attributePathStepComparer(i, j AttributePathStep) bool {
+	switch typedI := i.(type) {
+	case AttributeName:
+		switch typedJ := j.(type) {
+		case AttributeName:
+			return string(typedI) == string(typedJ)
+		default:
+			return false
+		}
+	case ElementKeyInt:
+		switch typedJ := j.(type) {
+		case ElementKeyInt:
+			return int(typedI) == int(typedJ)
+		default:
+			return false
+		}
+	case ElementKeyString:
+		switch typedJ := j.(type) {
+		case ElementKeyString:
+			return string(typedI) == string(typedJ)
+		default:
+			return false
+		}
+	case ElementKeyValue:
+		switch typedJ := j.(type) {
+		case ElementKeyValue:
+			return Value(typedI).Equal(Value(typedJ))
+		default:
+			return false
+		}
+	default:
+		panic(fmt.Sprintf("unknown AttributePathStep type: %T", typedI))
 	}
 }
