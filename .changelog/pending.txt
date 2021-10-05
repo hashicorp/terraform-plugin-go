@@ -1,0 +1,3 @@
+```release-note:bug
+tftypes: Return null `Number` when `NewValue` receives `(*big.Float)(nil)`
+```
