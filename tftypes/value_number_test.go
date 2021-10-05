@@ -89,6 +89,10 @@ func TestNewValue_number(t *testing.T) {
 			expected: Value{typ: Number, value: nil},
 			result:   NewValue(Number, nil),
 		},
+		"*big.Float-nil": {
+			expected: Value{typ: Number, value: nil},
+			result:   NewValue(Number, (*big.Float)(nil)),
+		},
 		"*big.Float": {
 			expected: Value{typ: Number, value: big.NewFloat(123)},
 			result:   NewValue(Number, big.NewFloat(123)),
