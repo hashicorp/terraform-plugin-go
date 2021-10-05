@@ -572,7 +572,7 @@ func TestAttributePathLastStep(t *testing.T) {
 
 			got := tc.path.LastStep()
 
-			if diff := cmp.Diff(tc.expected, got, cmp.Comparer(attributePathStepComparer)); diff != "" {
+			if diff := cmp.Diff(tc.expected, got); diff != "" {
 				t.Errorf("Unexpected results (-wanted, +got): %s", diff)
 			}
 		})
@@ -642,37 +642,202 @@ func TestAttributePathString(t *testing.T) {
 	}
 }
 
-func attributePathStepComparer(i, j AttributePathStep) bool {
-	switch typedI := i.(type) {
-	case AttributeName:
-		switch typedJ := j.(type) {
-		case AttributeName:
-			return string(typedI) == string(typedJ)
-		default:
-			return false
-		}
-	case ElementKeyInt:
-		switch typedJ := j.(type) {
-		case ElementKeyInt:
-			return int(typedI) == int(typedJ)
-		default:
-			return false
-		}
-	case ElementKeyString:
-		switch typedJ := j.(type) {
-		case ElementKeyString:
-			return string(typedI) == string(typedJ)
-		default:
-			return false
-		}
-	case ElementKeyValue:
-		switch typedJ := j.(type) {
-		case ElementKeyValue:
-			return Value(typedI).Equal(Value(typedJ))
-		default:
-			return false
-		}
-	default:
-		panic(fmt.Sprintf("unknown AttributePathStep type: %T", typedI))
+func TestAttributeNameEqual(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		attributeName AttributeName
+		other         AttributePathStep
+		expected      bool
+	}{
+		"AttributeName-different": {
+			attributeName: AttributeName("test"),
+			other:         AttributeName("other"),
+			expected:      false,
+		},
+		"AttributeName-equal": {
+			attributeName: AttributeName("test"),
+			other:         AttributeName("test"),
+			expected:      true,
+		},
+		"ElementKeyInt": {
+			attributeName: AttributeName("test"),
+			other:         ElementKeyInt(1),
+			expected:      false,
+		},
+		"ElementKeyString": {
+			attributeName: AttributeName("test"),
+			other:         ElementKeyString("test"),
+			expected:      false,
+		},
+		"ElementKeyValue": {
+			attributeName: AttributeName("test"),
+			other:         ElementKeyValue(NewValue(String, "test")),
+			expected:      false,
+		},
+	}
+
+	for name, tc := range testCases {
+		name, tc := name, tc
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := tc.attributeName.Equal(tc.other)
+
+			if diff := cmp.Diff(tc.expected, got); diff != "" {
+				t.Errorf("Unexpected results (-wanted, +got): %s", diff)
+			}
+		})
+	}
+}
+
+func TestElementKeyIntEqual(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		elementKeyInt ElementKeyInt
+		other         AttributePathStep
+		expected      bool
+	}{
+		"AttributeName": {
+			elementKeyInt: ElementKeyInt(1),
+			other:         AttributeName("test"),
+			expected:      false,
+		},
+		"ElementKeyInt-different": {
+			elementKeyInt: ElementKeyInt(1),
+			other:         ElementKeyInt(2),
+			expected:      false,
+		},
+		"ElementKeyInt-equal": {
+			elementKeyInt: ElementKeyInt(1),
+			other:         ElementKeyInt(1),
+			expected:      true,
+		},
+		"ElementKeyString": {
+			elementKeyInt: ElementKeyInt(1),
+			other:         ElementKeyString("test"),
+			expected:      false,
+		},
+		"ElementKeyValue": {
+			elementKeyInt: ElementKeyInt(1),
+			other:         ElementKeyValue(NewValue(String, "test")),
+			expected:      false,
+		},
+	}
+
+	for name, tc := range testCases {
+		name, tc := name, tc
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := tc.elementKeyInt.Equal(tc.other)
+
+			if diff := cmp.Diff(tc.expected, got); diff != "" {
+				t.Errorf("Unexpected results (-wanted, +got): %s", diff)
+			}
+		})
+	}
+}
+
+func TestElementKeyStringEqual(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		elementKeyString ElementKeyString
+		other            AttributePathStep
+		expected         bool
+	}{
+		"AttributeName": {
+			elementKeyString: ElementKeyString("test"),
+			other:            AttributeName("test"),
+			expected:         false,
+		},
+		"ElementKeyInt": {
+			elementKeyString: ElementKeyString("test"),
+			other:            ElementKeyInt(1),
+			expected:         false,
+		},
+		"ElementKeyString-different": {
+			elementKeyString: ElementKeyString("test"),
+			other:            ElementKeyString("other"),
+			expected:         false,
+		},
+		"ElementKeyString-equal": {
+			elementKeyString: ElementKeyString("test"),
+			other:            ElementKeyString("test"),
+			expected:         true,
+		},
+		"ElementKeyValue": {
+			elementKeyString: ElementKeyString("test"),
+			other:            ElementKeyValue(NewValue(String, "test")),
+			expected:         false,
+		},
+	}
+
+	for name, tc := range testCases {
+		name, tc := name, tc
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := tc.elementKeyString.Equal(tc.other)
+
+			if diff := cmp.Diff(tc.expected, got); diff != "" {
+				t.Errorf("Unexpected results (-wanted, +got): %s", diff)
+			}
+		})
+	}
+}
+
+func TestElementKeyValueEqual(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		elementKeyValue ElementKeyValue
+		other           AttributePathStep
+		expected        bool
+	}{
+		"AttributeName-different": {
+			elementKeyValue: ElementKeyValue(NewValue(String, "test")),
+			other:           AttributeName("test"),
+			expected:        false,
+		},
+		"ElementKeyInt": {
+			elementKeyValue: ElementKeyValue(NewValue(String, "test")),
+			other:           ElementKeyInt(1),
+			expected:        false,
+		},
+		"ElementKeyString": {
+			elementKeyValue: ElementKeyValue(NewValue(String, "test")),
+			other:           ElementKeyString("test"),
+			expected:        false,
+		},
+		"ElementKeyValue-different": {
+			elementKeyValue: ElementKeyValue(NewValue(String, "test")),
+			other:           ElementKeyValue(NewValue(String, "other")),
+			expected:        false,
+		},
+		"ElementKeyValue-equal": {
+			elementKeyValue: ElementKeyValue(NewValue(String, "test")),
+			other:           ElementKeyValue(NewValue(String, "test")),
+			expected:        true,
+		},
+	}
+
+	for name, tc := range testCases {
+		name, tc := name, tc
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := tc.elementKeyValue.Equal(tc.other)
+
+			if diff := cmp.Diff(tc.expected, got); diff != "" {
+				t.Errorf("Unexpected results (-wanted, +got): %s", diff)
+			}
+		})
 	}
 }
