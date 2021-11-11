@@ -447,6 +447,21 @@ func TestValueFromMsgPack(t *testing.T) {
 			value: NewValue(DynamicPseudoType, nil),
 			typ:   DynamicPseudoType,
 		},
+		"object-dynamic-null": {
+			hex: "81a161c0",
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"a": DynamicPseudoType,
+				},
+			}, map[string]Value{
+				"a": NewValue(DynamicPseudoType, nil),
+			}),
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"a": DynamicPseudoType,
+				},
+			},
+		},
 		"dynamic-unknown": {
 			hex:   "d40000",
 			value: NewValue(DynamicPseudoType, UnknownValue),
