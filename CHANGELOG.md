@@ -1,3 +1,19 @@
+# 0.5.0 (Unreleased)
+
+BREAKING CHANGES:
+* `tf6server.New` and `tf5server.New` now accept a name argument (meant to be the full registry path of the provider, e.g. registry.terraform.io/hashicorp/random) and a variadic argument of `ServeOpts`, just like the `Serve` function. Providers calling `Serve` will not notice any change. Providers calling `New` directly should pass the name and any options they would like the server to be configured with. ([#93](https://github.com/hashicorp/terraform-plugin-go/issues/93))
+
+FEATURES:
+* Added support for [terraform-plugin-log](https://github.com/hashicorp/terraform-plugin-log) v0.2.0, injecting loggers for SDKs and the provider into requests and adding trace and error log lines to request handlers. ([#93](https://github.com/hashicorp/terraform-plugin-go/issues/93))
+
+ENHANCEMENTS:
+* New `WithoutLogStderrOverride`, `WithLogEnvVarName`, and `WithoutLogLocation` `ServeOpt` helper functions have been added to `tf6server` and `tf5server`. These helpers can be passed to `Serve` or `New` to control logging behaviors for SDK and provider logs. `WithoutLogStderrOverride` disables using the stderr that existed at startup instead of the one that exists when the log function is called; it is recommended to not use this unless you understand the impacts, as Terraform's default behavior is counter-intuitive. `WithLogEnvVarName` sets the name of the provider's log module and controls what follows `TF_LOG_PROVIDER_` as the environment variable to control the log's level. `WithoutLogLocation` excludes filename and line numbers from log output. ([#93](https://github.com/hashicorp/terraform-plugin-go/issues/93))
+* tftypes: Added `AttributePath` `LastStep()` method and `AttributePathStep` `Equal()` method ([#112](https://github.com/hashicorp/terraform-plugin-go/issues/112))
+
+BUG FIXES:
+* Fixed a panic when using DynamicPseudoType attributes in an object. ([#116](https://github.com/hashicorp/terraform-plugin-go/issues/116))
+* tftypes: Return null `Number` when `NewValue` receives `(*big.Float)(nil)` ([#114](https://github.com/hashicorp/terraform-plugin-go/issues/114))
+
 # 0.4.0 (September 24, 2021)
 
 BREAKING CHANGES:
