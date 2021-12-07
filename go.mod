@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/go-hclog v0.16.1
 	github.com/hashicorp/go-plugin v1.3.0
 	github.com/hashicorp/go-uuid v1.0.2
-	github.com/hashicorp/terraform-plugin-log v0.1.1-0.20211207185331-430250a6acd4
+	github.com/hashicorp/terraform-plugin-log v0.2.0
 	github.com/hashicorp/terraform-registry-address v0.0.0-20210412075316-9b2996cce896
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce
