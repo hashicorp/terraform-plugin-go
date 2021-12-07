@@ -1,4 +1,4 @@
-# 0.5.0 (Unreleased)
+# 0.5.0 (December 07, 2021)
 
 BREAKING CHANGES:
 * `tf6server.New` and `tf5server.New` now accept a name argument (meant to be the full registry path of the provider, e.g. registry.terraform.io/hashicorp/random) and a variadic argument of `ServeOpts`, just like the `Serve` function. Providers calling `Serve` will not notice any change. Providers calling `New` directly should pass the name and any options they would like the server to be configured with. ([#93](https://github.com/hashicorp/terraform-plugin-go/issues/93))
