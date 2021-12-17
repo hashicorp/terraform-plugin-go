@@ -7,8 +7,8 @@ import (
 	"math/big"
 	"sort"
 
-	"github.com/vmihailenco/msgpack"
-	msgpackCodes "github.com/vmihailenco/msgpack/codes"
+	msgpack "github.com/vmihailenco/msgpack/v4"
+	msgpackCodes "github.com/vmihailenco/msgpack/v4/codes"
 )
 
 type msgPackUnknownType struct{}
