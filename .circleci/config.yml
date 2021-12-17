@@ -25,13 +25,13 @@ commands:
 jobs:
   "docker-go117 build":
     docker:
-      - image: docker.mirror.hashicorp.services/circleci/golang:1.17
+      - image: docker.mirror.hashicorp.services/cimg/go:1.17
     steps:
       - get_dependencies
       - run: go build ./...
   "docker-go117 test":
     docker:
-      - image: docker.mirror.hashicorp.services/circleci/golang:1.17
+      - image: docker.mirror.hashicorp.services/cimg/go:1.17
         environment:
           TF_ACC_TERRAFORM_VERSION: "0.12.26"
     parameters:
@@ -53,32 +53,32 @@ jobs:
           path: << parameters.test_results >>
   "docker-go117 vet":
     docker:
-      - image: docker.mirror.hashicorp.services/circleci/golang:1.17
+      - image: docker.mirror.hashicorp.services/cimg/go:1.17
     steps:
       - get_dependencies
       - run: go vet ./...
   "docker-go117 gofmt":
     docker:
-      - image: docker.mirror.hashicorp.services/circleci/golang:1.17
+      - image: docker.mirror.hashicorp.services/cimg/go:1.17
     steps:
       - get_dependencies
       - run: ./scripts/gofmtcheck.sh
   "docker-go117 golangci-lint":
     docker:
-      - image: docker.mirror.hashicorp.services/circleci/golang:1.17
+      - image: docker.mirror.hashicorp.services/cimg/go:1.17
     steps:
       - get_dependencies
       - get_golangci_lint
       - run: bin/golangci-lint run -v ./...
   "docker-go116 build":
     docker:
-      - image: docker.mirror.hashicorp.services/circleci/golang:1.16
+      - image: docker.mirror.hashicorp.services/cimg/go:1.16
     steps:
       - get_dependencies
       - run: go build ./...
   "docker-go116 test":
     docker:
-      - image: docker.mirror.hashicorp.services/circleci/golang:1.16
+      - image: docker.mirror.hashicorp.services/cimg/go:1.16
         environment:
           TF_ACC_TERRAFORM_VERSION: "0.12.26"
     parameters:
@@ -100,26 +100,26 @@ jobs:
           path: << parameters.test_results >>
   "docker-go116 vet":
     docker:
-      - image: docker.mirror.hashicorp.services/circleci/golang:1.16
+      - image: docker.mirror.hashicorp.services/cimg/go:1.16
     steps:
       - get_dependencies
       - run: go vet ./...
   "docker-go116 gofmt":
     docker:
-      - image: docker.mirror.hashicorp.services/circleci/golang:1.16
+      - image: docker.mirror.hashicorp.services/cimg/go:1.16
     steps:
       - get_dependencies
       - run: ./scripts/gofmtcheck.sh
   "docker-go116 golangci-lint":
     docker:
-      - image: docker.mirror.hashicorp.services/circleci/golang:1.16
+      - image: docker.mirror.hashicorp.services/cimg/go:1.16
     steps:
       - get_dependencies
       - get_golangci_lint
       - run: bin/golangci-lint run -v ./...
   "docker-go116 release":
     docker:
-      - image: circleci/golang:1.16
+      - image: cimg/go:1.16
     steps:
       - add_ssh_keys:
           fingerprints:
