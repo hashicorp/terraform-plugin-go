@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"regexp"
@@ -14,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-go/internal/logging"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
@@ -21,38 +21,9 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
-	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-log/tfsdklog"
-	tfaddr "github.com/hashicorp/terraform-registry-address"
 	testing "github.com/mitchellh/go-testing-interface"
-)
-
-const tflogSubsystemName = "proto"
-
-// Global logging keys attached to all requests.
-//
-// Practitioners or tooling reading logs may be depending on these keys, so be
-// conscious of that when changing them.
-const (
-	// A unique ID for the RPC request
-	logKeyRequestID = "tf_req_id"
-
-	// The full address of the provider, such as
-	// registry.terraform.io/hashicorp/random
-	logKeyProviderAddress = "tf_provider_addr"
-
-	// The RPC being run, such as "ApplyResourceChange"
-	logKeyRPC = "tf_rpc"
-
-	// The type of resource being operated on, such as "random_pet"
-	logKeyResourceType = "tf_resource_type"
-
-	// The type of data source being operated on, such as "archive_file"
-	logKeyDataSourceType = "tf_data_source_type"
-
-	// The protocol version being used, as a string, such as "5"
-	logKeyProtocolVersion = "tf_proto_version"
 )
 
 const (
@@ -370,6 +341,9 @@ type server struct {
 	useTFLogSink bool
 	testHandle   testing.T
 	name         string
+
+	// protocolVersion is the protocol version for the server.
+	protocolVersion string
 }
 
 func mergeStop(ctx context.Context, cancel context.CancelFunc, stopCh chan struct{}) {
@@ -402,50 +376,11 @@ func (s *server) loggingContext(ctx context.Context) context.Context {
 		ctx = tfsdklog.RegisterTestSink(ctx, s.testHandle)
 	}
 
-	// generate a request ID
-	reqID, err := uuid.GenerateUUID()
-	if err != nil {
-		reqID = "unable to assign request ID: " + err.Error()
-	}
+	ctx = logging.InitContext(ctx, s.tflogSDKOpts, s.tflogOpts)
+	ctx = logging.RequestIdContext(ctx)
+	ctx = logging.ProviderAddressContext(ctx, s.name)
+	ctx = logging.ProtocolVersionContext(ctx, s.protocolVersion)
 
-	// set up the logger SDK loggers are derived from
-	ctx = tfsdklog.NewRootSDKLogger(ctx, append(tfsdklog.Options{
-		tfsdklog.WithLevelFromEnv("TF_LOG_SDK"),
-	}, s.tflogSDKOpts...)...)
-	ctx = tfsdklog.With(ctx, logKeyRequestID, reqID)
-	ctx = tfsdklog.With(ctx, logKeyProviderAddress, s.name)
-
-	// set up our protocol-level subsystem logger
-	ctx = tfsdklog.NewSubsystem(ctx, tflogSubsystemName, append(tfsdklog.Options{
-		tfsdklog.WithLevelFromEnv("TF_LOG_SDK_PROTO"),
-	}, s.tflogSDKOpts...)...)
-	ctx = tfsdklog.SubsystemWith(ctx, tflogSubsystemName, logKeyProtocolVersion, "5")
-
-	// set up the provider logger
-	ctx = tfsdklog.NewRootProviderLogger(ctx, s.tflogOpts...)
-	ctx = tflog.With(ctx, logKeyRequestID, reqID)
-	ctx = tflog.With(ctx, logKeyProviderAddress, s.name)
-	return ctx
-}
-
-func rpcLoggingContext(ctx context.Context, rpc string) context.Context {
-	ctx = tfsdklog.With(ctx, logKeyRPC, rpc)
-	ctx = tfsdklog.SubsystemWith(ctx, tflogSubsystemName, logKeyRPC, rpc)
-	ctx = tflog.With(ctx, logKeyRPC, rpc)
-	return ctx
-}
-
-func resourceLoggingContext(ctx context.Context, resource string) context.Context {
-	ctx = tfsdklog.With(ctx, logKeyResourceType, resource)
-	ctx = tfsdklog.SubsystemWith(ctx, tflogSubsystemName, logKeyResourceType, resource)
-	ctx = tflog.With(ctx, logKeyResourceType, resource)
-	return ctx
-}
-
-func dataSourceLoggingContext(ctx context.Context, dataSource string) context.Context {
-	ctx = tfsdklog.With(ctx, logKeyDataSourceType, dataSource)
-	ctx = tfsdklog.SubsystemWith(ctx, tflogSubsystemName, logKeyDataSourceType, dataSource)
-	ctx = tflog.With(ctx, logKeyDataSourceType, dataSource)
 	return ctx
 }
 
@@ -473,98 +408,96 @@ func New(name string, serve tfprotov5.ProviderServer, opts ...ServeOpt) tfplugin
 	}
 	envVar := conf.envVar
 	if envVar == "" {
-		addr, err := tfaddr.ParseRawProviderSourceString(name)
-		if err != nil {
-			log.Printf("[ERROR] Error parsing provider name %q: %s", name, err)
-		} else {
-			envVar = addr.Type
-		}
+		envVar = logging.ProviderLoggerName(name)
 	}
-	envVar = strings.ReplaceAll(envVar, "-", "_")
 	if envVar != "" {
-		options = append(options, tfsdklog.WithLogName(envVar), tflog.WithLevelFromEnv("TF_LOG_PROVIDER", envVar))
+		options = append(options, tfsdklog.WithLogName(envVar), tflog.WithLevelFromEnv(logging.EnvTfLogProvider, envVar))
 	}
 	return &server{
-		downstream:   serve,
-		stopCh:       make(chan struct{}),
-		tflogOpts:    options,
-		tflogSDKOpts: sdkOptions,
-		name:         name,
-		useTFLogSink: conf.useLoggingSink != nil,
-		testHandle:   conf.useLoggingSink,
+		downstream:      serve,
+		stopCh:          make(chan struct{}),
+		tflogOpts:       options,
+		tflogSDKOpts:    sdkOptions,
+		name:            name,
+		useTFLogSink:    conf.useLoggingSink != nil,
+		testHandle:      conf.useLoggingSink,
+		protocolVersion: "6",
 	}
 }
 
 func (s *server) GetSchema(ctx context.Context, req *tfplugin5.GetProviderSchema_Request) (*tfplugin5.GetProviderSchema_Response, error) {
-	ctx = rpcLoggingContext(s.loggingContext(ctx), "GetSchema")
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, "GetSchema")
 	ctx = s.stoppableContext(ctx)
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Received request")
-	defer tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Served request")
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
 	r, err := fromproto.GetProviderSchemaRequest(req)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting request from protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting request from protobuf", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Calling downstream")
+	logging.ProtocolTrace(ctx, "Calling downstream")
 	resp, err := s.downstream.GetProviderSchema(ctx, r)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error from downstream", "error", err)
+		logging.ProtocolError(ctx, "Error from downstream", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Called downstream")
+	logging.ProtocolTrace(ctx, "Called downstream")
 	ret, err := toproto.GetProviderSchema_Response(resp)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting response to protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting response to protobuf", "error", err)
 		return nil, err
 	}
 	return ret, nil
 }
 
 func (s *server) PrepareProviderConfig(ctx context.Context, req *tfplugin5.PrepareProviderConfig_Request) (*tfplugin5.PrepareProviderConfig_Response, error) {
-	ctx = rpcLoggingContext(s.loggingContext(ctx), "PrepareProviderConfig")
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, "PrepareProviderConfig")
 	ctx = s.stoppableContext(ctx)
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Received request")
-	defer tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Served request")
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
 	r, err := fromproto.PrepareProviderConfigRequest(req)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting request from protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting request from protobuf", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Calling downstream")
+	logging.ProtocolTrace(ctx, "Calling downstream")
 	resp, err := s.downstream.PrepareProviderConfig(ctx, r)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error from downstream", "error", err)
+		logging.ProtocolError(ctx, "Error from downstream", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Called downstream")
+	logging.ProtocolTrace(ctx, "Called downstream")
 	ret, err := toproto.PrepareProviderConfig_Response(resp)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting response to protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting response to protobuf", "error", err)
 		return nil, err
 	}
 	return ret, nil
 }
 
 func (s *server) Configure(ctx context.Context, req *tfplugin5.Configure_Request) (*tfplugin5.Configure_Response, error) {
-	ctx = rpcLoggingContext(s.loggingContext(ctx), "Configure")
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, "Configure")
 	ctx = s.stoppableContext(ctx)
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Received request")
-	defer tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Served request")
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
 	r, err := fromproto.ConfigureProviderRequest(req)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting request from protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting request from protobuf", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Calling downstream")
+	logging.ProtocolTrace(ctx, "Calling downstream")
 	resp, err := s.downstream.ConfigureProvider(ctx, r)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error from downstream", "error", err)
+		logging.ProtocolError(ctx, "Error from downstream", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Called downstream")
+	logging.ProtocolTrace(ctx, "Called downstream")
 	ret, err := toproto.Configure_Response(resp)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting response to protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting response to protobuf", "error", err)
 		return nil, err
 	}
 	return ret, nil
@@ -584,228 +517,245 @@ func (s *server) stop() {
 }
 
 func (s *server) Stop(ctx context.Context, req *tfplugin5.Stop_Request) (*tfplugin5.Stop_Response, error) {
-	ctx = rpcLoggingContext(s.loggingContext(ctx), "Stop")
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, "Stop")
 	ctx = s.stoppableContext(ctx)
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Received request")
-	defer tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Served request")
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
 	r, err := fromproto.StopProviderRequest(req)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting request from protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting request from protobuf", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Calling downstream")
+	logging.ProtocolTrace(ctx, "Calling downstream")
 	resp, err := s.downstream.StopProvider(ctx, r)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error from downstream", "error", err)
+		logging.ProtocolError(ctx, "Error from downstream", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Called downstream")
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Closing all our contexts")
+	logging.ProtocolTrace(ctx, "Called downstream")
+	logging.ProtocolTrace(ctx, "Closing all our contexts")
 	s.stop()
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Closed all our contexts")
+	logging.ProtocolTrace(ctx, "Closed all our contexts")
 	ret, err := toproto.Stop_Response(resp)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting response to protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting response to protobuf", "error", err)
 		return nil, err
 	}
 	return ret, nil
 }
 
 func (s *server) ValidateDataSourceConfig(ctx context.Context, req *tfplugin5.ValidateDataSourceConfig_Request) (*tfplugin5.ValidateDataSourceConfig_Response, error) {
-	ctx = dataSourceLoggingContext(rpcLoggingContext(s.loggingContext(ctx), "ValidateDataSourceConfig"), req.TypeName)
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, "ValidateDataSourceConfig")
+	ctx = logging.DataSourceContext(ctx, req.TypeName)
 	ctx = s.stoppableContext(ctx)
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Received request")
-	defer tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Served request")
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
 	r, err := fromproto.ValidateDataSourceConfigRequest(req)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting request from protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting request from protobuf", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Calling downstream")
+	logging.ProtocolTrace(ctx, "Calling downstream")
 	resp, err := s.downstream.ValidateDataSourceConfig(ctx, r)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error from downstream", "error", err)
+		logging.ProtocolError(ctx, "Error from downstream", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Called downstream")
+	logging.ProtocolTrace(ctx, "Called downstream")
 	ret, err := toproto.ValidateDataSourceConfig_Response(resp)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting response to protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting response to protobuf", "error", err)
 		return nil, err
 	}
 	return ret, nil
 }
 
 func (s *server) ReadDataSource(ctx context.Context, req *tfplugin5.ReadDataSource_Request) (*tfplugin5.ReadDataSource_Response, error) {
-	ctx = dataSourceLoggingContext(rpcLoggingContext(s.loggingContext(ctx), "ReadDataSource"), req.TypeName)
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, "ReadDataSource")
+	ctx = logging.DataSourceContext(ctx, req.TypeName)
 	ctx = s.stoppableContext(ctx)
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Received request")
-	defer tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Served request")
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
 	r, err := fromproto.ReadDataSourceRequest(req)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting request from protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting request from protobuf", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Calling downstream")
+	logging.ProtocolTrace(ctx, "Calling downstream")
 	resp, err := s.downstream.ReadDataSource(ctx, r)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error from downstream", "error", err)
+		logging.ProtocolError(ctx, "Error from downstream", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Called downstream")
+	logging.ProtocolTrace(ctx, "Called downstream")
 	ret, err := toproto.ReadDataSource_Response(resp)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting response to protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting response to protobuf", "error", err)
 		return nil, err
 	}
 	return ret, nil
 }
 
 func (s *server) ValidateResourceTypeConfig(ctx context.Context, req *tfplugin5.ValidateResourceTypeConfig_Request) (*tfplugin5.ValidateResourceTypeConfig_Response, error) {
-	ctx = resourceLoggingContext(rpcLoggingContext(s.loggingContext(ctx), "ValidateResourceTypeConfig"), req.TypeName)
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, "ValidateResourceTypeConfig")
+	ctx = logging.ResourceContext(ctx, req.TypeName)
 	ctx = s.stoppableContext(ctx)
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Received request")
-	defer tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Served request")
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
 	r, err := fromproto.ValidateResourceTypeConfigRequest(req)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting request from protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting request from protobuf", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Calling downstream")
+	logging.ProtocolTrace(ctx, "Calling downstream")
 	resp, err := s.downstream.ValidateResourceTypeConfig(ctx, r)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error from downstream", "error", err)
+		logging.ProtocolError(ctx, "Error from downstream", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Called downstream")
+	logging.ProtocolTrace(ctx, "Called downstream")
 	ret, err := toproto.ValidateResourceTypeConfig_Response(resp)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting response to protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting response to protobuf", "error", err)
 		return nil, err
 	}
 	return ret, nil
 }
 
 func (s *server) UpgradeResourceState(ctx context.Context, req *tfplugin5.UpgradeResourceState_Request) (*tfplugin5.UpgradeResourceState_Response, error) {
-	ctx = resourceLoggingContext(rpcLoggingContext(s.loggingContext(ctx), "UpgradeResourceState"), req.TypeName)
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, "UpgradeResourceState")
+	ctx = logging.ResourceContext(ctx, req.TypeName)
 	ctx = s.stoppableContext(ctx)
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Received request")
-	defer tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Served request")
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
 	r, err := fromproto.UpgradeResourceStateRequest(req)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting request from protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting request from protobuf", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Calling downstream")
+	logging.ProtocolTrace(ctx, "Calling downstream")
 	resp, err := s.downstream.UpgradeResourceState(ctx, r)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error from downstream", "error", err)
+		logging.ProtocolError(ctx, "Error from downstream", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Called downstream")
+	logging.ProtocolTrace(ctx, "Called downstream")
 	ret, err := toproto.UpgradeResourceState_Response(resp)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting response to protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting response to protobuf", "error", err)
 		return nil, err
 	}
 	return ret, nil
 }
 
 func (s *server) ReadResource(ctx context.Context, req *tfplugin5.ReadResource_Request) (*tfplugin5.ReadResource_Response, error) {
-	ctx = resourceLoggingContext(rpcLoggingContext(s.loggingContext(ctx), "ReadResource"), req.TypeName)
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, "ReadResource")
+	ctx = logging.ResourceContext(ctx, req.TypeName)
 	ctx = s.stoppableContext(ctx)
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Received request")
-	defer tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Served request")
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
 	r, err := fromproto.ReadResourceRequest(req)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting request from protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting request from protobuf", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Calling downstream")
+	logging.ProtocolTrace(ctx, "Calling downstream")
 	resp, err := s.downstream.ReadResource(ctx, r)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error from downstream", "error", err)
+		logging.ProtocolError(ctx, "Error from downstream", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Called downstream")
+	logging.ProtocolTrace(ctx, "Called downstream")
 	ret, err := toproto.ReadResource_Response(resp)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting response to protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting response to protobuf", "error", err)
 		return nil, err
 	}
 	return ret, nil
 }
 
 func (s *server) PlanResourceChange(ctx context.Context, req *tfplugin5.PlanResourceChange_Request) (*tfplugin5.PlanResourceChange_Response, error) {
-	ctx = resourceLoggingContext(rpcLoggingContext(s.loggingContext(ctx), "PlanResourceChange"), req.TypeName)
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, "PlanResourceChange")
+	ctx = logging.ResourceContext(ctx, req.TypeName)
 	ctx = s.stoppableContext(ctx)
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Received request")
-	defer tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Served request")
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
 	r, err := fromproto.PlanResourceChangeRequest(req)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting request from protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting request from protobuf", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Calling downstream")
+	logging.ProtocolTrace(ctx, "Calling downstream")
 	resp, err := s.downstream.PlanResourceChange(ctx, r)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error from downstream", "error", err)
+		logging.ProtocolError(ctx, "Error from downstream", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Called downstream")
+	logging.ProtocolTrace(ctx, "Called downstream")
 	ret, err := toproto.PlanResourceChange_Response(resp)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting response to protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting response to protobuf", "error", err)
 		return nil, err
 	}
 	return ret, nil
 }
 
 func (s *server) ApplyResourceChange(ctx context.Context, req *tfplugin5.ApplyResourceChange_Request) (*tfplugin5.ApplyResourceChange_Response, error) {
-	ctx = resourceLoggingContext(rpcLoggingContext(s.loggingContext(ctx), "ApplyResourceChange"), req.TypeName)
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, "ApplyResourceChange")
+	ctx = logging.ResourceContext(ctx, req.TypeName)
 	ctx = s.stoppableContext(ctx)
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Received request")
-	defer tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Served request")
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
 	r, err := fromproto.ApplyResourceChangeRequest(req)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting request from protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting request from protobuf", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Calling downstream")
+	logging.ProtocolTrace(ctx, "Calling downstream")
 	resp, err := s.downstream.ApplyResourceChange(ctx, r)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error from downstream", "error", err)
+		logging.ProtocolError(ctx, "Error from downstream", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Called downstream")
+	logging.ProtocolTrace(ctx, "Called downstream")
 	ret, err := toproto.ApplyResourceChange_Response(resp)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting response to protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting response to protobuf", "error", err)
 		return nil, err
 	}
 	return ret, nil
 }
 
 func (s *server) ImportResourceState(ctx context.Context, req *tfplugin5.ImportResourceState_Request) (*tfplugin5.ImportResourceState_Response, error) {
-	ctx = resourceLoggingContext(rpcLoggingContext(s.loggingContext(ctx), "ImportResourceState"), req.TypeName)
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, "ImportResourceState")
+	ctx = logging.ResourceContext(ctx, req.TypeName)
 	ctx = s.stoppableContext(ctx)
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Received request")
-	defer tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Served request")
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
 	r, err := fromproto.ImportResourceStateRequest(req)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting request from protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting request from protobuf", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Calling downstream")
+	logging.ProtocolTrace(ctx, "Calling downstream")
 	resp, err := s.downstream.ImportResourceState(ctx, r)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error from downstream", "error", err)
+		logging.ProtocolError(ctx, "Error from downstream", "error", err)
 		return nil, err
 	}
-	tfsdklog.SubsystemTrace(ctx, tflogSubsystemName, "Called downstream")
+	logging.ProtocolTrace(ctx, "Called downstream")
 	ret, err := toproto.ImportResourceState_Response(resp)
 	if err != nil {
-		tfsdklog.SubsystemError(ctx, tflogSubsystemName, "Error converting response to protobuf", "error", err)
+		logging.ProtocolError(ctx, "Error converting response to protobuf", "error", err)
 		return nil, err
 	}
 	return ret, nil
