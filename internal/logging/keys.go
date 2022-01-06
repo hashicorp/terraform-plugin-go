@@ -21,6 +21,9 @@ const (
 	// The type of data source being operated on, such as "archive_file"
 	KeyDataSourceType = "tf_data_source_type"
 
+	// Path to protocol data file, such as "/tmp/example.json"
+	KeyProtocolDataFile = "tf_proto_data_file"
+
 	// The protocol version being used, as a string, such as "6"
 	KeyProtocolVersion = "tf_proto_version"
 )
