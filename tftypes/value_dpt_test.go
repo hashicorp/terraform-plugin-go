@@ -1,6 +1,7 @@
 package tftypes
 
 import (
+	"math/big"
 	"regexp"
 	"testing"
 )
@@ -14,10 +15,93 @@ func Test_newValue_dpt(t *testing.T) {
 		expected Value
 	}
 	tests := map[string]testCase{
-		"known": {
+		"*big.Float": {
 			typ: DynamicPseudoType,
-			val: "hello",
-			err: regexp.MustCompile(`cannot have DynamicPseudoType with known value, DynamicPseudoType can only contain null or unknown values`),
+			val: big.NewFloat(123),
+			expected: Value{
+				typ: DynamicPseudoType,
+				value: Value{
+					typ:   Number,
+					value: big.NewFloat(123),
+				},
+			},
+		},
+		"bool": {
+			typ: DynamicPseudoType,
+			val: true,
+			expected: Value{
+				typ:   DynamicPseudoType,
+				value: true,
+			},
+		},
+		"float64": {
+			typ: DynamicPseudoType,
+			val: float64(123),
+			expected: Value{
+				typ: DynamicPseudoType,
+				value: Value{
+					typ:   Number,
+					value: big.NewFloat(123),
+				},
+			},
+		},
+		"int": {
+			typ: DynamicPseudoType,
+			val: 123,
+			expected: Value{
+				typ: DynamicPseudoType,
+				value: Value{
+					typ:   Number,
+					value: big.NewFloat(123),
+				},
+			},
+		},
+		"int64": {
+			typ: DynamicPseudoType,
+			val: int64(123),
+			expected: Value{
+				typ: DynamicPseudoType,
+				value: Value{
+					typ:   Number,
+					value: big.NewFloat(123),
+				},
+			},
+		},
+		"object": {
+			typ: DynamicPseudoType,
+			val: map[string]Value{
+				"testkey": NewValue(String, "testvalue"),
+			},
+			expected: Value{
+				typ: DynamicPseudoType,
+				value: map[string]Value{
+					"testkey": {
+						typ:   String,
+						value: "testvalue",
+					},
+				},
+			},
+		},
+		"string": {
+			typ: DynamicPseudoType,
+			val: "test",
+			expected: Value{
+				typ:   DynamicPseudoType,
+				value: "test",
+			},
+		},
+		"tuple": {
+			typ: DynamicPseudoType,
+			val: []Value{NewValue(String, "test")},
+			expected: Value{
+				typ: DynamicPseudoType,
+				value: []Value{
+					{
+						typ:   String,
+						value: "test",
+					},
+				},
+			},
 		},
 		"null": {
 			typ: DynamicPseudoType,
