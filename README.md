@@ -100,6 +100,25 @@ func TestAccDataSourceFoo(t *testing.T) {
 }
 ```
 
+## Debugging
+
+Provider servers can be instrumented with debugging tooling, such as [`delve`](https://github.com/go-delve/delve/), by using the [`WithManagedDebug()`](https://pkg.go.dev/github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server#WithManagedDebug) and [`WithDebug()`](https://pkg.go.dev/github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server#WithDebug) `ServeOpt`. In this mode, Terraform CLI no longer manages the server lifecycle and instead connects to the running provider server via a reattach configuration supplied by the `TF_REATTACH_PROVIDERS` environment variable. The `WithDebug()` implementation is meant for advanced use cases which require manually handling the reattach configuration, such as managing providers with [terraform-exec](https://pkg.go.dev/github.com/hashicorp/terraform-exec), while the `WithManagedDebug()` implementation is suitable for provider `main()` functions. For example:
+
+```go
+func main() {
+	debugFlag := flag.Bool("debug", false, "Start provider in debug mode.")
+	flag.Parse()
+
+	opts := []tf6server.ServeOpt{}
+
+	if *debugFlag {
+		opts = append(opts, tf5server.WithManagedDebug())
+	}
+
+	tf6server.Serve("registry.terraform.io/namespace/example", /* Provider function */, opts...)
+}
+```
+
 ## Documentation
 
 Documentation is a work in progress. The GoDoc for packages, types, functions,
