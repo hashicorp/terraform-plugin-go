@@ -112,7 +112,7 @@ func main() {
 	opts := []tf6server.ServeOpt{}
 
 	if *debugFlag {
-		opts = append(opts, tf5server.WithManagedDebug())
+		opts = append(opts, tf6server.WithManagedDebug())
 	}
 
 	tf6server.Serve("registry.terraform.io/namespace/example", /* Provider function */, opts...)
