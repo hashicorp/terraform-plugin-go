@@ -2,11 +2,17 @@ package tf5server
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
+	"os"
+	"os/signal"
 	"regexp"
+	"runtime"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/fromproto"
@@ -49,6 +55,15 @@ const (
 	logKeyProtocolVersion = "tf_proto_version"
 )
 
+const (
+	// envTfReattachProviders is the environment variable used by Terraform CLI
+	// to directly connect to already running provider processes, such as those
+	// being inspected by debugging processes. When connecting to providers in
+	// this manner, Terraform CLI disables certain plugin handshake checks and
+	// will not stop the provider process.
+	envTfReattachProviders = "TF_REATTACH_PROVIDERS"
+)
+
 // ServeOpt is an interface for defining options that can be passed to the
 // Serve function. Each implementation modifies the ServeConfig being
 // generated. A slice of ServeOpts then, cumulatively applied, render a full
@@ -65,6 +80,10 @@ type ServeConfig struct {
 	debugCh      chan *plugin.ReattachConfig
 	debugCloseCh chan struct{}
 
+	managedDebug                      bool
+	managedDebugReattachConfigTimeout time.Duration
+	managedDebugStopSignals           []os.Signal
+
 	disableLogInitStderr bool
 	disableLogLocation   bool
 	useLoggingSink       testing.T
@@ -79,11 +98,61 @@ func (s serveConfigFunc) ApplyServeOpt(in *ServeConfig) error {
 
 // WithDebug returns a ServeOpt that will set the server into debug mode, using
 // the passed options to populate the go-plugin ServeTestConfig.
+//
+// This is an advanced ServeOpt that assumes the caller will fully manage the
+// reattach configuration and server lifecycle. Refer to WithManagedDebug for a
+// ServeOpt that handles common use cases, such as implementing provider main
+// functions.
 func WithDebug(ctx context.Context, config chan *plugin.ReattachConfig, closeCh chan struct{}) ServeOpt {
 	return serveConfigFunc(func(in *ServeConfig) error {
+		if in.managedDebug {
+			return errors.New("cannot set both WithDebug and WithManagedDebug")
+		}
+
 		in.debugCtx = ctx
 		in.debugCh = config
 		in.debugCloseCh = closeCh
+		return nil
+	})
+}
+
+// WithManagedDebug returns a ServeOpt that will start the server in debug
+// mode, managing the reattach configuration handling and server lifecycle.
+// Reattach configuration is output to stdout with human friendly instructions.
+// By default, the server can be stopped with os.Interrupt (SIGINT; ctrl-c).
+//
+// Refer to the optional WithManagedDebugStopSignals and
+// WithManagedDebugReattachConfigTimeout ServeOpt for additional configuration.
+//
+// The reattach configuration output of this handling is not protected by
+// compatibility guarantees. Use the WithDebug ServeOpt for advanced use cases.
+func WithManagedDebug() ServeOpt {
+	return serveConfigFunc(func(in *ServeConfig) error {
+		if in.debugCh != nil {
+			return errors.New("cannot set both WithDebug and WithManagedDebug")
+		}
+
+		in.managedDebug = true
+		return nil
+	})
+}
+
+// WithManagedDebugStopSignals returns a ServeOpt that will set the stop signals for a
+// debug managed process (WithManagedDebug). When not configured, os.Interrupt
+// (SIGINT; Ctrl-c) will stop the process.
+func WithManagedDebugStopSignals(signals []os.Signal) ServeOpt {
+	return serveConfigFunc(func(in *ServeConfig) error {
+		in.managedDebugStopSignals = signals
+		return nil
+	})
+}
+
+// WithManagedDebugReattachConfigTimeout returns a ServeOpt that will set the timeout
+// for a debug managed process to start and return its reattach configuration.
+// When not configured, 2 seconds is the default.
+func WithManagedDebugReattachConfigTimeout(timeout time.Duration) ServeOpt {
+	return serveConfigFunc(func(in *ServeConfig) error {
+		in.managedDebugReattachConfigTimeout = timeout
 		return nil
 	})
 }
@@ -152,13 +221,19 @@ func WithLogEnvVarName(name string) ServeOpt {
 // modify the logger that go-plugin is using, ServeOpts can be specified to
 // support that.
 func Serve(name string, serverFactory func() tfprotov5.ProviderServer, opts ...ServeOpt) error {
-	var conf ServeConfig
+	// Defaults
+	conf := ServeConfig{
+		managedDebugReattachConfigTimeout: 2 * time.Second,
+		managedDebugStopSignals:           []os.Signal{os.Interrupt},
+	}
+
 	for _, opt := range opts {
 		err := opt.ApplyServeOpt(&conf)
 		if err != nil {
 			return err
 		}
 	}
+
 	serveConfig := &plugin.ServeConfig{
 		HandshakeConfig: plugin.HandshakeConfig{
 			ProtocolVersion:  5,
@@ -172,9 +247,35 @@ func Serve(name string, serverFactory func() tfprotov5.ProviderServer, opts ...S
 		},
 		GRPCServer: plugin.DefaultGRPCServer,
 	}
+
 	if conf.logger != nil {
 		serveConfig.Logger = conf.logger
 	}
+
+	if conf.managedDebug {
+		ctx, cancel := context.WithCancel(context.Background())
+		signalCh := make(chan os.Signal, len(conf.managedDebugStopSignals))
+
+		signal.Notify(signalCh, conf.managedDebugStopSignals...)
+
+		defer func() {
+			signal.Stop(signalCh)
+			cancel()
+		}()
+
+		go func() {
+			select {
+			case <-signalCh:
+				cancel()
+			case <-ctx.Done():
+			}
+		}()
+
+		conf.debugCh = make(chan *plugin.ReattachConfig)
+		conf.debugCloseCh = make(chan struct{})
+		conf.debugCtx = ctx
+	}
+
 	if conf.debugCh != nil {
 		serveConfig.Test = &plugin.ServeTestConfig{
 			Context:          conf.debugCtx,
@@ -182,7 +283,78 @@ func Serve(name string, serverFactory func() tfprotov5.ProviderServer, opts ...S
 			CloseCh:          conf.debugCloseCh,
 		}
 	}
-	plugin.Serve(serveConfig)
+
+	if !conf.managedDebug {
+		plugin.Serve(serveConfig)
+		return nil
+	}
+
+	go plugin.Serve(serveConfig)
+
+	var pluginReattachConfig *plugin.ReattachConfig
+
+	select {
+	case pluginReattachConfig = <-conf.debugCh:
+	case <-time.After(conf.managedDebugReattachConfigTimeout):
+		return errors.New("timeout waiting on reattach configuration")
+	}
+
+	if pluginReattachConfig == nil {
+		return errors.New("nil reattach configuration received")
+	}
+
+	// Duplicate implementation is required because the go-plugin
+	// ReattachConfig.Addr implementation is not friendly for JSON encoding
+	// and to avoid importing terraform-exec.
+	type reattachConfigAddr struct {
+		Network string
+		String  string
+	}
+
+	type reattachConfig struct {
+		Protocol        string
+		ProtocolVersion int
+		Pid             int
+		Test            bool
+		Addr            reattachConfigAddr
+	}
+
+	reattachBytes, err := json.Marshal(map[string]reattachConfig{
+		name: {
+			Protocol:        string(pluginReattachConfig.Protocol),
+			ProtocolVersion: pluginReattachConfig.ProtocolVersion,
+			Pid:             pluginReattachConfig.Pid,
+			Test:            pluginReattachConfig.Test,
+			Addr: reattachConfigAddr{
+				Network: pluginReattachConfig.Addr.Network(),
+				String:  pluginReattachConfig.Addr.String(),
+			},
+		},
+	})
+
+	if err != nil {
+		return fmt.Errorf("Error building reattach string: %w", err)
+	}
+
+	reattachStr := string(reattachBytes)
+
+	// This is currently intended to be executed via provider main function and
+	// human friendly, so output directly to stdout.
+	fmt.Printf("Provider started. To attach Terraform CLI, set the %s environment variable with the following:\n\n", envTfReattachProviders)
+
+	switch runtime.GOOS {
+	case "windows":
+		fmt.Printf("\tCommand Prompt:\tset \"%s=%s\"\n", envTfReattachProviders, reattachStr)
+		fmt.Printf("\tPowerShell:\t$env:%s='%s'\n", envTfReattachProviders, strings.ReplaceAll(reattachStr, `'`, `''`))
+	default:
+		fmt.Printf("\t%s='%s'\n", envTfReattachProviders, strings.ReplaceAll(reattachStr, `'`, `'"'"'`))
+	}
+
+	fmt.Println("")
+
+	// Wait for the server to be done.
+	<-conf.debugCloseCh
+
 	return nil
 }
 
