@@ -119,6 +119,8 @@ func main() {
 }
 ```
 
+To write raw protocol MessagePack or JSON data to disk, set the `TF_LOG_SDK_PROTO_DATA_DIR` environment variable.
+
 ## Documentation
 
 Documentation is a work in progress. The GoDoc for packages, types, functions,
