@@ -1,0 +1,7 @@
+```release-note:enhancement
+tfprotov5/tf5server: Added `WithManagedDebug()` `ServeOpt`, which implements outputting reattach configuration to stdout and stopping on SIGINT
+```
+
+```release-note:enhancement
+tfprotov6/tf6server: Added `WithManagedDebug()` `ServeOpt`, which implements outputting reattach configuration to stdout and stopping on SIGINT
+```
