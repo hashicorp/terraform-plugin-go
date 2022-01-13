@@ -27,6 +27,30 @@ import (
 )
 
 const (
+	// protocolVersionMajor represents the major version number of the protocol
+	// being served. This is used during the plugin handshake to validate the
+	// server and client are compatible.
+	//
+	// In the future, it may be possible to include this information directly
+	// in the protocol buffers rather than recreating a constant here.
+	protocolVersionMajor uint = 6
+
+	// protocolVersionMinor represents the minor version number of the protocol
+	// being served. Backwards compatible additions are possible in the
+	// protocol definitions, which is when this may be increased. While it is
+	// not used in plugin negotiation, it can be helpful to include this value
+	// for debugging, such as in logs.
+	//
+	// In the future, it may be possible to include this information directly
+	// in the protocol buffers rather than recreating a constant here.
+	protocolVersionMinor uint = 0
+)
+
+// protocolVersion represents the combined major and minor version numbers of
+// the protocol being served.
+var protocolVersion string = fmt.Sprintf("%d.%d", protocolVersionMajor, protocolVersionMinor)
+
+const (
 	// envTfReattachProviders is the environment variable used by Terraform CLI
 	// to directly connect to already running provider processes, such as those
 	// being inspected by debugging processes. When connecting to providers in
@@ -207,7 +231,7 @@ func Serve(name string, serverFactory func() tfprotov6.ProviderServer, opts ...S
 
 	serveConfig := &plugin.ServeConfig{
 		HandshakeConfig: plugin.HandshakeConfig{
-			ProtocolVersion:  6,
+			ProtocolVersion:  protocolVersionMajor,
 			MagicCookieKey:   "TF_PLUGIN_MAGIC_COOKIE",
 			MagicCookieValue: "d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d6991ca9872b2",
 		},
@@ -428,7 +452,7 @@ func New(name string, serve tfprotov6.ProviderServer, opts ...ServeOpt) tfplugin
 		useTFLogSink:    conf.useLoggingSink != nil,
 		testHandle:      conf.useLoggingSink,
 		protocolDataDir: os.Getenv(logging.EnvTfLogSdkProtoDataDir),
-		protocolVersion: "6",
+		protocolVersion: protocolVersion,
 	}
 }
 
