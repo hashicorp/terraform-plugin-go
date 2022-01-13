@@ -426,7 +426,7 @@ func New(name string, serve tfprotov5.ProviderServer, opts ...ServeOpt) tfplugin
 		useTFLogSink:    conf.useLoggingSink != nil,
 		testHandle:      conf.useLoggingSink,
 		protocolDataDir: os.Getenv(logging.EnvTfLogSdkProtoDataDir),
-		protocolVersion: "6",
+		protocolVersion: "5",
 	}
 }
 
