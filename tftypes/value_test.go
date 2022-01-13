@@ -415,6 +415,16 @@ func TestValueAs(t *testing.T) {
 				}}, []Value{}),
 			}),
 		},
+		"dynamic": {
+			in:       NewValue(DynamicPseudoType, "hello"),
+			as:       strPointer(""),
+			expected: strPointer("hello"),
+		},
+		"dynamic-null": {
+			in:       NewValue(DynamicPseudoType, nil),
+			as:       strPointer(""),
+			expected: strPointer(""),
+		},
 	}
 
 	for name, test := range tests {
