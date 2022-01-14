@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/toproto"
+	"google.golang.org/grpc"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -57,6 +58,26 @@ const (
 	// this manner, Terraform CLI disables certain plugin handshake checks and
 	// will not stop the provider process.
 	envTfReattachProviders = "TF_REATTACH_PROVIDERS"
+)
+
+const (
+	// grpcMaxMessageSize is the maximum gRPC send and receive message sizes
+	// for the server.
+	//
+	// This 256MB value is arbitrarily raised from the default message sizes of
+	// 4MB to account for advanced use cases, but arbitrarily lowered from
+	// MaxInt32 (or similar) to prevent incorrect server implementations from
+	// exhausting resources in common execution environments. Receiving a gRPC
+	// message size error is preferable for troubleshooting over determining
+	// why an execution environment may have terminated the process via its
+	// memory management processes, such as oom-killer on Linux.
+	//
+	// This value is kept as constant over allowing server configurability
+	// since there are many factors that influence message size, such as
+	// Terraform configuration and state data. If larger message size use
+	// cases appear, other gRPC options should be explored, such as
+	// implementing streaming RPCs and messages.
+	grpcMaxMessageSize = 256 << 20
 )
 
 // ServeOpt is an interface for defining options that can be passed to the
@@ -242,7 +263,12 @@ func Serve(name string, serverFactory func() tfprotov6.ProviderServer, opts ...S
 				Name:         name,
 			},
 		},
-		GRPCServer: plugin.DefaultGRPCServer,
+		GRPCServer: func(opts []grpc.ServerOption) *grpc.Server {
+			opts = append(opts, grpc.MaxRecvMsgSize(grpcMaxMessageSize))
+			opts = append(opts, grpc.MaxSendMsgSize(grpcMaxMessageSize))
+
+			return grpc.NewServer(opts...)
+		},
 	}
 
 	if conf.logger != nil {
