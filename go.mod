@@ -3,7 +3,7 @@ module github.com/hashicorp/terraform-plugin-go
 go 1.16
 
 require (
-	github.com/golang/protobuf v1.4.3
+	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.6
 	github.com/hashicorp/go-hclog v1.1.0
 	github.com/hashicorp/go-plugin v1.4.3
@@ -14,5 +14,5 @@ require (
 	github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce
 	github.com/vmihailenco/msgpack/v4 v4.3.12
 	google.golang.org/grpc v1.43.0
-	google.golang.org/protobuf v1.25.0
+	google.golang.org/protobuf v1.26.0
 )
