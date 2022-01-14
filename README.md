@@ -119,7 +119,9 @@ func main() {
 }
 ```
 
-To write raw protocol MessagePack or JSON data to disk, set the `TF_LOG_SDK_PROTO_DATA_DIR` environment variable.
+### Protocol Data
+
+To write raw protocol MessagePack or JSON data to disk, set the `TF_LOG_SDK_PROTO_DATA_DIR` environment variable. During Terraform execution, this directory will get populated with `{TIME}_{RPC}_{MESSAGE}_{FIELD}.{EXTENSION}` named files. Tooling such as [`jq`](https://stedolan.github.io/jq/) can be used to inspect the JSON data. Tooling such as [`fq`](https://github.com/wader/fq) or [`msgpack2json`](https://pkg.go.dev/github.com/nokute78/msgpack-microscope/cmd/msgpack2json) can be used to inspect the MessagePack data.
 
 ## Documentation
 
