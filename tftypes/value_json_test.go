@@ -302,7 +302,7 @@ func TestValueFromJSON(t *testing.T) {
 		},
 		"tuple-of-dynamic-bools": {
 			value: NewValue(Tuple{
-				ElementTypes: []Type{Bool, Bool},
+				ElementTypes: []Type{DynamicPseudoType, DynamicPseudoType},
 			}, []Value{
 				NewValue(Bool, true),
 				NewValue(Bool, false),
@@ -324,7 +324,7 @@ func TestValueFromJSON(t *testing.T) {
 		},
 		"map-of-dynamic-bools": {
 			value: NewValue(Map{
-				ElementType: Bool,
+				ElementType: DynamicPseudoType,
 			}, map[string]Value{
 				"true":  NewValue(Bool, true),
 				"false": NewValue(Bool, false),
@@ -338,7 +338,7 @@ func TestValueFromJSON(t *testing.T) {
 			value: NewValue(Object{
 				AttributeTypes: map[string]Type{
 					"static":  Bool,
-					"dynamic": Bool,
+					"dynamic": DynamicPseudoType,
 				},
 			}, map[string]Value{
 				"static":  NewValue(Bool, true),

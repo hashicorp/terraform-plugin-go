@@ -1,0 +1,3 @@
+```release-note:bug
+tftypes: Fixed regression with DynamicPseudoType handling since v0.4.0, allowing usage of known values again and preventing msgpack decoding errors in Terraform CLI
+```

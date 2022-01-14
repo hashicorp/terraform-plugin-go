@@ -127,7 +127,7 @@ func TestValueFromMsgPack(t *testing.T) {
 			hex: "81a86772656574696e6792c40822737472696e6722a568656c6c6f",
 			value: NewValue(Object{
 				AttributeTypes: map[string]Type{
-					"greeting": String,
+					"greeting": DynamicPseudoType,
 				},
 			}, map[string]Value{
 				"greeting": NewValue(String, "hello"),
@@ -248,7 +248,7 @@ func TestValueFromMsgPack(t *testing.T) {
 		"map-dynamic": {
 			hex: "81a86772656574696e6792c40822737472696e6722a568656c6c6f",
 			value: NewValue(Map{
-				ElementType: String,
+				ElementType: DynamicPseudoType,
 			}, map[string]Value{
 				"greeting": NewValue(String, "hello"),
 			}),
@@ -291,7 +291,7 @@ func TestValueFromMsgPack(t *testing.T) {
 		"tuple-dynamic": {
 			hex: "9292c40822737472696e6722a568656c6c6f92c40822737472696e6722a5776f726c64",
 			value: NewValue(Tuple{
-				ElementTypes: []Type{String, String},
+				ElementTypes: []Type{DynamicPseudoType, DynamicPseudoType},
 			}, []Value{
 				NewValue(String, "hello"),
 				NewValue(String, "world"),
@@ -336,7 +336,7 @@ func TestValueFromMsgPack(t *testing.T) {
 			hex: "81a86772656574696e6792c40822737472696e6722a568656c6c6f",
 			value: NewValue(Object{
 				AttributeTypes: map[string]Type{
-					"greeting": String,
+					"greeting": DynamicPseudoType,
 				},
 			}, map[string]Value{
 				"greeting": NewValue(String, "hello"),
