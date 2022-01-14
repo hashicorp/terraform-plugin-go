@@ -1,0 +1,7 @@
+```release-note:enhancement
+tfprotov5/tf5server: Added support for writing protocol data to disk by setting `TF_LOG_SDK_PROTO_DATA_DIR` environment variable
+```
+
+```release-note:enhancement
+tfprotov6/tf6server: Added support for writing protocol data to disk by setting `TF_LOG_SDK_PROTO_DATA_DIR` environment variable
+```
