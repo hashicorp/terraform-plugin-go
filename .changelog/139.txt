@@ -1,0 +1,7 @@
+```release-note:enhancement
+tfprotov5/tf5server: Increased maximum gRPC send and receive message size limit to 256MB
+```
+
+```release-note:enhancement
+tfprotov6/tf6server: Increased maximum gRPC send and receive message size limit to 256MB
+```
