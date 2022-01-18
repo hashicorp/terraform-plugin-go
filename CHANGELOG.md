@@ -1,3 +1,19 @@
+# 0.6.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* tfprotov5/tf5server: Added `WithManagedDebug()` `ServeOpt`, which implements outputting reattach configuration to stdout and stopping on SIGINT ([#137](https://github.com/hashicorp/terraform-plugin-go/issues/137))
+* tfprotov5/tf5server: Added support for writing protocol data to disk by setting `TF_LOG_SDK_PROTO_DATA_DIR` environment variable ([#135](https://github.com/hashicorp/terraform-plugin-go/issues/135))
+* tfprotov5/tf5server: Increased maximum gRPC send and receive message size limit to 256MB ([#139](https://github.com/hashicorp/terraform-plugin-go/issues/139))
+* tfprotov6/tf6server: Added `WithManagedDebug()` `ServeOpt`, which implements outputting reattach configuration to stdout and stopping on SIGINT ([#137](https://github.com/hashicorp/terraform-plugin-go/issues/137))
+* tfprotov6/tf6server: Added support for writing protocol data to disk by setting `TF_LOG_SDK_PROTO_DATA_DIR` environment variable ([#135](https://github.com/hashicorp/terraform-plugin-go/issues/135))
+* tfprotov6/tf6server: Increased maximum gRPC send and receive message size limit to 256MB ([#139](https://github.com/hashicorp/terraform-plugin-go/issues/139))
+
+BUG FIXES:
+
+* Prevent potential process leak on Windows platforms ([#123](https://github.com/hashicorp/terraform-plugin-go/issues/123))
+* tftypes: Fixed regression with DynamicPseudoType handling since v0.4.0, allowing usage of known values again and preventing msgpack decoding errors in Terraform CLI ([#136](https://github.com/hashicorp/terraform-plugin-go/issues/136))
+
 # 0.5.0 (December 07, 2021)
 
 BREAKING CHANGES:
