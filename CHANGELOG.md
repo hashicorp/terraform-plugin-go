@@ -1,3 +1,13 @@
+# 0.7.0 (Unreleased)
+
+BREAKING CHANGES:
+
+* tfprotov6: The `SchemaObject.MaxItems` and `SchemaObject.MinItems` fields have been removed without replacement. These were never used in the protocol and did not perform any validation. ([#143](https://github.com/hashicorp/terraform-plugin-go/issues/143))
+
+BUG FIXES:
+
+* tfprotov6: The `ApplyResourceChangeResponse.UnsafeToUseLegacyTypeSystem` and `PlanResourceChangeResponse.UnsafeToUseLegacyTypeSystem` fields are now properly passed into and out of the protocol ([#143](https://github.com/hashicorp/terraform-plugin-go/issues/143))
+
 # 0.6.0 (January 18, 2022)
 
 ENHANCEMENTS:
