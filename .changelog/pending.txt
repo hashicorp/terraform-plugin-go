@@ -1,0 +1,7 @@
+```release-note:breaking-change
+tfprotov6: The `SchemaObject.MaxItems` and `SchemaObject.MinItems` fields have been removed without replacement. These were never used in the protocol and did not perform any validation.
+```
+
+```release-note:bug
+tfprotov6: The `ApplyResourceChangeResponse.UnsafeToUseLegacyTypeSystem` and `PlanResourceChangeResponse.UnsafeToUseLegacyTypeSystem` fields are now properly passed into and out of the protocol
+```
