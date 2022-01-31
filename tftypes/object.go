@@ -28,7 +28,7 @@ type Object struct {
 	// (e.g. Schema) and should not be used as part of a Type when creating
 	// a Value (e.g. NewValue()). When creating a Value, all OptionalAttributes
 	// must still be defined in the Object by setting each attribute to a null
-	// value for its attribute type.
+	// or known value for its attribute type.
 	//
 	// The key of OptionalAttributes should be the name of the attribute
 	// that is optional. The value should be an empty struct, used only to
