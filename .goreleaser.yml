@@ -1,4 +1,4 @@
-project_name: terraform-plugin-log
+project_name: terraform-plugin-go
 build:
   skip: true
 milestones:
