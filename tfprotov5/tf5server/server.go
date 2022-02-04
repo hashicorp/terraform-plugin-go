@@ -258,6 +258,7 @@ func Serve(name string, serverFactory func() tfprotov5.ProviderServer, opts ...S
 		},
 		Plugins: plugin.PluginSet{
 			"provider": &GRPCProviderPlugin{
+				Name:         name,
 				GRPCProvider: serverFactory,
 			},
 		},
