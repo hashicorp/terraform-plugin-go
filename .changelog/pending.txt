@@ -1,0 +1,3 @@
+```release-note:bug
+tfprotov5/tf5server: Ensure server options are passed through on startup
+```
