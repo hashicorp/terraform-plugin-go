@@ -1,3 +1,10 @@
+# 0.7.1
+
+BUG FIXES:
+
+* tfprotov5/tf5server: Ensure server options are passed through on startup ([#153](https://github.com/hashicorp/terraform-plugin-go/issues/153))
+* tfprotov5/tf5server: Prevent empty provider address error logs on startup ([#150](https://github.com/hashicorp/terraform-plugin-go/issues/150))
+
 # 0.7.0 (January 20, 2022)
 
 BREAKING CHANGES:
