@@ -1,0 +1,7 @@
+```release-note:enhancement
+tfprotov5: Added `ValueType()` methods to `Schema`, `SchemaAttribute`, `SchemaBlock`, and `SchemaNestedBlock` types.
+```
+
+```release-note:enhancement
+tfprotov6: Added `ValueType()` methods to `Schema`, `SchemaAttribute`, `SchemaBlock`, `SchemaNestedBlock`, and `SchemaObject` types.
+```
