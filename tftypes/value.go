@@ -133,7 +133,7 @@ func (val Value) ApplyTerraform5AttributePathStep(step AttributePathStep) (inter
 	}
 	switch s := step.(type) {
 	case AttributeName:
-		if !val.Type().Is(Object{}) {
+		if !val.Type().Is(Object{}) && !val.Type().Is(Map{}) {
 			return nil, ErrInvalidStep
 		}
 		o := map[string]Value{}
