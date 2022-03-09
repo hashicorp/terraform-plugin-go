@@ -1,8 +1,137 @@
 package tftypes
 
 import (
+	"errors"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
+
+func TestPrimitiveApplyTerraform5AttributePathStep(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		primitive     primitive
+		step          AttributePathStep
+		expectedType  interface{}
+		expectedError error
+	}{
+		"Bool-AttributeName": {
+			primitive:     Bool,
+			step:          AttributeName("test"),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"Bool-ElementKeyInt": {
+			primitive:     Bool,
+			step:          ElementKeyInt(123),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"Bool-ElementKeyString": {
+			primitive:     Bool,
+			step:          ElementKeyString("test"),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"Bool-ElementKeyValue": {
+			primitive:     Bool,
+			step:          ElementKeyValue(NewValue(String, "test")),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"DynamicPseudoType-AttributeName": {
+			primitive:     DynamicPseudoType,
+			step:          AttributeName("test"),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"DynamicPseudoType-ElementKeyInt": {
+			primitive:     DynamicPseudoType,
+			step:          ElementKeyInt(123),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"DynamicPseudoType-ElementKeyString": {
+			primitive:     DynamicPseudoType,
+			step:          ElementKeyString("test"),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"DynamicPseudoType-ElementKeyValue": {
+			primitive:     DynamicPseudoType,
+			step:          ElementKeyValue(NewValue(String, "test")),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"Number-AttributeName": {
+			primitive:     Number,
+			step:          AttributeName("test"),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"Number-ElementKeyInt": {
+			primitive:     Number,
+			step:          ElementKeyInt(123),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"Number-ElementKeyString": {
+			primitive:     Number,
+			step:          ElementKeyString("test"),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"Number-ElementKeyValue": {
+			primitive:     Number,
+			step:          ElementKeyValue(NewValue(String, "test")),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"String-AttributeName": {
+			primitive:     String,
+			step:          AttributeName("test"),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"String-ElementKeyInt": {
+			primitive:     String,
+			step:          ElementKeyInt(123),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"String-ElementKeyString": {
+			primitive:     String,
+			step:          ElementKeyString("test"),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"String-ElementKeyValue": {
+			primitive:     String,
+			step:          ElementKeyValue(NewValue(String, "test")),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got, err := testCase.primitive.ApplyTerraform5AttributePathStep(testCase.step)
+
+			if !errors.Is(err, testCase.expectedError) {
+				t.Errorf("expected error %q, got %s", testCase.expectedError, err)
+			}
+
+			if diff := cmp.Diff(got, testCase.expectedType); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
 
 func TestPrimitiveEqual(t *testing.T) {
 	type testCase struct {

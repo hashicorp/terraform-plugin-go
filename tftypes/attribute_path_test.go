@@ -43,13 +43,13 @@ func (a attributePathStepperTestSlice) ApplyTerraform5AttributePathStep(step Att
 func TestWalkAttributePath(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
-		value    interface{}
+		in       interface{}
 		path     *AttributePath
 		expected interface{}
 	}
 	tests := map[string]testCase{
 		"msi-root": {
-			value: map[string]interface{}{
+			in: map[string]interface{}{
 				"a": map[string]interface{}{
 					"red":  true,
 					"blue": 123,
@@ -70,7 +70,7 @@ func TestWalkAttributePath(t *testing.T) {
 			},
 		},
 		"msi-full": {
-			value: map[string]interface{}{
+			in: map[string]interface{}{
 				"a": map[string]interface{}{
 					"red":  true,
 					"blue": 123,
@@ -88,8 +88,180 @@ func TestWalkAttributePath(t *testing.T) {
 			},
 			expected: true,
 		},
+		"Object-AttributeName-Bool": {
+			in: Object{
+				AttributeTypes: map[string]Type{
+					"other": String,
+					"test":  Bool,
+				},
+			},
+			path: &AttributePath{
+				steps: []AttributePathStep{
+					AttributeName("test"),
+				},
+			},
+			expected: Bool,
+		},
+		"Object-AttributeName-DynamicPseudoType": {
+			in: Object{
+				AttributeTypes: map[string]Type{
+					"other": Bool,
+					"test":  DynamicPseudoType,
+				},
+			},
+			path: &AttributePath{
+				steps: []AttributePathStep{
+					AttributeName("test"),
+				},
+			},
+			expected: DynamicPseudoType,
+		},
+		"Object-AttributeName-List": {
+			in: Object{
+				AttributeTypes: map[string]Type{
+					"other": Bool,
+					"test":  List{ElementType: String},
+				},
+			},
+			path: &AttributePath{
+				steps: []AttributePathStep{
+					AttributeName("test"),
+				},
+			},
+			expected: List{ElementType: String},
+		},
+		"Object-AttributeName-List-ElementKeyInt": {
+			in: Object{
+				AttributeTypes: map[string]Type{
+					"other": Bool,
+					"test":  List{ElementType: String},
+				},
+			},
+			path: &AttributePath{
+				steps: []AttributePathStep{
+					AttributeName("test"),
+					ElementKeyInt(0),
+				},
+			},
+			expected: String,
+		},
+		"Object-AttributeName-Map": {
+			in: Object{
+				AttributeTypes: map[string]Type{
+					"other": Bool,
+					"test":  Map{ElementType: String},
+				},
+			},
+			path: &AttributePath{
+				steps: []AttributePathStep{
+					AttributeName("test"),
+				},
+			},
+			expected: Map{ElementType: String},
+		},
+		"Object-AttributeName-Map-ElementKeyString": {
+			in: Object{
+				AttributeTypes: map[string]Type{
+					"other": Bool,
+					"test":  Map{ElementType: String},
+				},
+			},
+			path: &AttributePath{
+				steps: []AttributePathStep{
+					AttributeName("test"),
+					ElementKeyString("sub-test"),
+				},
+			},
+			expected: String,
+		},
+		"Object-AttributeName-Number": {
+			in: Object{
+				AttributeTypes: map[string]Type{
+					"other": Bool,
+					"test":  Number,
+				},
+			},
+			path: &AttributePath{
+				steps: []AttributePathStep{
+					AttributeName("test"),
+				},
+			},
+			expected: Number,
+		},
+		"Object-AttributeName-Set": {
+			in: Object{
+				AttributeTypes: map[string]Type{
+					"other": Bool,
+					"test":  Set{ElementType: String},
+				},
+			},
+			path: &AttributePath{
+				steps: []AttributePathStep{
+					AttributeName("test"),
+				},
+			},
+			expected: Set{ElementType: String},
+		},
+		"Object-AttributeName-Set-ElementKeyValue": {
+			in: Object{
+				AttributeTypes: map[string]Type{
+					"other": Bool,
+					"test":  Set{ElementType: String},
+				},
+			},
+			path: &AttributePath{
+				steps: []AttributePathStep{
+					AttributeName("test"),
+					ElementKeyValue(NewValue(String, "sub-test")),
+				},
+			},
+			expected: String,
+		},
+		"Object-AttributeName-String": {
+			in: Object{
+				AttributeTypes: map[string]Type{
+					"other": Bool,
+					"test":  String,
+				},
+			},
+			path: &AttributePath{
+				steps: []AttributePathStep{
+					AttributeName("test"),
+				},
+			},
+			expected: String,
+		},
+		"Object-AttributeName-Tuple": {
+			in: Object{
+				AttributeTypes: map[string]Type{
+					"other": Bool,
+					"test":  Tuple{ElementTypes: []Type{Bool, String}},
+				},
+			},
+			path: &AttributePath{
+				steps: []AttributePathStep{
+					AttributeName("test"),
+				},
+			},
+			expected: Tuple{ElementTypes: []Type{Bool, String}},
+		},
+		"Object-AttributeName-Tuple-ElementKeyInt": {
+			in: Object{
+				AttributeTypes: map[string]Type{
+					"other": Bool,
+					"test":  Tuple{ElementTypes: []Type{Bool, String}},
+				},
+			},
+			path: &AttributePath{
+				steps: []AttributePathStep{
+					AttributeName("test"),
+					ElementKeyInt(1),
+				},
+			},
+			expected: String,
+		},
 		"slice-interface-root": {
-			value: []interface{}{
+			in: []interface{}{
 				map[string]interface{}{
 					"a": true,
 					"b": 123,
@@ -119,7 +291,7 @@ func TestWalkAttributePath(t *testing.T) {
 			},
 		},
 		"slice-interface-full": {
-			value: []interface{}{
+			in: []interface{}{
 				map[string]interface{}{
 					"a": true,
 					"b": 123,
@@ -144,7 +316,7 @@ func TestWalkAttributePath(t *testing.T) {
 			expected: "hello world",
 		},
 		"attributepathstepper": {
-			value: []interface{}{
+			in: []interface{}{
 				attributePathStepperTestStruct{
 					Name: "terraform",
 					Colors: []string{
@@ -173,7 +345,7 @@ func TestWalkAttributePath(t *testing.T) {
 		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			result, remaining, err := WalkAttributePath(test.value, test.path)
+			result, remaining, err := WalkAttributePath(test.in, test.path)
 			if err != nil {
 				t.Fatalf("error walking attribute path, %v still remains in the path: %s", remaining, err)
 			}
