@@ -1,3 +1,14 @@
+# 0.8.0 (March 10, 2022)
+
+NOTES:
+
+* The underlying `terraform-plugin-log` dependency has been updated to v0.3.0, which includes a breaking change in the optional additional fields parameter of logging function calls to ensure correctness and catch coding errors during compilation. Any early adopter provider logging which calls those functions may require updates. ([#166](https://github.com/hashicorp/terraform-plugin-go/issues/166))
+
+ENHANCEMENTS:
+
+* tfprotov5: Added `ValueType()` methods to `Schema`, `SchemaAttribute`, `SchemaBlock`, and `SchemaNestedBlock` types. ([#158](https://github.com/hashicorp/terraform-plugin-go/issues/158))
+* tfprotov6: Added `ValueType()` methods to `Schema`, `SchemaAttribute`, `SchemaBlock`, `SchemaNestedBlock`, and `SchemaObject` types. ([#158](https://github.com/hashicorp/terraform-plugin-go/issues/158))
+
 # 0.7.1
 
 BUG FIXES:
