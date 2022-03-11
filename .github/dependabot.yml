@@ -1,6 +1,13 @@
 version: 2
 updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
   - package-ecosystem: "gomod"
     directory: "/"
+    ignore:
+      # go-hclog should only be updated via terraform-plugin-log
+      - dependency-name: "github.com/hashicorp/go-hclog"
     schedule:
       interval: "daily"
