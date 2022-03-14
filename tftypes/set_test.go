@@ -1,6 +1,71 @@
 package tftypes
 
-import "testing"
+import (
+	"errors"
+	"testing"
+
+	"github.com/google/go-cmp/cmp"
+)
+
+func TestSetApplyTerraform5AttributePathStep(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		set           Set
+		step          AttributePathStep
+		expectedType  interface{}
+		expectedError error
+	}{
+		"AttributeName": {
+			set:           Set{},
+			step:          AttributeName("test"),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"ElementKeyInt": {
+			set:           Set{},
+			step:          ElementKeyInt(123),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"ElementKeyString": {
+			set:           Set{},
+			step:          ElementKeyString("test"),
+			expectedType:  nil,
+			expectedError: ErrInvalidStep,
+		},
+		"ElementKeyValue-no-ElementType": {
+			set:           Set{},
+			step:          ElementKeyValue(NewValue(String, "test")),
+			expectedType:  nil,
+			expectedError: nil,
+		},
+		"ElementKeyValue-ElementType": {
+			set:           Set{ElementType: String},
+			step:          ElementKeyValue(NewValue(String, "test")),
+			expectedType:  String,
+			expectedError: nil,
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got, err := testCase.set.ApplyTerraform5AttributePathStep(testCase.step)
+
+			if !errors.Is(err, testCase.expectedError) {
+				t.Errorf("expected error %q, got %s", testCase.expectedError, err)
+			}
+
+			if diff := cmp.Diff(got, testCase.expectedType); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
 
 func TestSetEqual(t *testing.T) {
 	t.Parallel()
