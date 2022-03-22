@@ -34,10 +34,10 @@ jobs:
           version: '3.19.3'
       - run: go mod download
       - name: protoc (tfplugin5)
-        run: generate.sh
+        run: ./generate.sh
         working-directory: tfprotov5/internal/tfplugin5
       - name: protoc (tfplugin6)
-        run: generate.sh
+        run: ./generate.sh
         working-directory: tfprotov6/internal/tfplugin6
       - name: git diff
         run: |
