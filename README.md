@@ -157,6 +157,30 @@ out of scope and should live in a separate module.
 
 Please see [`.github/CONTRIBUTING.md`](https://github.com/hashicorp/terraform-plugin-go/blob/main/.github/CONTRIBUTING.md).
 
+### Unit Testing
+
+Run `go test ./...` or `make test` after any changes.
+
+### Linting
+
+Ensure the following tooling is installed:
+
+- [`golangci-lint](https://golangci-lint.run/): Aggregate Go linting tool.
+
+Run `golangci-lint run ./..` or `make lint` after any changes.
+
+### Protocol Updates
+
+Ensure the following tooling is installed:
+
+- [`protoc`](https://github.com/protocolbuffers/protobuf): Protocol Buffers compiler.
+- [`protoc-gen-go`](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go): Go plugin for Protocol Buffers compiler. e.g. `go install google.golang.org/protobuf/cmd/protoc-gen-go`
+- [`protoc-gen-go-grpc`](https://pkg.go.dev/google.golang.org/grpc/cmd/protoc-gen-go-grpc): Go gRPC plugin for Protocol Buffers compiler. e.g. `go install google.golang.org/grpc/cmd/protoc-gen-go-grpc`
+
+The Protocol Buffers definitions can be found in `tfprotov5/internal/tfplugin5` and `tfprotov6/internal/tfplugin6`.
+
+Run `make protoc` to recompile the Protocol Buffers files for Go after any changes.
+
 ## License
 
 This module is licensed under the [Mozilla Public License v2.0](https://github.com/hashicorp/terraform-plugin-go/blob/main/LICENSE).
