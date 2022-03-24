@@ -167,7 +167,7 @@ Ensure the following tooling is installed:
 
 - [`golangci-lint](https://golangci-lint.run/): Aggregate Go linting tool.
 
-Run `golangci-lint run ./..` or `make lint` after any changes.
+Run `golangci-lint run ./...` or `make lint` after any changes.
 
 ### Protocol Updates
 
@@ -179,7 +179,7 @@ Ensure the following tooling is installed:
 
 The Protocol Buffers definitions can be found in `tfprotov5/internal/tfplugin5` and `tfprotov6/internal/tfplugin6`.
 
-Run `make protoc` to recompile the Protocol Buffers files for Go after any changes.
+Run `make protoc` to recompile the Protocol Buffers files after any changes.
 
 ## License
 
