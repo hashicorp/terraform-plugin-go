@@ -35,12 +35,7 @@ jobs:
       - run: go mod download
       - run: go install google.golang.org/protobuf/cmd/protoc-gen-go
       - run: go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
-      - name: protoc (tfplugin5)
-        run: ./generate.sh
-        working-directory: tfprotov5/internal/tfplugin5
-      - name: protoc (tfplugin6)
-        run: ./generate.sh
-        working-directory: tfprotov6/internal/tfplugin6
+      - run: make protoc
       - name: git diff
         run: |
           git diff --compact-summary --exit-code || \
