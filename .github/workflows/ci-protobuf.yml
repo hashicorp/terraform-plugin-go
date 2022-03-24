@@ -1,0 +1,42 @@
+# Continuous integration handling for Protocol Buffers
+name: ci-protobuf
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/ci-protobuf.yml
+      - .go-version
+      - go.mod
+      - go.sum
+      - 'tfprotov5/internal/tfplugin5/*'
+      - 'tfprotov6/internal/tfplugin6/*'
+
+permissions:
+  contents: read
+
+jobs:
+  protoc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - id: go-version
+        # Reference: https://github.com/actions/setup-go/issues/23
+        run: echo "::set-output name=version::$(cat ./.go-version)"
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ steps.go-version.outputs.version }}
+      - uses: arduino/setup-protoc@v1
+        with:
+          # The version string is embedded in protoc generated files, so it is
+          # pinned here to prevent unexpected differences. Follow the
+          # https://github.com/protocolbuffers/protobuf repository for protoc
+          # release updates.
+          version: '3.19.4'
+      - run: go mod download
+      - run: go install google.golang.org/protobuf/cmd/protoc-gen-go
+      - run: go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
+      - run: make protoc
+      - name: git diff
+        run: |
+          git diff --compact-summary --exit-code || \
+            (echo; echo "Unexpected difference in directories after code generation. Run 'protoc' command and commit."; exit 1)
