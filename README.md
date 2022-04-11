@@ -29,6 +29,12 @@ Providers built on terraform-plugin-go will only be usable with Terraform
 v0.12.0 and later. Developing providers for versions of Terraform below 0.12.0
 is unsupported by the Terraform Plugin SDK team.
 
+## Go Compatibility
+
+This project follows the [support policy](https://golang.org/doc/devel/release.html#policy) of Go as its support policy. The two latest major releases of Go are supported by the project.
+
+Currently, that means Go **1.17** or later must be used when including this project as a dependency.
+
 ## Getting Started
 
 terraform-plugin-go is targeted towards experienced Terraform developers.
