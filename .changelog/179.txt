@@ -1,0 +1,7 @@
+```release-note:bug
+tfprotov5/tf5server: Ensured `@caller` in protocol logging entries accurately reflected calling code location
+```
+
+```release-note:bug
+tfprotov6/tf6server: Ensured `@caller` in protocol logging entries accurately reflected calling code location
+```
