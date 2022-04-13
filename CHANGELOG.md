@@ -1,3 +1,18 @@
+# 0.9.0 (April 13, 2022)
+
+NOTES:
+
+* This Go module has been updated to Go 1.17 per the [Go support policy](https://golang.org/doc/devel/release.html#policy). Any consumers building on earlier Go versions may experience errors. ([#175](https://github.com/hashicorp/terraform-plugin-go/issues/175))
+
+ENHANCEMENTS:
+
+* tftypes: Added `Type` support to `WalkAttributePath()` function ([#163](https://github.com/hashicorp/terraform-plugin-go/issues/163))
+
+BUG FIXES:
+
+* tfprotov5/tf5server: Ensured `@caller` in protocol logging entries accurately reflected calling code location ([#179](https://github.com/hashicorp/terraform-plugin-go/issues/179))
+* tfprotov6/tf6server: Ensured `@caller` in protocol logging entries accurately reflected calling code location ([#179](https://github.com/hashicorp/terraform-plugin-go/issues/179))
+
 # 0.8.0 (March 10, 2022)
 
 NOTES:
