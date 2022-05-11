@@ -70,9 +70,24 @@ func TestValueFromMsgPack(t *testing.T) {
 			value: NewValue(Number, big.NewFloat(1)),
 			typ:   Number,
 		},
+		"int64-number": {
+			hex:   "cf7fffffffffffffff",
+			value: NewValue(Number, new(big.Float).SetInt64(math.MaxInt64)),
+			typ:   Number,
+		},
+		"uint64-number": {
+			hex:   "b43138343436373434303733373039353531363135",
+			value: NewValue(Number, new(big.Float).SetUint64(math.MaxUint64)),
+			typ:   Number,
+		},
 		"float-number": {
 			hex:   "cb3ff8000000000000",
 			value: NewValue(Number, big.NewFloat(1.5)),
+			typ:   Number,
+		},
+		"float64-number": {
+			hex:   "cb7fefffffffffffff",
+			value: NewValue(Number, new(big.Float).SetFloat64(math.MaxFloat64)),
 			typ:   Number,
 		},
 		"big-number": {
