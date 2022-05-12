@@ -1,3 +1,8 @@
+# 0.9.1 (May 12, 2022)
+
+BUG FIXES:
+* tftypes: Prevented loss of number precision with integers between 54 and 64 bits ([#190](https://github.com/hashicorp/terraform-plugin-go/issues/190))
+
 # 0.9.0 (April 13, 2022)
 
 NOTES:
