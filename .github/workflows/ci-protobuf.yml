@@ -5,7 +5,6 @@ on:
   pull_request:
     paths:
       - .github/workflows/ci-protobuf.yml
-      - .go-version
       - go.mod
       - go.sum
       - 'tfprotov5/internal/tfplugin5/*'
