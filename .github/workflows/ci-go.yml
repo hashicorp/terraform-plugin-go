@@ -44,6 +44,7 @@ jobs:
       - run: go mod edit -replace github.com/hashicorp/terraform-plugin-go=../
       - run: go mod tidy
       - run: go test -v ./internal/protocolprovider
+      - run: go test -v ./internal/framework5provider
       - run: go test -v ./internal/sdkv2provider
         env:
           TF_ACC: '1'
@@ -81,7 +82,7 @@ jobs:
           terraform_wrapper: false
       - run: go mod edit -replace github.com/hashicorp/terraform-plugin-go=../
       - run: go mod tidy
-      - run: go test -v ./internal/frameworkprovider
+      - run: go test -v ./internal/framework6provider
       - run: go test -v ./internal/protocolv6provider
       - # Terraform CLI 1.1.5+ is required for upgrading sdk/v2
         if: matrix.terraform != '1.0.*'
@@ -99,7 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: [ '1.18', '1.17' ]
+        go-version: ['1.18', '1.17']
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
