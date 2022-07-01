@@ -32,7 +32,7 @@ func DownstreamResponse(ctx context.Context, diagnostics diag.Diagnostics) {
 	}
 
 	if requestStart, ok := ctx.Value(ContextKeyDownstreamRequestStartTime{}).(time.Time); ok {
-		responseFields[logging.KeyRequestDurationSeconds] = time.Since(requestStart).Seconds()
+		responseFields[logging.KeyRequestDurationMs] = time.Since(requestStart).Milliseconds()
 	}
 
 	logging.ProtocolTrace(ctx, "Received downstream response", responseFields)

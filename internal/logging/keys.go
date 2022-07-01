@@ -26,8 +26,8 @@ const (
 	// Underlying error string
 	KeyError = "error"
 
-	// Duration in seconds for the RPC request
-	KeyRequestDurationSeconds = "tf_req_duration_seconds"
+	// Duration in milliseconds for the RPC request
+	KeyRequestDurationMs = "tf_req_duration_ms"
 
 	// A unique ID for the RPC request
 	KeyRequestID = "tf_req_id"
