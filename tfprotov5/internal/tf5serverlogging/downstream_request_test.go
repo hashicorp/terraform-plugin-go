@@ -1,17 +1,52 @@
-package tf5serverlogging
+package tf5serverlogging_test
 
 import (
 	"bytes"
 	"context"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-go/internal/logging"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/diag"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tf5serverlogging"
 	"github.com/hashicorp/terraform-plugin-log/tfsdklog"
 	"github.com/hashicorp/terraform-plugin-log/tfsdklogtest"
 )
+
+func TestDownstreamRequest(t *testing.T) {
+	t.Parallel()
+
+	var output bytes.Buffer
+
+	ctx := tfsdklogtest.RootLogger(context.Background(), &output)
+	ctx = logging.ProtoSubsystemContext(ctx, tfsdklog.Options{})
+
+	got := tf5serverlogging.DownstreamRequest(ctx)
+
+	if _, ok := got.Value(tf5serverlogging.ContextKeyDownstreamRequestStartTime{}).(time.Time); !ok {
+		t.Error("missing downstream request start time context key")
+	}
+
+	entries, err := tfsdklogtest.MultilineJSONDecode(&output)
+
+	if err != nil {
+		t.Fatalf("unable to read multiple line JSON: %s", err)
+	}
+
+	expectedEntries := []map[string]interface{}{
+		{
+			"@level":   "trace",
+			"@message": "Sending request downstream",
+			"@module":  "sdk.proto",
+		},
+	}
+
+	if diff := cmp.Diff(entries, expectedEntries); diff != "" {
+		t.Errorf("unexpected difference: %s", diff)
+	}
+}
 
 func TestDownstreamResponse(t *testing.T) {
 	t.Parallel()
@@ -151,7 +186,7 @@ func TestDownstreamResponse(t *testing.T) {
 			ctx := tfsdklogtest.RootLogger(context.Background(), &output)
 			ctx = logging.ProtoSubsystemContext(ctx, tfsdklog.Options{})
 
-			DownstreamResponse(ctx, testCase.diagnostics)
+			tf5serverlogging.DownstreamResponse(ctx, testCase.diagnostics)
 
 			entries, err := tfsdklogtest.MultilineJSONDecode(&output)
 

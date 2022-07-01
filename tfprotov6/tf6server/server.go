@@ -495,7 +495,7 @@ func (s *server) GetProviderSchema(ctx context.Context, req *tfplugin6.GetProvid
 		logging.ProtocolError(ctx, "Error converting request from protobuf", map[string]interface{}{logging.KeyError: err})
 		return nil, err
 	}
-	tf6serverlogging.DownstreamRequest(ctx)
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
 	resp, err := s.downstream.GetProviderSchema(ctx, r)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -523,7 +523,7 @@ func (s *server) ConfigureProvider(ctx context.Context, req *tfplugin6.Configure
 		return nil, err
 	}
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", r.Config)
-	tf6serverlogging.DownstreamRequest(ctx)
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
 	resp, err := s.downstream.ConfigureProvider(ctx, r)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -550,7 +550,7 @@ func (s *server) ValidateProviderConfig(ctx context.Context, req *tfplugin6.Vali
 		return nil, err
 	}
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", r.Config)
-	tf6serverlogging.DownstreamRequest(ctx)
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
 	resp, err := s.downstream.ValidateProviderConfig(ctx, r)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -590,7 +590,7 @@ func (s *server) Stop(ctx context.Context, req *tfplugin6.StopProvider_Request) 
 		logging.ProtocolError(ctx, "Error converting request from protobuf", map[string]interface{}{logging.KeyError: err})
 		return nil, err
 	}
-	tf6serverlogging.DownstreamRequest(ctx)
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
 	resp, err := s.downstream.StopProvider(ctx, r)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -622,7 +622,7 @@ func (s *server) ValidateDataResourceConfig(ctx context.Context, req *tfplugin6.
 		return nil, err
 	}
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", r.Config)
-	tf6serverlogging.DownstreamRequest(ctx)
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
 	resp, err := s.downstream.ValidateDataResourceConfig(ctx, r)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -652,7 +652,7 @@ func (s *server) ReadDataSource(ctx context.Context, req *tfplugin6.ReadDataSour
 	}
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", r.Config)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "ProviderMeta", r.ProviderMeta)
-	tf6serverlogging.DownstreamRequest(ctx)
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
 	resp, err := s.downstream.ReadDataSource(ctx, r)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -682,7 +682,7 @@ func (s *server) ValidateResourceConfig(ctx context.Context, req *tfplugin6.Vali
 		return nil, err
 	}
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", r.Config)
-	tf6serverlogging.DownstreamRequest(ctx)
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
 	resp, err := s.downstream.ValidateResourceConfig(ctx, r)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -710,7 +710,7 @@ func (s *server) UpgradeResourceState(ctx context.Context, req *tfplugin6.Upgrad
 		logging.ProtocolError(ctx, "Error converting request from protobuf", map[string]interface{}{logging.KeyError: err})
 		return nil, err
 	}
-	tf6serverlogging.DownstreamRequest(ctx)
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
 	resp, err := s.downstream.UpgradeResourceState(ctx, r)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -741,7 +741,7 @@ func (s *server) ReadResource(ctx context.Context, req *tfplugin6.ReadResource_R
 	}
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "CurrentState", r.CurrentState)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "ProviderMeta", r.ProviderMeta)
-	tf6serverlogging.DownstreamRequest(ctx)
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
 	resp, err := s.downstream.ReadResource(ctx, r)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -774,7 +774,7 @@ func (s *server) PlanResourceChange(ctx context.Context, req *tfplugin6.PlanReso
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "PriorState", r.PriorState)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "ProposedNewState", r.ProposedNewState)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "ProviderMeta", r.ProviderMeta)
-	tf6serverlogging.DownstreamRequest(ctx)
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
 	resp, err := s.downstream.PlanResourceChange(ctx, r)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -807,7 +807,7 @@ func (s *server) ApplyResourceChange(ctx context.Context, req *tfplugin6.ApplyRe
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "PlannedState", r.PlannedState)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", r.Config)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", r.Config)
-	tf6serverlogging.DownstreamRequest(ctx)
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
 	resp, err := s.downstream.ApplyResourceChange(ctx, r)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -836,7 +836,7 @@ func (s *server) ImportResourceState(ctx context.Context, req *tfplugin6.ImportR
 		logging.ProtocolError(ctx, "Error converting request from protobuf", map[string]interface{}{logging.KeyError: err})
 		return nil, err
 	}
-	tf6serverlogging.DownstreamRequest(ctx)
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
 	resp, err := s.downstream.ImportResourceState(ctx, r)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})

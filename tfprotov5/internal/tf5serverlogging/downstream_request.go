@@ -10,11 +10,13 @@ import (
 
 // DownstreamRequest sets a request duration start time context key and
 // generates a TRACE "Sending request downstream" log.
-func DownstreamRequest(ctx context.Context) {
+func DownstreamRequest(ctx context.Context) context.Context {
 	requestStart := time.Now()
 	ctx = context.WithValue(ctx, ContextKeyDownstreamRequestStartTime{}, requestStart)
 
 	logging.ProtocolTrace(ctx, "Sending request downstream")
+
+	return ctx
 }
 
 // DownstreamResponse generates the following logging:
