@@ -1,0 +1,7 @@
+```release-note:enhancement
+tfprotov5/tf5server: Added downstream RPC request duration and response diagnostics logging
+```
+
+```release-note:enhancement
+tfprotov6/tf6server: Added downstream RPC request duration and response diagnostics logging
+```
