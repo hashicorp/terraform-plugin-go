@@ -1,3 +1,10 @@
+# 0.10.0 (July 5, 2022)
+
+ENHANCEMENTS:
+
+* tfprotov5/tf5server: Added downstream RPC request duration and response diagnostics logging ([#203](https://github.com/hashicorp/terraform-plugin-go/issues/203))
+* tfprotov6/tf6server: Added downstream RPC request duration and response diagnostics logging ([#203](https://github.com/hashicorp/terraform-plugin-go/issues/203))
+
 # 0.9.1 (May 12, 2022)
 
 BUG FIXES:
