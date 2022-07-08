@@ -1,3 +1,14 @@
+# 0.11.0 (July 8, 2022)
+
+FEATURES:
+
+* Added support for protocol version 5.3 and 6.3, which allows providers to opt into the `PlanResourceChange` RPC for resource destruction ([#205](https://github.com/hashicorp/terraform-plugin-go/issues/205))
+
+ENHANCEMENTS:
+
+* tfprotov5: Added `ServerCapabilities` type and `ServerCapabilities` field to `GetProviderSchemaResponse` ([#205](https://github.com/hashicorp/terraform-plugin-go/issues/205))
+* tfprotov6: Added `ServerCapabilities` type and `ServerCapabilities` field to `GetProviderSchemaResponse` ([#205](https://github.com/hashicorp/terraform-plugin-go/issues/205))
+
 # 0.10.0 (July 5, 2022)
 
 ENHANCEMENTS:
