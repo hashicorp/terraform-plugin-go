@@ -1,0 +1,11 @@
+```release-note:feature
+Added support for protocol version 5.3 and 6.3, which allows providers to opt into the `PlanResourceChange` RPC for resource destruction
+```
+
+```release-note:enhancement
+tfprotov5: Added `ServerCapabilities` type and `ServerCapabilities` field to `GetProviderSchemaResponse`
+```
+
+```release-note:enhancement
+tfprotov6: Added `ServerCapabilities` type and `ServerCapabilities` field to `GetProviderSchemaResponse`
+```
