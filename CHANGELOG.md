@@ -1,3 +1,9 @@
+# 0.12.0 (July 15, 2022)
+
+NOTES:
+
+* The underlying `terraform-plugin-log` dependency has been updated to v0.6.0, which includes log filtering support and breaking changes of `With()` to `SetField()` function names. Any provider logging which calls those functions may require updates. ([#209](https://github.com/hashicorp/terraform-plugin-go/issues/209))
+
 # 0.11.0 (July 8, 2022)
 
 FEATURES:
