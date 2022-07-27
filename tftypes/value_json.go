@@ -435,20 +435,19 @@ func jsonUnmarshalObject(buf []byte, attrTypes map[string]Type, p *AttributePath
 
 	vals := map[string]Value{}
 	for dec.More() {
-		innerPath := p.WithElementKeyValue(NewValue(String, UnknownValue))
 		tok, err := dec.Token()
 		if err != nil {
-			return Value{}, innerPath.NewErrorf("error reading token: %w", err)
+			return Value{}, p.NewErrorf("error reading object attribute key token: %w", err)
 		}
 		key, ok := tok.(string)
 		if !ok {
-			return Value{}, innerPath.NewErrorf("object attribute key was %T, not string", tok)
+			return Value{}, p.NewErrorf("object attribute key was %T with value %v, not string", tok, tok)
 		}
+		innerPath := p.WithAttributeName(key)
 		attrType, ok := attrTypes[key]
 		if !ok {
 			return Value{}, innerPath.NewErrorf("unsupported attribute %q", key)
 		}
-		innerPath = p.WithAttributeName(key)
 
 		var rawVal json.RawMessage
 		err = dec.Decode(&rawVal)
