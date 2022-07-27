@@ -16,27 +16,24 @@ import (
 // terraform-plugin-go.  Third parties should not use it, and its behavior is
 // not covered under the API compatibility guarantees. Don't use this.
 func ValueFromJSON(data []byte, typ Type) (Value, error) {
-	return jsonUnmarshal(data, typ, NewAttributePath(), JSONOpts{})
+	return jsonUnmarshal(data, typ, NewAttributePath(), ValueFromJSONOpts{})
 }
 
-// UnmarshalOpts contains options that can be used to modify the behaviour when
-// unmarshalling. Currently, this only contains a struct for opts for JSON but
-// could have a field for Flatmap in the future.
-type UnmarshalOpts struct {
-	JSONOpts JSONOpts
-}
-
-// JSONOpts contains options that can be used to modify the behaviour when
+// ValueFromJSONOpts contains options that can be used to modify the behaviour when
 // unmarshalling JSON.
-type JSONOpts struct {
+//
+// IgnoreUndefinedAttributes is used to ignore any attributes which appear in the
+// JSON but do not have a corresponding entry in the schema. For example, raw state
+// where an attribute has been removed from the schema.
+type ValueFromJSONOpts struct {
 	IgnoreUndefinedAttributes bool
 }
 
 // ValueFromJSONWithOpts is identical to ValueFromJSON with the exception that it
-// accepts JSONOpts which can be used to modify the unmarshalling behaviour, such
+// accepts ValueFromJSONOpts which can be used to modify the unmarshalling behaviour, such
 // as ignoring undefined attributes, for instance. This can occur when the JSON
 // being unmarshalled does not have a corresponding attribute in the schema.
-func ValueFromJSONWithOpts(data []byte, typ Type, opts JSONOpts) (Value, error) {
+func ValueFromJSONWithOpts(data []byte, typ Type, opts ValueFromJSONOpts) (Value, error) {
 	return jsonUnmarshal(data, typ, NewAttributePath(), opts)
 }
 
@@ -47,7 +44,7 @@ func jsonByteDecoder(buf []byte) *json.Decoder {
 	return dec
 }
 
-func jsonUnmarshal(buf []byte, typ Type, p *AttributePath, opts JSONOpts) (Value, error) {
+func jsonUnmarshal(buf []byte, typ Type, p *AttributePath, opts ValueFromJSONOpts) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
@@ -160,7 +157,7 @@ func jsonUnmarshalBool(buf []byte, _ Type, p *AttributePath) (Value, error) {
 	return Value{}, p.NewErrorf("unsupported type %T sent as %s", tok, Bool)
 }
 
-func jsonUnmarshalDynamicPseudoType(buf []byte, _ Type, p *AttributePath, opts JSONOpts) (Value, error) {
+func jsonUnmarshalDynamicPseudoType(buf []byte, _ Type, p *AttributePath, opts ValueFromJSONOpts) (Value, error) {
 	dec := jsonByteDecoder(buf)
 	tok, err := dec.Token()
 	if err != nil {
@@ -213,7 +210,7 @@ func jsonUnmarshalDynamicPseudoType(buf []byte, _ Type, p *AttributePath, opts J
 	return jsonUnmarshal(valBody, t, p, opts)
 }
 
-func jsonUnmarshalList(buf []byte, elementType Type, p *AttributePath, opts JSONOpts) (Value, error) {
+func jsonUnmarshalList(buf []byte, elementType Type, p *AttributePath, opts ValueFromJSONOpts) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
@@ -274,7 +271,7 @@ func jsonUnmarshalList(buf []byte, elementType Type, p *AttributePath, opts JSON
 	}, vals), nil
 }
 
-func jsonUnmarshalSet(buf []byte, elementType Type, p *AttributePath, opts JSONOpts) (Value, error) {
+func jsonUnmarshalSet(buf []byte, elementType Type, p *AttributePath, opts ValueFromJSONOpts) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
@@ -330,7 +327,7 @@ func jsonUnmarshalSet(buf []byte, elementType Type, p *AttributePath, opts JSONO
 	}, vals), nil
 }
 
-func jsonUnmarshalMap(buf []byte, attrType Type, p *AttributePath, opts JSONOpts) (Value, error) {
+func jsonUnmarshalMap(buf []byte, attrType Type, p *AttributePath, opts ValueFromJSONOpts) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
@@ -380,7 +377,7 @@ func jsonUnmarshalMap(buf []byte, attrType Type, p *AttributePath, opts JSONOpts
 	}, vals), nil
 }
 
-func jsonUnmarshalTuple(buf []byte, elementTypes []Type, p *AttributePath, opts JSONOpts) (Value, error) {
+func jsonUnmarshalTuple(buf []byte, elementTypes []Type, p *AttributePath, opts ValueFromJSONOpts) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()
@@ -444,9 +441,7 @@ func jsonUnmarshalTuple(buf []byte, elementTypes []Type, p *AttributePath, opts 
 
 // jsonUnmarshalObject attempts to decode JSON object structure to tftypes.Value object.
 // opts contains fields that can be used to modify the behaviour of JSON unmarshalling.
-// ignoreUndefinedAttributes is used to ignore any attributes which appear in the JSON but do not have a corresponding
-// entry in the schema. For example, raw state where an attribute has been removed from the schema.
-func jsonUnmarshalObject(buf []byte, attrTypes map[string]Type, p *AttributePath, opts JSONOpts) (Value, error) {
+func jsonUnmarshalObject(buf []byte, attrTypes map[string]Type, p *AttributePath, opts ValueFromJSONOpts) (Value, error) {
 	dec := jsonByteDecoder(buf)
 
 	tok, err := dec.Token()

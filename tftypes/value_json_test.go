@@ -389,6 +389,24 @@ func TestValueFromJSONWithOpts(t *testing.T) {
 		json  string
 	}
 	tests := map[string]testCase{
+		"object-of-bool-number": {
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"bool":   Bool,
+					"number": Number,
+				},
+			}, map[string]Value{
+				"bool":   NewValue(Bool, true),
+				"number": NewValue(Number, big.NewFloat(0)),
+			}),
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"bool":   Bool,
+					"number": Number,
+				},
+			},
+			json: `{"bool":true,"number":0}`,
+		},
 		"object-with-missing-attribute": {
 			value: NewValue(Object{
 				AttributeTypes: map[string]Type{
@@ -412,7 +430,7 @@ func TestValueFromJSONWithOpts(t *testing.T) {
 		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			val, err := ValueFromJSONWithOpts([]byte(test.json), test.typ, JSONOpts{
+			val, err := ValueFromJSONWithOpts([]byte(test.json), test.typ, ValueFromJSONOpts{
 				IgnoreUndefinedAttributes: true,
 			})
 			if err != nil {
