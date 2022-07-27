@@ -23,7 +23,7 @@ func ValueFromJSON(data []byte, typ Type) (Value, error) {
 // unmarshalling. Currently, this only contains a struct for opts for JSON but
 // could have a field for Flatmap in the future.
 type UnmarshalOpts struct {
-	JsonOpts JSONOpts
+	JSONOpts JSONOpts
 }
 
 // JSONOpts contains options that can be used to modify the behaviour when
