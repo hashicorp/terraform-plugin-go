@@ -380,3 +380,65 @@ func TestValueFromJSON(t *testing.T) {
 		})
 	}
 }
+
+func TestValueFromJSONWithOpts(t *testing.T) {
+	t.Parallel()
+	type testCase struct {
+		value Value
+		typ   Type
+		json  string
+	}
+	tests := map[string]testCase{
+		"object-of-bool-number": {
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"bool":   Bool,
+					"number": Number,
+				},
+			}, map[string]Value{
+				"bool":   NewValue(Bool, true),
+				"number": NewValue(Number, big.NewFloat(0)),
+			}),
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"bool":   Bool,
+					"number": Number,
+				},
+			},
+			json: `{"bool":true,"number":0}`,
+		},
+		"object-with-missing-attribute": {
+			value: NewValue(Object{
+				AttributeTypes: map[string]Type{
+					"bool":   Bool,
+					"number": Number,
+				},
+			}, map[string]Value{
+				"bool":   NewValue(Bool, true),
+				"number": NewValue(Number, big.NewFloat(0)),
+			}),
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"bool":   Bool,
+					"number": Number,
+				},
+			},
+			json: `{"bool":true,"number":0,"unknown":"whatever"}`,
+		},
+	}
+	for name, test := range tests {
+		name, test := name, test
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			val, err := ValueFromJSONWithOpts([]byte(test.json), test.typ, ValueFromJSONOpts{
+				IgnoreUndefinedAttributes: true,
+			})
+			if err != nil {
+				t.Fatalf("unexpected error unmarshaling: %s", err)
+			}
+			if diff := cmp.Diff(test.value, val); diff != "" {
+				t.Errorf("Unexpected results (-wanted +got): %s", diff)
+			}
+		})
+	}
+}
