@@ -27,6 +27,8 @@ jobs:
           # pinned here to prevent unexpected differences. Follow the
           # https://github.com/protocolbuffers/protobuf repository for protoc
           # release updates.
+          # NOTE: Cannot yet update to version >= 21 due to:
+          # https://github.com/arduino/setup-protoc/issues/33
           version: '3.19.4'
       - run: go mod download
       - run: go install google.golang.org/protobuf/cmd/protoc-gen-go
