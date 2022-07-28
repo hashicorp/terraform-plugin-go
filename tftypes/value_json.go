@@ -21,11 +21,10 @@ func ValueFromJSON(data []byte, typ Type) (Value, error) {
 
 // ValueFromJSONOpts contains options that can be used to modify the behaviour when
 // unmarshalling JSON.
-//
-// IgnoreUndefinedAttributes is used to ignore any attributes which appear in the
-// JSON but do not have a corresponding entry in the schema. For example, raw state
-// where an attribute has been removed from the schema.
 type ValueFromJSONOpts struct {
+	// IgnoreUndefinedAttributes is used to ignore any attributes which appear in the
+	// JSON but do not have a corresponding entry in the schema. For example, raw state
+	// where an attribute has been removed from the schema.
 	IgnoreUndefinedAttributes bool
 }
 
