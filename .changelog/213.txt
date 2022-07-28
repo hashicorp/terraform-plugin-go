@@ -1,0 +1,7 @@
+```release-note:enhancement
+tfprotov5: Added `RawState` type `UnmarshalWithOpts` method to facilitate configurable behaviour during unmarshalling
+```
+
+```release-note:enhancement
+tfprotov6: Added `RawState` type `UnmarshalWithOpts` method to facilitate configurable behaviour during unmarshalling
+```
