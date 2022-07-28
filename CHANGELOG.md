@@ -1,3 +1,12 @@
+# 0.13.0 (July 28, 2022)
+
+ENHANCEMENTS:
+* tfprotov5: Added `RawState` type `UnmarshalWithOpts` method to facilitate configurable behaviour during unmarshalling ([#213](https://github.com/hashicorp/terraform-plugin-go/issues/213))
+* tfprotov6: Added `RawState` type `UnmarshalWithOpts` method to facilitate configurable behaviour during unmarshalling ([#213](https://github.com/hashicorp/terraform-plugin-go/issues/213))
+
+BUG FIXES:
+* tftypes: Clarified `ValueFromJSON` error messaging with object attribute key issues ([#214](https://github.com/hashicorp/terraform-plugin-go/issues/214))
+
 # 0.12.0 (July 15, 2022)
 
 NOTES:
