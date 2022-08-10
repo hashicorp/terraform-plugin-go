@@ -262,9 +262,9 @@ func (val Value) Copy() Value {
 //
 // * String: string, *string
 //
-// * Number: *big.Float, int64, *int64, int32, *int32, int16, *int16, int8,
-//           *int8, int, *int, uint64, *uint64, uint32, *uint32, uint16,
-//           *uint16, uint8, *uint8, uint, *uint, float64, *float64
+//   - Number: *big.Float, int64, *int64, int32, *int32, int16, *int16, int8,
+//     *int8, int, *int, uint64, *uint64, uint32, *uint32, uint16,
+//     *uint16, uint8, *uint8, uint, *uint, float64, *float64
 //
 // * Bool: bool, *bool
 //
