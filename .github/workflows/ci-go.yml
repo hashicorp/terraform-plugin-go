@@ -61,6 +61,7 @@ jobs:
           - '0.15.*'
           - '1.0.*'
           - '1.1.*'
+          - '1.2.*'
   terraform-provider-corner-tfprotov6:
     defaults:
       run:
@@ -95,12 +96,13 @@ jobs:
         terraform:
           - '1.0.*'
           - '1.1.*'
+          - '1.2.*'
   test:
     name: test (Go v${{ matrix.go-version }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: ['1.18', '1.17']
+        go-version: ['1.19', '1.18']
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
