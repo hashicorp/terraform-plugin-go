@@ -1,3 +1,19 @@
+# 0.14.0 (August 15, 2022)
+
+NOTES:
+
+* This Go module has been updated to Go 1.18 per the [Go support policy](https://golang.org/doc/devel/release.html#policy). Any consumers building on earlier Go versions may experience errors. ([#219](https://github.com/hashicorp/terraform-plugin-go/issues/219))
+
+ENHANCEMENTS:
+
+* tfprotov5/tf5server: Added resource private state when protocol data output is enabled ([#221](https://github.com/hashicorp/terraform-plugin-go/issues/221))
+* tfprotov6/tf6server: Added resource private state when protocol data output is enabled ([#221](https://github.com/hashicorp/terraform-plugin-go/issues/221))
+
+BUG FIXES:
+
+* tfprotov5/tf5server: Fixed `ApplyResourceChange` request RPC protocol data output to include `PriorState` and `ProviderMeta` fields ([#221](https://github.com/hashicorp/terraform-plugin-go/issues/221))
+* tfprotov6/tf6server: Fixed `ApplyResourceChange` request RPC protocol data output to include `PriorState` and `ProviderMeta` fields ([#221](https://github.com/hashicorp/terraform-plugin-go/issues/221))
+
 # 0.13.0 (July 28, 2022)
 
 ENHANCEMENTS:
