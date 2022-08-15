@@ -1,0 +1,15 @@
+```release-note:enhancement
+tfprotov5/tf5server: Added resource private state when protocol data output is enabled
+```
+
+```release-note:enhancement
+tfprotov6/tf6server: Added resource private state when protocol data output is enabled
+```
+
+```release-note:bug
+tfprotov5/tf5server: Fixed `ApplyResourceChange` request RPC protocol data output to include `PriorState` and `ProviderMeta` fields
+```
+
+```release-note:bug
+tfprotov6/tf6server: Fixed `ApplyResourceChange` request RPC protocol data output to include `PriorState` and `ProviderMeta` fields
+```
