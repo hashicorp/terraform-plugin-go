@@ -3,7 +3,7 @@ module github.com/hashicorp/terraform-plugin-go
 go 1.18
 
 require (
-	github.com/google/go-cmp v0.5.8
+	github.com/google/go-cmp v0.5.9
 	github.com/hashicorp/go-hclog v1.2.1
 	github.com/hashicorp/go-plugin v1.4.5
 	github.com/hashicorp/go-uuid v1.0.3
