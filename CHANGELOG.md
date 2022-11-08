@@ -1,3 +1,9 @@
+# 0.14.1 (November 8, 2022)
+
+NOTES:
+
+* No expected changes with this Go module's functionality. Contains updates to dependencies such as `google.golang.org/grpc` and `github.com/hashicorp/go-plugin`, which may be beneficial for consumers.
+
 # 0.14.0 (August 15, 2022)
 
 NOTES:
