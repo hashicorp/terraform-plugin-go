@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/go-plugin v1.4.6
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/terraform-plugin-log v0.7.0
-	github.com/hashicorp/terraform-registry-address v0.0.0-20220623143253-7d51757b572c
+	github.com/hashicorp/terraform-registry-address v0.1.0
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/vmihailenco/msgpack/v4 v4.3.12
 	google.golang.org/grpc v1.50.1
