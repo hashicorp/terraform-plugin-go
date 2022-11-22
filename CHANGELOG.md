@@ -1,3 +1,10 @@
+# 0.14.2 (November 22, 2022)
+
+BUG FIXES:
+
+* tfprotov5: Allow diagnostic messages with incorrect UTF-8 encoding to pass through with the invalid sequences replaced with the Unicode Replacement Character. This avoids returning the unhelpful message "string field contains invalid UTF-8" in that case. ([#237](https://github.com/hashicorp/terraform-plugin-go/issues/237))
+* tfprotov6: Allow diagnostic messages with incorrect UTF-8 encoding to pass through with the invalid sequences replaced with the Unicode Replacement Character. This avoids returning the unhelpful message "string field contains invalid UTF-8" in that case. ([#237](https://github.com/hashicorp/terraform-plugin-go/issues/237))
+
 # 0.14.1 (November 8, 2022)
 
 NOTES:
