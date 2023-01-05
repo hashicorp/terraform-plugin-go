@@ -1,0 +1,7 @@
+```release-note:bug
+tfprotov5/tf5server: Prevented `TF_LOG_SDK_PROTO_DATA_DIR` file overlap by switching from second to millisecond file naming granularity
+```
+
+```release-note:bug
+tfprotov6/tf6server: Prevented `TF_LOG_SDK_PROTO_DATA_DIR` file overlap by switching from second to millisecond file naming granularity
+```
