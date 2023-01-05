@@ -1,3 +1,10 @@
+# 0.14.3 (January 5, 2023)
+
+BUG FIXES:
+
+* tfprotov5/tf5server: Prevented `TF_LOG_SDK_PROTO_DATA_DIR` file overlap by switching from second to millisecond file naming granularity ([#245](https://github.com/hashicorp/terraform-plugin-go/issues/245))
+* tfprotov6/tf6server: Prevented `TF_LOG_SDK_PROTO_DATA_DIR` file overlap by switching from second to millisecond file naming granularity ([#245](https://github.com/hashicorp/terraform-plugin-go/issues/245))
+
 # 0.14.2 (November 22, 2022)
 
 BUG FIXES:
