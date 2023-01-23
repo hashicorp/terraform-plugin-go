@@ -118,14 +118,19 @@ func msgpackUnmarshal(dec *msgpack.Decoder, typ Type, path *AttributePath) (Valu
 		}
 		return NewValue(Bool, rv), nil
 	case typ.Is(List{}):
+		//nolint:forcetypeassert // Is func above guarantees this type assertion
 		return msgpackUnmarshalList(dec, typ.(List).ElementType, path)
 	case typ.Is(Set{}):
+		//nolint:forcetypeassert // Is func above guarantees this type assertion
 		return msgpackUnmarshalSet(dec, typ.(Set).ElementType, path)
 	case typ.Is(Map{}):
+		//nolint:forcetypeassert // Is func above guarantees this type assertion
 		return msgpackUnmarshalMap(dec, typ.(Map).ElementType, path)
 	case typ.Is(Tuple{}):
+		//nolint:forcetypeassert // Is func above guarantees this type assertion
 		return msgpackUnmarshalTuple(dec, typ.(Tuple).ElementTypes, path)
 	case typ.Is(Object{}):
+		//nolint:forcetypeassert // Is func above guarantees this type assertion
 		return msgpackUnmarshalObject(dec, typ.(Object).AttributeTypes, path)
 	}
 	return Value{}, path.NewErrorf("unsupported type %s", typ.String())
