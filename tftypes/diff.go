@@ -123,6 +123,7 @@ func (val1 Value) Diff(val2 Value) ([]ValueDiff, error) {
 		}
 
 		// convert from an interface{} to a Value
+		// TODO: Not sure the best resolution?
 		value2 := value2I.(Value)
 
 		// if they're both unknown, no need to continue
