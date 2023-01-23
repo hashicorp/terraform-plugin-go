@@ -5,14 +5,15 @@ issues:
 linters:
   disable-all: true
   enable:
-    - deadcode
     - durationcheck
     - errcheck
     - exportloopref
+    - forcetypeassert
     - gofmt
     - gosimple
     - ineffassign
     - makezero
+    - misspell
     - nilerr
     # - paralleltest # Reference: https://github.com/kunwardeep/paralleltest/issues/14
     - predeclared
@@ -20,5 +21,5 @@ linters:
     - tenv
     - unconvert
     - unparam
-    - varcheck
+    - unused
     - vet
