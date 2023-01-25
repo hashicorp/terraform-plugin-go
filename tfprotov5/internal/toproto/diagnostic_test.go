@@ -5,6 +5,8 @@ import (
 )
 
 func TestForceValidUTF8(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		Input string
 		Want  string
@@ -48,7 +50,10 @@ func TestForceValidUTF8(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.Input, func(t *testing.T) {
+			t.Parallel()
+
 			got := forceValidUTF8(test.Input)
 			if got != test.Want {
 				t.Errorf("wrong result\ngot:  %q\nwant: %q", got, test.Want)

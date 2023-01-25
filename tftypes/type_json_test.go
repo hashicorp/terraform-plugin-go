@@ -156,6 +156,8 @@ func TestTypeJSON(t *testing.T) {
 	for name, test := range testCases {
 		name, test := name, test
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			typ, err := ParseJSONType([]byte(test.json))
 			if err != nil {
 				t.Fatalf("unexpected error parsing JSON: %s", err)

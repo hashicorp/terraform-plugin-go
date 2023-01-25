@@ -134,6 +134,8 @@ func TestPrimitiveApplyTerraform5AttributePathStep(t *testing.T) {
 }
 
 func TestPrimitiveEqual(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
 		p1    primitive
 		p2    primitive
@@ -154,6 +156,8 @@ func TestPrimitiveEqual(t *testing.T) {
 	for name, tc := range tests {
 		name, tc := name, tc
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			res := tc.p1.Equal(tc.p2)
 			revRes := tc.p2.Equal(tc.p1)
 			if res != revRes {
@@ -167,6 +171,8 @@ func TestPrimitiveEqual(t *testing.T) {
 }
 
 func TestPrimitiveIs(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
 		p1    primitive
 		p2    primitive
@@ -187,6 +193,8 @@ func TestPrimitiveIs(t *testing.T) {
 	for name, tc := range tests {
 		name, tc := name, tc
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			res := tc.p1.Is(tc.p2)
 			if res != tc.equal {
 				t.Errorf("Expected result to be %v, got %v", tc.equal, res)
@@ -196,6 +204,8 @@ func TestPrimitiveIs(t *testing.T) {
 }
 
 func TestPrimitiveUsableAs(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
 		p        primitive
 		o        Type
