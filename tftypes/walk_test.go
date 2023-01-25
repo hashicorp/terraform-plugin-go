@@ -32,6 +32,8 @@ import (
 )
 
 func TestWalk(t *testing.T) {
+	t.Parallel()
+
 	valType := Object{
 		AttributeTypes: map[string]Type{
 			"string":       String,

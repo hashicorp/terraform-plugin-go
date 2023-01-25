@@ -430,6 +430,8 @@ func TestValueAs(t *testing.T) {
 	for name, test := range tests {
 		name, test := name, test
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			err := test.in.As(test.as)
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err)
@@ -1747,6 +1749,8 @@ func TestValueString(t *testing.T) {
 	for name, test := range tests {
 		name, test := name, test
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			str := test.in.String()
 			if diff := cmp.Diff(test.expected, str); diff != "" {
 				t.Errorf("Unexpected results (-wanted, +got): %s", diff)
