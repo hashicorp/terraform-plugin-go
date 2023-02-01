@@ -1,3 +1,0 @@
-```release-note:bug
-Fixed a panic when comparing the empty value of a tftypes.Value to a non-empty value.
-```

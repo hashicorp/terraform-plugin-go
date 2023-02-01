@@ -1,3 +1,0 @@
-```release-note:enhancement
-tftypes: Added `Type` support to `WalkAttributePath()` function
-```

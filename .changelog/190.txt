@@ -1,3 +1,0 @@
-```release-note:bug
-tftypes: Prevented loss of number precision with integers between 54 and 64 bits
-```

@@ -1,3 +1,0 @@
-```release-note:bug
-Fixed a panic when calling `tftypes.Value.As` and passing a pointer to an uninstantiated *big.Float.
-```

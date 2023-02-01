@@ -1,3 +1,0 @@
-```release-note:bug
-Fixed a panic when using DynamicPseudoType attributes in an object.
-```
