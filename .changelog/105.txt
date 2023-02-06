@@ -1,3 +1,0 @@
-```release-note:breaking-change
-The `AttributeType` property of `tftypes.Map` has been renamed to `ElementType`.
-```

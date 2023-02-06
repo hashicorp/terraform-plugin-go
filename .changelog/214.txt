@@ -1,3 +1,0 @@
-```release-note:bug
-tftypes: Clarified `ValueFromJSON` error messaging with object attribute key issues
-```

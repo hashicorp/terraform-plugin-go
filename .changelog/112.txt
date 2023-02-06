@@ -1,3 +1,0 @@
-```release-note:enhancement
-tftypes: Added `AttributePath` `LastStep()` method and `AttributePathStep` `Equal()` method
-```

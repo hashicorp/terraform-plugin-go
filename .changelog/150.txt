@@ -1,3 +1,0 @@
-```release-note:bug
-tfprotov5/tf5server: Prevent empty provider address error logs on startup
-```
