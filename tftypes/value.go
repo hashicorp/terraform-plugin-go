@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	msgpack "github.com/vmihailenco/msgpack/v4"
+	msgpack "github.com/vmihailenco/msgpack/v5"
 )
 
 // ValueConverter is an interface that provider-defined types can implement to
