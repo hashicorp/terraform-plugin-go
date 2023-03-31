@@ -3,8 +3,8 @@ package toproto
 import (
 	"errors"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/pulumi/terraform/pkg/tfplugin5"
 )
 
 var ErrUnknownAttributePathStepType = errors.New("unknown type of AttributePath_Step")

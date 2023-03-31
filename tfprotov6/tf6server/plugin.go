@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/go-plugin"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
+	"github.com/pulumi/terraform/pkg/tfplugin6"
 	"google.golang.org/grpc"
 )
 

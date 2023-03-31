@@ -17,8 +17,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tf5serverlogging"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/toproto"
+	"github.com/pulumi/terraform/pkg/tfplugin5"
 	"google.golang.org/grpc"
 
 	"github.com/hashicorp/go-hclog"

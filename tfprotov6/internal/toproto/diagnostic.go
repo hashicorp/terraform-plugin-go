@@ -4,7 +4,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
+	"github.com/pulumi/terraform/pkg/tfplugin6"
 )
 
 func Diagnostic(in *tfprotov6.Diagnostic) (*tfplugin6.Diagnostic, error) {
