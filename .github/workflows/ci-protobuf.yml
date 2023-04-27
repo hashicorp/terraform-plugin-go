@@ -21,7 +21,7 @@ jobs:
       - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
         with:
           go-version-file: 'go.mod'
-      - uses: arduino/setup-protoc@v1 # TSCCR: no entry for repository "arduino/setup-protoc"
+      - uses: arduino/setup-protoc@v1
         with:
           # The version string is embedded in protoc generated files, so it is
           # pinned here to prevent unexpected differences. Follow the
