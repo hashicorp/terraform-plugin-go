@@ -3,6 +3,10 @@ default: test
 lint:
 	golangci-lint run ./...
 
+tools:
+	go install google.golang.org/protobuf/cmd/protoc-gen-go
+	cd tools; go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
+
 # Protocol Buffers compilation is done outside of 'go generate' handling since
 # the 'protoc' tool is not installable via 'go install'.
 protoc:
@@ -30,4 +34,4 @@ test:
 generate:
 	cd tools; go generate ./...
 
-.PHONY: default lint protoc test
+.PHONY: default lint protoc test tools

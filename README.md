@@ -179,9 +179,9 @@ Run `golangci-lint run ./...` or `make lint` after any changes.
 
 Ensure the following tooling is installed:
 
-- [`protoc`](https://github.com/protocolbuffers/protobuf): Protocol Buffers compiler.
-- [`protoc-gen-go`](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go): Go plugin for Protocol Buffers compiler. e.g. `go install google.golang.org/protobuf/cmd/protoc-gen-go`
-- [`protoc-gen-go-grpc`](https://pkg.go.dev/google.golang.org/grpc/cmd/protoc-gen-go-grpc): Go gRPC plugin for Protocol Buffers compiler. e.g. `go install google.golang.org/grpc/cmd/protoc-gen-go-grpc`
+- [`protoc`](https://github.com/protocolbuffers/protobuf): Protocol Buffers compiler. This isn't Go specific tooling, so follow this [installation guide](https://github.com/protocolbuffers/protobuf#protocol-compiler-installation)
+- [`protoc-gen-go`](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go): Go plugin for Protocol Buffers compiler. Install by running `make tools`
+- [`protoc-gen-go-grpc`](https://pkg.go.dev/google.golang.org/grpc/cmd/protoc-gen-go-grpc): Go gRPC plugin for Protocol Buffers compiler. Install by running `make tools`
 
 The Protocol Buffers definitions can be found in `tfprotov5/internal/tfplugin5` and `tfprotov6/internal/tfplugin6`.
 
