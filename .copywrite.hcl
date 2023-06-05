@@ -23,9 +23,5 @@ project {
 
     # Release Engineering tooling configuration
     ".release/*.hcl",
-
-    # Protoc generated files
-    "tfprotov5/internal/tfplugin5/*.pb.go",
-    "tfprotov6/internal/tfplugin6/*.pb.go",
   ]
 }
