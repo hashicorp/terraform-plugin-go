@@ -9,6 +9,8 @@ on:
       - go.sum
       - 'tfprotov5/internal/tfplugin5/*'
       - 'tfprotov6/internal/tfplugin6/*'
+      - tools/go.mod
+      - tools/go.sum
 
 permissions:
   contents: read
@@ -21,15 +23,13 @@ jobs:
       - uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
         with:
           go-version-file: 'go.mod'
-      - uses: arduino/setup-protoc@v1
+      - uses: arduino/setup-protoc@9b1ee5b22b0a3f1feb8c2ff99b32c89b3c3191e9 # v2.0.0
         with:
           # The version string is embedded in protoc generated files, so it is
           # pinned here to prevent unexpected differences. Follow the
           # https://github.com/protocolbuffers/protobuf repository for protoc
           # release updates.
-          # NOTE: Cannot yet update to version >= 21 due to:
-          # https://github.com/arduino/setup-protoc/issues/33
-          version: '3.19.4'
+          version: '23.2'
       - run: go mod download
       - run: make tools
       - run: make protoc
