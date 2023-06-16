@@ -1,0 +1,5 @@
+kind: BUG FIXES
+body: 'tfprotov6/tf6server: Ensure interrupts route to StopProvider RPC'
+time: 2023-06-16T15:37:54.001208-04:00
+custom:
+  Issue: "301"
