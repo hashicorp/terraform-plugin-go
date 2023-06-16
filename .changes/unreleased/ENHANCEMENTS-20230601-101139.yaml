@@ -1,6 +1,0 @@
-kind: ENHANCEMENTS
-body: 'all: Improved SDK logging performance when messages would be skipped due to
-  configured logging level'
-time: 2023-06-01T10:11:39.332417-04:00
-custom:
-  Issue: "289"

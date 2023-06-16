@@ -1,3 +1,13 @@
+## 0.16.0 (June 16, 2023)
+
+ENHANCEMENTS:
+
+* all: Improved SDK logging performance when messages would be skipped due to configured logging level ([#289](https://github.com/hashicorp/terraform-plugin-go/issues/289))
+
+BUG FIXES:
+
+* tfprotov6/tf6server: Ensure interrupts route to StopProvider RPC ([#301](https://github.com/hashicorp/terraform-plugin-go/issues/301))
+
 ## 0.15.0 (March 27, 2023)
 
 NOTES:
