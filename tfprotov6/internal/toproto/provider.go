@@ -8,7 +8,25 @@ import (
 )
 
 func GetProviderSchema_Request(in *tfprotov6.GetProviderSchemaRequest) (*tfplugin6.GetProviderSchema_Request, error) {
-	return &tfplugin6.GetProviderSchema_Request{}, nil
+	req := &tfplugin6.GetProviderSchema_Request{}
+
+	if len(in.DataSourceTypeNames) > 0 {
+		req.DataSourceTypeNames = make([]string, 0, len(in.DataSourceTypeNames))
+
+		for idx, value := range in.DataSourceTypeNames {
+			req.DataSourceTypeNames[idx] = value
+		}
+	}
+
+	if len(in.ResourceTypeNames) > 0 {
+		req.ResourceTypeNames = make([]string, 0, len(in.ResourceTypeNames))
+
+		for idx, value := range in.ResourceTypeNames {
+			req.ResourceTypeNames[idx] = value
+		}
+	}
+
+	return req, nil
 }
 
 func GetProviderSchema_Response(in *tfprotov6.GetProviderSchemaResponse) (*tfplugin6.GetProviderSchema_Response, error) {

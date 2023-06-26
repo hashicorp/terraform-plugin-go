@@ -1,0 +1,6 @@
+kind: ENHANCEMENTS
+body: 'tfprotov5: Added `GetProviderSchemaRequest` type `DataSourceTypeNames` and
+  `ResourceTypeNames` fields'
+time: 2023-06-26T13:46:00.748983-04:00
+custom:
+  Issue: "9999"

@@ -44,7 +44,21 @@ type ProviderServer interface {
 
 // GetProviderSchemaRequest represents a Terraform RPC request for the
 // provider's schemas.
-type GetProviderSchemaRequest struct{}
+type GetProviderSchemaRequest struct {
+	// DataSourceTypeNames is a list of expected data resource type names to
+	// return schema information. Other data resource type schemas can be
+	// omitted from the response. Provider schema and meta-schema
+	// information should always be included in the response, regardless of
+	// this field containing a value.
+	DataSourceTypeNames []string
+
+	// ResourceTypeNames is a list of expected managed resource type names to
+	// return schema information. Other managed resource type schemas can be
+	// omitted from the response. Provider schema and meta-schema
+	// information should always be included in the response, regardless of
+	// this field containing a value.
+	ResourceTypeNames []string
+}
 
 // GetProviderSchemaResponse represents a Terraform RPC response containing the
 // provider's schemas.

@@ -9,7 +9,25 @@ import (
 )
 
 func GetProviderSchemaRequest(in *tfplugin5.GetProviderSchema_Request) (*tfprotov5.GetProviderSchemaRequest, error) {
-	return &tfprotov5.GetProviderSchemaRequest{}, nil
+	req := &tfprotov5.GetProviderSchemaRequest{}
+
+	if len(in.DataSourceTypeNames) > 0 {
+		req.DataSourceTypeNames = make([]string, 0, len(in.DataSourceTypeNames))
+
+		for idx, value := range in.DataSourceTypeNames {
+			req.DataSourceTypeNames[idx] = value
+		}
+	}
+
+	if len(in.ResourceTypeNames) > 0 {
+		req.ResourceTypeNames = make([]string, 0, len(in.ResourceTypeNames))
+
+		for idx, value := range in.ResourceTypeNames {
+			req.ResourceTypeNames[idx] = value
+		}
+	}
+
+	return req, nil
 }
 
 func GetProviderSchemaResponse(in *tfplugin5.GetProviderSchema_Response) (*tfprotov5.GetProviderSchemaResponse, error) {

@@ -1,0 +1,8 @@
+kind: NOTES
+body: Plugin protocol version 5 and version 6 now both support limiting schema
+  response data based on resource type names. Future versions of Terraform can
+  request subsets of overall schema data using these to reduce Terraform and
+  provider binary memory usage.
+time: 2023-06-26T13:48:13.325635-04:00
+custom:
+  Issue: "9999"
