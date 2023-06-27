@@ -1,0 +1,6 @@
+kind: ENHANCEMENTS
+body: 'tfprotov6: Added `DynamicValue` type `IsNull` method, which enables checking
+  if the value is null without type information and fully decoding underlying data'
+time: 2023-06-27T12:59:12.941648-04:00
+custom:
+  Issue: "305"
