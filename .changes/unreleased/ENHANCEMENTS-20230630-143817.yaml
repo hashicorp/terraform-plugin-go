@@ -1,0 +1,6 @@
+kind: ENHANCEMENTS
+body: 'tftypes: Added `AttributePath` type `NextStep()` method, which returns the
+  next step in the path without first copying via `Steps()`'
+time: 2023-06-30T14:38:17.600608-04:00
+custom:
+  Issue: "307"

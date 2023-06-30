@@ -1,0 +1,6 @@
+kind: BUG FIXES
+body: 'tftypes: Removed unnecessary memory allocations from `AttributePath` type
+  `Equal()`, `LastStep()`, and `WithoutLastStep()` methods'
+time: 2023-06-30T14:47:01.127283-04:00
+custom:
+  Issue: "307"
