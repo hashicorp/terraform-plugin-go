@@ -1,6 +1,0 @@
-kind: BUG FIXES
-body: 'tftypes: Significantly reduced compute and memory usage of `Value` type
-  walking and transformation'
-time: 2023-06-30T10:36:55.119505-04:00
-custom:
-  Issue: "307"
