@@ -1,0 +1,5 @@
+kind: BUG FIXES
+body: 'tftypes: Removed unnecessary memory allocations from `NewValue()` function'
+time: 2023-06-30T14:49:45.828209-04:00
+custom:
+  Issue: "307"

@@ -1748,3 +1748,236 @@ func TestTransform(t *testing.T) {
 		})
 	}
 }
+
+// This test is similar to TestTransform, but notably also verifies that the
+// original Value is not modified, which could cause an unexpected breaking
+// change for consumers.
+func TestTransform_OriginalValueUnmodified(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		value    Value
+		callback func(*AttributePath, Value) (Value, error)
+		expected Value // Transform return, which should be modified
+	}{
+		"Bool": {
+			value: NewValue(Bool, false),
+			callback: func(_ *AttributePath, v Value) (Value, error) {
+				return NewValue(Bool, true), nil
+			},
+			expected: NewValue(Bool, true),
+		},
+		"List-element": {
+			value: NewValue(
+				List{ElementType: Bool},
+				[]Value{
+					NewValue(Bool, false),
+				},
+			),
+			callback: func(_ *AttributePath, v Value) (Value, error) {
+				switch v.Type().(type) {
+				case primitive:
+					return NewValue(Bool, true), nil
+				default:
+					return v, nil
+				}
+			},
+			expected: NewValue(
+				List{ElementType: Bool},
+				[]Value{
+					NewValue(Bool, true),
+				},
+			),
+		},
+		"Map-element": {
+			value: NewValue(
+				Map{ElementType: Bool},
+				map[string]Value{
+					"testkey": NewValue(Bool, false),
+				},
+			),
+			callback: func(_ *AttributePath, v Value) (Value, error) {
+				switch v.Type().(type) {
+				case primitive:
+					return NewValue(Bool, true), nil
+				default:
+					return v, nil
+				}
+			},
+			expected: NewValue(
+				Map{ElementType: Bool},
+				map[string]Value{
+					"testkey": NewValue(Bool, true),
+				},
+			),
+		},
+		"Number": {
+			value: NewValue(Number, 123),
+			callback: func(_ *AttributePath, v Value) (Value, error) {
+				return NewValue(Number, 456), nil
+			},
+			expected: NewValue(Number, 456),
+		},
+		"Object-attribute": {
+			value: NewValue(
+				Object{
+					AttributeTypes: map[string]Type{
+						"testattr": Bool,
+					},
+				},
+				map[string]Value{
+					"testattr": NewValue(Bool, false),
+				},
+			),
+			callback: func(_ *AttributePath, v Value) (Value, error) {
+				switch v.Type().(type) {
+				case primitive:
+					return NewValue(Bool, true), nil
+				default:
+					return v, nil
+				}
+			},
+			expected: NewValue(
+				Object{
+					AttributeTypes: map[string]Type{
+						"testattr": Bool,
+					},
+				},
+				map[string]Value{
+					"testattr": NewValue(Bool, true),
+				},
+			),
+		},
+		"Object-Object-attribute": {
+			value: NewValue(
+				Object{
+					AttributeTypes: map[string]Type{
+						"testobj": Object{
+							AttributeTypes: map[string]Type{
+								"testattr": Bool,
+							},
+						},
+					},
+				},
+				map[string]Value{
+					"testobj": NewValue(
+						Object{
+							AttributeTypes: map[string]Type{
+								"testattr": Bool,
+							},
+						},
+						map[string]Value{
+							"testattr": NewValue(Bool, false),
+						},
+					),
+				},
+			),
+			callback: func(_ *AttributePath, v Value) (Value, error) {
+				switch v.Type().(type) {
+				case primitive:
+					return NewValue(Bool, true), nil
+				default:
+					return v, nil
+				}
+			},
+			expected: NewValue(
+				Object{
+					AttributeTypes: map[string]Type{
+						"testobj": Object{
+							AttributeTypes: map[string]Type{
+								"testattr": Bool,
+							},
+						},
+					},
+				},
+				map[string]Value{
+					"testobj": NewValue(
+						Object{
+							AttributeTypes: map[string]Type{
+								"testattr": Bool,
+							},
+						},
+						map[string]Value{
+							"testattr": NewValue(Bool, true),
+						},
+					),
+				},
+			),
+		},
+		"Set-element": {
+			value: NewValue(
+				Set{ElementType: Bool},
+				[]Value{
+					NewValue(Bool, false),
+				},
+			),
+			callback: func(_ *AttributePath, v Value) (Value, error) {
+				switch v.Type().(type) {
+				case primitive:
+					return NewValue(Bool, true), nil
+				default:
+					return v, nil
+				}
+			},
+			expected: NewValue(
+				Set{ElementType: Bool},
+				[]Value{
+					NewValue(Bool, true),
+				},
+			),
+		},
+		"String": {
+			value: NewValue(String, "original value"),
+			callback: func(_ *AttributePath, v Value) (Value, error) {
+				return NewValue(String, "new value"), nil
+			},
+			expected: NewValue(String, "new value"),
+		},
+		"Tuple-element": {
+			value: NewValue(
+				Tuple{ElementTypes: []Type{Bool}},
+				[]Value{
+					NewValue(Bool, false),
+				},
+			),
+			callback: func(_ *AttributePath, v Value) (Value, error) {
+				switch v.Type().(type) {
+				case primitive:
+					return NewValue(Bool, true), nil
+				default:
+					return v, nil
+				}
+			},
+			expected: NewValue(
+				Tuple{ElementTypes: []Type{Bool}},
+				[]Value{
+					NewValue(Bool, true),
+				},
+			),
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			copiedValue := testCase.value.Copy()
+
+			got, err := Transform(testCase.value, testCase.callback)
+
+			if err != nil {
+				t.Fatalf("unexpected Transform error: %s", err)
+			}
+
+			if diff := cmp.Diff(got, testCase.expected); diff != "" {
+				t.Errorf("unexpected Transform difference: %s", diff)
+			}
+
+			if diff := cmp.Diff(testCase.value, copiedValue); diff != "" {
+				t.Errorf("unexpected original Value difference: %s", diff)
+			}
+		})
+	}
+}
