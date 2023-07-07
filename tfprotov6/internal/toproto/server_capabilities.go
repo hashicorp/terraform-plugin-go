@@ -14,6 +14,7 @@ func GetProviderSchema_ServerCapabilities(in *tfprotov6.ServerCapabilities) *tfp
 	}
 
 	return &tfplugin6.GetProviderSchema_ServerCapabilities{
-		PlanDestroy: in.PlanDestroy,
+		GetProviderSchemaOptional: in.GetProviderSchemaOptional,
+		PlanDestroy:               in.PlanDestroy,
 	}
 }

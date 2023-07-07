@@ -1,9 +1,9 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
-// Terraform Plugin RPC protocol version 5.3
+// Terraform Plugin RPC protocol version 5.4
 //
-// This file defines version 5.3 of the RPC protocol. To implement a plugin
+// This file defines version 5.4 of the RPC protocol. To implement a plugin
 // against this protocol, copy this definition into your own codebase and
 // use protoc to generate stubs for your target language.
 //
@@ -172,6 +172,12 @@ message GetProviderSchema {
         // The plan_destroy capability signals that a provider expects a call
         // to PlanResourceChange when a resource is going to be destroyed.
         bool plan_destroy = 1;
+
+        // The get_provider_schema_optional capability indicates that this
+        // provider does not require calling GetProviderSchema to operate
+        // normally, and the caller can used a cached copy of the provider's
+        // schema.
+        bool get_provider_schema_optional = 2;
     }
 }
 
