@@ -48,7 +48,7 @@ const (
 	//
 	// In the future, it may be possible to include this information directly
 	// in the protocol buffers rather than recreating a constant here.
-	protocolVersionMinor uint = 3
+	protocolVersionMinor uint = 4
 )
 
 // protocolVersion represents the combined major and minor version numbers of
@@ -484,6 +484,42 @@ func New(name string, serve tfprotov5.ProviderServer, opts ...ServeOpt) tfplugin
 		protocolDataDir: os.Getenv(logging.EnvTfLogSdkProtoDataDir),
 		protocolVersion: protocolVersion,
 	}
+}
+
+func (s *server) GetMetadata(ctx context.Context, req *tfplugin5.GetMetadata_Request) (*tfplugin5.GetMetadata_Response, error) {
+	rpc := "GetMetadata"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	r, err := fromproto.GetMetadataRequest(req)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error converting request from protobuf", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	ctx = tf5serverlogging.DownstreamRequest(ctx)
+
+	resp, err := s.downstream.GetMetadata(ctx, r)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	ret, err := toproto.GetMetadata_Response(resp)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	return ret, nil
 }
 
 func (s *server) GetSchema(ctx context.Context, req *tfplugin5.GetProviderSchema_Request) (*tfplugin5.GetProviderSchema_Response, error) {
