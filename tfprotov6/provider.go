@@ -10,9 +10,11 @@ import (
 // ProviderServer is an interface that reflects that Terraform protocol.
 // Providers must implement this interface.
 type ProviderServer interface {
-	// GetMetadata is called when Terraform needs to know what the
-	// provider's schema is, along with the schemas of all its resources
-	// and data sources.
+	// GetMetadata returns upfront information about server capabilities and
+	// supported resource types without requiring the server to instantiate all
+	// schema information, which may be memory intensive. This RPC is optional,
+	// where clients may receive an unimplemented RPC error. Clients should
+	// ignore the error and call the GetProviderSchema RPC as a fallback.
 	GetMetadata(context.Context, *GetMetadataRequest) (*GetMetadataResponse, error)
 
 	// GetProviderSchema is called when Terraform needs to know what the
