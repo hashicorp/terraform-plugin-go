@@ -511,6 +511,7 @@ func (s *server) GetMetadata(ctx context.Context, req *tfplugin6.GetMetadata_Req
 	}
 
 	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+	tf6serverlogging.ServerCapabilities(ctx, resp.ServerCapabilities)
 
 	ret, err := toproto.GetMetadata_Response(resp)
 
@@ -541,6 +542,7 @@ func (s *server) GetProviderSchema(ctx context.Context, req *tfplugin6.GetProvid
 		return nil, err
 	}
 	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+	tf6serverlogging.ServerCapabilities(ctx, resp.ServerCapabilities)
 	ret, err := toproto.GetProviderSchema_Response(resp)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
