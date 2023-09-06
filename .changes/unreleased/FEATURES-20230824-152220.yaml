@@ -1,0 +1,5 @@
+kind: FEATURES
+body: 'tfprotov6: Upgraded protocol to 6.4 and implemented `GetMetadata` RPC'
+time: 2023-08-24T15:22:20.285837-04:00
+custom:
+  Issue: "310"
