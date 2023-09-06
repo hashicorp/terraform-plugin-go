@@ -1,7 +1,0 @@
-kind: NOTES
-body: 'all: If using terraform-plugin-framework, terraform-plugin-mux, or terraform-plugin-sdk,
-  only upgrade this Go module when upgrading those Go modules or you may receive
-  a `missing GetMetadata method` error when compiling'
-time: 2023-08-24T15:39:56.697018-04:00
-custom:
-  Issue: "310"

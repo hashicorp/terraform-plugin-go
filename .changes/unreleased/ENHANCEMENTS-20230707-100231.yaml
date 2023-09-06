@@ -1,7 +1,0 @@
-kind: ENHANCEMENTS
-body: 'tfprotov5: Added `ServerCapabilities` type `GetProviderSchemaOptional` field,
-  which when enabled can signal that the provider supports RPC operations without
-  the `GetProviderSchema` RPC being called first'
-time: 2023-07-07T10:02:31.242394-04:00
-custom:
-  Issue: "310"
