@@ -1,0 +1,6 @@
+kind: FEATURES
+body: 'tfprotov5: Upgraded protocol to 5.5, which implements support for provider
+  defined functions'
+time: 2023-10-26T16:43:00.024481-04:00
+custom:
+  Issue: "9999"
