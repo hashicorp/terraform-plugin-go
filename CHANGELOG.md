@@ -1,3 +1,9 @@
+## 0.19.1 (November 15, 2023)
+
+NOTES:
+
+* This release introduces no functional changes. It does however include dependency updates, such as `google.golang.org/grpc`, which address upstream CVEs. ([#324](https://github.com/hashicorp/terraform-plugin-go/issues/324))
+
 ## 0.19.0 (September 06, 2023)
 
 NOTES:

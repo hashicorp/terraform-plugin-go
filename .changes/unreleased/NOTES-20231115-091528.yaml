@@ -1,6 +1,0 @@
-kind: NOTES
-body: This release introduces no functional changes. It does however include dependency
-  updates, such as `google.golang.org/grpc`, which address upstream CVEs.
-time: 2023-11-15T09:15:28.630051-05:00
-custom:
-  Issue: "324"
