@@ -1,7 +1,7 @@
 kind: NOTES
 body: 'all: If using terraform-plugin-framework, terraform-plugin-mux, or terraform-plugin-sdk,
-  only upgrade this Go module when upgrading those Go modules or you may receive
-  a `missing CallFunction method` or `missing GetFunctions method` error when compiling'
+  only upgrade this Go module as part of upgrading those Go modules or you may receive
+  a `missing method CallFunction` or `missing method GetFunctions` error when compiling'
 time: 2023-10-26T16:43:59.845786-04:00
 custom:
-  Issue: "9999"
+  Issue: "351"
