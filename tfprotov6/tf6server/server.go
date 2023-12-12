@@ -910,6 +910,28 @@ func (s *server) CallFunction(ctx context.Context, protoReq *tfplugin6.CallFunct
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
 
+	// Remove this check and error in preference of s.downstream.CallFunction
+	// below once ProviderServer interface requires FunctionServer.
+	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/353
+	functionServer, ok := s.downstream.(tfprotov6.FunctionServer)
+
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement FunctionServer")
+
+		protoResp := &tfplugin6.CallFunction_Response{
+			Diagnostics: []*tfplugin6.Diagnostic{
+				{
+					Severity: tfplugin6.Diagnostic_ERROR,
+					Summary:  "Provider Functions Not Implemented",
+					Detail: "A provider-defined function call was received by the provider, however the provider does not implement functions. " +
+						"Either upgrade the provider to a version that implements provider-defined functions or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
 	req, err := fromproto.CallFunctionRequest(protoReq)
 
 	if err != nil {
@@ -924,7 +946,9 @@ func (s *server) CallFunction(ctx context.Context, protoReq *tfplugin6.CallFunct
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	resp, err := s.downstream.CallFunction(ctx, req)
+	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/353
+	// resp, err := s.downstream.CallFunction(ctx, req)
+	resp, err := functionServer.CallFunction(ctx, req)
 
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]any{logging.KeyError: err})
@@ -952,6 +976,21 @@ func (s *server) GetFunctions(ctx context.Context, protoReq *tfplugin6.GetFuncti
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
 
+	// Remove this check and response in preference of s.downstream.GetFunctions
+	// below once ProviderServer interface requires FunctionServer.
+	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/353
+	functionServer, ok := s.downstream.(tfprotov6.FunctionServer)
+
+	if !ok {
+		logging.ProtocolWarn(ctx, "ProviderServer does not implement FunctionServer")
+
+		protoResp := &tfplugin6.GetFunctions_Response{
+			Functions: map[string]*tfplugin6.Function{},
+		}
+
+		return protoResp, nil
+	}
+
 	req, err := fromproto.GetFunctionsRequest(protoReq)
 
 	if err != nil {
@@ -962,7 +1001,9 @@ func (s *server) GetFunctions(ctx context.Context, protoReq *tfplugin6.GetFuncti
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	resp, err := s.downstream.GetFunctions(ctx, req)
+	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/353
+	// resp, err := s.downstream.GetFunctions(ctx, req)
+	resp, err := functionServer.GetFunctions(ctx, req)
 
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]any{logging.KeyError: err})

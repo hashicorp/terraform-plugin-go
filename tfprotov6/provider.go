@@ -53,7 +53,10 @@ type ProviderServer interface {
 	// are a handy interface for defining what a function is to
 	// terraform-plugin-go, so they are their own interface that is composed
 	// into ProviderServer.
-	FunctionServer
+	//
+	// This will be required in an upcoming release.
+	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/353
+	// FunctionServer
 }
 
 // GetMetadataRequest represents a GetMetadata RPC request.
