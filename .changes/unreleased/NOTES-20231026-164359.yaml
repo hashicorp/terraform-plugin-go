@@ -1,6 +1,0 @@
-kind: NOTES
-body: 'tfprotov5+tfprotov6: An upcoming release will require the FunctionServer
-  implementation as part of ProviderServer.'
-time: 2023-10-26T16:43:59.845786-04:00
-custom:
-  Issue: "351"
