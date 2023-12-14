@@ -148,6 +148,62 @@ message ServerCapabilities {
     bool get_provider_schema_optional = 2;
 }
 
+message Function {
+    // parameters is the ordered list of positional function parameters.
+    repeated Parameter parameters = 1;
+
+    // variadic_parameter is an optional final parameter which accepts
+    // zero or more argument values, in which Terraform will send an
+    // ordered list of the parameter type.
+    Parameter variadic_parameter = 2;
+
+    // return is the function result.
+    Return return = 3;
+
+    // summary is the human-readable shortened documentation for the function.
+    string summary = 4;
+
+    // description is human-readable documentation for the function.
+    string description = 5;
+
+    // description_kind is the formatting of the description.
+    StringKind description_kind = 6;
+
+    // deprecation_message is human-readable documentation if the
+    // function is deprecated.
+    string deprecation_message = 7;
+
+    message Parameter {
+        // name is the human-readable display name for the parameter.
+        string name = 1;
+
+        // type is the type constraint for the parameter.
+        bytes type = 2;
+
+        // allow_null_value when enabled denotes that a null argument value can
+        // be passed to the provider. When disabled, Terraform returns an error
+        // if the argument value is null.
+        bool allow_null_value = 3;
+
+        // allow_unknown_values when enabled denotes that only wholly known
+        // argument values will be passed to the provider. When disabled,
+        // Terraform skips the function call entirely and assumes an unknown
+        // value result from the function.
+        bool allow_unknown_values = 4;
+
+        // description is human-readable documentation for the parameter.
+        string description = 5;
+
+        // description_kind is the formatting of the description.
+        StringKind description_kind = 6;
+    }
+
+    message Return {
+        // type is the type constraint for the function result.
+        bytes type = 1;
+    }
+}
+
 service Provider {
     //////// Information about what a provider supports/expects
 
@@ -204,12 +260,13 @@ message GetMetadata {
         repeated FunctionMetadata functions = 5;
     }
 
-    message DataSourceMetadata {
-        string type_name = 1;
+    message FunctionMetadata {
+        // name is the function name.
+        string name = 1;
     }
 
-    message FunctionMetadata {
-        string name = 1;
+    message DataSourceMetadata {
+        string type_name = 1;
     }
 
     message ResourceMetadata {
@@ -422,93 +479,6 @@ message ReadDataSource {
     }
 }
 
-message CallFunction {
-    message Request {
-        // name is the name of the function being called.
-        string name = 1;
-
-        // arguments is the data of each function argument value.
-        repeated DynamicValue arguments = 2;
-    }
-
-    message Response {
-        // result is result value after running the function logic.
-        DynamicValue result = 1;
-
-        // diagnostics is any warnings or errors from the function logic.
-        repeated Diagnostic diagnostics = 2;
-    }
-}
-
-message GetFunctions {
-    message Request {}
-
-    message Response {
-        // functions is a mapping of function names to definitions.
-        map<string, Function> functions = 1;
-
-        // diagnostics is any warnings or errors.
-        repeated Diagnostic diagnostics = 2;
-    }
-}
-
-message Function {
-    // parameters is the ordered list of positional function parameters.
-    repeated Parameter parameters = 1;
-
-    // variadic_parameter is an optional final parameter which accepts
-    // zero or more argument values, in which Terraform will send an
-    // ordered list of the parameter type.
-    Parameter variadic_parameter = 2;
-
-    // return is the function result.
-    Return return = 3;
-
-    // summary is the human-readable shortened documentation for the function.
-    string summary = 4;
-
-    // description is human-readable documentation for the function.
-    string description = 5;
-
-    // description_kind is the formatting of the description.
-    StringKind description_kind = 6;
-
-    // deprecation_message is human-readable documentation if the
-    // function is deprecated.
-    string deprecation_message = 7;
-
-    message Parameter {
-        // name is the human-readable display name for the parameter.
-        string name = 1;
-
-        // type is the type constraint for the parameter.
-        bytes type = 2;
-
-        // allow_null_value when enabled denotes that a null argument value can
-        // be passed to the provider. When disabled, Terraform returns an error
-        // if the argument value is null.
-        bool allow_null_value = 3;
-
-        // allow_unknown_values when enabled denotes that any unknown argument
-        // value (recursively checked for collections) can be passed to the
-        // provider. When disabled and an unknown value is present, Terraform
-        // skips the function call entirely and returns an unknown value from
-        // the function.
-        bool allow_unknown_values = 4;
-
-        // description is human-readable documentation for the parameter.
-        string description = 5;
-
-        // description_kind is the formatting of the description.
-        StringKind description_kind = 6;
-    }
-
-    message Return {
-        // type is the type constraint for the function return.
-        bytes type = 1;
-    }
-}
-
 service Provisioner {
     rpc GetSchema(GetProvisionerSchema.Request) returns (GetProvisionerSchema.Response);
     rpc ValidateProvisionerConfig(ValidateProvisionerConfig.Request) returns (ValidateProvisionerConfig.Response);
@@ -541,6 +511,36 @@ message ProvisionResource {
     }
     message Response {
         string output  = 1;
+        repeated Diagnostic diagnostics = 2;
+    }
+}
+
+message GetFunctions {
+    message Request {}
+
+    message Response {
+        // functions is a mapping of function names to definitions.
+        map<string, Function> functions = 1;
+
+        // diagnostics is any warnings or errors.
+        repeated Diagnostic diagnostics = 2;
+    }
+}
+
+message CallFunction {
+    message Request {
+        // name is the name of the function being called.
+        string name = 1;
+
+        // arguments is the data of each function argument value.
+        repeated DynamicValue arguments = 2;
+    }
+
+    message Response {
+        // result is result value after running the function logic.
+        DynamicValue result = 1;
+
+        // diagnostics is any warnings or errors from the function logic.
         repeated Diagnostic diagnostics = 2;
     }
 }
