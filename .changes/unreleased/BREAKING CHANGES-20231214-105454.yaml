@@ -1,0 +1,8 @@
+kind: BREAKING CHANGES
+body: 'tfprotov5+tfprotov6: The `ProviderServer` interface now requires the `FunctionServer`
+  interface. Before upgrading this Go module, ensure you are depending on at least
+  terraform-plugin-framework v1.5.0, terraform-plugin-mux v0.13.0, and
+  terraform-plugin-sdk/v2 v2.31.0.'
+time: 2023-12-14T10:54:54.463017-05:00
+custom:
+  Issue: "353"
