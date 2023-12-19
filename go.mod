@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/terraform-registry-address v0.2.3
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	google.golang.org/grpc v1.60.0
+	google.golang.org/grpc v1.60.1
 	google.golang.org/protobuf v1.31.0
 )
 
