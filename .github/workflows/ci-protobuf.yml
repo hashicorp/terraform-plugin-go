@@ -29,7 +29,7 @@ jobs:
           # pinned here to prevent unexpected differences. Follow the
           # https://github.com/protocolbuffers/protobuf repository for protoc
           # release updates.
-          version: '23.2'
+          version: '25.1'
       - run: go mod download
       - run: make tools
       - run: make protoc
