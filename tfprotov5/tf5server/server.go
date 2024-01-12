@@ -917,6 +917,7 @@ func (s *server) MoveResourceState(ctx context.Context, protoReq *tfplugin5.Move
 	// s.downstream.MoveResourceState below once ResourceServer interface
 	// implements the MoveResourceState method.
 	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/363
+	// nolint:staticcheck
 	resourceServerWMRS, ok := s.downstream.(tfprotov5.ResourceServerWithMoveResourceState)
 
 	if !ok {
