@@ -1,0 +1,6 @@
+kind: FEATURES
+body: 'tfprotov5+tfprotov6: Upgraded protocols and added types to support the `MoveResourceState`
+  RPC'
+time: 2024-01-12T15:33:55.940212-08:00
+custom:
+  Issue: "364"
