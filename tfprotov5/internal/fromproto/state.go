@@ -9,6 +9,10 @@ import (
 )
 
 func RawState(in *tfplugin5.RawState) *tfprotov5.RawState {
+	if in == nil {
+		return nil
+	}
+
 	return &tfprotov5.RawState{
 		JSON:    in.Json,
 		Flatmap: in.Flatmap,

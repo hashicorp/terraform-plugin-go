@@ -15,6 +15,7 @@ func ServerCapabilities(in *tfplugin5.ServerCapabilities) *tfprotov5.ServerCapab
 
 	return &tfprotov5.ServerCapabilities{
 		GetProviderSchemaOptional: in.GetProviderSchemaOptional,
+		MoveResourceState:         in.MoveResourceState,
 		PlanDestroy:               in.PlanDestroy,
 	}
 }

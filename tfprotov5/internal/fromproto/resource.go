@@ -42,12 +42,11 @@ func ValidateResourceTypeConfigResponse(in *tfplugin5.ValidateResourceTypeConfig
 
 func UpgradeResourceStateRequest(in *tfplugin5.UpgradeResourceState_Request) (*tfprotov5.UpgradeResourceStateRequest, error) {
 	resp := &tfprotov5.UpgradeResourceStateRequest{
+		RawState: RawState(in.RawState),
 		TypeName: in.TypeName,
 		Version:  in.Version,
 	}
-	if in.RawState != nil {
-		resp.RawState = RawState(in.RawState)
-	}
+
 	return resp, nil
 }
 
@@ -217,5 +216,17 @@ func ImportedResources(in []*tfplugin5.ImportResourceState_ImportedResource) ([]
 		}
 		resp = append(resp, r)
 	}
+	return resp, nil
+}
+
+func MoveResourceStateRequest(in *tfplugin5.MoveResourceState_Request) (*tfprotov5.MoveResourceStateRequest, error) {
+	resp := &tfprotov5.MoveResourceStateRequest{
+		SourceProviderAddress: in.SourceProviderAddress,
+		SourceSchemaVersion:   in.SourceSchemaVersion,
+		SourceState:           RawState(in.SourceState),
+		SourceTypeName:        in.SourceTypeName,
+		TargetTypeName:        in.TargetTypeName,
+	}
+
 	return resp, nil
 }
