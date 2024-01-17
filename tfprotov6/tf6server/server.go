@@ -902,6 +902,73 @@ func (s *server) ImportResourceState(ctx context.Context, req *tfplugin6.ImportR
 	return ret, nil
 }
 
+func (s *server) MoveResourceState(ctx context.Context, protoReq *tfplugin6.MoveResourceState_Request) (*tfplugin6.MoveResourceState_Response, error) {
+	rpc := "MoveResourceState"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.ResourceContext(ctx, protoReq.TargetTypeName)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	// Remove this check and error in preference of
+	// s.downstream.MoveResourceState below once ResourceServer interface
+	// implements the MoveResourceState method.
+	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/363
+	// nolint:staticcheck
+	resourceServerWMRS, ok := s.downstream.(tfprotov6.ResourceServerWithMoveResourceState)
+
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement ResourceServerWithMoveResourceState")
+
+		protoResp := &tfplugin6.MoveResourceState_Response{
+			Diagnostics: []*tfplugin6.Diagnostic{
+				{
+					Severity: tfplugin6.Diagnostic_ERROR,
+					Summary:  "Provider Move Resource State Not Implemented",
+					Detail: "A MoveResourceState call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements move resource state support or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	req, err := fromproto.MoveResourceStateRequest(protoReq)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error converting request from protobuf", map[string]interface{}{logging.KeyError: err})
+
+		return nil, err
+	}
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/363
+	// resp, err := s.downstream.MoveResourceState(ctx, req)
+	resp, err := resourceServerWMRS.MoveResourceState(ctx, req)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+
+		return nil, err
+	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "TargetState", resp.TargetState)
+
+	protoResp, err := toproto.MoveResourceState_Response(resp)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
+
+		return nil, err
+	}
+
+	return protoResp, nil
+}
+
 func (s *server) CallFunction(ctx context.Context, protoReq *tfplugin6.CallFunction_Request) (*tfplugin6.CallFunction_Response, error) {
 	rpc := "CallFunction"
 	ctx = s.loggingContext(ctx)

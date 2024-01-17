@@ -215,6 +215,24 @@ func ImportResourceState_ImportedResources(in []*tfprotov5.ImportedResource) ([]
 	return resp, nil
 }
 
+func MoveResourceState_Response(in *tfprotov5.MoveResourceStateResponse) (*tfplugin5.MoveResourceState_Response, error) {
+	diags, err := Diagnostics(in.Diagnostics)
+
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &tfplugin5.MoveResourceState_Response{
+		Diagnostics: diags,
+	}
+
+	if in.TargetState != nil {
+		resp.TargetState = DynamicValue(in.TargetState)
+	}
+
+	return resp, nil
+}
+
 // we have to say this next thing to get golint to stop yelling at us about the
 // underscores in the function names. We want the function names to match
 // actually-generated code, so it feels like fair play. It's just a shame we
