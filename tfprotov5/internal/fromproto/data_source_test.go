@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 func TestReadDataSourceRequest(t *testing.T) {
@@ -29,30 +28,18 @@ func TestReadDataSourceRequest(t *testing.T) {
 		},
 		"Config": {
 			in: &tfplugin5.ReadDataSource_Request{
-				Config: testTfplugin5DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfplugin5DynamicValue(),
 			},
 			expected: &tfprotov5.ReadDataSourceRequest{
-				Config: testTfprotov5DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfprotov5DynamicValue(),
 			},
 		},
 		"ProviderMeta": {
 			in: &tfplugin5.ReadDataSource_Request{
-				ProviderMeta: testTfplugin5DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				ProviderMeta: testTfplugin5DynamicValue(),
 			},
 			expected: &tfprotov5.ReadDataSourceRequest{
-				ProviderMeta: testTfprotov5DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				ProviderMeta: testTfprotov5DynamicValue(),
 			},
 		},
 		"TypeName": {
@@ -97,16 +84,10 @@ func TestValidateDataSourceConfigRequest(t *testing.T) {
 		},
 		"Config": {
 			in: &tfplugin5.ValidateDataSourceConfig_Request{
-				Config: testTfplugin5DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfplugin5DynamicValue(),
 			},
 			expected: &tfprotov5.ValidateDataSourceConfigRequest{
-				Config: testTfprotov5DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfprotov5DynamicValue(),
 			},
 		},
 		"TypeName": {

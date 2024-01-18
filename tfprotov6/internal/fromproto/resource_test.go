@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 func TestApplyResourceChangeRequest(t *testing.T) {
@@ -29,16 +28,10 @@ func TestApplyResourceChangeRequest(t *testing.T) {
 		},
 		"Config": {
 			in: &tfplugin6.ApplyResourceChange_Request{
-				Config: testTfplugin6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.ApplyResourceChangeRequest{
-				Config: testTfprotov6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfprotov6DynamicValue(),
 			},
 		},
 		"PlannedPrivate": {
@@ -51,44 +44,26 @@ func TestApplyResourceChangeRequest(t *testing.T) {
 		},
 		"PlannedState": {
 			in: &tfplugin6.ApplyResourceChange_Request{
-				PlannedState: testTfplugin6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				PlannedState: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.ApplyResourceChangeRequest{
-				PlannedState: testTfprotov6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				PlannedState: testTfprotov6DynamicValue(),
 			},
 		},
 		"PriorState": {
 			in: &tfplugin6.ApplyResourceChange_Request{
-				PriorState: testTfplugin6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				PriorState: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.ApplyResourceChangeRequest{
-				PriorState: testTfprotov6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				PriorState: testTfprotov6DynamicValue(),
 			},
 		},
 		"ProviderMeta": {
 			in: &tfplugin6.ApplyResourceChange_Request{
-				ProviderMeta: testTfplugin6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				ProviderMeta: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.ApplyResourceChangeRequest{
-				ProviderMeta: testTfprotov6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				ProviderMeta: testTfprotov6DynamicValue(),
 			},
 		},
 		"TypeName": {
@@ -253,16 +228,10 @@ func TestPlanResourceChangeRequest(t *testing.T) {
 		},
 		"Config": {
 			in: &tfplugin6.PlanResourceChange_Request{
-				Config: testTfplugin6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.PlanResourceChangeRequest{
-				Config: testTfprotov6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfprotov6DynamicValue(),
 			},
 		},
 		"PriorPrivate": {
@@ -275,44 +244,26 @@ func TestPlanResourceChangeRequest(t *testing.T) {
 		},
 		"PriorState": {
 			in: &tfplugin6.PlanResourceChange_Request{
-				PriorState: testTfplugin6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				PriorState: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.PlanResourceChangeRequest{
-				PriorState: testTfprotov6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				PriorState: testTfprotov6DynamicValue(),
 			},
 		},
 		"ProposedNewState": {
 			in: &tfplugin6.PlanResourceChange_Request{
-				ProposedNewState: testTfplugin6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				ProposedNewState: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.PlanResourceChangeRequest{
-				ProposedNewState: testTfprotov6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				ProposedNewState: testTfprotov6DynamicValue(),
 			},
 		},
 		"ProviderMeta": {
 			in: &tfplugin6.PlanResourceChange_Request{
-				ProviderMeta: testTfplugin6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				ProviderMeta: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.PlanResourceChangeRequest{
-				ProviderMeta: testTfprotov6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				ProviderMeta: testTfprotov6DynamicValue(),
 			},
 		},
 		"TypeName": {
@@ -357,16 +308,10 @@ func TestReadResourceRequest(t *testing.T) {
 		},
 		"CurrentState": {
 			in: &tfplugin6.ReadResource_Request{
-				CurrentState: testTfplugin6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				CurrentState: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.ReadResourceRequest{
-				CurrentState: testTfprotov6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				CurrentState: testTfprotov6DynamicValue(),
 			},
 		},
 		"Private": {
@@ -379,16 +324,10 @@ func TestReadResourceRequest(t *testing.T) {
 		},
 		"ProviderMeta": {
 			in: &tfplugin6.ReadResource_Request{
-				ProviderMeta: testTfplugin6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				ProviderMeta: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.ReadResourceRequest{
-				ProviderMeta: testTfprotov6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				ProviderMeta: testTfprotov6DynamicValue(),
 			},
 		},
 		"TypeName": {
@@ -489,16 +428,10 @@ func TestValidateResourceConfigRequest(t *testing.T) {
 		},
 		"Config": {
 			in: &tfplugin6.ValidateResourceConfig_Request{
-				Config: testTfplugin6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.ValidateResourceConfigRequest{
-				Config: testTfprotov6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfprotov6DynamicValue(),
 			},
 		},
 		"TypeName": {

@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 func TestCallFunctionRequest(t *testing.T) {
@@ -32,18 +31,12 @@ func TestCallFunctionRequest(t *testing.T) {
 		"Arguments": {
 			in: &tfplugin6.CallFunction_Request{
 				Arguments: []*tfplugin6.DynamicValue{
-					testTfplugin6DynamicValue(t,
-						tftypes.Object{},
-						tftypes.NewValue(tftypes.Object{}, nil),
-					),
+					testTfplugin6DynamicValue(),
 				},
 			},
 			expected: &tfprotov6.CallFunctionRequest{
 				Arguments: []*tfprotov6.DynamicValue{
-					testTfprotov6DynamicValue(t,
-						tftypes.Object{},
-						tftypes.NewValue(tftypes.Object{}, nil),
-					),
+					testTfprotov6DynamicValue(),
 				},
 			},
 		},

@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 func TestGetMetadataRequest(t *testing.T) {
@@ -93,16 +92,10 @@ func TestConfigureProviderRequest(t *testing.T) {
 		},
 		"Config": {
 			in: &tfplugin6.ConfigureProvider_Request{
-				Config: testTfplugin6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.ConfigureProviderRequest{
-				Config: testTfprotov6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfprotov6DynamicValue(),
 			},
 		},
 		"TerraformVersion": {
@@ -179,16 +172,10 @@ func TestValidateProviderConfigRequest(t *testing.T) {
 		},
 		"Config": {
 			in: &tfplugin6.ValidateProviderConfig_Request{
-				Config: testTfplugin6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.ValidateProviderConfigRequest{
-				Config: testTfprotov6DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfprotov6DynamicValue(),
 			},
 		},
 	}

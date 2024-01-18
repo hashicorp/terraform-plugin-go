@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 func TestGetMetadataRequest(t *testing.T) {
@@ -93,16 +92,10 @@ func TestConfigureProviderRequest(t *testing.T) {
 		},
 		"Config": {
 			in: &tfplugin5.Configure_Request{
-				Config: testTfplugin5DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfplugin5DynamicValue(),
 			},
 			expected: &tfprotov5.ConfigureProviderRequest{
-				Config: testTfprotov5DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfprotov5DynamicValue(),
 			},
 		},
 		"TerraformVersion": {
@@ -147,16 +140,10 @@ func TestPrepareProviderConfigRequest(t *testing.T) {
 		},
 		"Config": {
 			in: &tfplugin5.PrepareProviderConfig_Request{
-				Config: testTfplugin5DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfplugin5DynamicValue(),
 			},
 			expected: &tfprotov5.PrepareProviderConfigRequest{
-				Config: testTfprotov5DynamicValue(t,
-					tftypes.Object{},
-					tftypes.NewValue(tftypes.Object{}, nil),
-				),
+				Config: testTfprotov5DynamicValue(),
 			},
 		},
 	}
