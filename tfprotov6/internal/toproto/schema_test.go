@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+
 package toproto_test
 
 import (
