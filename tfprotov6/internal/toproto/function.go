@@ -23,10 +23,7 @@ func CallFunction_Response(in *tfprotov6.CallFunctionResponse) (*tfplugin6.CallF
 
 	resp := &tfplugin6.CallFunction_Response{
 		Diagnostics: diags,
-	}
-
-	if in.Result != nil {
-		resp.Result = DynamicValue(in.Result)
+		Result:      DynamicValue(in.Result),
 	}
 
 	return resp, nil
