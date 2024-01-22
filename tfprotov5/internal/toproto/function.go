@@ -23,10 +23,7 @@ func CallFunction_Response(in *tfprotov5.CallFunctionResponse) (*tfplugin5.CallF
 
 	resp := &tfplugin5.CallFunction_Response{
 		Diagnostics: diags,
-	}
-
-	if in.Result != nil {
-		resp.Result = DynamicValue(in.Result)
+		Result:      DynamicValue(in.Result),
 	}
 
 	return resp, nil
@@ -168,7 +165,9 @@ func GetMetadata_FunctionMetadata(in *tfprotov5.FunctionMetadata) *tfplugin5.Get
 		return nil
 	}
 
-	return &tfplugin5.GetMetadata_FunctionMetadata{
+	resp := &tfplugin5.GetMetadata_FunctionMetadata{
 		Name: in.Name,
 	}
+
+	return resp
 }

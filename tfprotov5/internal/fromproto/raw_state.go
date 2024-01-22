@@ -8,6 +8,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
-func StringKind(in tfplugin5.StringKind) tfprotov5.StringKind {
-	return tfprotov5.StringKind(in)
+func RawState(in *tfplugin5.RawState) *tfprotov5.RawState {
+	if in == nil {
+		return nil
+	}
+
+	resp := &tfprotov5.RawState{
+		JSON:    in.Json,
+		Flatmap: in.Flatmap,
+	}
+
+	return resp
 }
