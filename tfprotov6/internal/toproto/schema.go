@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package toproto
 
 import (
@@ -8,112 +11,137 @@ import (
 )
 
 func Schema(in *tfprotov6.Schema) (*tfplugin6.Schema, error) {
-	var resp tfplugin6.Schema
-	resp.Version = in.Version
-	if in.Block != nil {
-		block, err := Schema_Block(in.Block)
-		if err != nil {
-			return &resp, fmt.Errorf("error marshalling block: %w", err)
-		}
-		resp.Block = block
+	if in == nil {
+		return nil, nil
 	}
-	return &resp, nil
+
+	block, err := Schema_Block(in.Block)
+
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling block: %w", err)
+	}
+
+	resp := &tfplugin6.Schema{
+		Block:   block,
+		Version: in.Version,
+	}
+
+	return resp, nil
 }
 
 func Schema_Block(in *tfprotov6.SchemaBlock) (*tfplugin6.Schema_Block, error) {
+	if in == nil {
+		return nil, nil
+	}
+
+	attributes, err := Schema_Attributes(in.Attributes)
+
+	if err != nil {
+		return nil, err
+	}
+
+	blockTypes, err := Schema_NestedBlocks(in.BlockTypes)
+
+	if err != nil {
+		return nil, err
+	}
+
 	resp := &tfplugin6.Schema_Block{
-		Version:         in.Version,
+		Attributes:      attributes,
+		BlockTypes:      blockTypes,
+		Deprecated:      in.Deprecated,
 		Description:     in.Description,
 		DescriptionKind: StringKind(in.DescriptionKind),
-		Deprecated:      in.Deprecated,
+		Version:         in.Version,
 	}
-	attrs, err := Schema_Attributes(in.Attributes)
-	if err != nil {
-		return resp, err
-	}
-	resp.Attributes = attrs
-	blocks, err := Schema_NestedBlocks(in.BlockTypes)
-	if err != nil {
-		return resp, err
-	}
-	resp.BlockTypes = blocks
+
 	return resp, nil
 }
 
 func Schema_Attribute(in *tfprotov6.SchemaAttribute) (*tfplugin6.Schema_Attribute, error) {
+	if in == nil {
+		return nil, nil
+	}
+
+	typ, err := CtyType(in.Type)
+
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling %q type to JSON: %w", in.Name, err)
+	}
+
+	nestedType, err := Schema_Object(in.NestedType)
+
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling %q nested type to JSON: %w", in.Name, err)
+	}
+
 	resp := &tfplugin6.Schema_Attribute{
-		Name:            in.Name,
-		Description:     in.Description,
-		Required:        in.Required,
-		Optional:        in.Optional,
 		Computed:        in.Computed,
-		Sensitive:       in.Sensitive,
-		DescriptionKind: StringKind(in.DescriptionKind),
 		Deprecated:      in.Deprecated,
+		Description:     in.Description,
+		DescriptionKind: StringKind(in.DescriptionKind),
+		Name:            in.Name,
+		NestedType:      nestedType,
+		Optional:        in.Optional,
+		Required:        in.Required,
+		Sensitive:       in.Sensitive,
+		Type:            typ,
 	}
-	if in.Type != nil {
-		t, err := CtyType(in.Type)
-		if err != nil {
-			return resp, fmt.Errorf("error marshaling type to JSON: %w", err)
-		}
-		resp.Type = t
-	}
-	if in.NestedType != nil {
-		nb, err := Schema_Object(in.NestedType)
-		if err != nil {
-			return resp, err
-		}
-		resp.NestedType = nb
-	}
+
 	return resp, nil
 }
 
 func Schema_Attributes(in []*tfprotov6.SchemaAttribute) ([]*tfplugin6.Schema_Attribute, error) {
 	resp := make([]*tfplugin6.Schema_Attribute, 0, len(in))
+
 	for _, a := range in {
-		if a == nil {
-			resp = append(resp, nil)
-			continue
-		}
 		attr, err := Schema_Attribute(a)
+
 		if err != nil {
 			return nil, err
 		}
+
 		resp = append(resp, attr)
 	}
+
 	return resp, nil
 }
 
 func Schema_NestedBlock(in *tfprotov6.SchemaNestedBlock) (*tfplugin6.Schema_NestedBlock, error) {
+	if in == nil {
+		return nil, nil
+	}
+
+	block, err := Schema_Block(in.Block)
+
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling %q nested block: %w", in.TypeName, err)
+	}
+
 	resp := &tfplugin6.Schema_NestedBlock{
-		TypeName: in.TypeName,
-		Nesting:  Schema_NestedBlock_NestingMode(in.Nesting),
-		MinItems: in.MinItems,
+		Block:    block,
 		MaxItems: in.MaxItems,
+		MinItems: in.MinItems,
+		Nesting:  Schema_NestedBlock_NestingMode(in.Nesting),
+		TypeName: in.TypeName,
 	}
-	if in.Block != nil {
-		block, err := Schema_Block(in.Block)
-		if err != nil {
-			return resp, fmt.Errorf("error marshaling nested block: %w", err)
-		}
-		resp.Block = block
-	}
+
 	return resp, nil
 }
 
 func Schema_NestedBlocks(in []*tfprotov6.SchemaNestedBlock) ([]*tfplugin6.Schema_NestedBlock, error) {
 	resp := make([]*tfplugin6.Schema_NestedBlock, 0, len(in))
+
 	for _, b := range in {
-		if b == nil {
-			resp = append(resp, nil)
-			continue
-		}
 		block, err := Schema_NestedBlock(b)
+
 		if err != nil {
 			return nil, err
 		}
+
 		resp = append(resp, block)
 	}
+
 	return resp, nil
 }
 
@@ -126,22 +154,20 @@ func Schema_Object_NestingMode(in tfprotov6.SchemaObjectNestingMode) tfplugin6.S
 }
 
 func Schema_Object(in *tfprotov6.SchemaObject) (*tfplugin6.Schema_Object, error) {
-	resp := &tfplugin6.Schema_Object{
-		Nesting: Schema_Object_NestingMode(in.Nesting),
+	if in == nil {
+		return nil, nil
 	}
-	attrs, err := Schema_Attributes(in.Attributes)
+
+	attributes, err := Schema_Attributes(in.Attributes)
+
 	if err != nil {
 		return nil, err
 	}
-	resp.Attributes = attrs
+
+	resp := &tfplugin6.Schema_Object{
+		Attributes: attributes,
+		Nesting:    Schema_Object_NestingMode(in.Nesting),
+	}
 
 	return resp, nil
 }
-
-// we have to say this next thing to get golint to stop yelling at us about the
-// underscores in the function names. We want the function names to match
-// actually-generated code, so it feels like fair play. It's just a shame we
-// lose golint for the entire file.
-//
-// This file is not actually generated. You can edit it. Ignore this next line.
-// Code generated by hand ignore this next bit DO NOT EDIT.

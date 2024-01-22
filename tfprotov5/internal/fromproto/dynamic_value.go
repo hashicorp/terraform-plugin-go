@@ -8,13 +8,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
-func RawState(in *tfplugin5.RawState) *tfprotov5.RawState {
+func DynamicValue(in *tfplugin5.DynamicValue) *tfprotov5.DynamicValue {
 	if in == nil {
 		return nil
 	}
 
-	return &tfprotov5.RawState{
+	resp := &tfprotov5.DynamicValue{
+		MsgPack: in.Msgpack,
 		JSON:    in.Json,
-		Flatmap: in.Flatmap,
 	}
+
+	return resp
 }
