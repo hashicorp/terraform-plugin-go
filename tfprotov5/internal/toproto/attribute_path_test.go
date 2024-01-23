@@ -50,11 +50,7 @@ func TestAttributePath(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.AttributePath(testCase.in)
+			got := toproto.AttributePath(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -137,11 +133,7 @@ func TestAttributePaths(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.AttributePaths(testCase.in)
+			got := toproto.AttributePaths(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -206,11 +198,7 @@ func TestAttributePath_Step(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.AttributePath_Step(testCase.in)
+			got := toproto.AttributePath_Step(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -280,11 +268,7 @@ func TestAttributePath_Steps(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.AttributePath_Steps(testCase.in)
+			got := toproto.AttributePath_Steps(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than

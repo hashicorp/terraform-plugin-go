@@ -20,39 +20,27 @@ func GetMetadata_DataSourceMetadata(in *tfprotov5.DataSourceMetadata) *tfplugin5
 	return resp
 }
 
-func ValidateDataSourceConfig_Response(in *tfprotov5.ValidateDataSourceConfigResponse) (*tfplugin5.ValidateDataSourceConfig_Response, error) {
+func ValidateDataSourceConfig_Response(in *tfprotov5.ValidateDataSourceConfigResponse) *tfplugin5.ValidateDataSourceConfig_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin5.ValidateDataSourceConfig_Response{
-		Diagnostics: diags,
+		Diagnostics: Diagnostics(in.Diagnostics),
 	}
 
-	return resp, nil
+	return resp
 }
 
-func ReadDataSource_Response(in *tfprotov5.ReadDataSourceResponse) (*tfplugin5.ReadDataSource_Response, error) {
+func ReadDataSource_Response(in *tfprotov5.ReadDataSourceResponse) *tfplugin5.ReadDataSource_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin5.ReadDataSource_Response{
-		Diagnostics: diags,
+		Diagnostics: Diagnostics(in.Diagnostics),
 		State:       DynamicValue(in.State),
 	}
 
-	return resp, nil
+	return resp
 }

@@ -18,39 +18,27 @@ func GetMetadata_DataSourceMetadata(in *tfprotov6.DataSourceMetadata) *tfplugin6
 	}
 }
 
-func ValidateDataResourceConfig_Response(in *tfprotov6.ValidateDataResourceConfigResponse) (*tfplugin6.ValidateDataResourceConfig_Response, error) {
+func ValidateDataResourceConfig_Response(in *tfprotov6.ValidateDataResourceConfigResponse) *tfplugin6.ValidateDataResourceConfig_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin6.ValidateDataResourceConfig_Response{
-		Diagnostics: diags,
+		Diagnostics: Diagnostics(in.Diagnostics),
 	}
 
-	return resp, nil
+	return resp
 }
 
-func ReadDataSource_Response(in *tfprotov6.ReadDataSourceResponse) (*tfplugin6.ReadDataSource_Response, error) {
+func ReadDataSource_Response(in *tfprotov6.ReadDataSourceResponse) *tfplugin6.ReadDataSource_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin6.ReadDataSource_Response{
-		Diagnostics: diags,
+		Diagnostics: Diagnostics(in.Diagnostics),
 		State:       DynamicValue(in.State),
 	}
 
-	return resp, nil
+	return resp
 }

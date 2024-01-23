@@ -10,23 +10,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
 )
 
-func CallFunction_Response(in *tfprotov6.CallFunctionResponse) (*tfplugin6.CallFunction_Response, error) {
+func CallFunction_Response(in *tfprotov6.CallFunctionResponse) *tfplugin6.CallFunction_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin6.CallFunction_Response{
-		Diagnostics: diags,
+		Diagnostics: Diagnostics(in.Diagnostics),
 		Result:      DynamicValue(in.Result),
 	}
 
-	return resp, nil
+	return resp
 }
 
 func Function(in *tfprotov6.Function) (*tfplugin6.Function, error) {
@@ -136,14 +130,8 @@ func GetFunctions_Response(in *tfprotov6.GetFunctionsResponse) (*tfplugin6.GetFu
 		return nil, nil
 	}
 
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
-	}
-
 	resp := &tfplugin6.GetFunctions_Response{
-		Diagnostics: diags,
+		Diagnostics: Diagnostics(in.Diagnostics),
 		Functions:   make(map[string]*tfplugin6.Function, len(in.Functions)),
 	}
 

@@ -10,25 +10,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
-func GetMetadata_Response(in *tfprotov5.GetMetadataResponse) (*tfplugin5.GetMetadata_Response, error) {
+func GetMetadata_Response(in *tfprotov5.GetMetadataResponse) *tfplugin5.GetMetadata_Response {
 	if in == nil {
-		return nil, nil
+		return nil
 	}
 
 	resp := &tfplugin5.GetMetadata_Response{
 		DataSources:        make([]*tfplugin5.GetMetadata_DataSourceMetadata, 0, len(in.DataSources)),
+		Diagnostics:        Diagnostics(in.Diagnostics),
 		Functions:          make([]*tfplugin5.GetMetadata_FunctionMetadata, 0, len(in.Functions)),
 		Resources:          make([]*tfplugin5.GetMetadata_ResourceMetadata, 0, len(in.Resources)),
 		ServerCapabilities: ServerCapabilities(in.ServerCapabilities),
 	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return resp, err
-	}
-
-	resp.Diagnostics = diags
 
 	for _, datasource := range in.DataSources {
 		resp.DataSources = append(resp.DataSources, GetMetadata_DataSourceMetadata(&datasource))
@@ -42,18 +35,12 @@ func GetMetadata_Response(in *tfprotov5.GetMetadataResponse) (*tfplugin5.GetMeta
 		resp.Resources = append(resp.Resources, GetMetadata_ResourceMetadata(&resource))
 	}
 
-	return resp, nil
+	return resp
 }
 
 func GetProviderSchema_Response(in *tfprotov5.GetProviderSchemaResponse) (*tfplugin5.GetProviderSchema_Response, error) {
 	if in == nil {
 		return nil, nil
-	}
-
-	diagnostics, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
 	}
 
 	provider, err := Schema(in.Provider)
@@ -70,7 +57,7 @@ func GetProviderSchema_Response(in *tfprotov5.GetProviderSchemaResponse) (*tfplu
 
 	resp := &tfplugin5.GetProviderSchema_Response{
 		DataSourceSchemas:  make(map[string]*tfplugin5.Schema, len(in.DataSourceSchemas)),
-		Diagnostics:        diagnostics,
+		Diagnostics:        Diagnostics(in.Diagnostics),
 		Functions:          make(map[string]*tfplugin5.Function, len(in.Functions)),
 		Provider:           provider,
 		ProviderMeta:       providerMeta,
@@ -111,41 +98,29 @@ func GetProviderSchema_Response(in *tfprotov5.GetProviderSchemaResponse) (*tfplu
 	return resp, nil
 }
 
-func PrepareProviderConfig_Response(in *tfprotov5.PrepareProviderConfigResponse) (*tfplugin5.PrepareProviderConfig_Response, error) {
+func PrepareProviderConfig_Response(in *tfprotov5.PrepareProviderConfigResponse) *tfplugin5.PrepareProviderConfig_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin5.PrepareProviderConfig_Response{
-		Diagnostics:    diags,
+		Diagnostics:    Diagnostics(in.Diagnostics),
 		PreparedConfig: DynamicValue(in.PreparedConfig),
 	}
 
-	return resp, nil
+	return resp
 }
 
-func Configure_Response(in *tfprotov5.ConfigureProviderResponse) (*tfplugin5.Configure_Response, error) {
+func Configure_Response(in *tfprotov5.ConfigureProviderResponse) *tfplugin5.Configure_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin5.Configure_Response{
-		Diagnostics: diags,
+		Diagnostics: Diagnostics(in.Diagnostics),
 	}
 
-	return resp, nil
+	return resp
 }
 
 func Stop_Response(in *tfprotov5.StopProviderResponse) *tfplugin5.Stop_Response {

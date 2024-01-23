@@ -10,20 +10,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
 )
 
-func GetMetadata_Response(in *tfprotov6.GetMetadataResponse) (*tfplugin6.GetMetadata_Response, error) {
+func GetMetadata_Response(in *tfprotov6.GetMetadataResponse) *tfplugin6.GetMetadata_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin6.GetMetadata_Response{
 		DataSources:        make([]*tfplugin6.GetMetadata_DataSourceMetadata, 0, len(in.DataSources)),
-		Diagnostics:        diags,
+		Diagnostics:        Diagnostics(in.Diagnostics),
 		Functions:          make([]*tfplugin6.GetMetadata_FunctionMetadata, 0, len(in.Functions)),
 		Resources:          make([]*tfplugin6.GetMetadata_ResourceMetadata, 0, len(in.Resources)),
 		ServerCapabilities: ServerCapabilities(in.ServerCapabilities),
@@ -41,18 +35,12 @@ func GetMetadata_Response(in *tfprotov6.GetMetadataResponse) (*tfplugin6.GetMeta
 		resp.Resources = append(resp.Resources, GetMetadata_ResourceMetadata(&resource))
 	}
 
-	return resp, nil
+	return resp
 }
 
 func GetProviderSchema_Response(in *tfprotov6.GetProviderSchemaResponse) (*tfplugin6.GetProviderSchema_Response, error) {
 	if in == nil {
 		return nil, nil
-	}
-
-	diagnostics, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
 	}
 
 	provider, err := Schema(in.Provider)
@@ -69,7 +57,7 @@ func GetProviderSchema_Response(in *tfprotov6.GetProviderSchemaResponse) (*tfplu
 
 	resp := &tfplugin6.GetProviderSchema_Response{
 		DataSourceSchemas:  make(map[string]*tfplugin6.Schema, len(in.DataSourceSchemas)),
-		Diagnostics:        diagnostics,
+		Diagnostics:        Diagnostics(in.Diagnostics),
 		Functions:          make(map[string]*tfplugin6.Function, len(in.Functions)),
 		Provider:           provider,
 		ProviderMeta:       providerMeta,
@@ -110,40 +98,28 @@ func GetProviderSchema_Response(in *tfprotov6.GetProviderSchemaResponse) (*tfplu
 	return resp, nil
 }
 
-func ValidateProviderConfig_Response(in *tfprotov6.ValidateProviderConfigResponse) (*tfplugin6.ValidateProviderConfig_Response, error) {
+func ValidateProviderConfig_Response(in *tfprotov6.ValidateProviderConfigResponse) *tfplugin6.ValidateProviderConfig_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin6.ValidateProviderConfig_Response{
-		Diagnostics: diags,
+		Diagnostics: Diagnostics(in.Diagnostics),
 	}
 
-	return resp, nil
+	return resp
 }
 
-func ConfigureProvider_Response(in *tfprotov6.ConfigureProviderResponse) (*tfplugin6.ConfigureProvider_Response, error) {
+func ConfigureProvider_Response(in *tfprotov6.ConfigureProviderResponse) *tfplugin6.ConfigureProvider_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin6.ConfigureProvider_Response{
-		Diagnostics: diags,
+		Diagnostics: Diagnostics(in.Diagnostics),
 	}
 
-	return resp, nil
+	return resp
 }
 
 func StopProvider_Response(in *tfprotov6.StopProviderResponse) *tfplugin6.StopProvider_Response {
