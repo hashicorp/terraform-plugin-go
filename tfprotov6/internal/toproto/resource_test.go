@@ -78,11 +78,7 @@ func TestApplyResourceChange_Response(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.ApplyResourceChange_Response(testCase.in)
+			got := toproto.ApplyResourceChange_Response(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -207,11 +203,7 @@ func TestImportResourceState_Response(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.ImportResourceState_Response(testCase.in)
+			got := toproto.ImportResourceState_Response(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -411,11 +403,7 @@ func TestMoveResourceState_Response(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.MoveResourceState_Response(testCase.in)
+			got := toproto.MoveResourceState_Response(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -524,11 +512,7 @@ func TestPlanResourceChange_Response(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.PlanResourceChange_Response(testCase.in)
+			got := toproto.PlanResourceChange_Response(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -604,11 +588,7 @@ func TestReadResource_Response(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.ReadResource_Response(testCase.in)
+			got := toproto.ReadResource_Response(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -673,11 +653,7 @@ func TestUpgradeResourceState_Response(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.UpgradeResourceState_Response(testCase.in)
+			got := toproto.UpgradeResourceState_Response(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -733,11 +709,7 @@ func TestValidateResourceConfig_Response(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.ValidateResourceConfig_Response(testCase.in)
+			got := toproto.ValidateResourceConfig_Response(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than

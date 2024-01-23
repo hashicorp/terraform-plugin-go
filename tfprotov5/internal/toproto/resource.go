@@ -20,129 +20,87 @@ func GetMetadata_ResourceMetadata(in *tfprotov5.ResourceMetadata) *tfplugin5.Get
 	return resp
 }
 
-func ValidateResourceTypeConfig_Response(in *tfprotov5.ValidateResourceTypeConfigResponse) (*tfplugin5.ValidateResourceTypeConfig_Response, error) {
+func ValidateResourceTypeConfig_Response(in *tfprotov5.ValidateResourceTypeConfigResponse) *tfplugin5.ValidateResourceTypeConfig_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin5.ValidateResourceTypeConfig_Response{
-		Diagnostics: diags,
+		Diagnostics: Diagnostics(in.Diagnostics),
 	}
 
-	return resp, nil
+	return resp
 }
 
-func UpgradeResourceState_Response(in *tfprotov5.UpgradeResourceStateResponse) (*tfplugin5.UpgradeResourceState_Response, error) {
+func UpgradeResourceState_Response(in *tfprotov5.UpgradeResourceStateResponse) *tfplugin5.UpgradeResourceState_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin5.UpgradeResourceState_Response{
-		Diagnostics:   diags,
+		Diagnostics:   Diagnostics(in.Diagnostics),
 		UpgradedState: DynamicValue(in.UpgradedState),
 	}
 
-	return resp, nil
+	return resp
 }
 
-func ReadResource_Response(in *tfprotov5.ReadResourceResponse) (*tfplugin5.ReadResource_Response, error) {
+func ReadResource_Response(in *tfprotov5.ReadResourceResponse) *tfplugin5.ReadResource_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin5.ReadResource_Response{
-		Diagnostics: diags,
+		Diagnostics: Diagnostics(in.Diagnostics),
 		NewState:    DynamicValue(in.NewState),
 		Private:     in.Private,
 	}
 
-	return resp, nil
+	return resp
 }
 
-func PlanResourceChange_Response(in *tfprotov5.PlanResourceChangeResponse) (*tfplugin5.PlanResourceChange_Response, error) {
+func PlanResourceChange_Response(in *tfprotov5.PlanResourceChangeResponse) *tfplugin5.PlanResourceChange_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
-	}
-
-	requiresReplace, err := AttributePaths(in.RequiresReplace)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin5.PlanResourceChange_Response{
-		Diagnostics:      diags,
+		Diagnostics:      Diagnostics(in.Diagnostics),
 		LegacyTypeSystem: in.UnsafeToUseLegacyTypeSystem, //nolint:staticcheck
 		PlannedPrivate:   in.PlannedPrivate,
 		PlannedState:     DynamicValue(in.PlannedState),
-		RequiresReplace:  requiresReplace,
+		RequiresReplace:  AttributePaths(in.RequiresReplace),
 	}
 
-	return resp, nil
+	return resp
 }
 
-func ApplyResourceChange_Response(in *tfprotov5.ApplyResourceChangeResponse) (*tfplugin5.ApplyResourceChange_Response, error) {
+func ApplyResourceChange_Response(in *tfprotov5.ApplyResourceChangeResponse) *tfplugin5.ApplyResourceChange_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin5.ApplyResourceChange_Response{
-		Diagnostics:      diags,
+		Diagnostics:      Diagnostics(in.Diagnostics),
 		LegacyTypeSystem: in.UnsafeToUseLegacyTypeSystem, //nolint:staticcheck
 		NewState:         DynamicValue(in.NewState),
 		Private:          in.Private,
 	}
 
-	return resp, nil
+	return resp
 }
 
-func ImportResourceState_Response(in *tfprotov5.ImportResourceStateResponse) (*tfplugin5.ImportResourceState_Response, error) {
+func ImportResourceState_Response(in *tfprotov5.ImportResourceStateResponse) *tfplugin5.ImportResourceState_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin5.ImportResourceState_Response{
-		Diagnostics:       diags,
+		Diagnostics:       Diagnostics(in.Diagnostics),
 		ImportedResources: ImportResourceState_ImportedResources(in.ImportedResources),
 	}
 
-	return resp, nil
+	return resp
 }
 
 func ImportResourceState_ImportedResource(in *tfprotov5.ImportedResource) *tfplugin5.ImportResourceState_ImportedResource {
@@ -169,21 +127,15 @@ func ImportResourceState_ImportedResources(in []*tfprotov5.ImportedResource) []*
 	return resp
 }
 
-func MoveResourceState_Response(in *tfprotov5.MoveResourceStateResponse) (*tfplugin5.MoveResourceState_Response, error) {
+func MoveResourceState_Response(in *tfprotov5.MoveResourceStateResponse) *tfplugin5.MoveResourceState_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	diags, err := Diagnostics(in.Diagnostics)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin5.MoveResourceState_Response{
-		Diagnostics: diags,
+		Diagnostics: Diagnostics(in.Diagnostics),
 		TargetState: DynamicValue(in.TargetState),
 	}
 
-	return resp, nil
+	return resp
 }

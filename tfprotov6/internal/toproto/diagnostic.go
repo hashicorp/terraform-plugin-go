@@ -10,46 +10,34 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
 )
 
-func Diagnostic(in *tfprotov6.Diagnostic) (*tfplugin6.Diagnostic, error) {
+func Diagnostic(in *tfprotov6.Diagnostic) *tfplugin6.Diagnostic {
 	if in == nil {
-		return nil, nil
-	}
-
-	attribute, err := AttributePath(in.Attribute)
-
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	resp := &tfplugin6.Diagnostic{
-		Attribute:        attribute,
+		Attribute:        AttributePath(in.Attribute),
 		Detail:           ForceValidUTF8(in.Detail),
 		FunctionArgument: in.FunctionArgument,
 		Severity:         Diagnostic_Severity(in.Severity),
 		Summary:          ForceValidUTF8(in.Summary),
 	}
 
-	return resp, nil
+	return resp
 }
 
 func Diagnostic_Severity(in tfprotov6.DiagnosticSeverity) tfplugin6.Diagnostic_Severity {
 	return tfplugin6.Diagnostic_Severity(in)
 }
 
-func Diagnostics(in []*tfprotov6.Diagnostic) ([]*tfplugin6.Diagnostic, error) {
+func Diagnostics(in []*tfprotov6.Diagnostic) []*tfplugin6.Diagnostic {
 	resp := make([]*tfplugin6.Diagnostic, 0, len(in))
 
 	for _, diag := range in {
-		d, err := Diagnostic(diag)
-
-		if err != nil {
-			return resp, err
-		}
-
-		resp = append(resp, d)
+		resp = append(resp, Diagnostic(diag))
 	}
 
-	return resp, nil
+	return resp
 }
 
 // ForceValidUTF8 returns a string guaranteed to be valid UTF-8 even if the

@@ -508,12 +508,7 @@ func (s *server) GetMetadata(ctx context.Context, protoReq *tfplugin5.GetMetadat
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 	tf5serverlogging.ServerCapabilities(ctx, resp.ServerCapabilities)
 
-	protoResp, err := toproto.GetMetadata_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.GetMetadata_Response(resp)
 
 	return protoResp, nil
 }
@@ -574,12 +569,7 @@ func (s *server) PrepareProviderConfig(ctx context.Context, protoReq *tfplugin5.
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "PreparedConfig", resp.PreparedConfig)
 
-	protoResp, err := toproto.PrepareProviderConfig_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.PrepareProviderConfig_Response(resp)
 
 	return protoResp, nil
 }
@@ -606,12 +596,7 @@ func (s *server) Configure(ctx context.Context, protoReq *tfplugin5.Configure_Re
 
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 
-	protoResp, err := toproto.Configure_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.Configure_Response(resp)
 
 	return protoResp, nil
 }
@@ -682,12 +667,7 @@ func (s *server) ValidateDataSourceConfig(ctx context.Context, protoReq *tfplugi
 
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 
-	protoResp, err := toproto.ValidateDataSourceConfig_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.ValidateDataSourceConfig_Response(resp)
 
 	return protoResp, nil
 }
@@ -717,12 +697,7 @@ func (s *server) ReadDataSource(ctx context.Context, protoReq *tfplugin5.ReadDat
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "State", resp.State)
 
-	protoResp, err := toproto.ReadDataSource_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.ReadDataSource_Response(resp)
 
 	return protoResp, nil
 }
@@ -751,12 +726,7 @@ func (s *server) ValidateResourceTypeConfig(ctx context.Context, protoReq *tfplu
 
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 
-	protoResp, err := toproto.ValidateResourceTypeConfig_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.ValidateResourceTypeConfig_Response(resp)
 
 	return protoResp, nil
 }
@@ -784,12 +754,7 @@ func (s *server) UpgradeResourceState(ctx context.Context, protoReq *tfplugin5.U
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "UpgradedState", resp.UpgradedState)
 
-	protoResp, err := toproto.UpgradeResourceState_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.UpgradeResourceState_Response(resp)
 
 	return protoResp, nil
 }
@@ -823,12 +788,7 @@ func (s *server) ReadResource(ctx context.Context, protoReq *tfplugin5.ReadResou
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "NewState", resp.NewState)
 	logging.ProtocolPrivateData(ctx, s.protocolDataDir, rpc, "Response", "Private", resp.Private)
 
-	protoResp, err := toproto.ReadResource_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.ReadResource_Response(resp)
 
 	return protoResp, nil
 }
@@ -863,12 +823,7 @@ func (s *server) PlanResourceChange(ctx context.Context, protoReq *tfplugin5.Pla
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "PlannedState", resp.PlannedState)
 	logging.ProtocolPrivateData(ctx, s.protocolDataDir, rpc, "Response", "PlannedPrivate", resp.PlannedPrivate)
 
-	protoResp, err := toproto.PlanResourceChange_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.PlanResourceChange_Response(resp)
 
 	return protoResp, nil
 }
@@ -903,12 +858,7 @@ func (s *server) ApplyResourceChange(ctx context.Context, protoReq *tfplugin5.Ap
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "NewState", resp.NewState)
 	logging.ProtocolPrivateData(ctx, s.protocolDataDir, rpc, "Response", "Private", resp.Private)
 
-	protoResp, err := toproto.ApplyResourceChange_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.ApplyResourceChange_Response(resp)
 
 	return protoResp, nil
 }
@@ -940,12 +890,7 @@ func (s *server) ImportResourceState(ctx context.Context, protoReq *tfplugin5.Im
 		logging.ProtocolPrivateData(ctx, s.protocolDataDir, rpc, "Response_ImportedResource", "Private", importedResource.Private)
 	}
 
-	protoResp, err := toproto.ImportResourceState_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.ImportResourceState_Response(resp)
 
 	return protoResp, nil
 }
@@ -1000,13 +945,7 @@ func (s *server) MoveResourceState(ctx context.Context, protoReq *tfplugin5.Move
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "TargetState", resp.TargetState)
 
-	protoResp, err := toproto.MoveResourceState_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
-
-		return nil, err
-	}
+	protoResp := toproto.MoveResourceState_Response(resp)
 
 	return protoResp, nil
 }
@@ -1061,12 +1000,7 @@ func (s *server) CallFunction(ctx context.Context, protoReq *tfplugin5.CallFunct
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "Result", resp.Result)
 
-	protoResp, err := toproto.CallFunction_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]any{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.CallFunction_Response(resp)
 
 	return protoResp, nil
 }
