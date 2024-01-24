@@ -60,6 +60,27 @@ func TestTypeJSON(t *testing.T) {
 			json: `["map","string"]`,
 			typ:  Map{ElementType: String},
 		},
+		"object-empty": {
+			json: `["object",{}]`,
+			typ:  Object{AttributeTypes: map[string]Type{}},
+		},
+		"object-string": {
+			json: `["object",{"test":"string"}]`,
+			typ: Object{AttributeTypes: map[string]Type{
+				"test": String,
+			}},
+		},
+		"object-string-optional": {
+			json: `["object",{"test":"string"},["test"]]`,
+			typ: Object{
+				AttributeTypes: map[string]Type{
+					"test": String,
+				},
+				OptionalAttributes: map[string]struct{}{
+					"test": {},
+				},
+			},
+		},
 		"object-string_number_bool": {
 			json: `["object",{"foo":"string","bar":"number","baz":"bool"}]`,
 			typ: Object{AttributeTypes: map[string]Type{
@@ -109,6 +130,16 @@ func TestTypeJSON(t *testing.T) {
 					"baz": {},
 				},
 			},
+		},
+		"tuple-empty": {
+			json: `["tuple",[]]`,
+			typ:  Tuple{ElementTypes: []Type{}},
+		},
+		"tuple-string": {
+			json: `["tuple",["string"]]`,
+			typ: Tuple{ElementTypes: []Type{
+				String,
+			}},
 		},
 		"tuple-string_number_bool": {
 			json: `["tuple",["string","number","bool"]]`,

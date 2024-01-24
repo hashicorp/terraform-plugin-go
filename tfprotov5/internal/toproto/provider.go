@@ -4,8 +4,6 @@
 package toproto
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
@@ -38,64 +36,34 @@ func GetMetadata_Response(in *tfprotov5.GetMetadataResponse) *tfplugin5.GetMetad
 	return resp
 }
 
-func GetProviderSchema_Response(in *tfprotov5.GetProviderSchemaResponse) (*tfplugin5.GetProviderSchema_Response, error) {
+func GetProviderSchema_Response(in *tfprotov5.GetProviderSchemaResponse) *tfplugin5.GetProviderSchema_Response {
 	if in == nil {
-		return nil, nil
-	}
-
-	provider, err := Schema(in.Provider)
-
-	if err != nil {
-		return nil, fmt.Errorf("error marshaling provider schema: %w", err)
-	}
-
-	providerMeta, err := Schema(in.ProviderMeta)
-
-	if err != nil {
-		return nil, fmt.Errorf("error marshaling provider_meta schema: %w", err)
+		return nil
 	}
 
 	resp := &tfplugin5.GetProviderSchema_Response{
 		DataSourceSchemas:  make(map[string]*tfplugin5.Schema, len(in.DataSourceSchemas)),
 		Diagnostics:        Diagnostics(in.Diagnostics),
 		Functions:          make(map[string]*tfplugin5.Function, len(in.Functions)),
-		Provider:           provider,
-		ProviderMeta:       providerMeta,
+		Provider:           Schema(in.Provider),
+		ProviderMeta:       Schema(in.ProviderMeta),
 		ResourceSchemas:    make(map[string]*tfplugin5.Schema, len(in.ResourceSchemas)),
 		ServerCapabilities: ServerCapabilities(in.ServerCapabilities),
 	}
 
-	for k, v := range in.ResourceSchemas {
-		schema, err := Schema(v)
-
-		if err != nil {
-			return nil, fmt.Errorf("error marshaling resource schema for %q: %w", k, err)
-		}
-
-		resp.ResourceSchemas[k] = schema
+	for name, schema := range in.ResourceSchemas {
+		resp.ResourceSchemas[name] = Schema(schema)
 	}
 
-	for k, v := range in.DataSourceSchemas {
-		schema, err := Schema(v)
-
-		if err != nil {
-			return nil, fmt.Errorf("error marshaling data source schema for %q: %w", k, err)
-		}
-
-		resp.DataSourceSchemas[k] = schema
+	for name, schema := range in.DataSourceSchemas {
+		resp.DataSourceSchemas[name] = Schema(schema)
 	}
 
-	for name, functionPtr := range in.Functions {
-		function, err := Function(functionPtr)
-
-		if err != nil {
-			return nil, fmt.Errorf("error marshaling function definition for %q: %w", name, err)
-		}
-
-		resp.Functions[name] = function
+	for name, function := range in.Functions {
+		resp.Functions[name] = Function(function)
 	}
 
-	return resp, nil
+	return resp
 }
 
 func PrepareProviderConfig_Response(in *tfprotov5.PrepareProviderConfigResponse) *tfplugin5.PrepareProviderConfig_Response {

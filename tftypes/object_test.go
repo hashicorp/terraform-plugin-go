@@ -4,8 +4,10 @@
 package tftypes
 
 import (
+	"encoding/json"
 	"errors"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -651,4 +653,50 @@ func TestObjectUsableAs(t *testing.T) {
 			}
 		})
 	}
+}
+
+func FuzzMarshalJSONObjectAttributeName(f *testing.F) {
+	// NOTE: Seed comments are placed above due to incorrect go fmt alignment
+	// behavior when mixing single and multiple byte characters.
+	seeds := []string{
+		"ASCII",
+		"こんにちは",
+		// "ﬄ" is a single-character ligature
+		"baﬄe",
+		// These "e" have multiple combining diacritics
+		"wé́́é́́é́́!",
+		// Astral-plane characters
+		"😸😾",
+		// neither byte is valid UTF-8
+		"\xff\xff",
+		// invalid bytes interleaved with single byte characters
+		"t\xffe\xffst",
+		// invalid bytes interleaved with multiple byte sequences
+		"\xffこんにちは\xffこんにちは",
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, name string) {
+		got := marshalJSONObjectAttributeName(name)
+
+		// The result should always unmarshal to the same string, when given
+		// valid UTF-8. This function is not and should not be concerned with
+		// validating the given input.
+		if !utf8.ValidString(name) {
+			return
+		}
+
+		var unmarshaled string
+
+		if err := json.Unmarshal(got, &unmarshaled); err != nil {
+			t.Fatalf("failed to unmarshal: %s", err)
+		}
+
+		if unmarshaled != name {
+			t.Fatalf("expected %q, got %q", name, unmarshaled)
+		}
+	})
 }
