@@ -535,12 +535,7 @@ func (s *server) GetSchema(ctx context.Context, protoReq *tfplugin5.GetProviderS
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 	tf5serverlogging.ServerCapabilities(ctx, resp.ServerCapabilities)
 
-	protoResp, err := toproto.GetProviderSchema_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]interface{}{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.GetProviderSchema_Response(resp)
 
 	return protoResp, nil
 }
@@ -1043,12 +1038,7 @@ func (s *server) GetFunctions(ctx context.Context, protoReq *tfplugin5.GetFuncti
 
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 
-	protoResp, err := toproto.GetFunctions_Response(resp)
-
-	if err != nil {
-		logging.ProtocolError(ctx, "Error converting response to protobuf", map[string]any{logging.KeyError: err})
-		return nil, err
-	}
+	protoResp := toproto.GetFunctions_Response(resp)
 
 	return protoResp, nil
 }

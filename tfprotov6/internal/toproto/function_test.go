@@ -91,58 +91,36 @@ func TestFunction(t *testing.T) {
 			expected: nil,
 		},
 		"zero": {
-			in:       &tfprotov6.Function{},
-			expected: nil,
+			in: &tfprotov6.Function{},
+			expected: &tfplugin6.Function{
+				Parameters: []*tfplugin6.Function_Parameter{},
+			},
 		},
 		"Description": {
 			in: &tfprotov6.Function{
 				Description: "test",
-				// Return will no longer be required in a future change.
-				// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-				Return: &tfprotov6.FunctionReturn{
-					Type: tftypes.Bool,
-				},
 			},
 			expected: &tfplugin6.Function{
 				Description: "test",
 				Parameters:  []*tfplugin6.Function_Parameter{},
-				Return: &tfplugin6.Function_Return{
-					Type: []byte(`"bool"`),
-				},
 			},
 		},
 		"DescriptionKind": {
 			in: &tfprotov6.Function{
 				DescriptionKind: tfprotov6.StringKindMarkdown,
-				// Return will no longer be required in a future change.
-				// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-				Return: &tfprotov6.FunctionReturn{
-					Type: tftypes.Bool,
-				},
 			},
 			expected: &tfplugin6.Function{
 				DescriptionKind: tfplugin6.StringKind_MARKDOWN,
 				Parameters:      []*tfplugin6.Function_Parameter{},
-				Return: &tfplugin6.Function_Return{
-					Type: []byte(`"bool"`),
-				},
 			},
 		},
 		"DeprecationMessage": {
 			in: &tfprotov6.Function{
 				DeprecationMessage: "test",
-				// Return will no longer be required in a future change.
-				// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-				Return: &tfprotov6.FunctionReturn{
-					Type: tftypes.Bool,
-				},
 			},
 			expected: &tfplugin6.Function{
 				DeprecationMessage: "test",
 				Parameters:         []*tfplugin6.Function_Parameter{},
-				Return: &tfplugin6.Function_Return{
-					Type: []byte(`"bool"`),
-				},
 			},
 		},
 		"Parameters": {
@@ -152,18 +130,12 @@ func TestFunction(t *testing.T) {
 						Type: tftypes.Bool,
 					},
 				},
-				Return: &tfprotov6.FunctionReturn{
-					Type: tftypes.Bool,
-				},
 			},
 			expected: &tfplugin6.Function{
 				Parameters: []*tfplugin6.Function_Parameter{
 					{
 						Type: []byte(`"bool"`),
 					},
-				},
-				Return: &tfplugin6.Function_Return{
-					Type: []byte(`"bool"`),
 				},
 			},
 		},
@@ -182,35 +154,21 @@ func TestFunction(t *testing.T) {
 		},
 		"Summary": {
 			in: &tfprotov6.Function{
-				// Return will no longer be required in a future change.
-				// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-				Return: &tfprotov6.FunctionReturn{
-					Type: tftypes.Bool,
-				},
 				Summary: "test",
 			},
 			expected: &tfplugin6.Function{
 				Parameters: []*tfplugin6.Function_Parameter{},
-				Return: &tfplugin6.Function_Return{
-					Type: []byte(`"bool"`),
-				},
-				Summary: "test",
+				Summary:    "test",
 			},
 		},
 		"VariadicParameter": {
 			in: &tfprotov6.Function{
-				Return: &tfprotov6.FunctionReturn{
-					Type: tftypes.Bool,
-				},
 				VariadicParameter: &tfprotov6.FunctionParameter{
 					Type: tftypes.Bool,
 				},
 			},
 			expected: &tfplugin6.Function{
 				Parameters: []*tfplugin6.Function_Parameter{},
-				Return: &tfplugin6.Function_Return{
-					Type: []byte(`"bool"`),
-				},
 				VariadicParameter: &tfplugin6.Function_Parameter{
 					Type: []byte(`"bool"`),
 				},
@@ -224,10 +182,7 @@ func TestFunction(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it will be removed
-			// in a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.Function(testCase.in)
+			got := toproto.Function(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -259,66 +214,46 @@ func TestFunction_Parameter(t *testing.T) {
 		},
 		"zero": {
 			in:       &tfprotov6.FunctionParameter{},
-			expected: nil,
+			expected: &tfplugin6.Function_Parameter{},
 		},
 		"AllowNullValue": {
 			in: &tfprotov6.FunctionParameter{
 				AllowNullValue: true,
-				// Type will no longer be required in a future change.
-				// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-				Type: tftypes.Bool,
 			},
 			expected: &tfplugin6.Function_Parameter{
 				AllowNullValue: true,
-				Type:           []byte(`"bool"`),
 			},
 		},
 		"AllowUnknownValues": {
 			in: &tfprotov6.FunctionParameter{
 				AllowUnknownValues: true,
-				// Type will no longer be required in a future change.
-				// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-				Type: tftypes.Bool,
 			},
 			expected: &tfplugin6.Function_Parameter{
 				AllowUnknownValues: true,
-				Type:               []byte(`"bool"`),
 			},
 		},
 		"Description": {
 			in: &tfprotov6.FunctionParameter{
 				Description: "test",
-				// Type will no longer be required in a future change.
-				// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-				Type: tftypes.Bool,
 			},
 			expected: &tfplugin6.Function_Parameter{
 				Description: "test",
-				Type:        []byte(`"bool"`),
 			},
 		},
 		"DescriptionKind": {
 			in: &tfprotov6.FunctionParameter{
 				DescriptionKind: tfprotov6.StringKindMarkdown,
-				// Type will no longer be required in a future change.
-				// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-				Type: tftypes.Bool,
 			},
 			expected: &tfplugin6.Function_Parameter{
 				DescriptionKind: tfplugin6.StringKind_MARKDOWN,
-				Type:            []byte(`"bool"`),
 			},
 		},
 		"Name": {
 			in: &tfprotov6.FunctionParameter{
 				Name: "test",
-				// Type will no longer be required in a future change.
-				// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-				Type: tftypes.Bool,
 			},
 			expected: &tfplugin6.Function_Parameter{
 				Name: "test",
-				Type: []byte(`"bool"`),
 			},
 		},
 		"Type": {
@@ -337,10 +272,7 @@ func TestFunction_Parameter(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it will be removed
-			// in a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.Function_Parameter(testCase.in)
+			got := toproto.Function_Parameter(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -370,7 +302,7 @@ func TestFunction_Return(t *testing.T) {
 		},
 		"zero": {
 			in:       &tfprotov6.FunctionReturn{},
-			expected: nil,
+			expected: &tfplugin6.Function_Return{},
 		},
 		"Type": {
 			in: &tfprotov6.FunctionReturn{
@@ -388,10 +320,7 @@ func TestFunction_Return(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it will be removed
-			// in a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.Function_Return(testCase.in)
+			got := toproto.Function_Return(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -469,11 +398,7 @@ func TestGetFunctions_Response(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.GetFunctions_Response(testCase.in)
+			got := toproto.GetFunctions_Response(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than

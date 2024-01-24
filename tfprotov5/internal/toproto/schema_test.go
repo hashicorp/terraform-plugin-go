@@ -66,11 +66,7 @@ func TestSchema(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.Schema(testCase.in)
+			got := toproto.Schema(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -185,11 +181,7 @@ func TestSchema_Attribute(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.Schema_Attribute(testCase.in)
+			got := toproto.Schema_Attribute(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -259,11 +251,7 @@ func TestSchema_Attributes(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.Schema_Attributes(testCase.in)
+			got := toproto.Schema_Attributes(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -380,11 +368,7 @@ func TestSchema_Block(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.Schema_Block(testCase.in)
+			got := toproto.Schema_Block(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -479,11 +463,7 @@ func TestSchema_NestedBlock(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.Schema_NestedBlock(testCase.in)
+			got := toproto.Schema_NestedBlock(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
@@ -555,11 +535,7 @@ func TestSchema_NestedBlocks(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			// Intentionally not checking the error return as it is impossible
-			// to implement a test case which would raise an error. This return
-			// will be removed in preference of a panic a future change.
-			// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/365
-			got, _ := toproto.Schema_NestedBlocks(testCase.in)
+			got := toproto.Schema_NestedBlocks(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than
