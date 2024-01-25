@@ -103,6 +103,7 @@ func MoveResourceStateRequest(in *tfplugin6.MoveResourceState_Request) *tfprotov
 	}
 
 	resp := &tfprotov6.MoveResourceStateRequest{
+		SourcePrivate:         in.SourcePrivate,
 		SourceProviderAddress: in.SourceProviderAddress,
 		SourceSchemaVersion:   in.SourceSchemaVersion,
 		SourceState:           RawState(in.SourceState),

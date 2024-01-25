@@ -133,8 +133,9 @@ func MoveResourceState_Response(in *tfprotov5.MoveResourceStateResponse) *tfplug
 	}
 
 	resp := &tfplugin5.MoveResourceState_Response{
-		Diagnostics: Diagnostics(in.Diagnostics),
-		TargetState: DynamicValue(in.TargetState),
+		Diagnostics:   Diagnostics(in.Diagnostics),
+		TargetPrivate: in.TargetPrivate,
+		TargetState:   DynamicValue(in.TargetState),
 	}
 
 	return resp

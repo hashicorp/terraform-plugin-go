@@ -507,6 +507,9 @@ type ImportedResource struct {
 // must have enabled the MoveResourceState server capability to enable these
 // requests.
 type MoveResourceStateRequest struct {
+	// SourcePrivate is the private state of the source resource.
+	SourcePrivate []byte
+
 	// SourceProviderAddress is the address of the provider for the source
 	// resource type.
 	SourceProviderAddress string
@@ -529,6 +532,9 @@ type MoveResourceStateRequest struct {
 // MoveResourceStateResponse is the response from the provider containing
 // the moved state for the given resource.
 type MoveResourceStateResponse struct {
+	// TargetPrivate is the target resource private state after the move.
+	TargetPrivate []byte
+
 	// TargetState is the target resource state after the move.
 	TargetState *DynamicValue
 
