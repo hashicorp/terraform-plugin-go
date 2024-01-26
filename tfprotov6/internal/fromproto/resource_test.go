@@ -155,6 +155,14 @@ func TestMoveResourceStateRequest(t *testing.T) {
 			in:       &tfplugin6.MoveResourceState_Request{},
 			expected: &tfprotov6.MoveResourceStateRequest{},
 		},
+		"SourcePrivate": {
+			in: &tfplugin6.MoveResourceState_Request{
+				SourcePrivate: []byte(`{}`),
+			},
+			expected: &tfprotov6.MoveResourceStateRequest{
+				SourcePrivate: []byte(`{}`),
+			},
+		},
 		"SourceProviderAddress": {
 			in: &tfplugin6.MoveResourceState_Request{
 				SourceProviderAddress: "test",

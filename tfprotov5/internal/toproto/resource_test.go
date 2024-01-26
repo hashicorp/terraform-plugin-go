@@ -386,6 +386,15 @@ func TestMoveResourceState_Response(t *testing.T) {
 				},
 			},
 		},
+		"TargetPrivate": {
+			in: &tfprotov5.MoveResourceStateResponse{
+				TargetPrivate: []byte(`{}`),
+			},
+			expected: &tfplugin5.MoveResourceState_Response{
+				Diagnostics:   []*tfplugin5.Diagnostic{},
+				TargetPrivate: []byte(`{}`),
+			},
+		},
 		"TargetState": {
 			in: &tfprotov5.MoveResourceStateResponse{
 				TargetState: testTfprotov5DynamicValue(),
