@@ -1,6 +1,0 @@
-kind: NOTES
-body: 'tfprotov5+tfprotov6: An upcoming release will require the MoveResourceState
-  implementation as part of ResourceServer'
-time: 2024-01-12T15:35:01.843365-08:00
-custom:
-  Issue: "364"

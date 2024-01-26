@@ -1,3 +1,13 @@
+## 0.21.0 (January 26, 2024)
+
+NOTES:
+
+* tfprotov5+tfprotov6: An upcoming release will require the MoveResourceState implementation as part of ResourceServer ([#364](https://github.com/hashicorp/terraform-plugin-go/issues/364))
+
+FEATURES:
+
+* tfprotov5+tfprotov6: Upgraded protocols and added types to support the `MoveResourceState` RPC ([#364](https://github.com/hashicorp/terraform-plugin-go/issues/364))
+
 ## 0.20.0 (December 14, 2023)
 
 NOTES:
