@@ -8,10 +8,20 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/toproto"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
+)
+
+var (
+	testTfplugin5Error = &tfplugin5.FunctionError{
+		Text: "test function error",
+	}
+	testTfprotov5Error = &tfprotov5.FunctionError{
+		Text: "test function error",
+	}
 )
 
 func TestCallFunction_Response(t *testing.T) {
@@ -26,21 +36,15 @@ func TestCallFunction_Response(t *testing.T) {
 			expected: nil,
 		},
 		"zero": {
-			in: &tfprotov5.CallFunctionResponse{},
-			expected: &tfplugin5.CallFunction_Response{
-				Diagnostics: []*tfplugin5.Diagnostic{},
-			},
+			in:       &tfprotov5.CallFunctionResponse{},
+			expected: &tfplugin5.CallFunction_Response{},
 		},
-		"Diagnostics": {
+		"Error": {
 			in: &tfprotov5.CallFunctionResponse{
-				Diagnostics: []*tfprotov5.Diagnostic{
-					testTfprotov5Diagnostic,
-				},
+				Error: testTfprotov5Error,
 			},
 			expected: &tfplugin5.CallFunction_Response{
-				Diagnostics: []*tfplugin5.Diagnostic{
-					testTfplugin5Diagnostic,
-				},
+				Error: testTfplugin5Error,
 			},
 		},
 		"Result": {
@@ -48,8 +52,7 @@ func TestCallFunction_Response(t *testing.T) {
 				Result: testTfprotov5DynamicValue(),
 			},
 			expected: &tfplugin5.CallFunction_Response{
-				Diagnostics: []*tfplugin5.Diagnostic{},
-				Result:      testTfplugin5DynamicValue(),
+				Result: testTfplugin5DynamicValue(),
 			},
 		},
 	}
@@ -70,6 +73,7 @@ func TestCallFunction_Response(t *testing.T) {
 				tfplugin5.Diagnostic{},
 				tfplugin5.DynamicValue{},
 				tfplugin5.CallFunction_Response{},
+				tfplugin5.FunctionError{},
 			)
 
 			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {
