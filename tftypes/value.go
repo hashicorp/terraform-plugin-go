@@ -46,6 +46,14 @@ type Value struct {
 	value interface{}
 }
 
+// AsDynamic returns a clone of Value with the type set as DynamicPseudoType
+func (val Value) AsDynamic() Value {
+	newVal := val.Copy()
+	newVal.typ = DynamicPseudoType
+
+	return newVal
+}
+
 func (val Value) String() string {
 	typ := val.Type()
 
