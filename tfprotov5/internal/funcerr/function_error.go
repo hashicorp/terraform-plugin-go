@@ -35,7 +35,7 @@ func (e *FunctionError) Log(ctx context.Context) {
 	switch {
 	case e.FunctionArgument != nil && e.Text != "":
 		logging.ProtocolError(ctx, "Response contains function error", map[string]interface{}{
-			logging.KeyFunctionErrorMsg:      e.Text,
+			logging.KeyFunctionErrorText:     e.Text,
 			logging.KeyFunctionErrorArgument: *e.FunctionArgument,
 		})
 	case e.FunctionArgument != nil:
@@ -44,7 +44,7 @@ func (e *FunctionError) Log(ctx context.Context) {
 		})
 	case e.Text != "":
 		logging.ProtocolError(ctx, "Response contains function error", map[string]interface{}{
-			logging.KeyFunctionErrorMsg: e.Text,
+			logging.KeyFunctionErrorText: e.Text,
 		})
 	}
 }

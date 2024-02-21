@@ -101,10 +101,10 @@ func TestFunctionErrorLog(t *testing.T) {
 			},
 			expected: []map[string]interface{}{
 				{
-					"@level":             "error",
-					"@message":           "Response contains function error",
-					"@module":            "sdk.proto",
-					"function_error_msg": "test function error",
+					"@level":              "error",
+					"@message":            "Response contains function error",
+					"@module":             "sdk.proto",
+					"function_error_text": "test function error",
 				},
 			},
 		},
@@ -118,7 +118,7 @@ func TestFunctionErrorLog(t *testing.T) {
 					"@level":                  "error",
 					"@message":                "Response contains function error",
 					"@module":                 "sdk.proto",
-					"function_error_msg":      "test function error",
+					"function_error_text":     "test function error",
 					"function_error_argument": float64(0),
 				},
 			},

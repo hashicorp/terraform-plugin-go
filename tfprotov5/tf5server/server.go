@@ -962,12 +962,12 @@ func (s *server) CallFunction(ctx context.Context, protoReq *tfplugin5.CallFunct
 	if !ok {
 		logging.ProtocolError(ctx, "ProviderServer does not implement FunctionServer")
 
-		msg := "Provider Functions Not Implemented: A provider-defined function call was received by the provider, however the provider does not implement functions. " +
+		text := "Provider Functions Not Implemented: A provider-defined function call was received by the provider, however the provider does not implement functions. " +
 			"Either upgrade the provider to a version that implements provider-defined functions or this is a bug in Terraform that should be reported to the Terraform maintainers."
 
 		protoResp := &tfplugin5.CallFunction_Response{
 			Error: &tfplugin5.FunctionError{
-				Text: msg,
+				Text: text,
 			},
 		}
 

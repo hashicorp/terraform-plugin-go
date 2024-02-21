@@ -36,7 +36,7 @@ const (
 	KeyFunctionErrorExists = "function_error_exists"
 
 	// Message of the function error.
-	KeyFunctionErrorMsg = "function_error_msg"
+	KeyFunctionErrorText = "function_error_text"
 
 	// Duration in milliseconds for the RPC request
 	KeyRequestDurationMs = "tf_req_duration_ms"
