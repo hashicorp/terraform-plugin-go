@@ -41,10 +41,6 @@ message Diagnostic {
     string summary = 2;
     string detail = 3;
     AttributePath attribute = 4;
-
-    // function_argument is the positional function argument for aligning
-    // configuration source.
-    optional int64 function_argument = 5;
 }
 
 message FunctionError {
