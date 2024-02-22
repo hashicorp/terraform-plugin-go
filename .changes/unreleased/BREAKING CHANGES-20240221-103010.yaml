@@ -1,6 +1,0 @@
-kind: BREAKING CHANGES
-body: 'tfprotov5+tfprotov6: Modified the response returned from the CallFunction RPC,
-  replacing diagnostics with function error'
-time: 2024-02-21T10:30:10.223878Z
-custom:
-  Issue: "380"
