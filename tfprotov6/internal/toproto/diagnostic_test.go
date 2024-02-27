@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/toproto"
@@ -69,15 +70,6 @@ func TestDiagnostic(t *testing.T) {
 			expected: &tfplugin6.Diagnostic{
 				Detail:   "test",
 				Severity: tfplugin6.Diagnostic_INVALID,
-			},
-		},
-		"FunctionArgument": {
-			in: &tfprotov6.Diagnostic{
-				FunctionArgument: pointer(int64(123)),
-			},
-			expected: &tfplugin6.Diagnostic{
-				FunctionArgument: pointer(int64(123)),
-				Severity:         tfplugin6.Diagnostic_INVALID,
 			},
 		},
 		"Severity": {
