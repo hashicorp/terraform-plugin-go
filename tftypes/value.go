@@ -223,31 +223,6 @@ func (val Value) Equal(o Value) bool {
 	}
 	deepEqual, err := val.deepEqual(o)
 	if err != nil {
-		panic(err)
-	}
-	return deepEqual
-}
-
-// SafeEqual returns true if two Values should be considered equal. Values are
-// considered equal if their types are considered equal and if they represent
-// data that is considered equal.
-//
-// This function will never panic.
-func (val Value) SafeEqual(o Value) bool {
-	if val.Type() == nil && o.Type() == nil && val.value == nil && o.value == nil {
-		return true
-	}
-	if val.Type() == nil {
-		return false
-	}
-	if o.Type() == nil {
-		return false
-	}
-	if !val.Type().Equal(o.Type()) {
-		return false
-	}
-	deepEqual, err := val.deepEqual(o)
-	if err != nil {
 		return false
 	}
 	return deepEqual
