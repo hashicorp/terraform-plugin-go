@@ -1,0 +1,6 @@
+kind: BUG FIXES
+body: 'tftypes: Fixed an edge-case where `(Value).Equal` would panic when comparing
+  two values with underlying `DynamicPseudoType` types and different concrete values.'
+time: 2024-02-28T17:11:04.381759-05:00
+custom:
+  Issue: "383"
