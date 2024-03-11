@@ -5,4 +5,4 @@ body: 'all: To prevent compilation errors, ensure your Go module is updated to a
   upgrading this dependency.'
 time: 2024-03-11T09:37:36.503168-04:00
 custom:
-  Issue: "9999"
+  Issue: "388"
