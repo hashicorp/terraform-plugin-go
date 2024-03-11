@@ -1,3 +1,13 @@
+## 0.22.1 (March 11, 2024)
+
+NOTES:
+
+* all: Upgraded google.golang.org/protobuf dependency, which includes a fix for CVE-2024-24786. While the fixed feature is not used in this Go module, this upgrade may silence security vulnerability scanner reports that are based purely on dependency versions. ([#385](https://github.com/hashicorp/terraform-plugin-go/issues/385))
+
+BUG FIXES:
+
+* tftypes: Fixed an edge-case where `(Value).Equal` would panic when comparing two values with underlying `DynamicPseudoType` types and different concrete values. ([#383](https://github.com/hashicorp/terraform-plugin-go/issues/383))
+
 ## 0.22.0 (February 22, 2024)
 
 BREAKING CHANGES:
