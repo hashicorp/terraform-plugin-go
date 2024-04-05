@@ -123,6 +123,14 @@ func TestImportResourceStateRequest(t *testing.T) {
 				TypeName: "test",
 			},
 		},
+		"DeferralAllowed": {
+			in: &tfplugin5.ImportResourceState_Request{
+				DeferralAllowed: true,
+			},
+			expected: &tfprotov5.ImportResourceStateRequest{
+				DeferralAllowed: true,
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -283,6 +291,14 @@ func TestPlanResourceChangeRequest(t *testing.T) {
 				TypeName: "test",
 			},
 		},
+		"DeferralAllowed": {
+			in: &tfplugin5.PlanResourceChange_Request{
+				DeferralAllowed: true,
+			},
+			expected: &tfprotov5.PlanResourceChangeRequest{
+				DeferralAllowed: true,
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -345,6 +361,14 @@ func TestReadResourceRequest(t *testing.T) {
 			},
 			expected: &tfprotov5.ReadResourceRequest{
 				TypeName: "test",
+			},
+		},
+		"DeferralAllowed": {
+			in: &tfplugin5.ReadResource_Request{
+				DeferralAllowed: true,
+			},
+			expected: &tfprotov5.ReadResourceRequest{
+				DeferralAllowed: true,
 			},
 		},
 	}

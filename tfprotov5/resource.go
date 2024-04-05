@@ -177,6 +177,9 @@ type ReadResourceRequest struct {
 	//
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
+
+	// TODO: doc
+	DeferralAllowed bool
 }
 
 // ReadResourceResponse is the response from the provider about the current
@@ -201,6 +204,9 @@ type ReadResourceResponse struct {
 	// with requests for this resource. This state will be associated with
 	// the resource, but will not be considered when calculating diffs.
 	Private []byte
+
+	// TODO: doc
+	Deferred *Deferred
 }
 
 // PlanResourceChangeRequest is the request Terraform sends when it is
@@ -267,6 +273,9 @@ type PlanResourceChangeRequest struct {
 	//
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
+
+	// TODO: doc
+	DeferralAllowed bool
 }
 
 // PlanResourceChangeResponse is the response from the provider about what the
@@ -345,6 +354,9 @@ type PlanResourceChangeResponse struct {
 	//
 	// Deprecated: Really, just don't use this, you don't need it.
 	UnsafeToUseLegacyTypeSystem bool
+
+	// TODO: doc
+	Deferred *Deferred
 }
 
 // ApplyResourceChangeRequest is the request Terraform sends when it needs to
@@ -465,6 +477,9 @@ type ImportResourceStateRequest struct {
 	// for the ID, and use it to determine what resource or resources to
 	// import.
 	ID string
+
+	// TODO: doc
+	DeferralAllowed bool
 }
 
 // ImportResourceStateResponse is the response from the provider about the
@@ -478,6 +493,9 @@ type ImportResourceStateResponse struct {
 	// requested resource or resources. Returning an empty slice indicates
 	// a successful validation with no warnings or errors generated.
 	Diagnostics []*Diagnostic
+
+	// TODO: doc
+	Deferred *Deferred
 }
 
 // ImportedResource represents a single resource that a provider has

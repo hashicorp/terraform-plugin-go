@@ -99,6 +99,19 @@ func TestReadDataSource_Response(t *testing.T) {
 				State:       testTfplugin5DynamicValue(),
 			},
 		},
+		"Deferred": {
+			in: &tfprotov5.ReadDataSourceResponse{
+				Deferred: &tfprotov5.Deferred{
+					Reason: tfprotov5.DeferredReasonResourceConfigUnknown,
+				},
+			},
+			expected: &tfplugin5.ReadDataSource_Response{
+				Diagnostics: []*tfplugin5.Diagnostic{},
+				Deferred: &tfplugin5.Deferred{
+					Reason: tfplugin5.Deferred_RESOURCE_CONFIG_UNKNOWN,
+				},
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -117,6 +130,7 @@ func TestReadDataSource_Response(t *testing.T) {
 				tfplugin5.Diagnostic{},
 				tfplugin5.DynamicValue{},
 				tfplugin5.ReadDataSource_Response{},
+				tfplugin5.Deferred{},
 			)
 
 			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {

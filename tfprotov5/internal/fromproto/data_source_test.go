@@ -51,6 +51,14 @@ func TestReadDataSourceRequest(t *testing.T) {
 				TypeName: "test",
 			},
 		},
+		"DeferralAllowed": {
+			in: &tfplugin5.ReadDataSource_Request{
+				DeferralAllowed: true,
+			},
+			expected: &tfprotov5.ReadDataSourceRequest{
+				DeferralAllowed: true,
+			},
+		},
 	}
 
 	for name, testCase := range testCases {

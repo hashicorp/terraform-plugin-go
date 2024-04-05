@@ -41,10 +41,11 @@ func ReadResourceRequest(in *tfplugin5.ReadResource_Request) *tfprotov5.ReadReso
 	}
 
 	resp := &tfprotov5.ReadResourceRequest{
-		CurrentState: DynamicValue(in.CurrentState),
-		Private:      in.Private,
-		ProviderMeta: DynamicValue(in.ProviderMeta),
-		TypeName:     in.TypeName,
+		CurrentState:    DynamicValue(in.CurrentState),
+		Private:         in.Private,
+		ProviderMeta:    DynamicValue(in.ProviderMeta),
+		TypeName:        in.TypeName,
+		DeferralAllowed: in.DeferralAllowed,
 	}
 
 	return resp
@@ -62,6 +63,7 @@ func PlanResourceChangeRequest(in *tfplugin5.PlanResourceChange_Request) *tfprot
 		ProposedNewState: DynamicValue(in.ProposedNewState),
 		ProviderMeta:     DynamicValue(in.ProviderMeta),
 		TypeName:         in.TypeName,
+		DeferralAllowed:  in.DeferralAllowed,
 	}
 
 	return resp
@@ -90,8 +92,9 @@ func ImportResourceStateRequest(in *tfplugin5.ImportResourceState_Request) *tfpr
 	}
 
 	resp := &tfprotov5.ImportResourceStateRequest{
-		TypeName: in.TypeName,
-		ID:       in.Id,
+		TypeName:        in.TypeName,
+		ID:              in.Id,
+		DeferralAllowed: in.DeferralAllowed,
 	}
 
 	return resp

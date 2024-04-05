@@ -87,6 +87,9 @@ type ReadDataSourceRequest struct {
 	//
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
+
+	// TODO: doc
+	DeferralAllowed bool
 }
 
 // ReadDataSourceResponse is the response from the provider about the current
@@ -105,4 +108,7 @@ type ReadDataSourceResponse struct {
 	// indicates a successful validation with no warnings or errors
 	// generated.
 	Diagnostics []*Diagnostic
+
+	// TODO: doc
+	Deferred *Deferred
 }
