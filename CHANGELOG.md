@@ -1,3 +1,9 @@
+## 0.22.2 (April 18, 2024)
+
+BUG FIXES:
+
+* tftypes: Large integers are always encoded as msgpack integers rather than float values to ensure the decoded value will not be rounded to 52-bit precision ([#396](https://github.com/hashicorp/terraform-plugin-go/issues/396))
+
 ## 0.22.1 (March 11, 2024)
 
 NOTES:
