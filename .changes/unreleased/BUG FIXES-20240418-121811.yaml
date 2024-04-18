@@ -1,0 +1,6 @@
+kind: BUG FIXES
+body: 'tftypes: Large integers are always encoded as msgpack integers rather than
+  float values to ensure the decoded value will not be rounded to 52-bit precision'
+time: 2024-04-18T12:18:11.880247-04:00
+custom:
+  Issue: "396"
