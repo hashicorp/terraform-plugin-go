@@ -900,37 +900,11 @@ func (s *server) MoveResourceState(ctx context.Context, protoReq *tfplugin6.Move
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
 
-	// Remove this check and error in preference of
-	// s.downstream.MoveResourceState below once ResourceServer interface
-	// implements the MoveResourceState method.
-	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/363
-	// nolint:staticcheck
-	resourceServerWMRS, ok := s.downstream.(tfprotov6.ResourceServerWithMoveResourceState)
-
-	if !ok {
-		logging.ProtocolError(ctx, "ProviderServer does not implement ResourceServerWithMoveResourceState")
-
-		protoResp := &tfplugin6.MoveResourceState_Response{
-			Diagnostics: []*tfplugin6.Diagnostic{
-				{
-					Severity: tfplugin6.Diagnostic_ERROR,
-					Summary:  "Provider Move Resource State Not Implemented",
-					Detail: "A MoveResourceState call was received by the provider, however the provider does not implement the call. " +
-						"Either upgrade the provider to a version that implements move resource state support or this is a bug in Terraform that should be reported to the Terraform maintainers.",
-				},
-			},
-		}
-
-		return protoResp, nil
-	}
-
 	req := fromproto.MoveResourceStateRequest(protoReq)
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/363
-	// resp, err := s.downstream.MoveResourceState(ctx, req)
-	resp, err := resourceServerWMRS.MoveResourceState(ctx, req)
+	resp, err := s.downstream.MoveResourceState(ctx, req)
 
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -954,26 +928,6 @@ func (s *server) CallFunction(ctx context.Context, protoReq *tfplugin6.CallFunct
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
 
-	// Remove this check and error in preference of s.downstream.CallFunction
-	// below once ProviderServer interface requires FunctionServer.
-	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/353
-	functionServer, ok := s.downstream.(tfprotov6.FunctionServer)
-
-	if !ok {
-		logging.ProtocolError(ctx, "ProviderServer does not implement FunctionServer")
-
-		text := "Provider Functions Not Implemented: A provider-defined function call was received by the provider, however the provider does not implement functions. " +
-			"Either upgrade the provider to a version that implements provider-defined functions or this is a bug in Terraform that should be reported to the Terraform maintainers."
-
-		protoResp := &tfplugin6.CallFunction_Response{
-			Error: &tfplugin6.FunctionError{
-				Text: text,
-			},
-		}
-
-		return protoResp, nil
-	}
-
 	req := fromproto.CallFunctionRequest(protoReq)
 
 	for position, argument := range req.Arguments {
@@ -982,9 +936,7 @@ func (s *server) CallFunction(ctx context.Context, protoReq *tfplugin6.CallFunct
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/353
-	// resp, err := s.downstream.CallFunction(ctx, req)
-	resp, err := functionServer.CallFunction(ctx, req)
+	resp, err := s.downstream.CallFunction(ctx, req)
 
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]any{logging.KeyError: err})
@@ -1007,28 +959,11 @@ func (s *server) GetFunctions(ctx context.Context, protoReq *tfplugin6.GetFuncti
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
 
-	// Remove this check and response in preference of s.downstream.GetFunctions
-	// below once ProviderServer interface requires FunctionServer.
-	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/353
-	functionServer, ok := s.downstream.(tfprotov6.FunctionServer)
-
-	if !ok {
-		logging.ProtocolWarn(ctx, "ProviderServer does not implement FunctionServer")
-
-		protoResp := &tfplugin6.GetFunctions_Response{
-			Functions: map[string]*tfplugin6.Function{},
-		}
-
-		return protoResp, nil
-	}
-
 	req := fromproto.GetFunctionsRequest(protoReq)
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	// Reference: https://github.com/hashicorp/terraform-plugin-go/issues/353
-	// resp, err := s.downstream.GetFunctions(ctx, req)
-	resp, err := functionServer.GetFunctions(ctx, req)
+	resp, err := s.downstream.GetFunctions(ctx, req)
 
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]any{logging.KeyError: err})

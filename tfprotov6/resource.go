@@ -52,14 +52,24 @@ type ResourceServer interface {
 	// specified by the passed ID and return it as one or more resource
 	// states for Terraform to assume control of.
 	ImportResourceState(context.Context, *ImportResourceStateRequest) (*ImportResourceStateResponse, error)
+
+	// MoveResourceState is called when Terraform is asked to change a resource
+	// type for an existing resource. The provider must accept the change as
+	// valid by ensuring the source resource type, schema version, and provider
+	// address are compatible to convert the source state into the target
+	// resource type and latest state version.
+	//
+	// This functionality is only supported in Terraform 1.8 and later. The
+	// provider must have enabled the MoveResourceState server capability to
+	// enable these requests.
+	MoveResourceState(context.Context, *MoveResourceStateRequest) (*MoveResourceStateResponse, error)
 }
 
 // ResourceServerWithMoveResourceState is a temporary interface for servers
 // to implement MoveResourceState RPC handling.
 //
-// Deprecated: The MoveResourceState method will be moved into the
-// ResourceServer interface and this interface will be removed in a future
-// version.
+// Deprecated: This interface will be removed in a future version. Use
+// ResourceServer instead.
 type ResourceServerWithMoveResourceState interface {
 	ResourceServer
 
