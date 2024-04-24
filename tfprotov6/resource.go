@@ -186,7 +186,7 @@ type ReadResourceRequest struct {
 	ProviderMeta *DynamicValue
 
 	// TODO: doc
-	DeferralAllowed bool
+	ClientCapabilities *ClientCapabilities
 }
 
 // ReadResourceResponse is the response from the provider about the current
@@ -282,7 +282,7 @@ type PlanResourceChangeRequest struct {
 	ProviderMeta *DynamicValue
 
 	// TODO: doc
-	DeferralAllowed bool
+	ClientCapabilities *ClientCapabilities
 }
 
 // PlanResourceChangeResponse is the response from the provider about what the
@@ -486,7 +486,7 @@ type ImportResourceStateRequest struct {
 	ID string
 
 	// TODO: doc
-	DeferralAllowed bool
+	ClientCapabilities *ClientCapabilities
 }
 
 // ImportResourceStateResponse is the response from the provider about the

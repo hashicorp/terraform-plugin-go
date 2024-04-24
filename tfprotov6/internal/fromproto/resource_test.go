@@ -123,12 +123,16 @@ func TestImportResourceStateRequest(t *testing.T) {
 				TypeName: "test",
 			},
 		},
-		"DeferralAllowed": {
+		"ClientCapabilities": {
 			in: &tfplugin6.ImportResourceState_Request{
-				DeferralAllowed: true,
+				ClientCapabilities: &tfplugin6.ClientCapabilities{
+					DeferralAllowed: true,
+				},
 			},
 			expected: &tfprotov6.ImportResourceStateRequest{
-				DeferralAllowed: true,
+				ClientCapabilities: &tfprotov6.ClientCapabilities{
+					DeferralAllowed: true,
+				},
 			},
 		},
 	}
@@ -291,12 +295,16 @@ func TestPlanResourceChangeRequest(t *testing.T) {
 				TypeName: "test",
 			},
 		},
-		"DeferralAllowed": {
+		"ClientCapabilities": {
 			in: &tfplugin6.PlanResourceChange_Request{
-				DeferralAllowed: true,
+				ClientCapabilities: &tfplugin6.ClientCapabilities{
+					DeferralAllowed: true,
+				},
 			},
 			expected: &tfprotov6.PlanResourceChangeRequest{
-				DeferralAllowed: true,
+				ClientCapabilities: &tfprotov6.ClientCapabilities{
+					DeferralAllowed: true,
+				},
 			},
 		},
 	}
@@ -363,12 +371,16 @@ func TestReadResourceRequest(t *testing.T) {
 				TypeName: "test",
 			},
 		},
-		"DeferralAllowed": {
+		"ClientCapabilities": {
 			in: &tfplugin6.ReadResource_Request{
-				DeferralAllowed: true,
+				ClientCapabilities: &tfplugin6.ClientCapabilities{
+					DeferralAllowed: true,
+				},
 			},
 			expected: &tfprotov6.ReadResourceRequest{
-				DeferralAllowed: true,
+				ClientCapabilities: &tfprotov6.ClientCapabilities{
+					DeferralAllowed: true,
+				},
 			},
 		},
 	}

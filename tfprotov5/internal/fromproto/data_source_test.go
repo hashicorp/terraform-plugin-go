@@ -53,10 +53,14 @@ func TestReadDataSourceRequest(t *testing.T) {
 		},
 		"DeferralAllowed": {
 			in: &tfplugin5.ReadDataSource_Request{
-				DeferralAllowed: true,
+				ClientCapabilities: &tfplugin5.ClientCapabilities{
+					DeferralAllowed: true,
+				},
 			},
 			expected: &tfprotov5.ReadDataSourceRequest{
-				DeferralAllowed: true,
+				ClientCapabilities: &tfprotov5.ClientCapabilities{
+					DeferralAllowed: true,
+				},
 			},
 		},
 	}

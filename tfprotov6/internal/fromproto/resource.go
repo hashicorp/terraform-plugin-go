@@ -41,11 +41,11 @@ func ReadResourceRequest(in *tfplugin6.ReadResource_Request) *tfprotov6.ReadReso
 	}
 
 	resp := &tfprotov6.ReadResourceRequest{
-		CurrentState:    DynamicValue(in.CurrentState),
-		Private:         in.Private,
-		ProviderMeta:    DynamicValue(in.ProviderMeta),
-		TypeName:        in.TypeName,
-		DeferralAllowed: in.DeferralAllowed,
+		CurrentState:       DynamicValue(in.CurrentState),
+		Private:            in.Private,
+		ProviderMeta:       DynamicValue(in.ProviderMeta),
+		TypeName:           in.TypeName,
+		ClientCapabilities: ClientCapabilities(in.ClientCapabilities),
 	}
 
 	return resp
@@ -57,13 +57,13 @@ func PlanResourceChangeRequest(in *tfplugin6.PlanResourceChange_Request) *tfprot
 	}
 
 	resp := &tfprotov6.PlanResourceChangeRequest{
-		Config:           DynamicValue(in.Config),
-		PriorPrivate:     in.PriorPrivate,
-		PriorState:       DynamicValue(in.PriorState),
-		ProposedNewState: DynamicValue(in.ProposedNewState),
-		ProviderMeta:     DynamicValue(in.ProviderMeta),
-		TypeName:         in.TypeName,
-		DeferralAllowed:  in.DeferralAllowed,
+		Config:             DynamicValue(in.Config),
+		PriorPrivate:       in.PriorPrivate,
+		PriorState:         DynamicValue(in.PriorState),
+		ProposedNewState:   DynamicValue(in.ProposedNewState),
+		ProviderMeta:       DynamicValue(in.ProviderMeta),
+		TypeName:           in.TypeName,
+		ClientCapabilities: ClientCapabilities(in.ClientCapabilities),
 	}
 
 	return resp
@@ -92,9 +92,9 @@ func ImportResourceStateRequest(in *tfplugin6.ImportResourceState_Request) *tfpr
 	}
 
 	resp := &tfprotov6.ImportResourceStateRequest{
-		TypeName:        in.TypeName,
-		ID:              in.Id,
-		DeferralAllowed: in.DeferralAllowed,
+		TypeName:           in.TypeName,
+		ID:                 in.Id,
+		ClientCapabilities: ClientCapabilities(in.ClientCapabilities),
 	}
 
 	return resp

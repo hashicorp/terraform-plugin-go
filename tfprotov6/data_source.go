@@ -89,7 +89,7 @@ type ReadDataSourceRequest struct {
 	ProviderMeta *DynamicValue
 
 	// TODO: doc
-	DeferralAllowed bool
+	ClientCapabilities *ClientCapabilities
 }
 
 // ReadDataSourceResponse is the response from the provider about the current

@@ -208,6 +208,9 @@ type ConfigureProviderRequest struct {
 	// known values. Values that are not set in the configuration will be
 	// null.
 	Config *DynamicValue
+
+	// TODO: doc
+	ClientCapabilities *ClientCapabilities
 }
 
 // ConfigureProviderResponse represents a Terraform RPC response to the
