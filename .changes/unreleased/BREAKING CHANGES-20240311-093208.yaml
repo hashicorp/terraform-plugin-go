@@ -1,0 +1,7 @@
+kind: BREAKING CHANGES
+body: 'tfprotov5+tfprotov6: `FunctionServer` interface is now required in `ProviderServer`.
+  Implementations not needing function support can return errors from the `GetFunctions`
+  and `CallFunction` methods.'
+time: 2024-03-11T09:32:08.806864-04:00
+custom:
+  Issue: "388"

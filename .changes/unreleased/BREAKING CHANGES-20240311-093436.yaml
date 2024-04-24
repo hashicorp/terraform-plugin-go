@@ -1,0 +1,7 @@
+kind: BREAKING CHANGES
+body: 'tfprotov5+tfprotov6: `MoveResourceState` method is now required in
+  `ResourceServer`. Implementations not needing move state support can return
+  errors from the `MoveResourceState` method.'
+time: 2024-03-11T09:34:36.800884-04:00
+custom:
+  Issue: "388"
