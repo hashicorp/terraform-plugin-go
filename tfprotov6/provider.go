@@ -209,7 +209,8 @@ type ConfigureProviderRequest struct {
 	// null.
 	Config *DynamicValue
 
-	// TODO: doc
+	// ClientCapabilities defines optionally supported protocol features for
+	// the Terraform client, such as forward-compatible Terraform behavior changes.
 	ClientCapabilities *ClientCapabilities
 }
 

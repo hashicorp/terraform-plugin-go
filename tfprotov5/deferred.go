@@ -4,26 +4,29 @@
 package tfprotov5
 
 const (
-	// TODO: doc
+	// DeferredReasonUnknown is used to indicate an invalid `DeferredReason`.
+	// Provider developers should not use it.
 	DeferredReasonUnknown DeferredReason = 0
 
-	// TODO: doc
+	// DeferredReasonResourceConfigUnknown is used to indicate that the resource configuration
+	// is partially unknown and the real values need to be known before the change can be planned.
 	DeferredReasonResourceConfigUnknown DeferredReason = 1
 
-	// TODO: doc
+	// DeferredReasonProviderConfigUnknown is used to indicate that the provider configuration
+	// is partially unknown and the real values need to be known before the change can be planned.
 	DeferredReasonProviderConfigUnknown DeferredReason = 2
 
-	// TODO: doc
+	// DeferredReasonAbsentPrereq is used to indicate that a hard dependency has not been satisfied.
 	DeferredReasonAbsentPrereq DeferredReason = 3
 )
 
-// TODO: doc
+// Deferred is used to indicate to Terraform that a change needs to be deferred for a reason.
 type Deferred struct {
-	// TODO: doc
+	// Reason is the reason for deferring the change.
 	Reason DeferredReason
 }
 
-// TODO: doc
+// DeferredReason represents different reasons for deferring a change.
 type DeferredReason int32
 
 func (d DeferredReason) String() string {

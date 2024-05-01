@@ -188,7 +188,8 @@ type ReadResourceRequest struct {
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
 
-	// TODO: doc
+	// ClientCapabilities defines optionally supported protocol features for
+	// the Terraform client, such as forward-compatible Terraform behavior changes.
 	ClientCapabilities *ClientCapabilities
 }
 
@@ -215,7 +216,8 @@ type ReadResourceResponse struct {
 	// the resource, but will not be considered when calculating diffs.
 	Private []byte
 
-	// TODO: doc
+	// Deferred is used to indicate to Terraform that the ReadResource operation
+	// needs to be deferred for a reason.
 	Deferred *Deferred
 }
 
@@ -284,7 +286,8 @@ type PlanResourceChangeRequest struct {
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
 
-	// TODO: doc
+	// ClientCapabilities defines optionally supported protocol features for
+	// the Terraform client, such as forward-compatible Terraform behavior changes.
 	ClientCapabilities *ClientCapabilities
 }
 
@@ -365,7 +368,8 @@ type PlanResourceChangeResponse struct {
 	// Deprecated: Really, just don't use this, you don't need it.
 	UnsafeToUseLegacyTypeSystem bool
 
-	// TODO: doc
+	// Deferred is used to indicate to Terraform that the PlanResourceChange operation
+	// needs to be deferred for a reason.
 	Deferred *Deferred
 }
 
@@ -488,7 +492,8 @@ type ImportResourceStateRequest struct {
 	// import.
 	ID string
 
-	// TODO: doc
+	// ClientCapabilities defines optionally supported protocol features for
+	// the Terraform client, such as forward-compatible Terraform behavior changes.
 	ClientCapabilities *ClientCapabilities
 }
 
@@ -504,7 +509,8 @@ type ImportResourceStateResponse struct {
 	// a successful validation with no warnings or errors generated.
 	Diagnostics []*Diagnostic
 
-	// TODO: doc
+	// Deferred is used to indicate to Terraform that the ImportResourceState operation
+	// needs to be deferred for a reason.
 	Deferred *Deferred
 }
 

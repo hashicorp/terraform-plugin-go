@@ -88,7 +88,8 @@ type ReadDataSourceRequest struct {
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
 
-	// TODO: doc
+	// ClientCapabilities defines optionally supported protocol features for
+	// the Terraform client, such as forward-compatible Terraform behavior changes.
 	ClientCapabilities *ClientCapabilities
 }
 
@@ -109,6 +110,7 @@ type ReadDataSourceResponse struct {
 	// generated.
 	Diagnostics []*Diagnostic
 
-	// TODO: doc
+	// Deferred is used to indicate to Terraform that the ReadDataSource operation
+	// needs to be deferred for a reason.
 	Deferred *Deferred
 }
