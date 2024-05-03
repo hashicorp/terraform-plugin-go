@@ -45,7 +45,7 @@ func ReadResourceRequest(in *tfplugin6.ReadResource_Request) *tfprotov6.ReadReso
 		Private:            in.Private,
 		ProviderMeta:       DynamicValue(in.ProviderMeta),
 		TypeName:           in.TypeName,
-		ClientCapabilities: ClientCapabilities(in.ClientCapabilities),
+		ClientCapabilities: ReadResourceClientCapabilities(in.ClientCapabilities),
 	}
 
 	return resp
@@ -63,7 +63,7 @@ func PlanResourceChangeRequest(in *tfplugin6.PlanResourceChange_Request) *tfprot
 		ProposedNewState:   DynamicValue(in.ProposedNewState),
 		ProviderMeta:       DynamicValue(in.ProviderMeta),
 		TypeName:           in.TypeName,
-		ClientCapabilities: ClientCapabilities(in.ClientCapabilities),
+		ClientCapabilities: PlanResourceChangeClientCapabilities(in.ClientCapabilities),
 	}
 
 	return resp
@@ -94,7 +94,7 @@ func ImportResourceStateRequest(in *tfplugin6.ImportResourceState_Request) *tfpr
 	resp := &tfprotov6.ImportResourceStateRequest{
 		TypeName:           in.TypeName,
 		ID:                 in.Id,
-		ClientCapabilities: ClientCapabilities(in.ClientCapabilities),
+		ClientCapabilities: ImportResourceStateClientCapabilities(in.ClientCapabilities),
 	}
 
 	return resp

@@ -12,12 +12,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
 )
 
-func TestClientCapabilities(t *testing.T) {
+func TestConfigureProviderClientCapabilities(t *testing.T) {
 	t.Parallel()
 
 	testCases := map[string]struct {
 		in       *tfplugin6.ClientCapabilities
-		expected *tfprotov6.ClientCapabilities
+		expected *tfprotov6.ConfigureProviderClientCapabilities
 	}{
 		"nil": {
 			in:       nil,
@@ -25,13 +25,13 @@ func TestClientCapabilities(t *testing.T) {
 		},
 		"zero": {
 			in:       &tfplugin6.ClientCapabilities{},
-			expected: &tfprotov6.ClientCapabilities{},
+			expected: &tfprotov6.ConfigureProviderClientCapabilities{},
 		},
 		"DeferralAllowed": {
 			in: &tfplugin6.ClientCapabilities{
 				DeferralAllowed: true,
 			},
-			expected: &tfprotov6.ClientCapabilities{
+			expected: &tfprotov6.ConfigureProviderClientCapabilities{
 				DeferralAllowed: true,
 			},
 		},
@@ -43,7 +43,167 @@ func TestClientCapabilities(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			got := fromproto.ClientCapabilities(testCase.in)
+			got := fromproto.ConfigureProviderClientCapabilities(testCase.in)
+
+			if diff := cmp.Diff(got, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
+
+func TestReadDataSourceClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfplugin6.ClientCapabilities
+		expected *tfprotov6.ReadDataSourceClientCapabilities
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in:       &tfplugin6.ClientCapabilities{},
+			expected: &tfprotov6.ReadDataSourceClientCapabilities{},
+		},
+		"DeferralAllowed": {
+			in: &tfplugin6.ClientCapabilities{
+				DeferralAllowed: true,
+			},
+			expected: &tfprotov6.ReadDataSourceClientCapabilities{
+				DeferralAllowed: true,
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := fromproto.ReadDataSourceClientCapabilities(testCase.in)
+
+			if diff := cmp.Diff(got, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
+
+func TestReadResourceClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfplugin6.ClientCapabilities
+		expected *tfprotov6.ReadResourceClientCapabilities
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in:       &tfplugin6.ClientCapabilities{},
+			expected: &tfprotov6.ReadResourceClientCapabilities{},
+		},
+		"DeferralAllowed": {
+			in: &tfplugin6.ClientCapabilities{
+				DeferralAllowed: true,
+			},
+			expected: &tfprotov6.ReadResourceClientCapabilities{
+				DeferralAllowed: true,
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := fromproto.ReadResourceClientCapabilities(testCase.in)
+
+			if diff := cmp.Diff(got, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
+
+func TestPlanResourceChangeClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfplugin6.ClientCapabilities
+		expected *tfprotov6.PlanResourceChangeClientCapabilities
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in:       &tfplugin6.ClientCapabilities{},
+			expected: &tfprotov6.PlanResourceChangeClientCapabilities{},
+		},
+		"DeferralAllowed": {
+			in: &tfplugin6.ClientCapabilities{
+				DeferralAllowed: true,
+			},
+			expected: &tfprotov6.PlanResourceChangeClientCapabilities{
+				DeferralAllowed: true,
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := fromproto.PlanResourceChangeClientCapabilities(testCase.in)
+
+			if diff := cmp.Diff(got, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
+
+func TestImportResourceStateClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfplugin6.ClientCapabilities
+		expected *tfprotov6.ImportResourceStateClientCapabilities
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in:       &tfplugin6.ClientCapabilities{},
+			expected: &tfprotov6.ImportResourceStateClientCapabilities{},
+		},
+		"DeferralAllowed": {
+			in: &tfplugin6.ClientCapabilities{
+				DeferralAllowed: true,
+			},
+			expected: &tfprotov6.ImportResourceStateClientCapabilities{
+				DeferralAllowed: true,
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := fromproto.ImportResourceStateClientCapabilities(testCase.in)
 
 			if diff := cmp.Diff(got, testCase.expected); diff != "" {
 				t.Errorf("unexpected difference: %s", diff)

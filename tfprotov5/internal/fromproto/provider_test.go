@@ -114,7 +114,7 @@ func TestConfigureProviderRequest(t *testing.T) {
 				},
 			},
 			expected: &tfprotov5.ConfigureProviderRequest{
-				ClientCapabilities: &tfprotov5.ClientCapabilities{
+				ClientCapabilities: &tfprotov5.ConfigureProviderClientCapabilities{
 					DeferralAllowed: true,
 				},
 			},

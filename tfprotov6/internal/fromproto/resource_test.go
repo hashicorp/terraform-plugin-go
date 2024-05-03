@@ -130,7 +130,7 @@ func TestImportResourceStateRequest(t *testing.T) {
 				},
 			},
 			expected: &tfprotov6.ImportResourceStateRequest{
-				ClientCapabilities: &tfprotov6.ClientCapabilities{
+				ClientCapabilities: &tfprotov6.ImportResourceStateClientCapabilities{
 					DeferralAllowed: true,
 				},
 			},
@@ -302,7 +302,7 @@ func TestPlanResourceChangeRequest(t *testing.T) {
 				},
 			},
 			expected: &tfprotov6.PlanResourceChangeRequest{
-				ClientCapabilities: &tfprotov6.ClientCapabilities{
+				ClientCapabilities: &tfprotov6.PlanResourceChangeClientCapabilities{
 					DeferralAllowed: true,
 				},
 			},
@@ -378,7 +378,7 @@ func TestReadResourceRequest(t *testing.T) {
 				},
 			},
 			expected: &tfprotov6.ReadResourceRequest{
-				ClientCapabilities: &tfprotov6.ClientCapabilities{
+				ClientCapabilities: &tfprotov6.ReadResourceClientCapabilities{
 					DeferralAllowed: true,
 				},
 			},

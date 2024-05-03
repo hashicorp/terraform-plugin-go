@@ -188,9 +188,9 @@ type ReadResourceRequest struct {
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
 
-	// ClientCapabilities defines optionally supported protocol features for
-	// the Terraform client, such as forward-compatible Terraform behavior changes.
-	ClientCapabilities *ClientCapabilities
+	// ClientCapabilities defines optionally supported protocol features for the
+	// ReadResource RPC, such as forward-compatible Terraform behavior changes.
+	ClientCapabilities *ReadResourceClientCapabilities
 }
 
 // ReadResourceResponse is the response from the provider about the current
@@ -286,9 +286,9 @@ type PlanResourceChangeRequest struct {
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
 
-	// ClientCapabilities defines optionally supported protocol features for
-	// the Terraform client, such as forward-compatible Terraform behavior changes.
-	ClientCapabilities *ClientCapabilities
+	// ClientCapabilities defines optionally supported protocol features for the
+	// PlanResourceChange RPC, such as forward-compatible Terraform behavior changes.
+	ClientCapabilities *PlanResourceChangeClientCapabilities
 }
 
 // PlanResourceChangeResponse is the response from the provider about what the
@@ -492,9 +492,9 @@ type ImportResourceStateRequest struct {
 	// import.
 	ID string
 
-	// ClientCapabilities defines optionally supported protocol features for
-	// the Terraform client, such as forward-compatible Terraform behavior changes.
-	ClientCapabilities *ClientCapabilities
+	// ClientCapabilities defines optionally supported protocol features for the
+	// ImportResourceState RPC, such as forward-compatible Terraform behavior changes.
+	ClientCapabilities *ImportResourceStateClientCapabilities
 }
 
 // ImportResourceStateResponse is the response from the provider about the

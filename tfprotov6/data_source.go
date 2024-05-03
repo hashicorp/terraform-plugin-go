@@ -88,9 +88,9 @@ type ReadDataSourceRequest struct {
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
 
-	// ClientCapabilities defines optionally supported protocol features for
-	// the Terraform client, such as forward-compatible Terraform behavior changes.
-	ClientCapabilities *ClientCapabilities
+	// ClientCapabilities defines optionally supported protocol features for the
+	// ReadDataSource RPC, such as forward-compatible Terraform behavior changes.
+	ClientCapabilities *ReadDataSourceClientCapabilities
 }
 
 // ReadDataSourceResponse is the response from the provider about the current

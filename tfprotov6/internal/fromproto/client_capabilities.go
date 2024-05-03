@@ -8,12 +8,60 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
 )
 
-func ClientCapabilities(in *tfplugin6.ClientCapabilities) *tfprotov6.ClientCapabilities {
+func ConfigureProviderClientCapabilities(in *tfplugin6.ClientCapabilities) *tfprotov6.ConfigureProviderClientCapabilities {
 	if in == nil {
 		return nil
 	}
 
-	resp := &tfprotov6.ClientCapabilities{
+	resp := &tfprotov6.ConfigureProviderClientCapabilities{
+		DeferralAllowed: in.DeferralAllowed,
+	}
+
+	return resp
+}
+
+func ReadDataSourceClientCapabilities(in *tfplugin6.ClientCapabilities) *tfprotov6.ReadDataSourceClientCapabilities {
+	if in == nil {
+		return nil
+	}
+
+	resp := &tfprotov6.ReadDataSourceClientCapabilities{
+		DeferralAllowed: in.DeferralAllowed,
+	}
+
+	return resp
+}
+
+func ReadResourceClientCapabilities(in *tfplugin6.ClientCapabilities) *tfprotov6.ReadResourceClientCapabilities {
+	if in == nil {
+		return nil
+	}
+
+	resp := &tfprotov6.ReadResourceClientCapabilities{
+		DeferralAllowed: in.DeferralAllowed,
+	}
+
+	return resp
+}
+
+func PlanResourceChangeClientCapabilities(in *tfplugin6.ClientCapabilities) *tfprotov6.PlanResourceChangeClientCapabilities {
+	if in == nil {
+		return nil
+	}
+
+	resp := &tfprotov6.PlanResourceChangeClientCapabilities{
+		DeferralAllowed: in.DeferralAllowed,
+	}
+
+	return resp
+}
+
+func ImportResourceStateClientCapabilities(in *tfplugin6.ClientCapabilities) *tfprotov6.ImportResourceStateClientCapabilities {
+	if in == nil {
+		return nil
+	}
+
+	resp := &tfprotov6.ImportResourceStateClientCapabilities{
 		DeferralAllowed: in.DeferralAllowed,
 	}
 

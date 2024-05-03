@@ -58,7 +58,7 @@ func TestReadDataSourceRequest(t *testing.T) {
 				},
 			},
 			expected: &tfprotov5.ReadDataSourceRequest{
-				ClientCapabilities: &tfprotov5.ClientCapabilities{
+				ClientCapabilities: &tfprotov5.ReadDataSourceClientCapabilities{
 					DeferralAllowed: true,
 				},
 			},
