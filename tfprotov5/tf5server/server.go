@@ -696,6 +696,16 @@ func (s *server) ReadDataSource(ctx context.Context, protoReq *tfplugin5.ReadDat
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "State", resp.State)
 	tf5serverlogging.Deferred(ctx, resp.Deferred)
 
+	if resp.Deferred != nil && (req.ClientCapabilities == nil || !req.ClientCapabilities.DeferralAllowed) {
+		resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
+			Severity: tfprotov5.DiagnosticSeverityError,
+			Summary:  "Invalid Deferred Response",
+			Detail: "Provider returned a deferred response but the Terraform request did not indicate support for deferred actions." +
+				"This is an issue with the provider and should be reported to the provider developers.\n\n" +
+				fmt.Sprintf("Deferred reason - %q", resp.Deferred.Reason.String()),
+		})
+	}
+
 	protoResp := toproto.ReadDataSource_Response(resp)
 
 	return protoResp, nil
@@ -789,6 +799,16 @@ func (s *server) ReadResource(ctx context.Context, protoReq *tfplugin5.ReadResou
 	logging.ProtocolPrivateData(ctx, s.protocolDataDir, rpc, "Response", "Private", resp.Private)
 	tf5serverlogging.Deferred(ctx, resp.Deferred)
 
+	if resp.Deferred != nil && (req.ClientCapabilities == nil || !req.ClientCapabilities.DeferralAllowed) {
+		resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
+			Severity: tfprotov5.DiagnosticSeverityError,
+			Summary:  "Invalid Deferred Response",
+			Detail: "Provider returned a deferred response but the Terraform request did not indicate support for deferred actions." +
+				"This is an issue with the provider and should be reported to the provider developers.\n\n" +
+				fmt.Sprintf("Deferred reason - %q", resp.Deferred.Reason.String()),
+		})
+	}
+
 	protoResp := toproto.ReadResource_Response(resp)
 
 	return protoResp, nil
@@ -825,6 +845,16 @@ func (s *server) PlanResourceChange(ctx context.Context, protoReq *tfplugin5.Pla
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "PlannedState", resp.PlannedState)
 	logging.ProtocolPrivateData(ctx, s.protocolDataDir, rpc, "Response", "PlannedPrivate", resp.PlannedPrivate)
 	tf5serverlogging.Deferred(ctx, resp.Deferred)
+
+	if resp.Deferred != nil && (req.ClientCapabilities == nil || !req.ClientCapabilities.DeferralAllowed) {
+		resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
+			Severity: tfprotov5.DiagnosticSeverityError,
+			Summary:  "Invalid Deferred Response",
+			Detail: "Provider returned a deferred response but the Terraform request did not indicate support for deferred actions." +
+				"This is an issue with the provider and should be reported to the provider developers.\n\n" +
+				fmt.Sprintf("Deferred reason - %q", resp.Deferred.Reason.String()),
+		})
+	}
 
 	protoResp := toproto.PlanResourceChange_Response(resp)
 
@@ -895,6 +925,16 @@ func (s *server) ImportResourceState(ctx context.Context, protoReq *tfplugin5.Im
 		logging.ProtocolPrivateData(ctx, s.protocolDataDir, rpc, "Response_ImportedResource", "Private", importedResource.Private)
 	}
 	tf5serverlogging.Deferred(ctx, resp.Deferred)
+
+	if resp.Deferred != nil && (req.ClientCapabilities == nil || !req.ClientCapabilities.DeferralAllowed) {
+		resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
+			Severity: tfprotov5.DiagnosticSeverityError,
+			Summary:  "Invalid Deferred Response",
+			Detail: "Provider returned a deferred response but the Terraform request did not indicate support for deferred actions." +
+				"This is an issue with the provider and should be reported to the provider developers.\n\n" +
+				fmt.Sprintf("Deferred reason - %q", resp.Deferred.Reason.String()),
+		})
+	}
 
 	protoResp := toproto.ImportResourceState_Response(resp)
 
