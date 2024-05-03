@@ -579,6 +579,7 @@ func (s *server) Configure(ctx context.Context, protoReq *tfplugin5.Configure_Re
 	defer logging.ProtocolTrace(ctx, "Served request")
 	req := fromproto.ConfigureProviderRequest(protoReq)
 
+	tf5serverlogging.ConfigureProviderClientCapabilities(ctx, req.ClientCapabilities)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 
 	ctx = tf5serverlogging.DownstreamRequest(ctx)
@@ -679,6 +680,7 @@ func (s *server) ReadDataSource(ctx context.Context, protoReq *tfplugin5.ReadDat
 
 	req := fromproto.ReadDataSourceRequest(protoReq)
 
+	tf5serverlogging.ReadDataSourceClientCapabilities(ctx, req.ClientCapabilities)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "ProviderMeta", req.ProviderMeta)
 	ctx = tf5serverlogging.DownstreamRequest(ctx)
@@ -692,6 +694,7 @@ func (s *server) ReadDataSource(ctx context.Context, protoReq *tfplugin5.ReadDat
 
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "State", resp.State)
+	tf5serverlogging.Deferred(ctx, resp.Deferred)
 
 	protoResp := toproto.ReadDataSource_Response(resp)
 
@@ -766,6 +769,7 @@ func (s *server) ReadResource(ctx context.Context, protoReq *tfplugin5.ReadResou
 
 	req := fromproto.ReadResourceRequest(protoReq)
 
+	tf5serverlogging.ReadResourceClientCapabilities(ctx, req.ClientCapabilities)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "CurrentState", req.CurrentState)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "ProviderMeta", req.ProviderMeta)
 	logging.ProtocolPrivateData(ctx, s.protocolDataDir, rpc, "Request", "Private", req.Private)
@@ -783,6 +787,7 @@ func (s *server) ReadResource(ctx context.Context, protoReq *tfplugin5.ReadResou
 
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "NewState", resp.NewState)
 	logging.ProtocolPrivateData(ctx, s.protocolDataDir, rpc, "Response", "Private", resp.Private)
+	tf5serverlogging.Deferred(ctx, resp.Deferred)
 
 	protoResp := toproto.ReadResource_Response(resp)
 
@@ -800,6 +805,7 @@ func (s *server) PlanResourceChange(ctx context.Context, protoReq *tfplugin5.Pla
 
 	req := fromproto.PlanResourceChangeRequest(protoReq)
 
+	tf5serverlogging.PlanResourceChangeClientCapabilities(ctx, req.ClientCapabilities)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "PriorState", req.PriorState)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "ProposedNewState", req.ProposedNewState)
@@ -818,6 +824,7 @@ func (s *server) PlanResourceChange(ctx context.Context, protoReq *tfplugin5.Pla
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "PlannedState", resp.PlannedState)
 	logging.ProtocolPrivateData(ctx, s.protocolDataDir, rpc, "Response", "PlannedPrivate", resp.PlannedPrivate)
+	tf5serverlogging.Deferred(ctx, resp.Deferred)
 
 	protoResp := toproto.PlanResourceChange_Response(resp)
 
@@ -870,6 +877,8 @@ func (s *server) ImportResourceState(ctx context.Context, protoReq *tfplugin5.Im
 
 	req := fromproto.ImportResourceStateRequest(protoReq)
 
+	tf5serverlogging.ImportResourceStateClientCapabilities(ctx, req.ClientCapabilities)
+
 	ctx = tf5serverlogging.DownstreamRequest(ctx)
 
 	resp, err := s.downstream.ImportResourceState(ctx, req)
@@ -885,6 +894,7 @@ func (s *server) ImportResourceState(ctx context.Context, protoReq *tfplugin5.Im
 		logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response_ImportedResource", "State", importedResource.State)
 		logging.ProtocolPrivateData(ctx, s.protocolDataDir, rpc, "Response_ImportedResource", "Private", importedResource.Private)
 	}
+	tf5serverlogging.Deferred(ctx, resp.Deferred)
 
 	protoResp := toproto.ImportResourceState_Response(resp)
 
