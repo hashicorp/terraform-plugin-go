@@ -697,13 +697,7 @@ func (s *server) ReadDataSource(ctx context.Context, protoReq *tfplugin5.ReadDat
 	tf5serverlogging.Deferred(ctx, resp.Deferred)
 
 	if resp.Deferred != nil && (req.ClientCapabilities == nil || !req.ClientCapabilities.DeferralAllowed) {
-		resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
-			Summary:  "Invalid Deferred Response",
-			Detail: "Provider returned a deferred response but the Terraform request did not indicate support for deferred actions." +
-				"This is an issue with the provider and should be reported to the provider developers.\n\n" +
-				fmt.Sprintf("Deferred reason - %q", resp.Deferred.Reason.String()),
-		})
+		resp.Diagnostics = append(resp.Diagnostics, invalidDeferredResponseDiag(resp.Deferred.Reason))
 	}
 
 	protoResp := toproto.ReadDataSource_Response(resp)
@@ -800,13 +794,7 @@ func (s *server) ReadResource(ctx context.Context, protoReq *tfplugin5.ReadResou
 	tf5serverlogging.Deferred(ctx, resp.Deferred)
 
 	if resp.Deferred != nil && (req.ClientCapabilities == nil || !req.ClientCapabilities.DeferralAllowed) {
-		resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
-			Summary:  "Invalid Deferred Response",
-			Detail: "Provider returned a deferred response but the Terraform request did not indicate support for deferred actions." +
-				"This is an issue with the provider and should be reported to the provider developers.\n\n" +
-				fmt.Sprintf("Deferred reason - %q", resp.Deferred.Reason.String()),
-		})
+		resp.Diagnostics = append(resp.Diagnostics, invalidDeferredResponseDiag(resp.Deferred.Reason))
 	}
 
 	protoResp := toproto.ReadResource_Response(resp)
@@ -847,13 +835,7 @@ func (s *server) PlanResourceChange(ctx context.Context, protoReq *tfplugin5.Pla
 	tf5serverlogging.Deferred(ctx, resp.Deferred)
 
 	if resp.Deferred != nil && (req.ClientCapabilities == nil || !req.ClientCapabilities.DeferralAllowed) {
-		resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
-			Summary:  "Invalid Deferred Response",
-			Detail: "Provider returned a deferred response but the Terraform request did not indicate support for deferred actions." +
-				"This is an issue with the provider and should be reported to the provider developers.\n\n" +
-				fmt.Sprintf("Deferred reason - %q", resp.Deferred.Reason.String()),
-		})
+		resp.Diagnostics = append(resp.Diagnostics, invalidDeferredResponseDiag(resp.Deferred.Reason))
 	}
 
 	protoResp := toproto.PlanResourceChange_Response(resp)
@@ -927,13 +909,7 @@ func (s *server) ImportResourceState(ctx context.Context, protoReq *tfplugin5.Im
 	tf5serverlogging.Deferred(ctx, resp.Deferred)
 
 	if resp.Deferred != nil && (req.ClientCapabilities == nil || !req.ClientCapabilities.DeferralAllowed) {
-		resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
-			Summary:  "Invalid Deferred Response",
-			Detail: "Provider returned a deferred response but the Terraform request did not indicate support for deferred actions." +
-				"This is an issue with the provider and should be reported to the provider developers.\n\n" +
-				fmt.Sprintf("Deferred reason - %q", resp.Deferred.Reason.String()),
-		})
+		resp.Diagnostics = append(resp.Diagnostics, invalidDeferredResponseDiag(resp.Deferred.Reason))
 	}
 
 	protoResp := toproto.ImportResourceState_Response(resp)
@@ -1025,4 +1001,14 @@ func (s *server) GetFunctions(ctx context.Context, protoReq *tfplugin5.GetFuncti
 	protoResp := toproto.GetFunctions_Response(resp)
 
 	return protoResp, nil
+}
+
+func invalidDeferredResponseDiag(reason tfprotov5.DeferredReason) *tfprotov5.Diagnostic {
+	return &tfprotov5.Diagnostic{
+		Severity: tfprotov5.DiagnosticSeverityError,
+		Summary:  "Invalid Deferred Response",
+		Detail: "Provider returned a deferred response but the Terraform request did not indicate support for deferred actions." +
+			"This is an issue with the provider and should be reported to the provider developers.\n\n" +
+			fmt.Sprintf("Deferred reason - %q", reason.String()),
+	}
 }
