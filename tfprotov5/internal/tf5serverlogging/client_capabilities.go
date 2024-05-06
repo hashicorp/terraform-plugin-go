@@ -12,12 +12,13 @@ import (
 
 // ConfigureProviderClientCapabilities generates a TRACE "Announced client capabilities" log.
 func ConfigureProviderClientCapabilities(ctx context.Context, capabilities *tfprotov5.ConfigureProviderClientCapabilities) {
-	responseFields := map[string]interface{}{
-		logging.KeyClientCapabilityDeferralAllowed: false,
+	if capabilities == nil {
+		logging.ProtocolTrace(ctx, "No announced client capabilities", map[string]interface{}{})
+		return
 	}
 
-	if capabilities != nil {
-		responseFields[logging.KeyClientCapabilityDeferralAllowed] = capabilities.DeferralAllowed
+	responseFields := map[string]interface{}{
+		logging.KeyClientCapabilityDeferralAllowed: capabilities.DeferralAllowed,
 	}
 
 	logging.ProtocolTrace(ctx, "Announced client capabilities", responseFields)
@@ -25,12 +26,13 @@ func ConfigureProviderClientCapabilities(ctx context.Context, capabilities *tfpr
 
 // ReadDataSourceClientCapabilities generates a TRACE "Announced client capabilities" log.
 func ReadDataSourceClientCapabilities(ctx context.Context, capabilities *tfprotov5.ReadDataSourceClientCapabilities) {
-	responseFields := map[string]interface{}{
-		logging.KeyClientCapabilityDeferralAllowed: false,
+	if capabilities == nil {
+		logging.ProtocolTrace(ctx, "No announced client capabilities", map[string]interface{}{})
+		return
 	}
 
-	if capabilities != nil {
-		responseFields[logging.KeyClientCapabilityDeferralAllowed] = capabilities.DeferralAllowed
+	responseFields := map[string]interface{}{
+		logging.KeyClientCapabilityDeferralAllowed: capabilities.DeferralAllowed,
 	}
 
 	logging.ProtocolTrace(ctx, "Announced client capabilities", responseFields)
@@ -38,12 +40,13 @@ func ReadDataSourceClientCapabilities(ctx context.Context, capabilities *tfproto
 
 // ReadResourceClientCapabilities generates a TRACE "Announced client capabilities" log.
 func ReadResourceClientCapabilities(ctx context.Context, capabilities *tfprotov5.ReadResourceClientCapabilities) {
-	responseFields := map[string]interface{}{
-		logging.KeyClientCapabilityDeferralAllowed: false,
+	if capabilities == nil {
+		logging.ProtocolTrace(ctx, "No announced client capabilities", map[string]interface{}{})
+		return
 	}
 
-	if capabilities != nil {
-		responseFields[logging.KeyClientCapabilityDeferralAllowed] = capabilities.DeferralAllowed
+	responseFields := map[string]interface{}{
+		logging.KeyClientCapabilityDeferralAllowed: capabilities.DeferralAllowed,
 	}
 
 	logging.ProtocolTrace(ctx, "Announced client capabilities", responseFields)
@@ -51,12 +54,13 @@ func ReadResourceClientCapabilities(ctx context.Context, capabilities *tfprotov5
 
 // PlanResourceChangeClientCapabilities generates a TRACE "Announced client capabilities" log.
 func PlanResourceChangeClientCapabilities(ctx context.Context, capabilities *tfprotov5.PlanResourceChangeClientCapabilities) {
-	responseFields := map[string]interface{}{
-		logging.KeyClientCapabilityDeferralAllowed: false,
+	if capabilities == nil {
+		logging.ProtocolTrace(ctx, "No announced client capabilities", map[string]interface{}{})
+		return
 	}
 
-	if capabilities != nil {
-		responseFields[logging.KeyClientCapabilityDeferralAllowed] = capabilities.DeferralAllowed
+	responseFields := map[string]interface{}{
+		logging.KeyClientCapabilityDeferralAllowed: capabilities.DeferralAllowed,
 	}
 
 	logging.ProtocolTrace(ctx, "Announced client capabilities", responseFields)
@@ -64,12 +68,13 @@ func PlanResourceChangeClientCapabilities(ctx context.Context, capabilities *tfp
 
 // ImportResourceStateClientCapabilities generates a TRACE "Announced client capabilities" log.
 func ImportResourceStateClientCapabilities(ctx context.Context, capabilities *tfprotov5.ImportResourceStateClientCapabilities) {
-	responseFields := map[string]interface{}{
-		logging.KeyClientCapabilityDeferralAllowed: false,
+	if capabilities == nil {
+		logging.ProtocolTrace(ctx, "No announced client capabilities", map[string]interface{}{})
+		return
 	}
 
-	if capabilities != nil {
-		responseFields[logging.KeyClientCapabilityDeferralAllowed] = capabilities.DeferralAllowed
+	responseFields := map[string]interface{}{
+		logging.KeyClientCapabilityDeferralAllowed: capabilities.DeferralAllowed,
 	}
 
 	logging.ProtocolTrace(ctx, "Announced client capabilities", responseFields)

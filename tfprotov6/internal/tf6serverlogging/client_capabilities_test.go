@@ -27,10 +27,9 @@ func TestConfigureProviderClientCapabilities(t *testing.T) {
 			capabilities: nil,
 			expected: []map[string]interface{}{
 				{
-					"@level":                                "trace",
-					"@message":                              "Announced client capabilities",
-					"@module":                               "sdk.proto",
-					"tf_client_capability_deferral_allowed": false,
+					"@level":   "trace",
+					"@message": "No announced client capabilities",
+					"@module":  "sdk.proto",
 				},
 			},
 		},
@@ -97,10 +96,9 @@ func TestReadDataSourceClientCapabilities(t *testing.T) {
 			capabilities: nil,
 			expected: []map[string]interface{}{
 				{
-					"@level":                                "trace",
-					"@message":                              "Announced client capabilities",
-					"@module":                               "sdk.proto",
-					"tf_client_capability_deferral_allowed": false,
+					"@level":   "trace",
+					"@message": "No announced client capabilities",
+					"@module":  "sdk.proto",
 				},
 			},
 		},
@@ -167,10 +165,9 @@ func TestReadResourceClientCapabilities(t *testing.T) {
 			capabilities: nil,
 			expected: []map[string]interface{}{
 				{
-					"@level":                                "trace",
-					"@message":                              "Announced client capabilities",
-					"@module":                               "sdk.proto",
-					"tf_client_capability_deferral_allowed": false,
+					"@level":   "trace",
+					"@message": "No announced client capabilities",
+					"@module":  "sdk.proto",
 				},
 			},
 		},
@@ -237,10 +234,9 @@ func TestPlanResourceChangeClientCapabilities(t *testing.T) {
 			capabilities: nil,
 			expected: []map[string]interface{}{
 				{
-					"@level":                                "trace",
-					"@message":                              "Announced client capabilities",
-					"@module":                               "sdk.proto",
-					"tf_client_capability_deferral_allowed": false,
+					"@level":   "trace",
+					"@message": "No announced client capabilities",
+					"@module":  "sdk.proto",
 				},
 			},
 		},
@@ -307,10 +303,9 @@ func TestImportResourceStateClientCapabilities(t *testing.T) {
 			capabilities: nil,
 			expected: []map[string]interface{}{
 				{
-					"@level":                                "trace",
-					"@message":                              "Announced client capabilities",
-					"@module":                               "sdk.proto",
-					"tf_client_capability_deferral_allowed": false,
+					"@level":   "trace",
+					"@message": "No announced client capabilities",
+					"@module":  "sdk.proto",
 				},
 			},
 		},
