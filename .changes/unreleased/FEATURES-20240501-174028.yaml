@@ -1,6 +1,0 @@
-kind: FEATURES
-body: 'tfprotov5+tfprotov6: Upgraded protocols and added types to support deferred
-  actions'
-time: 2024-05-01T17:40:28.845566-04:00
-custom:
-  Issue: "403"
