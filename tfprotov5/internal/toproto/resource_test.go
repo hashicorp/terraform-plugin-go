@@ -195,6 +195,20 @@ func TestImportResourceState_Response(t *testing.T) {
 				},
 			},
 		},
+		"Deferred": {
+			in: &tfprotov5.ImportResourceStateResponse{
+				Deferred: &tfprotov5.Deferred{
+					Reason: tfprotov5.DeferredReasonResourceConfigUnknown,
+				},
+			},
+			expected: &tfplugin5.ImportResourceState_Response{
+				Diagnostics:       []*tfplugin5.Diagnostic{},
+				ImportedResources: []*tfplugin5.ImportResourceState_ImportedResource{},
+				Deferred: &tfplugin5.Deferred{
+					Reason: tfplugin5.Deferred_RESOURCE_CONFIG_UNKNOWN,
+				},
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -213,6 +227,7 @@ func TestImportResourceState_Response(t *testing.T) {
 				tfplugin5.Diagnostic{},
 				tfplugin5.ImportResourceState_ImportedResource{},
 				tfplugin5.ImportResourceState_Response{},
+				tfplugin5.Deferred{},
 			)
 
 			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {
@@ -513,6 +528,20 @@ func TestPlanResourceChange_Response(t *testing.T) {
 				RequiresReplace:  []*tfplugin5.AttributePath{},
 			},
 		},
+		"Deferred": {
+			in: &tfprotov5.PlanResourceChangeResponse{
+				Deferred: &tfprotov5.Deferred{
+					Reason: tfprotov5.DeferredReasonProviderConfigUnknown,
+				},
+			},
+			expected: &tfplugin5.PlanResourceChange_Response{
+				Diagnostics:     []*tfplugin5.Diagnostic{},
+				RequiresReplace: []*tfplugin5.AttributePath{},
+				Deferred: &tfplugin5.Deferred{
+					Reason: tfplugin5.Deferred_PROVIDER_CONFIG_UNKNOWN,
+				},
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -533,6 +562,7 @@ func TestPlanResourceChange_Response(t *testing.T) {
 				tfplugin5.Diagnostic{},
 				tfplugin5.DynamicValue{},
 				tfplugin5.PlanResourceChange_Response{},
+				tfplugin5.Deferred{},
 			)
 
 			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {
@@ -589,6 +619,19 @@ func TestReadResource_Response(t *testing.T) {
 				Private:     []byte("{}"),
 			},
 		},
+		"Deferred": {
+			in: &tfprotov5.ReadResourceResponse{
+				Deferred: &tfprotov5.Deferred{
+					Reason: tfprotov5.DeferredReasonAbsentPrereq,
+				},
+			},
+			expected: &tfplugin5.ReadResource_Response{
+				Diagnostics: []*tfplugin5.Diagnostic{},
+				Deferred: &tfplugin5.Deferred{
+					Reason: tfplugin5.Deferred_ABSENT_PREREQ,
+				},
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -607,6 +650,7 @@ func TestReadResource_Response(t *testing.T) {
 				tfplugin5.Diagnostic{},
 				tfplugin5.DynamicValue{},
 				tfplugin5.ReadResource_Response{},
+				tfplugin5.Deferred{},
 			)
 
 			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {

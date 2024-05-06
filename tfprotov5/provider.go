@@ -208,6 +208,10 @@ type ConfigureProviderRequest struct {
 	// known values. Values that are not set in the configuration will be
 	// null.
 	Config *DynamicValue
+
+	// ClientCapabilities defines optionally supported protocol features for the
+	// ConfigureProvider RPC, such as forward-compatible Terraform behavior changes.
+	ClientCapabilities *ConfigureProviderClientCapabilities
 }
 
 // ConfigureProviderResponse represents a Terraform RPC response to the

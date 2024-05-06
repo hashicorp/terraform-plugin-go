@@ -107,6 +107,18 @@ func TestConfigureProviderRequest(t *testing.T) {
 				TerraformVersion: "0.0.1",
 			},
 		},
+		"ClientCapabilities": {
+			in: &tfplugin6.ConfigureProvider_Request{
+				ClientCapabilities: &tfplugin6.ClientCapabilities{
+					DeferralAllowed: true,
+				},
+			},
+			expected: &tfprotov6.ConfigureProviderRequest{
+				ClientCapabilities: &tfprotov6.ConfigureProviderClientCapabilities{
+					DeferralAllowed: true,
+				},
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
