@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/hashicorp/copywrite v0.18.0
-	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.3.0
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.4.0
 )
 
 require (
@@ -64,6 +64,6 @@ require (
 	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
