@@ -3,7 +3,7 @@ module tools
 go 1.21
 
 require (
-	github.com/hashicorp/copywrite v0.18.0
+	github.com/hashicorp/copywrite v0.19.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.4.0
 )
 
