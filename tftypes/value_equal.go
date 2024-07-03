@@ -129,9 +129,44 @@ func (val1 Value) deepEqual(val2 Value) (bool, error) {
 					return false, fmt.Errorf("cannot convert %T into *big.Float", value2.value)
 				}
 
-				if n1.Cmp(n2) != 0 {
-					hasDiff = true
+				// Compare numbers using cty comparison logic
+				// Reference: https://github.com/zclconf/go-cty/blob/7b73cce468e8021d933cfb7990356837c6348146/cty/primitive_type.go#L94
 
+				// Directly compare integers
+				n1Int, n1Acc := n1.Int(nil)
+				n2Int, n2Acc := n2.Int(nil)
+				if n1Acc != n2Acc {
+					// Only one is an exact integer value, so they can't be equal
+					hasDiff = true
+					return false, stopWalkError
+				}
+				if n1Acc == big.Exact {
+					if n1Int.Cmp(n2Int) != 0 {
+						hasDiff = true
+						return false, stopWalkError
+					}
+					return true, nil
+				}
+
+				// Compare floating point numbers by the cty JSON serialization
+				const format = 'f'
+				const prec = -1
+				n1Str := n1.Text(format, prec)
+				n2Str := n2.Text(format, prec)
+
+				// The one exception to our rule about equality-by-stringification is
+				// negative zero, because we want -0 to always be equal to +0.
+				const posZero = "0"
+				const negZero = "-0"
+				if n1Str == negZero {
+					n1Str = posZero
+				}
+				if n2Str == negZero {
+					n2Str = posZero
+				}
+
+				if n1Str != n2Str {
+					hasDiff = true
 					return false, stopWalkError
 				}
 			case Bool.name:
