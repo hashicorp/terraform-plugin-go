@@ -92,7 +92,13 @@ func msgpackUnmarshal(dec *msgpack.Decoder, typ Type, path *AttributePath) (Valu
 				return Value{}, path.NewErrorf("couldn't decode number as uint64: %w", err)
 			}
 			return NewValue(Number, new(big.Float).SetUint64(rv)), nil
-		case msgpackCodes.Float, msgpackCodes.Double:
+		case msgpackCodes.Float:
+			rv, err := dec.DecodeFloat32()
+			if err != nil {
+				return Value{}, path.NewErrorf("couldn't decode number as float32: %w", err)
+			}
+			return NewValue(Number, big.NewFloat(float64(rv))), nil
+		case msgpackCodes.Double:
 			rv, err := dec.DecodeFloat64()
 			if err != nil {
 				return Value{}, path.NewErrorf("couldn't decode number as float64: %w", err)
@@ -445,6 +451,11 @@ func marshalMsgPackNumber(val Value, typ Type, p *AttributePath, enc *msgpack.En
 		err := enc.EncodeInt(iv)
 		if err != nil {
 			return p.NewErrorf("error encoding int value: %w", err)
+		}
+	} else if fv, acc := n.Float32(); acc == big.Exact {
+		err := enc.EncodeFloat32(fv)
+		if err != nil {
+			return p.NewErrorf("error encoding float value: %w", err)
 		}
 	} else if fv, acc := n.Float64(); acc == big.Exact && !n.IsInt() {
 		err := enc.EncodeFloat64(fv)

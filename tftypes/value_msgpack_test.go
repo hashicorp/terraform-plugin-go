@@ -93,8 +93,18 @@ func TestValueFromMsgPack(t *testing.T) {
 			typ:   Number,
 		},
 		"float-number": {
-			hex:   "cb3ff8000000000000",
+			hex:   "ca3fc00000",
 			value: NewValue(Number, big.NewFloat(1.5)),
+			typ:   Number,
+		},
+		"float32-positive-number": {
+			hex:   "ca7f7fffff",
+			value: NewValue(Number, new(big.Float).SetFloat64(math.MaxFloat32)),
+			typ:   Number,
+		},
+		"float32-negative-number": {
+			hex:   "ca00000001",
+			value: NewValue(Number, new(big.Float).SetFloat64(math.SmallestNonzeroFloat32)),
 			typ:   Number,
 		},
 		"float64-positive-number": {
@@ -129,7 +139,7 @@ func TestValueFromMsgPack(t *testing.T) {
 			typ:   Number,
 		},
 		"large-uint64": {
-			hex:   "b339323233333732303336383534373735383038",
+			hex:   "ca5f000000",
 			value: NewValue(Number, uint64AsFloat),
 			typ:   Number,
 		},
