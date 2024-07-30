@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/hashicorp/copywrite v0.19.0
-	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.0
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1
 )
 
 require (
