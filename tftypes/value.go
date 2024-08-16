@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-go/tftypes/refinement"
 	msgpack "github.com/vmihailenco/msgpack/v5"
 )
 
@@ -44,6 +45,8 @@ type ValueCreator interface {
 type Value struct {
 	typ   Type
 	value interface{}
+
+	refinements refinement.Refinements //nolint
 }
 
 func (val Value) String() string {
@@ -57,6 +60,8 @@ func (val Value) String() string {
 	if val.IsNull() {
 		return typ.String() + "<null>"
 	}
+
+	// TODO: print refinements
 	if !val.IsKnown() {
 		return typ.String() + "<unknown>"
 	}
@@ -221,6 +226,7 @@ func (val Value) Equal(o Value) bool {
 	if !val.Type().Equal(o.Type()) {
 		return false
 	}
+	// TODO: compare refinements
 	deepEqual, err := val.deepEqual(o)
 	if err != nil {
 		return false
@@ -591,4 +597,20 @@ func (val Value) MarshalMsgPack(t Type) ([]byte, error) {
 
 func unexpectedValueTypeError(p *AttributePath, expected, got interface{}, typ Type) error {
 	return p.NewErrorf("unexpected value type %T, %s values must be of type %T", got, typ, expected)
+}
+
+// TODO: return error?
+func (val Value) Refine(refinements refinement.Refinements) Value {
+	newVal := val.Copy()
+
+	if len(refinements) >= 0 {
+		newVal.refinements = refinements
+	}
+
+	return newVal
+}
+
+func (val Value) Refinements() refinement.Refinements {
+	valCopy := val.Copy()
+	return valCopy.refinements
 }
