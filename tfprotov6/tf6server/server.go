@@ -109,6 +109,8 @@ type ServeConfig struct {
 	disableLogLocation   bool
 	useLoggingSink       testing.T
 	envVar               string
+
+	unaryServerInterceptor grpc.UnaryServerInterceptor
 }
 
 type serveConfigFunc func(*ServeConfig) error
@@ -232,6 +234,13 @@ func WithLogEnvVarName(name string) ServeOpt {
 	})
 }
 
+func WithUnaryServerInterceptor(interceptor grpc.UnaryServerInterceptor) ServeOpt {
+	return serveConfigFunc(func(in *ServeConfig) error {
+		in.unaryServerInterceptor = interceptor
+		return nil
+	})
+}
+
 // Serve starts a tfprotov6.ProviderServer serving, ready for Terraform to
 // connect to it. The name passed in should be the fully qualified name that
 // users will enter in the source field of the required_providers block, like
@@ -271,6 +280,7 @@ func Serve(name string, serverFactory func() tfprotov6.ProviderServer, opts ...S
 		GRPCServer: func(opts []grpc.ServerOption) *grpc.Server {
 			opts = append(opts, grpc.MaxRecvMsgSize(grpcMaxMessageSize))
 			opts = append(opts, grpc.MaxSendMsgSize(grpcMaxMessageSize))
+			opts = append(opts, grpc.ChainUnaryInterceptor(conf.unaryServerInterceptor))
 
 			return grpc.NewServer(opts...)
 		},
