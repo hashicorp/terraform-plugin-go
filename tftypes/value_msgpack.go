@@ -6,13 +6,18 @@ package tftypes
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"math"
 	"math/big"
 	"sort"
 
+	"github.com/hashicorp/terraform-plugin-go/tftypes/refinement"
 	msgpack "github.com/vmihailenco/msgpack/v5"
 	msgpackCodes "github.com/vmihailenco/msgpack/v5/msgpcode"
 )
+
+// https://github.com/zclconf/go-cty/blob/main/cty/msgpack/unknown.go#L32
+const unknownWithRefinementsExt = 0x0c
 
 type msgPackUnknownType struct{}
 
@@ -43,11 +48,7 @@ func msgpackUnmarshal(dec *msgpack.Decoder, typ Type, path *AttributePath) (Valu
 	}
 	if msgpackCodes.IsExt(peek) {
 		// as with go-cty, assume all extensions are unknown values
-		err := dec.Skip()
-		if err != nil {
-			return Value{}, path.NewErrorf("error skipping extension byte: %w", err)
-		}
-		return NewValue(typ, UnknownValue), nil
+		return msgpackUnmarshalUnknown(dec, typ, path)
 	}
 	if typ.Is(DynamicPseudoType) {
 		return msgpackUnmarshalDynamic(dec, path)
@@ -344,6 +345,91 @@ func msgpackUnmarshalDynamic(dec *msgpack.Decoder, path *AttributePath) (Value, 
 	}
 	return msgpackUnmarshal(dec, typ, path)
 }
+func msgpackUnmarshalUnknown(dec *msgpack.Decoder, typ Type, path *AttributePath) (Value, error) {
+	// The value is unknown, but we will check the extension header to see if any
+	// type-specific refinements are applied to the value.
+	typeCode, extLen, err := dec.DecodeExtHeader()
+	if err != nil {
+		return Value{}, path.NewErrorf("error decoding extension header: %w", err)
+	}
+
+	if extLen <= 1 {
+		// If the extension is zero or one-length, this is a wholly unknown value with no
+		// refinements.
+
+		// TODO: Previous implementations always skipped the body, should we preserve that?
+		if extLen > 0 {
+			// Skip the body
+			err = dec.Skip()
+			if err != nil {
+				return Value{}, path.NewErrorf("error skipping extension byte: %w", err)
+			}
+		}
+
+		return NewValue(typ, UnknownValue), nil
+	}
+
+	// Check if the extension is the designated cty unknown refinement code
+	if typeCode != unknownWithRefinementsExt {
+		// TODO: cleanup error
+		return Value{}, path.NewErrorf("unsupported extension type")
+	}
+
+	if extLen > 1024 {
+		// A refinement description greater than 1 kiB is unreasonable and
+		// might be an abusive attempt to allocate large amounts of memory
+		// in a system consuming this input.
+		return Value{}, path.NewErrorf("unsupported extension type")
+	}
+
+	body := make([]byte, extLen)
+	_, err = io.ReadAtLeast(dec.Buffered(), body, len(body))
+	if err != nil {
+		return Value{}, path.NewErrorf("failed to read msgpack extension body: %s", err)
+	}
+
+	rfnDec := msgpack.NewDecoder(bytes.NewReader(body))
+	entryCount, err := rfnDec.DecodeMapLen()
+	if err != nil {
+		return Value{}, path.NewErrorf("failed to decode msgpack extension body: not a map")
+	}
+
+	// Ignore all refinements for DynamicPseudoType for now, since go-cty also ignores this.
+	//
+	// We know that's invalid today but we might find a way to support it in the future and
+	// if so will want to introduce that in a backward-compatible way.
+	if typ.Is(DynamicPseudoType) {
+		return NewValue(typ, UnknownValue), nil
+	}
+
+	newVal := NewValue(typ, UnknownValue)
+	newRefinements := make(refinement.Refinements, 0)
+
+	for i := 0; i < entryCount; i++ {
+		keyCode, err := rfnDec.DecodeInt64()
+		if err != nil {
+			return Value{}, path.NewErrorf("failed to decode msgpack extension body: non-integer key in map")
+		}
+
+		switch keyCode := refinement.Key(keyCode); keyCode {
+		case refinement.KeyNullness:
+			isNull, err := rfnDec.DecodeBool()
+			if err != nil {
+				return Value{}, path.NewErrorf("failed to decode msgpack extension body: null refinement is not boolean")
+			}
+			// The presence of this key means we're refining the null-ness one
+			// way or another. If nullness is unknown then this key should not
+			// be present at all.
+			newRefinements[keyCode] = refinement.Nullness(isNull)
+		default:
+			// We don't want to error here, as go-cty could introduce new refinements that we'd
+			// want to just ignore until this code is updated
+			continue
+		}
+	}
+
+	return newVal.Refine(newRefinements), nil
+}
 
 func marshalMsgPack(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
 	if typ.Is(DynamicPseudoType) && !val.Type().Is(DynamicPseudoType) {
@@ -351,11 +437,7 @@ func marshalMsgPack(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder)
 
 	}
 	if !val.IsKnown() {
-		err := enc.Encode(msgPackUnknownVal)
-		if err != nil {
-			return p.NewErrorf("error encoding UnknownValue: %w", err)
-		}
-		return nil
+		return marshalUnknownValue(val, typ, p, enc)
 	}
 	if val.IsNull() {
 		err := enc.EncodeNil()
@@ -388,6 +470,65 @@ func marshalMsgPack(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder)
 		return marshalMsgPackObject(val, typ.(Object), p, enc)
 	}
 	return fmt.Errorf("unknown type %s", typ)
+}
+
+func marshalUnknownValue(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
+	// Use the representation of a wholly unknown value if there are no refinements. DynamicPseudoType
+	// cannot have refinements, so it will also use the wholly unknown value.
+	if len(val.refinements) == 0 || typ.Is(DynamicPseudoType) {
+		err := enc.Encode(msgPackUnknownVal)
+		if err != nil {
+			return p.NewErrorf("error encoding UnknownValue: %w", err)
+		}
+		return nil
+	}
+
+	var refnBuf bytes.Buffer
+	refnEnc := msgpack.NewEncoder(&refnBuf)
+	mapLen := 0
+
+	// TODO: Should the refinement interface define the encoding?
+	for kind := range val.refinements {
+		switch kind {
+		case refinement.KeyNullness:
+			mapLen++
+			refnEnc.EncodeInt(int64(kind)) //nolint
+			// An value that is definitely null cannot be unknown
+			refnEnc.EncodeBool(false) //nolint
+		default:
+			continue
+		}
+	}
+
+	if mapLen == 0 {
+		// Didn't find any refinements we know how to encode, use the wholly unknown value.
+		err := enc.Encode(msgPackUnknownVal)
+		if err != nil {
+			return p.NewErrorf("error encoding UnknownValue: %w", err)
+		}
+		return nil
+	}
+
+	// If we have at least one refinement to encode then we'll use the new
+	// representation of unknown values where refinement information is in the
+	// extension payload.
+	var lenBuf bytes.Buffer
+	lenEnc := msgpack.NewEncoder(&lenBuf)
+	lenEnc.EncodeMapLen(mapLen) //nolint
+
+	err := enc.EncodeExtHeader(unknownWithRefinementsExt, lenBuf.Len()+refnBuf.Len())
+	if err != nil {
+		return p.NewErrorf("failed to write unknown value: %s", err)
+	}
+	_, err = enc.Writer().Write(lenBuf.Bytes())
+	if err != nil {
+		return p.NewErrorf("failed to write unknown value: %s", err)
+	}
+	_, err = enc.Writer().Write(refnBuf.Bytes())
+	if err != nil {
+		return p.NewErrorf("failed to write unknown value: %s", err)
+	}
+	return nil
 }
 
 func marshalMsgPackDynamicPseudoType(val Value, _ Type, p *AttributePath, enc *msgpack.Encoder) error {
