@@ -10,6 +10,7 @@ import (
 	"math"
 	"math/big"
 	"sort"
+	"unicode/utf8"
 
 	"github.com/hashicorp/terraform-plugin-go/tftypes/refinement"
 	msgpack "github.com/vmihailenco/msgpack/v5"
@@ -421,9 +422,22 @@ func msgpackUnmarshalUnknown(dec *msgpack.Decoder, typ Type, path *AttributePath
 			// way or another. If nullness is unknown then this key should not
 			// be present at all.
 			newRefinements[keyCode] = refinement.Nullness(isNull)
+		case refinement.KeyStringPrefix:
+			if !typ.Is(String) {
+				return Value{}, path.NewErrorf("failed to decode msgpack extension body: string prefix refinement for non-string type")
+			}
+			prefix, err := rfnDec.DecodeString()
+			if err != nil {
+				return Value{}, path.NewErrorf("failed to decode msgpack extension body: string prefix refinement is not string")
+			}
+			if !utf8.ValidString(prefix) {
+				return Value{}, path.NewErrorf("failed to decode msgpack extension body: string prefix refinement is not valid UTF-8")
+			}
+
+			newRefinements[keyCode] = refinement.StringPrefix(prefix)
 		default:
 			// We don't want to error here, as go-cty could introduce new refinements that we'd
-			// want to just ignore until this code is updated
+			// want to just ignore until this logic is updated
 			continue
 		}
 	}
@@ -487,14 +501,23 @@ func marshalUnknownValue(val Value, typ Type, p *AttributePath, enc *msgpack.Enc
 	refnEnc := msgpack.NewEncoder(&refnBuf)
 	mapLen := 0
 
-	// TODO: Should the refinement interface define the encoding?
-	for kind := range val.refinements {
+	// TODO: Should the refinement interface be defining the encoding? Should we export the refinement implementations?
+	for kind, refn := range val.refinements {
 		switch kind {
 		case refinement.KeyNullness:
+			err := refn.Encode(refnEnc)
+			if err != nil {
+				return p.NewErrorf("error encoding Nullness value refinement: %w", err)
+			}
 			mapLen++
-			refnEnc.EncodeInt(int64(kind)) //nolint
-			// An value that is definitely null cannot be unknown
-			refnEnc.EncodeBool(false) //nolint
+		case refinement.KeyStringPrefix:
+			// TODO: If the prefix is empty, we shouldn't encode a refinement. This should
+			// probably be reflected in the interface.
+			err := refn.Encode(refnEnc)
+			if err != nil {
+				return p.NewErrorf("error encoding StringPrefix value refinement: %w", err)
+			}
+			mapLen++
 		default:
 			continue
 		}
