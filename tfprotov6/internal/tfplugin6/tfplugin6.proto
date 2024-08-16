@@ -1,9 +1,9 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
-// Terraform Plugin RPC protocol version 6.6
+// Terraform Plugin RPC protocol version 6.7
 //
-// This file defines version 6.6 of the RPC protocol. To implement a plugin
+// This file defines version 6.7 of the RPC protocol. To implement a plugin
 // against this protocol, copy this definition into your own codebase and
 // use protoc to generate stubs for your target language.
 //
@@ -21,6 +21,8 @@
 //
 syntax = "proto3";
 option go_package = "github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6";
+
+import "google/protobuf/timestamp.proto";
 
 package tfplugin6;
 
@@ -288,6 +290,12 @@ service Provider {
     rpc MoveResourceState(MoveResourceState.Request) returns (MoveResourceState.Response);
     rpc ReadDataSource(ReadDataSource.Request) returns (ReadDataSource.Response);
 
+    //////// Ephemeral Resource Lifecycle
+    rpc ValidateEphemeralResourceConfig(ValidateEphemeralResourceConfig.Request) returns (ValidateEphemeralResourceConfig.Response);
+    rpc OpenEphemeralResource(OpenEphemeralResource.Request) returns (OpenEphemeralResource.Response);
+    rpc RenewEphemeralResource(RenewEphemeralResource.Request) returns (RenewEphemeralResource.Response);
+    rpc CloseEphemeralResource(CloseEphemeralResource.Request) returns (CloseEphemeralResource.Response);
+
     // Functions
 
     // GetFunctions returns the definitions of all functions.
@@ -313,6 +321,7 @@ message GetMetadata {
 
         // functions returns metadata for any functions.
         repeated FunctionMetadata functions = 5;
+        repeated EphemeralResourceMetadata ephemeral_resources = 6;
     }
 
     message FunctionMetadata {
@@ -325,6 +334,10 @@ message GetMetadata {
     }
 
     message ResourceMetadata {
+        string type_name = 1;
+    }
+
+    message EphemeralResourceMetadata {
         string type_name = 1;
     }
 }
@@ -342,6 +355,7 @@ message GetProviderSchema {
 
         // functions is a mapping of function names to definitions.
         map<string, Function> functions = 7;
+        map<string, Schema> ephemeral_resource_schemas = 8;
     }
 }
 
@@ -612,5 +626,55 @@ message CallFunction {
 
         // error is any errors from the function logic.
         FunctionError error = 2;
+    }
+}
+
+message ValidateEphemeralResourceConfig {
+    message Request {
+        string type_name = 1;
+        DynamicValue config = 2;
+    }
+    message Response {
+        repeated Diagnostic diagnostics = 1;
+    }
+}
+
+message OpenEphemeralResource {
+    message Request {
+        string type_name = 1;
+        DynamicValue config = 2;
+    }
+    message Response {
+        repeated Diagnostic diagnostics = 1;
+        optional google.protobuf.Timestamp renew_at = 2;
+        bool is_closable = 3;
+        DynamicValue state = 4;
+        optional bytes private = 5;
+    }
+}
+
+message RenewEphemeralResource {
+    message Request {
+        string type_name = 1;
+        DynamicValue prior_state = 2;
+        DynamicValue config = 3;
+        optional bytes private = 4;
+    }
+    message Response {
+        DynamicValue state = 1;
+        repeated Diagnostic diagnostics = 2;
+        optional google.protobuf.Timestamp renew_at = 3;
+        optional bytes private = 4;
+    }
+}
+
+message CloseEphemeralResource {
+    message Request {
+        string type_name = 1;
+        DynamicValue prior_state = 2;
+        optional bytes private = 3;
+    }
+    message Response {
+        repeated Diagnostic diagnostics = 1;
     }
 }
