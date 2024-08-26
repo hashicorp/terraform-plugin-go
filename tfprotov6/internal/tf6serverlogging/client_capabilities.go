@@ -10,6 +10,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )
 
+// ValidateResourceConfigClientCapabilities generates a TRACE "Announced client capabilities" log.
+func ValidateResourceConfigClientCapabilities(ctx context.Context, capabilities *tfprotov6.ValidateResourceConfigClientCapabilities) {
+	if capabilities == nil {
+		logging.ProtocolTrace(ctx, "No announced client capabilities", map[string]interface{}{})
+		return
+	}
+
+	responseFields := map[string]interface{}{
+		logging.KeyClientCapabilityWriteOnlyAttributesAllowed: capabilities.WriteOnlyAttributesAllowed,
+	}
+
+	logging.ProtocolTrace(ctx, "Announced client capabilities", responseFields)
+}
+
 // ConfigureProviderClientCapabilities generates a TRACE "Announced client capabilities" log.
 func ConfigureProviderClientCapabilities(ctx context.Context, capabilities *tfprotov6.ConfigureProviderClientCapabilities) {
 	if capabilities == nil {
@@ -61,6 +75,20 @@ func PlanResourceChangeClientCapabilities(ctx context.Context, capabilities *tfp
 
 	responseFields := map[string]interface{}{
 		logging.KeyClientCapabilityDeferralAllowed: capabilities.DeferralAllowed,
+	}
+
+	logging.ProtocolTrace(ctx, "Announced client capabilities", responseFields)
+}
+
+// ApplyResourceChangeClientCapabilities generates a TRACE "Announced client capabilities" log.
+func ApplyResourceChangeClientCapabilities(ctx context.Context, capabilities *tfprotov6.ApplyResourceChangeClientCapabilities) {
+	if capabilities == nil {
+		logging.ProtocolTrace(ctx, "No announced client capabilities", map[string]interface{}{})
+		return
+	}
+
+	responseFields := map[string]interface{}{
+		logging.KeyClientCapabilityWriteOnlyAttributesAllowed: capabilities.WriteOnlyAttributesAllowed,
 	}
 
 	logging.ProtocolTrace(ctx, "Announced client capabilities", responseFields)

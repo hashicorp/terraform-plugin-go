@@ -83,6 +83,10 @@ type ValidateResourceConfigRequest struct {
 	// from knowing the value at request time. Any attributes not directly
 	// set in the configuration will be null.
 	Config *DynamicValue
+
+	// ClientCapabilities defines optionally supported protocol features for the
+	// ValidateResourceConfig RPC, such as forward-compatible Terraform behavior changes.
+	ClientCapabilities *ValidateResourceConfigClientCapabilities
 }
 
 // ValidateResourceConfigResponse is the response from the provider about
@@ -410,6 +414,10 @@ type ApplyResourceChangeRequest struct {
 	//
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
+
+	// ClientCapabilities defines optionally supported protocol features for the
+	// ApplyResourceChangeRequest RPC, such as forward-compatible Terraform behavior changes.
+	ClientCapabilities *ApplyResourceChangeClientCapabilities
 }
 
 // ApplyResourceChangeResponse is the response from the provider about what the

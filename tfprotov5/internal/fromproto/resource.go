@@ -14,8 +14,9 @@ func ValidateResourceTypeConfigRequest(in *tfplugin5.ValidateResourceTypeConfig_
 	}
 
 	resp := &tfprotov5.ValidateResourceTypeConfigRequest{
-		Config:   DynamicValue(in.Config),
-		TypeName: in.TypeName,
+		ClientCapabilities: ValidateResourceTypeConfigClientCapabilities(in.ClientCapabilities),
+		Config:             DynamicValue(in.Config),
+		TypeName:           in.TypeName,
 	}
 
 	return resp
@@ -75,12 +76,13 @@ func ApplyResourceChangeRequest(in *tfplugin5.ApplyResourceChange_Request) *tfpr
 	}
 
 	resp := &tfprotov5.ApplyResourceChangeRequest{
-		Config:         DynamicValue(in.Config),
-		PlannedPrivate: in.PlannedPrivate,
-		PlannedState:   DynamicValue(in.PlannedState),
-		PriorState:     DynamicValue(in.PriorState),
-		ProviderMeta:   DynamicValue(in.ProviderMeta),
-		TypeName:       in.TypeName,
+		ClientCapabilities: ApplyResourceChangeClientCapabilities(in.ClientCapabilities),
+		Config:             DynamicValue(in.Config),
+		PlannedPrivate:     in.PlannedPrivate,
+		PlannedState:       DynamicValue(in.PlannedState),
+		PriorState:         DynamicValue(in.PriorState),
+		ProviderMeta:       DynamicValue(in.ProviderMeta),
+		TypeName:           in.TypeName,
 	}
 
 	return resp

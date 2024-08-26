@@ -7,10 +7,51 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
 )
+
+func TestValidateResourceConfigClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfplugin6.ClientCapabilities
+		expected *tfprotov6.ValidateResourceConfigClientCapabilities
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in:       &tfplugin6.ClientCapabilities{},
+			expected: &tfprotov6.ValidateResourceConfigClientCapabilities{},
+		},
+		"WriteOnlyAttributesAllowed": {
+			in: &tfplugin6.ClientCapabilities{
+				WriteOnlyAttributesAllowed: true,
+			},
+			expected: &tfprotov6.ValidateResourceConfigClientCapabilities{
+				WriteOnlyAttributesAllowed: true,
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := fromproto.ValidateResourceConfigClientCapabilities(testCase.in)
+
+			if diff := cmp.Diff(got, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
 
 func TestConfigureProviderClientCapabilities(t *testing.T) {
 	t.Parallel()
@@ -164,6 +205,46 @@ func TestPlanResourceChangeClientCapabilities(t *testing.T) {
 			t.Parallel()
 
 			got := fromproto.PlanResourceChangeClientCapabilities(testCase.in)
+
+			if diff := cmp.Diff(got, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
+
+func TestApplyResourceChangeClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfplugin6.ClientCapabilities
+		expected *tfprotov6.ApplyResourceChangeClientCapabilities
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in:       &tfplugin6.ClientCapabilities{},
+			expected: &tfprotov6.ApplyResourceChangeClientCapabilities{},
+		},
+		"WriteOnlyAttributesAllowed": {
+			in: &tfplugin6.ClientCapabilities{
+				WriteOnlyAttributesAllowed: true,
+			},
+			expected: &tfprotov6.ApplyResourceChangeClientCapabilities{
+				WriteOnlyAttributesAllowed: true,
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := fromproto.ApplyResourceChangeClientCapabilities(testCase.in)
 
 			if diff := cmp.Diff(got, testCase.expected); diff != "" {
 				t.Errorf("unexpected difference: %s", diff)
