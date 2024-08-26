@@ -716,6 +716,7 @@ func (s *server) ValidateResourceTypeConfig(ctx context.Context, protoReq *tfplu
 
 	req := fromproto.ValidateResourceTypeConfigRequest(protoReq)
 
+	tf5serverlogging.ValidateResourceTypeConfigClientCapabilities(ctx, req.ClientCapabilities)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 
 	ctx = tf5serverlogging.DownstreamRequest(ctx)
@@ -853,6 +854,8 @@ func (s *server) ApplyResourceChange(ctx context.Context, protoReq *tfplugin5.Ap
 	defer logging.ProtocolTrace(ctx, "Served request")
 
 	req := fromproto.ApplyResourceChangeRequest(protoReq)
+
+	tf5serverlogging.ApplyResourceChangeClientCapabilities(ctx, req.ClientCapabilities)
 
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "PlannedState", req.PlannedState)

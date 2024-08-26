@@ -8,6 +8,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
 )
 
+func ValidateResourceConfigClientCapabilities(in *tfplugin6.ClientCapabilities) *tfprotov6.ValidateResourceConfigClientCapabilities {
+	if in == nil {
+		return nil
+	}
+
+	resp := &tfprotov6.ValidateResourceConfigClientCapabilities{
+		WriteOnlyAttributesAllowed: in.WriteOnlyAttributesAllowed,
+	}
+
+	return resp
+}
+
 func ConfigureProviderClientCapabilities(in *tfplugin6.ClientCapabilities) *tfprotov6.ConfigureProviderClientCapabilities {
 	if in == nil {
 		return nil
@@ -51,6 +63,18 @@ func PlanResourceChangeClientCapabilities(in *tfplugin6.ClientCapabilities) *tfp
 
 	resp := &tfprotov6.PlanResourceChangeClientCapabilities{
 		DeferralAllowed: in.DeferralAllowed,
+	}
+
+	return resp
+}
+
+func ApplyResourceChangeClientCapabilities(in *tfplugin6.ClientCapabilities) *tfprotov6.ApplyResourceChangeClientCapabilities {
+	if in == nil {
+		return nil
+	}
+
+	resp := &tfprotov6.ApplyResourceChangeClientCapabilities{
+		WriteOnlyAttributesAllowed: in.WriteOnlyAttributesAllowed,
 	}
 
 	return resp

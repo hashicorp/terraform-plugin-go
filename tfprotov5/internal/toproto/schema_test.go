@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/toproto"
@@ -171,6 +172,14 @@ func TestSchema_Attribute(t *testing.T) {
 			},
 			expected: &tfplugin5.Schema_Attribute{
 				Type: []byte(`"bool"`),
+			},
+		},
+		"WriteOnly": {
+			in: &tfprotov5.SchemaAttribute{
+				WriteOnly: true,
+			},
+			expected: &tfplugin5.Schema_Attribute{
+				WriteOnly: true,
 			},
 		},
 	}

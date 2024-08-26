@@ -717,6 +717,7 @@ func (s *server) ValidateResourceConfig(ctx context.Context, protoReq *tfplugin6
 
 	req := fromproto.ValidateResourceConfigRequest(protoReq)
 
+	tf6serverlogging.ValidateResourceConfigClientCapabilities(ctx, req.ClientCapabilities)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
@@ -854,6 +855,7 @@ func (s *server) ApplyResourceChange(ctx context.Context, protoReq *tfplugin6.Ap
 
 	req := fromproto.ApplyResourceChangeRequest(protoReq)
 
+	tf6serverlogging.ApplyResourceChangeClientCapabilities(ctx, req.ClientCapabilities)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "PlannedState", req.PlannedState)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "PriorState", req.PriorState)

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
@@ -26,6 +27,18 @@ func TestApplyResourceChangeRequest(t *testing.T) {
 		"zero": {
 			in:       &tfplugin6.ApplyResourceChange_Request{},
 			expected: &tfprotov6.ApplyResourceChangeRequest{},
+		},
+		"ClientCapabilities": {
+			in: &tfplugin6.ApplyResourceChange_Request{
+				ClientCapabilities: &tfplugin6.ClientCapabilities{
+					WriteOnlyAttributesAllowed: true,
+				},
+			},
+			expected: &tfprotov6.ApplyResourceChangeRequest{
+				ClientCapabilities: &tfprotov6.ApplyResourceChangeClientCapabilities{
+					WriteOnlyAttributesAllowed: true,
+				},
+			},
 		},
 		"Config": {
 			in: &tfplugin6.ApplyResourceChange_Request{
@@ -470,6 +483,18 @@ func TestValidateResourceConfigRequest(t *testing.T) {
 		"zero": {
 			in:       &tfplugin6.ValidateResourceConfig_Request{},
 			expected: &tfprotov6.ValidateResourceConfigRequest{},
+		},
+		"ClientCapabilities": {
+			in: &tfplugin6.ValidateResourceConfig_Request{
+				ClientCapabilities: &tfplugin6.ClientCapabilities{
+					WriteOnlyAttributesAllowed: true,
+				},
+			},
+			expected: &tfprotov6.ValidateResourceConfigRequest{
+				ClientCapabilities: &tfprotov6.ValidateResourceConfigClientCapabilities{
+					WriteOnlyAttributesAllowed: true,
+				},
+			},
 		},
 		"Config": {
 			in: &tfplugin6.ValidateResourceConfig_Request{

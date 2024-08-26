@@ -9,12 +9,82 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/terraform-plugin-log/tfsdklog"
+	"github.com/hashicorp/terraform-plugin-log/tfsdklogtest"
+
 	"github.com/hashicorp/terraform-plugin-go/internal/logging"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tf6serverlogging"
-	"github.com/hashicorp/terraform-plugin-log/tfsdklog"
-	"github.com/hashicorp/terraform-plugin-log/tfsdklogtest"
 )
+
+func TestValidateResourceConfigClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		capabilities *tfprotov6.ValidateResourceConfigClientCapabilities
+		expected     []map[string]interface{}
+	}{
+		"nil": {
+			capabilities: nil,
+			expected: []map[string]interface{}{
+				{
+					"@level":   "trace",
+					"@message": "No announced client capabilities",
+					"@module":  "sdk.proto",
+				},
+			},
+		},
+		"empty": {
+			capabilities: &tfprotov6.ValidateResourceConfigClientCapabilities{},
+			expected: []map[string]interface{}{
+				{
+					"@level":   "trace",
+					"@message": "Announced client capabilities",
+					"@module":  "sdk.proto",
+					"tf_client_capability_write_only_attributes_allowed": false,
+				},
+			},
+		},
+		"write_only_attributes_allowed": {
+			capabilities: &tfprotov6.ValidateResourceConfigClientCapabilities{
+				WriteOnlyAttributesAllowed: true,
+			},
+			expected: []map[string]interface{}{
+				{
+					"@level":   "trace",
+					"@message": "Announced client capabilities",
+					"@module":  "sdk.proto",
+					"tf_client_capability_write_only_attributes_allowed": true,
+				},
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			var output bytes.Buffer
+
+			ctx := tfsdklogtest.RootLogger(context.Background(), &output)
+			ctx = logging.ProtoSubsystemContext(ctx, tfsdklog.Options{})
+
+			tf6serverlogging.ValidateResourceConfigClientCapabilities(ctx, testCase.capabilities)
+
+			entries, err := tfsdklogtest.MultilineJSONDecode(&output)
+
+			if err != nil {
+				t.Fatalf("unable to read multiple line JSON: %s", err)
+			}
+
+			if diff := cmp.Diff(entries, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
 
 func TestConfigureProviderClientCapabilities(t *testing.T) {
 	t.Parallel()
@@ -278,6 +348,75 @@ func TestPlanResourceChangeClientCapabilities(t *testing.T) {
 			ctx = logging.ProtoSubsystemContext(ctx, tfsdklog.Options{})
 
 			tf6serverlogging.PlanResourceChangeClientCapabilities(ctx, testCase.capabilities)
+
+			entries, err := tfsdklogtest.MultilineJSONDecode(&output)
+
+			if err != nil {
+				t.Fatalf("unable to read multiple line JSON: %s", err)
+			}
+
+			if diff := cmp.Diff(entries, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
+
+func TestApplyResourceChangeClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		capabilities *tfprotov6.ApplyResourceChangeClientCapabilities
+		expected     []map[string]interface{}
+	}{
+		"nil": {
+			capabilities: nil,
+			expected: []map[string]interface{}{
+				{
+					"@level":   "trace",
+					"@message": "No announced client capabilities",
+					"@module":  "sdk.proto",
+				},
+			},
+		},
+		"empty": {
+			capabilities: &tfprotov6.ApplyResourceChangeClientCapabilities{},
+			expected: []map[string]interface{}{
+				{
+					"@level":   "trace",
+					"@message": "Announced client capabilities",
+					"@module":  "sdk.proto",
+					"tf_client_capability_write_only_attributes_allowed": false,
+				},
+			},
+		},
+		"write_only_attributes_allowed": {
+			capabilities: &tfprotov6.ApplyResourceChangeClientCapabilities{
+				WriteOnlyAttributesAllowed: true,
+			},
+			expected: []map[string]interface{}{
+				{
+					"@level":   "trace",
+					"@message": "Announced client capabilities",
+					"@module":  "sdk.proto",
+					"tf_client_capability_write_only_attributes_allowed": true,
+				},
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			var output bytes.Buffer
+
+			ctx := tfsdklogtest.RootLogger(context.Background(), &output)
+			ctx = logging.ProtoSubsystemContext(ctx, tfsdklog.Options{})
+
+			tf6serverlogging.ApplyResourceChangeClientCapabilities(ctx, testCase.capabilities)
 
 			entries, err := tfsdklogtest.MultilineJSONDecode(&output)
 
