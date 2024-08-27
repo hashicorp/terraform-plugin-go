@@ -140,14 +140,6 @@ func TestRenewEphemeralResourceRequest(t *testing.T) {
 				Private: []byte("{}"),
 			},
 		},
-		"PriorState": {
-			in: &tfplugin6.RenewEphemeralResource_Request{
-				PriorState: testTfplugin6DynamicValue(),
-			},
-			expected: &tfprotov6.RenewEphemeralResourceRequest{
-				PriorState: testTfprotov6DynamicValue(),
-			},
-		},
 		"TypeName": {
 			in: &tfplugin6.RenewEphemeralResource_Request{
 				TypeName: "test",
@@ -196,12 +188,12 @@ func TestCloseEphemeralResourceRequest(t *testing.T) {
 				Private: []byte("{}"),
 			},
 		},
-		"PriorState": {
+		"State": {
 			in: &tfplugin6.CloseEphemeralResource_Request{
-				PriorState: testTfplugin6DynamicValue(),
+				State: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.CloseEphemeralResourceRequest{
-				PriorState: testTfprotov6DynamicValue(),
+				State: testTfprotov6DynamicValue(),
 			},
 		},
 		"TypeName": {

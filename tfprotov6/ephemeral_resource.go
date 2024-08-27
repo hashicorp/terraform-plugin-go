@@ -144,16 +144,15 @@ type RenewEphemeralResourceRequest struct {
 	// This configuration will always be fully known.
 	Config *DynamicValue
 
-	// PriorState is the latest state of the ephemeral resource, either from
-	// OpenEphemeralResource RPC or from a previous RenewEphemeralResource RPC
-	// call. See the documentation on `DynamicValue` for more information about
-	// safely accessing the configuration.
+	// State is the state of the ephemeral resource from the OpenEphemeralResource
+	// RPC call. See the documentation on `DynamicValue` for more information
+	// about safely accessing the configuration.
 	//
 	// The configuration is represented as a tftypes.Object, with each
 	// attribute and nested block getting its own key and value.
 	//
 	// This prior state will always be fully known.
-	PriorState *DynamicValue
+	State *DynamicValue
 
 	// Private is any provider-defined private state stored with the
 	// ephemeral resource. It is used for keeping state with the resource that is not
@@ -167,21 +166,6 @@ type RenewEphemeralResourceRequest struct {
 // RenewEphemeralResourceResponse is the response from the provider about the current
 // state of the renewed ephemeral resource.
 type RenewEphemeralResourceResponse struct {
-	// State is the provider's understanding of what the ephemeral resource's
-	// state is after it has been renewed, represented as a `DynamicValue`.
-	// See the documentation for `DynamicValue` for information about
-	// safely creating the `DynamicValue`.
-	//
-	// Any attribute, whether computed or not, that has a known value in
-	// the Config in the RenewEphemeralResourceRequest must be preserved
-	// exactly as it was in State.
-	//
-	// The state should be represented as a tftypes.Object, with each
-	// attribute and nested block getting its own key and value.
-	//
-	// No unknown values are allowed in the State.
-	State *DynamicValue
-
 	// Diagnostics report errors or warnings related to renewing the
 	// requested ephemeral resource. Returning an empty slice
 	// indicates a successful creation with no warnings or errors
@@ -205,16 +189,15 @@ type CloseEphemeralResourceRequest struct {
 	// TypeName is the type of resource Terraform is closing.
 	TypeName string
 
-	// PriorState is the latest state of the ephemeral resource, either from
-	// OpenEphemeralResource RPC or from a previous RenewEphemeralResource RPC
-	// call. See the documentation on `DynamicValue` for more information about
-	// safely accessing the configuration.
+	// State is the state of the ephemeral resource from the OpenEphemeralResource
+	// RPC call. See the documentation on `DynamicValue` for more information
+	// about safely accessing the configuration.
 	//
 	// The configuration is represented as a tftypes.Object, with each
 	// attribute and nested block getting its own key and value.
 	//
 	// This prior state will always be fully known.
-	PriorState *DynamicValue
+	State *DynamicValue
 
 	// Private is any provider-defined private state stored with the
 	// ephemeral resource. It is used for keeping state with the resource that is not

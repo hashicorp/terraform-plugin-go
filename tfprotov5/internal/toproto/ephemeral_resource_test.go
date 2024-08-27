@@ -240,15 +240,6 @@ func TestRenewEphemeralResource_Response(t *testing.T) {
 				},
 			},
 		},
-		"State": {
-			in: &tfprotov5.RenewEphemeralResourceResponse{
-				State: testTfprotov5DynamicValue(),
-			},
-			expected: &tfplugin5.RenewEphemeralResource_Response{
-				Diagnostics: []*tfplugin5.Diagnostic{},
-				State:       testTfplugin5DynamicValue(),
-			},
-		},
 		"Private": {
 			in: &tfprotov5.RenewEphemeralResourceResponse{
 				Private: []byte("{}"),

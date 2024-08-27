@@ -48,7 +48,6 @@ func RenewEphemeralResource_Response(in *tfprotov6.RenewEphemeralResourceRespons
 	}
 
 	return &tfplugin6.RenewEphemeralResource_Response{
-		State:       DynamicValue(in.State),
 		Diagnostics: Diagnostics(in.Diagnostics),
 		Private:     in.Private,
 		RenewAt:     Timestamp(in.RenewAt),
