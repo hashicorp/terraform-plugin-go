@@ -1,0 +1,5 @@
+kind: BUG FIXES
+body: 'logging: Add existing `MoveResourceState` server capability to v5 and v6 logging'
+time: 2024-09-17T16:24:14.06442-04:00
+custom:
+  Issue: "432"
