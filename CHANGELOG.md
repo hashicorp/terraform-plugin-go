@@ -1,3 +1,18 @@
+## 0.24.0 (September 18, 2024)
+
+BREAKING CHANGES:
+
+* tfprotov5+tfprotov6: Removed temporary `ResourceServerWithMoveResourceState` interface type. Use `ResourceServer` instead. ([#408](https://github.com/hashicorp/terraform-plugin-go/issues/408))
+
+NOTES:
+
+* all: If using terraform-plugin-mux, it must be upgraded to v0.16.0 or later to prevent compilation errors ([#408](https://github.com/hashicorp/terraform-plugin-go/issues/408))
+* all: This Go module has been updated to Go 1.22 per the [Go support policy](https://go.dev/doc/devel/release#policy). It is recommended to review the [Go 1.22 release notes](https://go.dev/doc/go1.22) before upgrading. Any consumers building on earlier Go versions may experience errors. ([#428](https://github.com/hashicorp/terraform-plugin-go/issues/428))
+
+BUG FIXES:
+
+* logging: Add existing `MoveResourceState` server capability to v5 and v6 logging ([#432](https://github.com/hashicorp/terraform-plugin-go/issues/432))
+
 ## 0.23.0 (May 06, 2024)
 
 BREAKING CHANGES:
