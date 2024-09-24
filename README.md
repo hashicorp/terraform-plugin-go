@@ -179,7 +179,8 @@ Run `golangci-lint run ./...` or `make lint` after any changes.
 
 Ensure the following tooling is installed:
 
-- [`protoc`](https://github.com/protocolbuffers/protobuf): Protocol Buffers compiler. This isn't Go specific tooling, so follow this [installation guide](https://github.com/protocolbuffers/protobuf#protocol-compiler-installation)
+- [`protoc`](https://github.com/protocolbuffers/protobuf): Protocol Buffers compiler. This isn't Go specific tooling, so follow this [installation guide](https://github.com/protocolbuffers/protobuf#protobuf-compiler-installation)
+  - The Terraform Plugin Protocol uses well-known types (`Timestamp`), so be sure to copy the `include` directory to a folder included in your `PATH` (for example, on MacOS, `/usr/local/include`).
 - [`protoc-gen-go`](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go): Go plugin for Protocol Buffers compiler. Install by running `make tools`
 - [`protoc-gen-go-grpc`](https://pkg.go.dev/google.golang.org/grpc/cmd/protoc-gen-go-grpc): Go gRPC plugin for Protocol Buffers compiler. Install by running `make tools`
 

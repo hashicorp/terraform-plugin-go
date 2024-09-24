@@ -134,16 +134,6 @@ type RenewEphemeralResourceRequest struct {
 	// TypeName is the type of resource Terraform is renewing.
 	TypeName string
 
-	// Config is the configuration the user supplied for that ephemeral resource. See
-	// the documentation on `DynamicValue` for more information about
-	// safely accessing the configuration.
-	//
-	// The configuration is represented as a tftypes.Object, with each
-	// attribute and nested block getting its own key and value.
-	//
-	// This configuration will always be fully known.
-	Config *DynamicValue
-
 	// State is the state of the ephemeral resource from the OpenEphemeralResource
 	// RPC call. See the documentation on `DynamicValue` for more information
 	// about safely accessing the configuration.

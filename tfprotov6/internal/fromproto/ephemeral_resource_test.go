@@ -124,14 +124,6 @@ func TestRenewEphemeralResourceRequest(t *testing.T) {
 			in:       &tfplugin6.RenewEphemeralResource_Request{},
 			expected: &tfprotov6.RenewEphemeralResourceRequest{},
 		},
-		"Config": {
-			in: &tfplugin6.RenewEphemeralResource_Request{
-				Config: testTfplugin6DynamicValue(),
-			},
-			expected: &tfprotov6.RenewEphemeralResourceRequest{
-				Config: testTfprotov6DynamicValue(),
-			},
-		},
 		"Private": {
 			in: &tfplugin6.RenewEphemeralResource_Request{
 				Private: []byte("{}"),

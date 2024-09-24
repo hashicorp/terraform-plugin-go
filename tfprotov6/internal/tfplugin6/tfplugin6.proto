@@ -657,8 +657,7 @@ message RenewEphemeralResource {
     message Request {
         string type_name = 1;
         DynamicValue state = 2;
-        DynamicValue config = 3;
-        optional bytes private = 4;
+        optional bytes private = 3;
     }
     message Response {
         repeated Diagnostic diagnostics = 1;
