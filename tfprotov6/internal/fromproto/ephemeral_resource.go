@@ -37,7 +37,6 @@ func RenewEphemeralResourceRequest(in *tfplugin6.RenewEphemeralResource_Request)
 
 	return &tfprotov6.RenewEphemeralResourceRequest{
 		TypeName: in.TypeName,
-		Config:   DynamicValue(in.Config),
 		State:    DynamicValue(in.State),
 		Private:  in.Private,
 	}
