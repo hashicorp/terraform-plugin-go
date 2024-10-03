@@ -85,27 +85,31 @@ type OpenEphemeralResourceRequest struct {
 	// This configuration will always be fully known. If Config contains unknown values,
 	// Terraform will defer the OpenEphemeralResource RPC until apply.
 	Config *DynamicValue
+
+	// ClientCapabilities defines optionally supported protocol features for the
+	// OpenEphemeralResource RPC, such as forward-compatible Terraform behavior changes.
+	ClientCapabilities *OpenEphemeralResourceClientCapabilities
 }
 
 // OpenEphemeralResourceResponse is the response from the provider about the current
 // state of the opened ephemeral resource.
 type OpenEphemeralResourceResponse struct {
-	// State is the provider's understanding of what the ephemeral resource's
-	// state is after it has been opened, represented as a `DynamicValue`.
+	// Result is the provider's understanding of what the ephemeral resource's
+	// data is after it has been opened, represented as a `DynamicValue`.
 	// See the documentation for `DynamicValue` for information about
 	// safely creating the `DynamicValue`.
 	//
 	// Any attribute, whether computed or not, that has a known value in
 	// the Config in the OpenEphemeralResourceRequest must be preserved
-	// exactly as it was in State.
+	// exactly as it was in Result.
 	//
 	// Any attribute in the Config in the OpenEphemeralResourceRequest
 	// that is unknown must take on a known value at this time. No unknown
-	// values are allowed in the State.
+	// values are allowed in the Result.
 	//
-	// The state should be represented as a tftypes.Object, with each
+	// The result should be represented as a tftypes.Object, with each
 	// attribute and nested block getting its own key and value.
-	State *DynamicValue
+	Result *DynamicValue
 
 	// Diagnostics report errors or warnings related to opening the
 	// requested ephemeral resource. Returning an empty slice
@@ -123,9 +127,9 @@ type OpenEphemeralResourceResponse struct {
 	// call the RenewEphemeralResource RPC when the specified time has passed.
 	RenewAt time.Time
 
-	// IsClosable indicates to Terraform whether the ephemeral resource
-	// implements the CloseEphemeralResource RPC.
-	IsClosable bool
+	// Deferred is used to indicate to Terraform that the OpenEphemeralResource operation
+	// needs to be deferred for a reason.
+	Deferred *Deferred
 }
 
 // RenewEphemeralResourceRequest is the request Terraform sends when it
@@ -133,16 +137,6 @@ type OpenEphemeralResourceResponse struct {
 type RenewEphemeralResourceRequest struct {
 	// TypeName is the type of resource Terraform is renewing.
 	TypeName string
-
-	// State is the state of the ephemeral resource from the OpenEphemeralResource
-	// RPC call. See the documentation on `DynamicValue` for more information
-	// about safely accessing the configuration.
-	//
-	// The configuration is represented as a tftypes.Object, with each
-	// attribute and nested block getting its own key and value.
-	//
-	// This prior state will always be fully known.
-	State *DynamicValue
 
 	// Private is any provider-defined private state stored with the
 	// ephemeral resource. It is used for keeping state with the resource that is not
@@ -153,8 +147,8 @@ type RenewEphemeralResourceRequest struct {
 	Private []byte
 }
 
-// RenewEphemeralResourceResponse is the response from the provider about the current
-// state of the renewed ephemeral resource.
+// RenewEphemeralResourceResponse is the response from the provider after an ephemeral resource
+// has been renewed.
 type RenewEphemeralResourceResponse struct {
 	// Diagnostics report errors or warnings related to renewing the
 	// requested ephemeral resource. Returning an empty slice
@@ -178,16 +172,6 @@ type RenewEphemeralResourceResponse struct {
 type CloseEphemeralResourceRequest struct {
 	// TypeName is the type of resource Terraform is closing.
 	TypeName string
-
-	// State is the state of the ephemeral resource from the OpenEphemeralResource
-	// RPC call. See the documentation on `DynamicValue` for more information
-	// about safely accessing the configuration.
-	//
-	// The configuration is represented as a tftypes.Object, with each
-	// attribute and nested block getting its own key and value.
-	//
-	// This prior state will always be fully known.
-	State *DynamicValue
 
 	// Private is any provider-defined private state stored with the
 	// ephemeral resource. It is used for keeping state with the resource that is not

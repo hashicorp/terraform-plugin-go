@@ -147,13 +147,13 @@ func TestOpenEphemeralResource_Response(t *testing.T) {
 				},
 			},
 		},
-		"State": {
+		"Result": {
 			in: &tfprotov6.OpenEphemeralResourceResponse{
-				State: testTfprotov6DynamicValue(),
+				Result: testTfprotov6DynamicValue(),
 			},
 			expected: &tfplugin6.OpenEphemeralResource_Response{
 				Diagnostics: []*tfplugin6.Diagnostic{},
-				State:       testTfplugin6DynamicValue(),
+				Result:      testTfplugin6DynamicValue(),
 			},
 		},
 		"Private": {
@@ -174,13 +174,17 @@ func TestOpenEphemeralResource_Response(t *testing.T) {
 				RenewAt:     testPbTimestamp(),
 			},
 		},
-		"IsClosable": {
+		"Deferred": {
 			in: &tfprotov6.OpenEphemeralResourceResponse{
-				IsClosable: true,
+				Deferred: &tfprotov6.Deferred{
+					Reason: tfprotov6.DeferredReasonResourceConfigUnknown,
+				},
 			},
 			expected: &tfplugin6.OpenEphemeralResource_Response{
 				Diagnostics: []*tfplugin6.Diagnostic{},
-				IsClosable:  true,
+				Deferred: &tfplugin6.Deferred{
+					Reason: tfplugin6.Deferred_RESOURCE_CONFIG_UNKNOWN,
+				},
 			},
 		},
 	}
@@ -201,6 +205,7 @@ func TestOpenEphemeralResource_Response(t *testing.T) {
 				tfplugin6.Diagnostic{},
 				tfplugin6.DynamicValue{},
 				tfplugin6.OpenEphemeralResource_Response{},
+				tfplugin6.Deferred{},
 				timestamppb.Timestamp{},
 			)
 

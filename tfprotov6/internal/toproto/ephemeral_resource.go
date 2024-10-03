@@ -34,11 +34,11 @@ func OpenEphemeralResource_Response(in *tfprotov6.OpenEphemeralResourceResponse)
 	}
 
 	return &tfplugin6.OpenEphemeralResource_Response{
-		State:       DynamicValue(in.State),
+		Result:      DynamicValue(in.Result),
 		Diagnostics: Diagnostics(in.Diagnostics),
 		Private:     in.Private,
 		RenewAt:     Timestamp(in.RenewAt),
-		IsClosable:  in.IsClosable,
+		Deferred:    Deferred(in.Deferred),
 	}
 }
 

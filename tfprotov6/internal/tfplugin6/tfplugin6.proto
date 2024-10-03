@@ -478,6 +478,7 @@ message PlanResourceChange {
         bytes planned_private = 3;
         repeated Diagnostic diagnostics = 4;
 
+
         // This may be set only by the helper/schema "SDK" in the main Terraform
         // repository, to request that Terraform Core >=0.12 permit additional
         // inconsistencies that can result from the legacy SDK type system
@@ -624,7 +625,7 @@ message CallFunction {
         // result is result value after running the function logic.
         DynamicValue result = 1;
 
-        // error is any errors from the function logic.
+        // error is any error from the function logic.
         FunctionError error = 2;
     }
 }
@@ -643,21 +644,23 @@ message OpenEphemeralResource {
     message Request {
         string type_name = 1;
         DynamicValue config = 2;
+        ClientCapabilities client_capabilities = 3;
     }
     message Response {
         repeated Diagnostic diagnostics = 1;
         optional google.protobuf.Timestamp renew_at = 2;
-        bool is_closable = 3;
-        DynamicValue state = 4;
-        optional bytes private = 5;
+        DynamicValue result = 3;
+        optional bytes private = 4;
+        // deferred is set if the provider is deferring the change. If set the caller
+        // needs to handle the deferral.
+        Deferred deferred = 5;
     }
 }
 
 message RenewEphemeralResource {
     message Request {
         string type_name = 1;
-        DynamicValue state = 2;
-        optional bytes private = 3;
+        optional bytes private = 2;
     }
     message Response {
         repeated Diagnostic diagnostics = 1;
@@ -669,8 +672,7 @@ message RenewEphemeralResource {
 message CloseEphemeralResource {
     message Request {
         string type_name = 1;
-        DynamicValue state = 2;
-        optional bytes private = 3;
+        optional bytes private = 2;
     }
     message Response {
         repeated Diagnostic diagnostics = 1;

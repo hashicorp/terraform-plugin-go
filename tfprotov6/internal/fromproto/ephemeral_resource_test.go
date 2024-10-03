@@ -92,6 +92,18 @@ func TestOpenEphemeralResourceRequest(t *testing.T) {
 				TypeName: "test",
 			},
 		},
+		"DeferralAllowed": {
+			in: &tfplugin6.OpenEphemeralResource_Request{
+				ClientCapabilities: &tfplugin6.ClientCapabilities{
+					DeferralAllowed: true,
+				},
+			},
+			expected: &tfprotov6.OpenEphemeralResourceRequest{
+				ClientCapabilities: &tfprotov6.OpenEphemeralResourceClientCapabilities{
+					DeferralAllowed: true,
+				},
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -178,14 +190,6 @@ func TestCloseEphemeralResourceRequest(t *testing.T) {
 			},
 			expected: &tfprotov6.CloseEphemeralResourceRequest{
 				Private: []byte("{}"),
-			},
-		},
-		"State": {
-			in: &tfplugin6.CloseEphemeralResource_Request{
-				State: testTfplugin6DynamicValue(),
-			},
-			expected: &tfprotov6.CloseEphemeralResourceRequest{
-				State: testTfprotov6DynamicValue(),
 			},
 		},
 		"TypeName": {

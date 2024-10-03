@@ -1007,6 +1007,7 @@ func (s *server) ValidateEphemeralResourceConfig(ctx context.Context, protoReq *
 	rpc := "ValidateEphemeralResourceConfig"
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.EphemeralResourceContext(ctx, protoReq.TypeName)
 	ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
@@ -1035,6 +1036,8 @@ func (s *server) ValidateEphemeralResourceConfig(ctx context.Context, protoReq *
 
 	req := fromproto.ValidateEphemeralResourceConfigRequest(protoReq)
 
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
+
 	ctx = tf5serverlogging.DownstreamRequest(ctx)
 
 	// TODO: Update this to call downstream once optional interface is removed
@@ -1057,6 +1060,7 @@ func (s *server) OpenEphemeralResource(ctx context.Context, protoReq *tfplugin5.
 	rpc := "OpenEphemeralResource"
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.EphemeralResourceContext(ctx, protoReq.TypeName)
 	ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
@@ -1085,6 +1089,8 @@ func (s *server) OpenEphemeralResource(ctx context.Context, protoReq *tfplugin5.
 
 	req := fromproto.OpenEphemeralResourceRequest(protoReq)
 
+	tf5serverlogging.OpenEphemeralResourceClientCapabilities(ctx, req.ClientCapabilities)
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 	ctx = tf5serverlogging.DownstreamRequest(ctx)
 
 	// TODO: Update this to call downstream once optional interface is removed
@@ -1097,6 +1103,12 @@ func (s *server) OpenEphemeralResource(ctx context.Context, protoReq *tfplugin5.
 	}
 
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "Result", resp.Result)
+	tf5serverlogging.Deferred(ctx, resp.Deferred)
+
+	if resp.Deferred != nil && (req.ClientCapabilities == nil || !req.ClientCapabilities.DeferralAllowed) {
+		resp.Diagnostics = append(resp.Diagnostics, invalidDeferredResponseDiag(resp.Deferred.Reason))
+	}
 
 	protoResp := toproto.OpenEphemeralResource_Response(resp)
 
@@ -1107,6 +1119,7 @@ func (s *server) RenewEphemeralResource(ctx context.Context, protoReq *tfplugin5
 	rpc := "RenewEphemeralResource"
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.EphemeralResourceContext(ctx, protoReq.TypeName)
 	ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
@@ -1157,6 +1170,7 @@ func (s *server) CloseEphemeralResource(ctx context.Context, protoReq *tfplugin5
 	rpc := "CloseEphemeralResource"
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.EphemeralResourceContext(ctx, protoReq.TypeName)
 	ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
