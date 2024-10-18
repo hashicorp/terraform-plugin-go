@@ -434,6 +434,8 @@ func msgpackUnmarshalUnknown(dec *msgpack.Decoder, typ Type, path *AttributePath
 				return Value{}, path.NewErrorf("failed to decode msgpack extension body: string prefix refinement is not valid UTF-8")
 			}
 
+			// TODO: If terraform doesn't support an empty string prefix, then neither should we, potentially return an error here.
+
 			newRefinements[keyCode] = refinement.StringPrefix(prefix)
 		default:
 			// We don't want to error here, as go-cty could introduce new refinements that we'd
@@ -501,7 +503,8 @@ func marshalUnknownValue(val Value, typ Type, p *AttributePath, enc *msgpack.Enc
 	refnEnc := msgpack.NewEncoder(&refnBuf)
 	mapLen := 0
 
-	// TODO: Should the refinement interface be defining the encoding? Should we export the refinement implementations?
+	// TODO: Should the refinement interface be defining the encoding? Should we export the refinement implementation details?
+	// - If we keep it in the interface, then we can simplify this logic
 	for kind, refn := range val.refinements {
 		switch kind {
 		case refinement.KeyNullness:

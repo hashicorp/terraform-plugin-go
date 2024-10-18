@@ -42,11 +42,13 @@ type ValueCreator interface {
 // The recommended usage of a Value is to check that it is known, using
 // Value.IsKnown, then to convert it to a Go type, using Value.As. The Go type
 // can then be manipulated.
+//
+// TODO: add docs for new refinement data
 type Value struct {
 	typ   Type
 	value interface{}
 
-	refinements refinement.Refinements //nolint
+	refinements refinement.Refinements
 }
 
 func (val Value) String() string {
@@ -62,6 +64,7 @@ func (val Value) String() string {
 	}
 
 	// TODO: print refinements
+
 	if !val.IsKnown() {
 		return typ.String() + "<unknown>"
 	}
@@ -226,7 +229,9 @@ func (val Value) Equal(o Value) bool {
 	if !val.Type().Equal(o.Type()) {
 		return false
 	}
+
 	// TODO: compare refinements
+
 	deepEqual, err := val.deepEqual(o)
 	if err != nil {
 		return false
@@ -237,6 +242,9 @@ func (val Value) Equal(o Value) bool {
 // Copy returns a defensively-copied clone of Value that shares no underlying
 // data structures with the original Value and can be mutated without
 // accidentally mutating the original.
+//
+// TODO: Make sure this actually works for refinements. Consuming packages should not be able to mutate refinements of val
+// TODO: Add docs referencing refinements
 func (val Value) Copy() Value {
 	newVal := val.value
 	switch v := val.value.(type) {
@@ -253,7 +261,11 @@ func (val Value) Copy() Value {
 		}
 		newVal = newVals
 	}
-	return NewValue(val.Type(), newVal)
+
+	newTfValue := NewValue(val.Type(), newVal)
+	newTfValue.refinements = val.refinements
+
+	return newTfValue
 }
 
 // NewValue returns a Value constructed using the specified Type and stores the
@@ -599,7 +611,7 @@ func unexpectedValueTypeError(p *AttributePath, expected, got interface{}, typ T
 	return p.NewErrorf("unexpected value type %T, %s values must be of type %T", got, typ, expected)
 }
 
-// TODO: return error?
+// TODO: do we need to return an error? Like if you attempt to refine a value improperly (like string prefix on a number)?
 func (val Value) Refine(refinements refinement.Refinements) Value {
 	newVal := val.Copy()
 
@@ -611,6 +623,8 @@ func (val Value) Refine(refinements refinement.Refinements) Value {
 }
 
 func (val Value) Refinements() refinement.Refinements {
+	// TODO: is this copy really needed?
 	valCopy := val.Copy()
+
 	return valCopy.refinements
 }
