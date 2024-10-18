@@ -1,6 +1,0 @@
-kind: BREAKING CHANGES
-body: 'tfprotov5+tfprotov6: Removed temporary `ResourceServerWithMoveResourceState`
-  interface type. Use `ResourceServer` instead.'
-time: 2024-05-10T10:58:24.383876-04:00
-custom:
-  Issue: "408"

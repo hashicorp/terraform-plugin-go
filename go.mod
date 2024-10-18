@@ -1,8 +1,8 @@
 module github.com/hashicorp/terraform-plugin-go
 
-go 1.21
+go 1.22.0
 
-toolchain go1.21.6
+toolchain go1.22.7
 
 require (
 	github.com/google/go-cmp v0.6.0
@@ -13,8 +13,8 @@ require (
 	github.com/hashicorp/terraform-registry-address v0.2.3
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	google.golang.org/grpc v1.64.0
-	google.golang.org/protobuf v1.34.1
+	google.golang.org/grpc v1.67.1
+	google.golang.org/protobuf v1.35.1
 )
 
 require (
@@ -26,8 +26,8 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	golang.org/x/net v0.23.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
+	golang.org/x/net v0.28.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
+	golang.org/x/text v0.17.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240814211410-ddb44dafa142 // indirect
 )
