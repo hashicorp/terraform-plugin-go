@@ -7,6 +7,8 @@ type stringPrefix struct {
 }
 
 // TODO: What if the prefix is empty? Should we skip encoding? Throw an error earlier? Throw an error here?
+// - I think an empty prefix string is valid, empty string is still more information then wholly unknown?
+// - I wonder what Terraform does in this situation today
 func (s stringPrefix) Encode(enc *msgpack.Encoder) error {
 	// Matching go-cty for the max prefix length allowed here
 	//
