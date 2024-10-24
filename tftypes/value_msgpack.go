@@ -421,7 +421,11 @@ func msgpackUnmarshalUnknown(dec *msgpack.Decoder, typ Type, path *AttributePath
 			// The presence of this key means we're refining the null-ness one
 			// way or another. If nullness is unknown then this key should not
 			// be present at all.
-			newRefinements[keyCode] = refinement.Nullness(isNull)
+			//
+			// isNull should always be false if this refinement is present, but to match Terraform's support
+			// of this encoding, we will pass along the value. If isNull is true, then the value should not be
+			// unknown with refinements, it should be a known null value.
+			newRefinements[keyCode] = refinement.NewNullness(isNull)
 		case refinement.KeyStringPrefix:
 			if !typ.Is(String) {
 				return Value{}, path.NewErrorf("failed to decode msgpack extension body: string prefix refinement for non-string type")
@@ -436,7 +440,7 @@ func msgpackUnmarshalUnknown(dec *msgpack.Decoder, typ Type, path *AttributePath
 
 			// TODO: If terraform doesn't support an empty string prefix, then neither should we, potentially return an error here.
 
-			newRefinements[keyCode] = refinement.StringPrefix(prefix)
+			newRefinements[keyCode] = refinement.NewStringPrefix(prefix)
 		default:
 			// We don't want to error here, as go-cty could introduce new refinements that we'd
 			// want to just ignore until this logic is updated
