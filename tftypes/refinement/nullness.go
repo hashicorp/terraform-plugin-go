@@ -2,34 +2,38 @@ package refinement
 
 import "github.com/vmihailenco/msgpack/v5"
 
-type nullness struct {
-	Value bool
+type Nullness struct {
+	value bool
 }
 
-func (n nullness) Encode(enc *msgpack.Encoder) error {
+func (n Nullness) Encode(enc *msgpack.Encoder) error {
 	err := enc.EncodeInt(int64(KeyNullness))
 	if err != nil {
 		return err
 	}
 
-	// A value that is definitely null cannot be unknown
-	return enc.EncodeBool(false)
+	// It shouldn't be possible for an unknown value to be definitely null (i.e. nullness.value = true),
+	// as that should be represented by a known null value instead. This encoding is in place to be compliant
+	// with Terraform's encoding which uses a definitely null refinement to collapse into a known null value.
+	return enc.EncodeBool(n.value)
 }
 
-func (n nullness) Equal(Refinement) bool {
+func (n Nullness) Equal(Refinement) bool {
 	return false
 }
 
-func (n nullness) String() string {
-	return "todo - nullness"
+func (n Nullness) String() string {
+	return "todo - Nullness"
 }
 
-func (n nullness) unimplementable() {}
+func (n Nullness) NotNull() bool {
+	return !n.value
+}
 
-// TODO: Should this accept a value? If a value is unknown and the it's refined to be null
-// then the value should be a known value of null instead.
-func Nullness(value bool) Refinement {
-	return nullness{
-		Value: value,
+func (n Nullness) unimplementable() {}
+
+func NewNullness(value bool) Refinement {
+	return Nullness{
+		value: value,
 	}
 }
