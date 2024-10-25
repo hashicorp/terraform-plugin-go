@@ -441,6 +441,44 @@ func msgpackUnmarshalUnknown(dec *msgpack.Decoder, typ Type, path *AttributePath
 			// TODO: If terraform doesn't support an empty string prefix, then neither should we, potentially return an error here.
 
 			newRefinements[keyCode] = refinement.NewStringPrefix(prefix)
+		case refinement.KeyNumberLowerBound, refinement.KeyNumberUpperBound:
+			if !typ.Is(Number) {
+				return Value{}, path.NewErrorf("failed to decode msgpack extension body: numeric bound refinement for non-number type")
+			}
+
+			// We know these refinements are a tuple of [number, bool] so we can re-use the msgpack decoding logic on this refinement
+			tfValBound, err := msgpackUnmarshal(rfnDec, Tuple{ElementTypes: []Type{Number, Bool}}, path)
+			if err != nil || tfValBound.IsNull() || !tfValBound.IsKnown() {
+				return Value{}, path.NewErrorf("failed to decode msgpack extension body: numeric bound refinement must be [number, bool] tuple")
+			}
+
+			tupleVal := []Value{}
+			err = tfValBound.As(&tupleVal)
+			if err != nil {
+				return Value{}, path.NewErrorf("failed to decode msgpack extension body: numeric bound refinement tuple value conversion failed: %w", err)
+			}
+
+			if len(tupleVal) != 2 {
+				return Value{}, path.NewErrorf("failed to decode msgpack extension body: numeric bound refinement tuple value conversion failed: expected 2 elements, got %d elements", len(tupleVal))
+			}
+
+			var boundVal *big.Float
+			err = tupleVal[0].As(&boundVal)
+			if err != nil {
+				return Value{}, path.NewErrorf("failed to decode msgpack extension body: numeric bound refinement bound value conversion failed: %w", err)
+			}
+
+			var inclusiveVal bool
+			err = tupleVal[1].As(&inclusiveVal)
+			if err != nil {
+				return Value{}, path.NewErrorf("failed to decode msgpack extension body: numeric bound refinement inclusive value conversion failed: %w", err)
+			}
+
+			if keyCode == refinement.KeyNumberLowerBound {
+				newRefinements[keyCode] = refinement.NewNumberLowerBound(boundVal, inclusiveVal)
+			} else {
+				newRefinements[keyCode] = refinement.NewNumberUpperBound(boundVal, inclusiveVal)
+			}
 		default:
 			err := rfnDec.Skip()
 			if err != nil {
@@ -511,23 +549,95 @@ func marshalUnknownValue(val Value, typ Type, p *AttributePath, enc *msgpack.Enc
 	refnEnc := msgpack.NewEncoder(&refnBuf)
 	mapLen := 0
 
-	// TODO: Should the refinement interface be defining the encoding? Should we export the refinement implementation details?
-	// - If we keep it in the interface, then we can simplify this logic
-	for kind, refn := range val.refinements {
-		switch kind {
-		case refinement.KeyNullness:
-			err := refn.Encode(refnEnc)
+	for _, refn := range val.refinements {
+		switch refnVal := refn.(type) {
+		case refinement.Nullness:
+			err := refnEnc.EncodeInt(int64(refinement.KeyNullness))
+			if err != nil {
+				return p.NewErrorf("error encoding Nullness value refinement key: %w", err)
+			}
+
+			// It shouldn't be possible for an unknown value to be definitely null (i.e. nullness.value = true),
+			// as that should be represented by a known null value instead. This encoding is in place to be compliant
+			// with Terraform's encoding which uses a definitely null refinement to collapse into a known null value.
+			err = refnEnc.EncodeBool(refnVal.Nullness())
 			if err != nil {
 				return p.NewErrorf("error encoding Nullness value refinement: %w", err)
 			}
+
 			mapLen++
-		case refinement.KeyStringPrefix:
-			// TODO: If the prefix is empty, we shouldn't encode a refinement. This should
-			// probably be reflected in the interface.
-			err := refn.Encode(refnEnc)
-			if err != nil {
-				return p.NewErrorf("error encoding StringPrefix value refinement: %w", err)
+		case refinement.StringPrefix:
+			if rawPrefix := refnVal.PrefixValue(); rawPrefix != "" {
+				// Matching go-cty for the max prefix length allowed here
+				//
+				// This ensures the total size of the refinements blob does not exceed the limit
+				// set by the decoder (1024).
+				maxPrefixLength := 256
+				prefix := rawPrefix
+				if len(rawPrefix) > maxPrefixLength {
+					prefix = prefix[:maxPrefixLength-1]
+				}
+
+				err := refnEnc.EncodeInt(int64(refinement.KeyStringPrefix))
+				if err != nil {
+					return p.NewErrorf("error encoding StringPrefix value refinement key: %w", err)
+				}
+
+				err = refnEnc.EncodeString(prefix)
+				if err != nil {
+					return p.NewErrorf("error encoding StringPrefix value refinement: %w", err)
+				}
+
+				mapLen++
 			}
+
+		case refinement.NumberLowerBound:
+			// TODO: should check this isn't negative infinity? To match go-cty
+			boundTfType := Tuple{ElementTypes: []Type{Number, Bool}}
+
+			// TODO: Do we need to do this? Kind of nasty
+			boundTfVal := NewValue(
+				boundTfType,
+				[]Value{
+					NewValue(Number, refnVal.LowerBound()),
+					NewValue(Bool, refnVal.IsInclusive()),
+				},
+			)
+
+			err := refnEnc.EncodeInt(int64(refinement.KeyNumberLowerBound))
+			if err != nil {
+				return p.NewErrorf("error encoding NumberLowerBound value refinement key: %w", err)
+			}
+
+			err = marshalMsgPack(boundTfVal, boundTfType, p, refnEnc)
+			if err != nil {
+				return p.NewErrorf("error encoding NumberLowerBound value refinement: %w", err)
+			}
+
+			mapLen++
+		case refinement.NumberUpperBound:
+			// TODO: should check this isn't positive infinity? To match go-cty
+			boundTfType := Tuple{ElementTypes: []Type{Number, Bool}}
+
+			// TODO: Do we need to do this? Kind of nasty
+			boundTfVal := NewValue(
+				boundTfType,
+				[]Value{
+					NewValue(Number, refnVal.UpperBound()),
+					NewValue(Bool, refnVal.IsInclusive()),
+				},
+			)
+
+			err := refnEnc.EncodeInt(int64(refinement.KeyNumberUpperBound))
+			if err != nil {
+				return p.NewErrorf("error encoding NumberUpperBound value refinement key: %w", err)
+			}
+
+			err = marshalMsgPack(boundTfVal, boundTfType, p, refnEnc)
+			if err != nil {
+				return p.NewErrorf("error encoding NumberUpperBound value refinement: %w", err)
+			}
+
 			mapLen++
 		default:
 			continue
