@@ -2,8 +2,6 @@ package refinement
 
 import (
 	"fmt"
-
-	"github.com/vmihailenco/msgpack/v5"
 )
 
 type Key int64
@@ -15,23 +13,26 @@ func (k Key) String() string {
 		return "nullness"
 	case KeyStringPrefix:
 		return "string_prefix"
+	case KeyNumberLowerBound:
+		return "number_lower_bound"
+	case KeyNumberUpperBound:
+		return "number_upper_bound"
 	default:
 		return fmt.Sprintf("unsupported refinement: %d", k)
 	}
 }
 
 const (
-	KeyNullness     = Key(1)
-	KeyStringPrefix = Key(2)
-	// KeyNumberLowerBound           = Key(3)
-	// KeyNumberUpperBound           = Key(4)
+	KeyNullness         = Key(1)
+	KeyStringPrefix     = Key(2)
+	KeyNumberLowerBound = Key(3)
+	KeyNumberUpperBound = Key(4)
 	// KeyCollectionLengthLowerBound = Key(5)
 	// KeyCollectionLengthUpperBound = Key(6)
 )
 
 type Refinement interface {
 	Equal(Refinement) bool
-	Encode(*msgpack.Encoder) error
 	String() string
 	unimplementable() // prevents external implementations, all refinements are defined in the Terraform/HCL type system go-cty.
 }
