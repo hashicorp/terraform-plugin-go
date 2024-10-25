@@ -442,6 +442,10 @@ func msgpackUnmarshalUnknown(dec *msgpack.Decoder, typ Type, path *AttributePath
 
 			newRefinements[keyCode] = refinement.NewStringPrefix(prefix)
 		default:
+			err := rfnDec.Skip()
+			if err != nil {
+				return Value{}, path.NewErrorf("error skipping unknown extension body, keycode = %d: %w", keyCode, err)
+			}
 			// We don't want to error here, as go-cty could introduce new refinements that we'd
 			// want to just ignore until this logic is updated
 			continue
