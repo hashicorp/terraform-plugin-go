@@ -18,11 +18,11 @@ type EphemeralResourceMetadata struct {
 // EphemeralResourceServer is an interface containing the methods an ephemeral resource
 // implementation needs to fill.
 type EphemeralResourceServer interface {
-	// ValidateEphemeralResourceConfig is called when Terraform is checking that a
-	// ephemeral resource's configuration is valid. It is guaranteed to have types
+	// ValidateEphemeralResourceConfig is called when Terraform is checking that an
+	// ephemeral resource configuration is valid. It is guaranteed to have types
 	// conforming to your schema, but it is not guaranteed that all values
 	// will be known. This is your opportunity to do custom or advanced
-	// validation prior to ephemeral resource creation.
+	// validation prior to an ephemeral resource being opened.
 	ValidateEphemeralResourceConfig(context.Context, *ValidateEphemeralResourceConfigRequest) (*ValidateEphemeralResourceConfigResponse, error)
 
 	// OpenEphemeralResource is called when Terraform wants to open the ephemeral resource,
@@ -35,8 +35,7 @@ type EphemeralResourceServer interface {
 	// OpenEphemeralResource call or a previous RenewEphemeralResource call.
 	RenewEphemeralResource(context.Context, *RenewEphemeralResourceRequest) (*RenewEphemeralResourceResponse, error)
 
-	// CloseEphemeralResource is called when Terraform is closing the ephemeral resource at
-	// the end of the Terraform run.
+	// CloseEphemeralResource is called when Terraform is closing the ephemeral resource.
 	CloseEphemeralResource(context.Context, *CloseEphemeralResourceRequest) (*CloseEphemeralResourceResponse, error)
 }
 
@@ -117,9 +116,8 @@ type OpenEphemeralResourceResponse struct {
 	// generated.
 	Diagnostics []*Diagnostic
 
-	// Private should be set to any state that the provider would like sent
-	// with requests for this ephemeral resource. This state will be associated with
-	// the ephemeral resource, but will not be considered when calculating diffs.
+	// Private should be set to any private data that the provider would like to be
+	// sent to the next Renew or Close call.
 	Private []byte
 
 	// RenewAt indicates to Terraform that the ephemeral resource
@@ -138,11 +136,10 @@ type RenewEphemeralResourceRequest struct {
 	// TypeName is the type of resource Terraform is renewing.
 	TypeName string
 
-	// Private is any provider-defined private state stored with the
-	// ephemeral resource. It is used for keeping state with the resource that is not
-	// meant to be included when calculating diffs.
+	// Private is any provider-defined private data stored with the
+	// ephemeral resource from the most recent Open or Renew call.
 	//
-	// To ensure private state data is preserved, copy any necessary data to
+	// To ensure private data is preserved, copy any necessary data to
 	// the RenewEphemeralResourceResponse type Private field.
 	Private []byte
 }
@@ -156,9 +153,8 @@ type RenewEphemeralResourceResponse struct {
 	// generated.
 	Diagnostics []*Diagnostic
 
-	// Private should be set to any state that the provider would like sent
-	// with requests for this ephemeral resource. This state will be associated with
-	// the ephemeral resource, but will not be considered when calculating diffs.
+	// Private should be set to any private data that the provider would like to be
+	// sent to the next Renew or Close call.
 	Private []byte
 
 	// RenewAt indicates to Terraform that the ephemeral resource
@@ -173,9 +169,8 @@ type CloseEphemeralResourceRequest struct {
 	// TypeName is the type of resource Terraform is closing.
 	TypeName string
 
-	// Private is any provider-defined private state stored with the
-	// ephemeral resource. It is used for keeping state with the resource that is not
-	// meant to be included when calculating diffs.
+	// Private is any provider-defined private data stored with the
+	// ephemeral resource from the most recent Open or Renew call.
 	Private []byte
 }
 
