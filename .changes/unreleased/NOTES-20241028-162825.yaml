@@ -1,5 +1,0 @@
-kind: NOTES
-body: 'tfprotov5+tfprotov6: An upcoming release will require the `EphemeralResourceServer` implementation as part of `ProviderServer`. '
-time: 2024-10-28T16:28:25.504018-04:00
-custom:
-    Issue: "441"
