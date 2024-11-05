@@ -1,3 +1,13 @@
+## 0.25.0 (October 30, 2024)
+
+NOTES:
+
+* tfprotov5+tfprotov6: An upcoming release will require the `EphemeralResourceServer` implementation as part of `ProviderServer`.  ([#441](https://github.com/hashicorp/terraform-plugin-go/issues/441))
+
+FEATURES:
+
+* tfprotov5+tfprotov6: Upgraded protocols and added types to support the new ephemeral resource type ([#441](https://github.com/hashicorp/terraform-plugin-go/issues/441))
+
 ## 0.24.0 (September 18, 2024)
 
 BREAKING CHANGES:
