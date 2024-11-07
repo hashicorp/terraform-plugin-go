@@ -1,0 +1,380 @@
+{
+  "format_version": "1.0",
+  "provider_schemas": {
+    "registry.terraform.io/hashicorp/time": {
+      "provider": {
+        "version": 0,
+        "block": {
+          "description_kind": "plain"
+        }
+      },
+      "resource_schemas": {
+        "time_offset": {
+          "version": 0,
+          "block": {
+            "attributes": {
+              "base_rfc3339": {
+                "type": "string",
+                "description": "Base timestamp in [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.8) format (see [RFC3339 time string](https://tools.ietf.org/html/rfc3339#section-5.8) e.g., `YYYY-MM-DDTHH:MM:SSZ`). Defaults to the current time.",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "day": {
+                "type": "number",
+                "description": "Number day of offset timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "hour": {
+                "type": "number",
+                "description": "Number hour of offset timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "id": {
+                "type": "string",
+                "description": "RFC3339 format of the offset timestamp, e.g. `2020-02-12T06:36:13Z`.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "minute": {
+                "type": "number",
+                "description": "Number minute of offset timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "month": {
+                "type": "number",
+                "description": "Number month of offset timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "offset_days": {
+                "type": "number",
+                "description": "Number of days to offset the base timestamp. At least one of the 'offset_' arguments must be configured.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "offset_hours": {
+                "type": "number",
+                "description": " Number of hours to offset the base timestamp. At least one of the 'offset_' arguments must be configured.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "offset_minutes": {
+                "type": "number",
+                "description": "Number of minutes to offset the base timestamp. At least one of the 'offset_' arguments must be configured.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "offset_months": {
+                "type": "number",
+                "description": "Number of months to offset the base timestamp. At least one of the 'offset_' arguments must be configured.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "offset_seconds": {
+                "type": "number",
+                "description": "Number of seconds to offset the base timestamp. At least one of the 'offset_' arguments must be configured.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "offset_years": {
+                "type": "number",
+                "description": "Number of years to offset the base timestamp. At least one of the 'offset_' arguments must be configured.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "rfc3339": {
+                "type": "string",
+                "description": "RFC3339 format of the offset timestamp, e.g. `2020-02-12T06:36:13Z`.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "second": {
+                "type": "number",
+                "description": "Number second of offset timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "triggers": {
+                "type": [
+                  "map",
+                  "string"
+                ],
+                "description": "Arbitrary map of values that, when changed, will trigger a new base timestamp value to be saved. See [the main provider documentation](../index.md) for more information.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "unix": {
+                "type": "number",
+                "description": "Number of seconds since epoch time, e.g. `1581489373`.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "year": {
+                "type": "number",
+                "description": "Number year of offset timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              }
+            },
+            "description": "Manages an offset time resource, which keeps an UTC timestamp stored in the Terraform state that is offset from a locally sourced base timestamp. This prevents perpetual differences caused by using the [`timestamp()` function](https://www.terraform.io/docs/configuration/functions/timestamp.html).",
+            "description_kind": "plain"
+          }
+        },
+        "time_rotating": {
+          "version": 0,
+          "block": {
+            "attributes": {
+              "day": {
+                "type": "number",
+                "description": "Number day of timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "hour": {
+                "type": "number",
+                "description": "Number hour of timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "id": {
+                "type": "string",
+                "description": "RFC3339 format of the timestamp, e.g. `2020-02-12T06:36:13Z`.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "minute": {
+                "type": "number",
+                "description": "Number minute of timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "month": {
+                "type": "number",
+                "description": "Number month of timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "rfc3339": {
+                "type": "string",
+                "description": "Base timestamp in [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.8) format (see [RFC3339 time string](https://tools.ietf.org/html/rfc3339#section-5.8) e.g., `YYYY-MM-DDTHH:MM:SSZ`). Defaults to the current time.",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "rotation_days": {
+                "type": "number",
+                "description": "Number of days to add to the base timestamp to configure the rotation timestamp. When the current time has passed the rotation timestamp, the resource will trigger recreation. At least one of the 'rotation_' arguments must be configured.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "rotation_hours": {
+                "type": "number",
+                "description": "Number of hours to add to the base timestamp to configure the rotation timestamp. When the current time has passed the rotation timestamp, the resource will trigger recreation. At least one of the 'rotation_' arguments must be configured.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "rotation_minutes": {
+                "type": "number",
+                "description": "Number of minutes to add to the base timestamp to configure the rotation timestamp. When the current time has passed the rotation timestamp, the resource will trigger recreation. At least one of the 'rotation_' arguments must be configured.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "rotation_months": {
+                "type": "number",
+                "description": "Number of months to add to the base timestamp to configure the rotation timestamp. When the current time has passed the rotation timestamp, the resource will trigger recreation. At least one of the 'rotation_' arguments must be configured.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "rotation_rfc3339": {
+                "type": "string",
+                "description": "Configure the rotation timestamp with an [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.8) format of the offset timestamp. When the current time has passed the rotation timestamp, the resource will trigger recreation. At least one of the 'rotation_' arguments must be configured.",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "rotation_years": {
+                "type": "number",
+                "description": "Number of years to add to the base timestamp to configure the rotation timestamp. When the current time has passed the rotation timestamp, the resource will trigger recreation. At least one of the 'rotation_' arguments must be configured.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "second": {
+                "type": "number",
+                "description": "Number second of timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "triggers": {
+                "type": [
+                  "map",
+                  "string"
+                ],
+                "description": "Arbitrary map of values that, when changed, will trigger a new base timestamp value to be saved. These conditions recreate the resource in addition to other rotation arguments. See [the main provider documentation](../index.md) for more information.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "unix": {
+                "type": "number",
+                "description": "Number of seconds since epoch time, e.g. `1581489373`.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "year": {
+                "type": "number",
+                "description": "Number year of timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              }
+            },
+            "description": "Manages a rotating time resource, which keeps a rotating UTC timestamp stored in the Terraform state and proposes resource recreation when the locally sourced current time is beyond the rotation time. This rotation only occurs when Terraform is executed, meaning there will be drift between the rotation timestamp and actual rotation. The new rotation timestamp offset includes this drift. This prevents perpetual differences caused by using the [`timestamp()` function](https://www.terraform.io/docs/configuration/functions/timestamp.html) by only forcing a new value on the set cadence.",
+            "description_kind": "plain"
+          }
+        },
+        "time_sleep": {
+          "version": 0,
+          "block": {
+            "attributes": {
+              "create_duration": {
+                "type": "string",
+                "description": "[Time duration](https://golang.org/pkg/time/#ParseDuration) to delay resource creation. For example, `30s` for 30 seconds or `5m` for 5 minutes. Updating this value by itself will not trigger a delay.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "destroy_duration": {
+                "type": "string",
+                "description": "[Time duration](https://golang.org/pkg/time/#ParseDuration) to delay resource destroy. For example, `30s` for 30 seconds or `5m` for 5 minutes. Updating this value by itself will not trigger a delay. This value or any updates to it must be successfully applied into the Terraform state before destroying this resource to take effect.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "id": {
+                "type": "string",
+                "description": "RFC3339 format of the offset timestamp, e.g. `2020-02-12T06:36:13Z`.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "triggers": {
+                "type": [
+                  "map",
+                  "string"
+                ],
+                "description": "(Optional) Arbitrary map of values that, when changed, will run any creation or destroy delays again. See [the main provider documentation](../index.md) for more information.",
+                "description_kind": "plain",
+                "optional": true
+              }
+            },
+            "description": "Manages a resource that delays creation and/or destruction, typically for further resources. This prevents cross-platform compatibility and destroy-time issues with using the [`local-exec` provisioner](https://www.terraform.io/docs/provisioners/local-exec.html).",
+            "description_kind": "plain"
+          }
+        },
+        "time_static": {
+          "version": 0,
+          "block": {
+            "attributes": {
+              "day": {
+                "type": "number",
+                "description": "Number day of timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "hour": {
+                "type": "number",
+                "description": "Number hour of timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "id": {
+                "type": "string",
+                "description": "RFC3339 format of the offset timestamp, e.g. `2020-02-12T06:36:13Z`.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "minute": {
+                "type": "number",
+                "description": "Number minute of timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "month": {
+                "type": "number",
+                "description": "Number month of timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "rfc3339": {
+                "type": "string",
+                "description": "Base timestamp in [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.8) format (see [RFC3339 time string](https://tools.ietf.org/html/rfc3339#section-5.8) e.g., `YYYY-MM-DDTHH:MM:SSZ`). Defaults to the current time.",
+                "description_kind": "plain",
+                "optional": true,
+                "computed": true
+              },
+              "second": {
+                "type": "number",
+                "description": "Number second of timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "triggers": {
+                "type": [
+                  "map",
+                  "string"
+                ],
+                "description": "Arbitrary map of values that, when changed, will trigger a new base timestamp value to be saved. See [the main provider documentation](../index.md) for more information.",
+                "description_kind": "plain",
+                "optional": true
+              },
+              "unix": {
+                "type": "number",
+                "description": "Number of seconds since epoch time, e.g. `1581489373`.",
+                "description_kind": "plain",
+                "computed": true
+              },
+              "year": {
+                "type": "number",
+                "description": "Number year of timestamp.",
+                "description_kind": "plain",
+                "computed": true
+              }
+            },
+            "description": "Manages a static time resource, which keeps a locally sourced UTC timestamp stored in the Terraform state. This prevents perpetual differences caused by using the [`timestamp()` function](https://www.terraform.io/docs/configuration/functions/timestamp.html).",
+            "description_kind": "plain"
+          }
+        }
+      },
+      "functions": {
+        "rfc3339_parse": {
+          "description": "Given an RFC3339 timestamp string, will parse and return an object representation of that date and time.",
+          "summary": "Parse an RFC3339 timestamp string into an object",
+          "return_type": [
+            "object",
+            {
+              "day": "number",
+              "hour": "number",
+              "iso_week": "number",
+              "iso_year": "number",
+              "minute": "number",
+              "month": "number",
+              "month_name": "string",
+              "second": "number",
+              "unix": "number",
+              "weekday": "number",
+              "weekday_name": "string",
+              "year": "number",
+              "year_day": "number"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "timestamp",
+              "description": "RFC3339 timestamp string to parse",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
