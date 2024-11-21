@@ -479,6 +479,21 @@ func msgpackUnmarshalUnknown(dec *msgpack.Decoder, typ Type, path *AttributePath
 			} else {
 				newRefinements[keyCode] = refinement.NewNumberUpperBound(boundVal, inclusiveVal)
 			}
+		case refinement.KeyCollectionLengthLowerBound, refinement.KeyCollectionLengthUpperBound:
+			if !typ.Is(List{}) && !typ.Is(Map{}) && !typ.Is(Set{}) {
+				return Value{}, path.NewErrorf("failed to decode msgpack extension body: length bound refinement for non-collection type")
+			}
+
+			boundVal, err := rfnDec.DecodeInt()
+			if err != nil {
+				return Value{}, path.NewErrorf("failed to decode msgpack extension body: length bound refinement must be integer")
+			}
+
+			if keyCode == refinement.KeyCollectionLengthLowerBound {
+				newRefinements[keyCode] = refinement.NewCollectionLengthLowerBound(int64(boundVal))
+			} else {
+				newRefinements[keyCode] = refinement.NewCollectionLengthUpperBound(int64(boundVal))
+			}
 		default:
 			err := rfnDec.Skip()
 			if err != nil {
@@ -636,6 +651,30 @@ func marshalUnknownValue(val Value, typ Type, p *AttributePath, enc *msgpack.Enc
 			err = marshalMsgPack(boundTfVal, boundTfType, p, refnEnc)
 			if err != nil {
 				return p.NewErrorf("error encoding NumberUpperBound value refinement: %w", err)
+			}
+
+			mapLen++
+		case refinement.CollectionLengthLowerBound:
+			err := refnEnc.EncodeInt(int64(refinement.KeyCollectionLengthLowerBound))
+			if err != nil {
+				return p.NewErrorf("error encoding CollectionLengthLowerBound value refinement key: %w", err)
+			}
+
+			err = refnEnc.EncodeInt(refnVal.LowerBound())
+			if err != nil {
+				return p.NewErrorf("error encoding CollectionLengthLowerBound value refinement: %w", err)
+			}
+
+			mapLen++
+		case refinement.CollectionLengthUpperBound:
+			err := refnEnc.EncodeInt(int64(refinement.KeyCollectionLengthUpperBound))
+			if err != nil {
+				return p.NewErrorf("error encoding CollectionLengthUpperBound value refinement key: %w", err)
+			}
+
+			err = refnEnc.EncodeInt(refnVal.UpperBound())
+			if err != nil {
+				return p.NewErrorf("error encoding CollectionLengthUpperBound value refinement: %w", err)
 			}
 
 			mapLen++
