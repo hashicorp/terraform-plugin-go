@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/terraform-plugin-go/tftypes/refinement"
 )
 
 func TestValueFromMsgPack(t *testing.T) {
@@ -532,6 +533,60 @@ func TestValueFromMsgPack(t *testing.T) {
 			}),
 			typ: List{ElementType: DynamicPseudoType},
 		},
+		"unknown-string-with-refinements": {
+			// TODO: How to actually visualize this? So hard to read these tests...
+			hex: "c70e0c8201c202a97072656669783a2f2f",
+			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:     refinement.NewNullness(false),
+				refinement.KeyStringPrefix: refinement.NewStringPrefix("prefix://"),
+			}),
+			typ: String,
+		},
+		"unknown-number-with-refinements": {
+			// TODO: How to actually visualize this? So hard to read these tests...
+			hex: "c70b0c8301c2039201c3049205c3",
+			value: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5), true),
+			}),
+			typ: Number,
+		},
+		"unknown-list-with-refinements": {
+			// TODO: How to actually visualize this? So hard to read these tests...
+			hex: "c7070c8301c205010605",
+			value: NewValue(List{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:                   refinement.NewNullness(false),
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthLowerBound(1),
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthUpperBound(5),
+			}),
+			typ: List{ElementType: String},
+		},
+		"unknown-map-with-refinements": {
+			// TODO: How to actually visualize this? So hard to read these tests...
+			hex: "c7070c8301c205010605",
+			value: NewValue(Map{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:                   refinement.NewNullness(false),
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthLowerBound(1),
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthUpperBound(5),
+			}),
+			typ: Map{ElementType: String},
+		},
+		"unknown-set-with-refinements": {
+			// TODO: How to actually visualize this? So hard to read these tests...
+			hex: "c7070c8301c205010605",
+			value: NewValue(Set{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:                   refinement.NewNullness(false),
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthLowerBound(1),
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthUpperBound(5),
+			}),
+			typ: Set{ElementType: String},
+		},
+		// TODO: Test putting refinements with too long of data (string prefix over 256)
+		// TODO: Test putting refinements with incorrect data (string prefix on nullness key)
+		// TODO: Test putting refinements on incorrect types (prefix on number or boolean)
+		// TODO: Test refinement number that doesn't exist? Should just be unknown value
+		// TODO: Test DynamicPseudoType?
 	}
 	for name, test := range tests {
 		name, test := name, test
@@ -550,6 +605,7 @@ func TestValueFromMsgPack(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error parsing hex: %s", err)
 			}
+
 			val, err := ValueFromMsgPack(b, test.typ)
 			if err != nil {
 				t.Fatalf("unexpected error unmarshaling: %s", err)
