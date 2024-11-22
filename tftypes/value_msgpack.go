@@ -564,25 +564,38 @@ func marshalUnknownValue(val Value, typ Type, p *AttributePath, enc *msgpack.Enc
 	refnEnc := msgpack.NewEncoder(&refnBuf)
 	mapLen := 0
 
-	for _, refn := range val.refinements {
-		switch refnVal := refn.(type) {
-		case refinement.Nullness:
-			err := refnEnc.EncodeInt(int64(refinement.KeyNullness))
-			if err != nil {
-				return p.NewErrorf("error encoding Nullness value refinement key: %w", err)
+	// Nullness refinement applies to all types except for DynamicPseudoType (handled above)
+	if refnVal, ok := val.refinements[refinement.KeyNullness]; ok {
+		data, ok := refnVal.(refinement.Nullness)
+		if !ok {
+			return p.NewErrorf("error encoding Nullness value refinement: unexpected refinement data of type %T", refnVal)
+		}
+
+		err := refnEnc.EncodeInt(int64(refinement.KeyNullness))
+		if err != nil {
+			return p.NewErrorf("error encoding Nullness value refinement key: %w", err)
+		}
+
+		// It shouldn't be possible for an unknown value to be definitely null (i.e. nullness.value = true),
+		// as that should be represented by a known null value instead. This encoding is in place to be compliant
+		// with Terraform's encoding which uses a definitely null refinement to collapse into a known null value.
+		err = refnEnc.EncodeBool(data.Nullness())
+		if err != nil {
+			return p.NewErrorf("error encoding Nullness value refinement: %w", err)
+		}
+
+		mapLen++
+	}
+
+	// Refinements for strings
+	if typ.Is(String) {
+		if refnVal, ok := val.refinements[refinement.KeyStringPrefix]; ok {
+			data, ok := refnVal.(refinement.StringPrefix)
+			if !ok {
+				return p.NewErrorf("error encoding StringPrefix value refinement: unexpected refinement data of type %T", refnVal)
 			}
 
-			// It shouldn't be possible for an unknown value to be definitely null (i.e. nullness.value = true),
-			// as that should be represented by a known null value instead. This encoding is in place to be compliant
-			// with Terraform's encoding which uses a definitely null refinement to collapse into a known null value.
-			err = refnEnc.EncodeBool(refnVal.Nullness())
-			if err != nil {
-				return p.NewErrorf("error encoding Nullness value refinement: %w", err)
-			}
-
-			mapLen++
-		case refinement.StringPrefix:
-			if rawPrefix := refnVal.PrefixValue(); rawPrefix != "" {
+			if rawPrefix := data.PrefixValue(); rawPrefix != "" {
 				// Matching go-cty for the max prefix length allowed here
 				//
 				// This ensures the total size of the refinements blob does not exceed the limit
@@ -605,8 +618,17 @@ func marshalUnknownValue(val Value, typ Type, p *AttributePath, enc *msgpack.Enc
 
 				mapLen++
 			}
+		}
+	}
 
-		case refinement.NumberLowerBound:
+	// Refinements for numbers
+	if typ.Is(Number) {
+		if refnVal, ok := val.refinements[refinement.KeyNumberLowerBound]; ok {
+			data, ok := refnVal.(refinement.NumberLowerBound)
+			if !ok {
+				return p.NewErrorf("error encoding NumberLowerBound value refinement: unexpected refinement data of type %T", refnVal)
+			}
+
 			// TODO: should check this isn't negative infinity? To match go-cty
 			boundTfType := Tuple{ElementTypes: []Type{Number, Bool}}
 
@@ -614,8 +636,8 @@ func marshalUnknownValue(val Value, typ Type, p *AttributePath, enc *msgpack.Enc
 			boundTfVal := NewValue(
 				boundTfType,
 				[]Value{
-					NewValue(Number, refnVal.LowerBound()),
-					NewValue(Bool, refnVal.IsInclusive()),
+					NewValue(Number, data.LowerBound()),
+					NewValue(Bool, data.IsInclusive()),
 				},
 			)
 
@@ -630,7 +652,14 @@ func marshalUnknownValue(val Value, typ Type, p *AttributePath, enc *msgpack.Enc
 			}
 
 			mapLen++
-		case refinement.NumberUpperBound:
+		}
+
+		if refnVal, ok := val.refinements[refinement.KeyNumberUpperBound]; ok {
+			data, ok := refnVal.(refinement.NumberUpperBound)
+			if !ok {
+				return p.NewErrorf("error encoding NumberUpperBound value refinement: unexpected refinement data of type %T", refnVal)
+			}
+
 			// TODO: should check this isn't positive infinity? To match go-cty
 			boundTfType := Tuple{ElementTypes: []Type{Number, Bool}}
 
@@ -638,8 +667,8 @@ func marshalUnknownValue(val Value, typ Type, p *AttributePath, enc *msgpack.Enc
 			boundTfVal := NewValue(
 				boundTfType,
 				[]Value{
-					NewValue(Number, refnVal.UpperBound()),
-					NewValue(Bool, refnVal.IsInclusive()),
+					NewValue(Number, data.UpperBound()),
+					NewValue(Bool, data.IsInclusive()),
 				},
 			)
 
@@ -654,32 +683,46 @@ func marshalUnknownValue(val Value, typ Type, p *AttributePath, enc *msgpack.Enc
 			}
 
 			mapLen++
-		case refinement.CollectionLengthLowerBound:
+		}
+	}
+
+	// Refinements for collections
+	if typ.Is(List{}) || typ.Is(Map{}) || typ.Is(Set{}) {
+		if refnVal, ok := val.refinements[refinement.KeyCollectionLengthLowerBound]; ok {
+			data, ok := refnVal.(refinement.CollectionLengthLowerBound)
+			if !ok {
+				return p.NewErrorf("error encoding CollectionLengthLowerBound value refinement: unexpected refinement data of type %T", refnVal)
+			}
+
 			err := refnEnc.EncodeInt(int64(refinement.KeyCollectionLengthLowerBound))
 			if err != nil {
 				return p.NewErrorf("error encoding CollectionLengthLowerBound value refinement key: %w", err)
 			}
 
-			err = refnEnc.EncodeInt(refnVal.LowerBound())
+			err = refnEnc.EncodeInt(data.LowerBound())
 			if err != nil {
 				return p.NewErrorf("error encoding CollectionLengthLowerBound value refinement: %w", err)
 			}
 
 			mapLen++
-		case refinement.CollectionLengthUpperBound:
+		}
+
+		if refnVal, ok := val.refinements[refinement.KeyCollectionLengthUpperBound]; ok {
+			data, ok := refnVal.(refinement.CollectionLengthUpperBound)
+			if !ok {
+				return p.NewErrorf("error encoding CollectionLengthUpperBound value refinement: unexpected refinement data of type %T", refnVal)
+			}
 			err := refnEnc.EncodeInt(int64(refinement.KeyCollectionLengthUpperBound))
 			if err != nil {
 				return p.NewErrorf("error encoding CollectionLengthUpperBound value refinement key: %w", err)
 			}
 
-			err = refnEnc.EncodeInt(refnVal.UpperBound())
+			err = refnEnc.EncodeInt(data.UpperBound())
 			if err != nil {
 				return p.NewErrorf("error encoding CollectionLengthUpperBound value refinement: %w", err)
 			}
 
 			mapLen++
-		default:
-			continue
 		}
 	}
 
