@@ -12,7 +12,6 @@ import (
 type Key int64
 
 func (k Key) String() string {
-	// TODO: Not sure when this is used, double check the names
 	switch k {
 	case KeyNullness:
 		return "nullness"
@@ -22,6 +21,10 @@ func (k Key) String() string {
 		return "number_lower_bound"
 	case KeyNumberUpperBound:
 		return "number_upper_bound"
+	case KeyCollectionLengthLowerBound:
+		return "collection_length_lower_bound"
+	case KeyCollectionLengthUpperBound:
+		return "collection_length_upper_bound"
 	default:
 		return fmt.Sprintf("unsupported refinement: %d", k)
 	}
@@ -65,7 +68,8 @@ const (
 	KeyCollectionLengthUpperBound = Key(6)
 )
 
-// TODO: docs
+// Refinement represents an unknown value refinement with data constraints relevant to the final value. This interface can be asserted further
+// with the associated structs in the `refinement` package to extract underlying refinement data.
 type Refinement interface {
 	// Equal should return true if the Refinement is considered equivalent to the
 	// Refinement passed as an argument.
@@ -77,7 +81,7 @@ type Refinement interface {
 	unimplementable() // prevents external implementations, all refinements are defined in the Terraform/HCL type system go-cty.
 }
 
-// TODO: docs
+// Refinements represents a map of unknown value refinement data.
 type Refinements map[Key]Refinement
 
 func (r Refinements) Equal(other Refinements) bool {

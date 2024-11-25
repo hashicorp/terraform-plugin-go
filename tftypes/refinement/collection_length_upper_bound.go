@@ -5,7 +5,8 @@ package refinement
 
 import "fmt"
 
-// TODO: doc
+// CollectionLengthUpperBound represents an unknown value refinement which indicates the length of the final collection value will be
+// at most the specified int64 value. This refinement can only be applied to List, Map, and Set types.
 type CollectionLengthUpperBound struct {
 	value int64
 }
@@ -23,14 +24,15 @@ func (n CollectionLengthUpperBound) String() string {
 	return fmt.Sprintf("length upper bound = %d", n.UpperBound())
 }
 
-// TODO: doc
+// UpperBound returns the int64 value that the final value's collection length will be at most.
 func (n CollectionLengthUpperBound) UpperBound() int64 {
 	return n.value
 }
 
 func (n CollectionLengthUpperBound) unimplementable() {}
 
-// TODO: doc
+// NewCollectionLengthUpperBound returns the CollectionLengthUpperBound unknown value refinement which indicates the length of the final
+// collection value will be at most the specified int64 value. This refinement can only be applied to List, Map, and Set types.
 func NewCollectionLengthUpperBound(value int64) Refinement {
 	return CollectionLengthUpperBound{
 		value: value,

@@ -42,8 +42,6 @@ type ValueCreator interface {
 // The recommended usage of a Value is to check that it is known, using
 // Value.IsKnown, then to convert it to a Go type, using Value.As. The Go type
 // can then be manipulated.
-//
-// TODO: add docs for new refinement data
 type Value struct {
 	typ   Type
 	value interface{}
@@ -628,7 +626,10 @@ func unexpectedValueTypeError(p *AttributePath, expected, got interface{}, typ T
 	return p.NewErrorf("unexpected value type %T, %s values must be of type %T", got, typ, expected)
 }
 
-// TODO: doc, mention returning value if not unknown
+// Refine is used to apply unknown refinement data to a Value. This method will return a copy of the Value, fully
+// replacing all the existing refinement data with the provided refinements.
+//
+// If the Value is not unknown, then a copy of the Value will be returned with no refinements.
 func (val Value) Refine(refinements refinement.Refinements) Value {
 	newVal := val.Copy()
 
@@ -648,8 +649,9 @@ func (val Value) Refine(refinements refinement.Refinements) Value {
 	return newVal
 }
 
-// TODO: doc, mention copy
+// Refinements returns the unknown refinement data for the Value.
 func (val Value) Refinements() refinement.Refinements {
+	// Copy the data first to prevent any mutation of the refinement map data.
 	valCopy := val.Copy()
 
 	return valCopy.refinements

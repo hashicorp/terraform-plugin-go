@@ -5,7 +5,8 @@ package refinement
 
 import "fmt"
 
-// TODO: doc
+// CollectionLengthLowerBound represents an unknown value refinement which indicates the length of the final collection value will be
+// at least the specified int64 value. This refinement can only be applied to List, Map, and Set types.
 type CollectionLengthLowerBound struct {
 	value int64
 }
@@ -23,14 +24,15 @@ func (n CollectionLengthLowerBound) String() string {
 	return fmt.Sprintf("length lower bound = %d", n.LowerBound())
 }
 
-// TODO: doc
+// LowerBound returns the int64 value that the final value's collection length will be at least.
 func (n CollectionLengthLowerBound) LowerBound() int64 {
 	return n.value
 }
 
 func (n CollectionLengthLowerBound) unimplementable() {}
 
-// TODO: doc
+// NewCollectionLengthLowerBound returns the CollectionLengthLowerBound unknown value refinement which indicates the length of the final
+// collection value will be at least the specified int64 value. This refinement can only be applied to List, Map, and Set types.
 func NewCollectionLengthLowerBound(value int64) Refinement {
 	return CollectionLengthLowerBound{
 		value: value,
