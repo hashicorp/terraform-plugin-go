@@ -8,7 +8,8 @@ import (
 	"math/big"
 )
 
-// TODO: doc
+// NumberLowerBound represents an unknown value refinement that indicates the final value will not be less than the specified
+// *big.Float value, as well as whether that bound is inclusive or exclusive. This refinement can only be applied to the Number type.
 type NumberLowerBound struct {
 	inclusive bool
 	value     *big.Float
@@ -32,19 +33,21 @@ func (n NumberLowerBound) String() string {
 	return fmt.Sprintf("lower bound = %s (%s)", n.LowerBound().String(), rangeDescription)
 }
 
-// TODO: doc
+// IsInclusive returns whether the bound returned by the `LowerBound` method is inclusive or exclusive.
 func (n NumberLowerBound) IsInclusive() bool {
 	return n.inclusive
 }
 
-// TODO: doc
+// LowerBound returns the *big.Float value that the final value will not be less than. The `IsInclusive` method must also be used during
+// comparison to determine whether the bound is inclusive or exclusive.
 func (n NumberLowerBound) LowerBound() *big.Float {
 	return n.value
 }
 
 func (n NumberLowerBound) unimplementable() {}
 
-// TODO: doc
+// NewNumberLowerBound returns the NumberLowerBound unknown value refinement that indicates the final value will not be less than the specified
+// *big.Float value, as well as whether that bound is inclusive or exclusive. This refinement can only be applied to the Number type.
 func NewNumberLowerBound(value *big.Float, inclusive bool) Refinement {
 	return NumberLowerBound{
 		value:     value,

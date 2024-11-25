@@ -5,7 +5,9 @@ package refinement
 
 import "fmt"
 
-// TODO: doc
+// StringPrefix represents an unknown value refinement that indicates the final value will be prefixed with the specified string value.
+// String prefixes that exceed 256 characters in length will be truncated and empty string prefixes will not be encoded. This refinement can
+// only be applied to the String type.
 type StringPrefix struct {
 	value string
 }
@@ -23,14 +25,16 @@ func (s StringPrefix) String() string {
 	return fmt.Sprintf("prefix = %q", s.PrefixValue())
 }
 
-// TODO: doc
+// PrefixValue returns the string value that the final value will be prefixed with.
 func (s StringPrefix) PrefixValue() string {
 	return s.value
 }
 
 func (s StringPrefix) unimplementable() {}
 
-// TODO: doc
+// NewStringPrefix returns the StringPrefix unknown value refinement that indicates the final value will be prefixed with the specified
+// string value. String prefixes that exceed 256 characters in length will be truncated and empty string prefixes will not be encoded. This
+// refinement can only be applied to the String type.
 func NewStringPrefix(value string) Refinement {
 	return StringPrefix{
 		value: value,
