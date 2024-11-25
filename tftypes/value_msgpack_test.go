@@ -15,13 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tftypes/refinement"
 )
 
-// Hex encoding of the long prefix refinements used in this test
-var longPrefixRefinement = "c801050c8201c202d9ff7072656669783a2f2f303132333435363738392d303132333435363738392d303132333435363738392d30313" +
-	"2333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d30313" +
-	"2333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d30313" +
-	"2333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d30313" +
-	"2333435363738392d30313233"
-
 func TestValueFromMsgPack(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
@@ -542,13 +535,6 @@ func TestValueFromMsgPack(t *testing.T) {
 			}),
 			typ: List{ElementType: DynamicPseudoType},
 		},
-		"unknown-dynamic-refinements-ignored": {
-			hex: "d40000",
-			value: NewValue(DynamicPseudoType, UnknownValue).Refine(refinement.Refinements{
-				refinement.KeyNullness: refinement.NewNullness(false),
-			}),
-			typ: DynamicPseudoType,
-		},
 		"unknown-bool-with-nullness-refinement": {
 			hex: "c7030c8101c2",
 			value: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
@@ -584,45 +570,11 @@ func TestValueFromMsgPack(t *testing.T) {
 			}),
 			typ: Object{AttributeTypes: map[string]Type{"attr": String}},
 		},
-		"unknown-string-with-empty-prefix-refinement": {
-			hex: "c7030c8101c2",
-			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
-				refinement.KeyNullness:     refinement.NewNullness(false),
-				refinement.KeyStringPrefix: refinement.NewStringPrefix(""),
-			}),
-			typ: String,
-		},
 		"unknown-string-with-prefix-refinement": {
 			hex: "c70e0c8201c202a97072656669783a2f2f",
 			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
 				refinement.KeyNullness:     refinement.NewNullness(false),
 				refinement.KeyStringPrefix: refinement.NewStringPrefix("prefix://"),
-			}),
-			typ: String,
-		},
-		"unknown-string-with-long-prefix-refinement-one": {
-			// This prefix will be cutoff at 256 bytes, so it will be equal to the other long prefix test.
-			hex: longPrefixRefinement,
-			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
-				refinement.KeyNullness: refinement.NewNullness(false),
-				refinement.KeyStringPrefix: refinement.NewStringPrefix(
-					"prefix://0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-" +
-						"0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-" +
-						"0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-thiswillbecutoff1",
-				),
-			}),
-			typ: String,
-		},
-		"unknown-string-with-long-prefix-refinement-two": {
-			// This prefix will be cutoff at 256 bytes, so it will be equal to the other long prefix test.
-			hex: longPrefixRefinement,
-			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
-				refinement.KeyNullness: refinement.NewNullness(false),
-				refinement.KeyStringPrefix: refinement.NewStringPrefix(
-					"prefix://0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-" +
-						"0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-" +
-						"0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-thiswillbecutoff2",
-				),
 			}),
 			typ: String,
 		},
@@ -689,22 +641,6 @@ func TestValueFromMsgPack(t *testing.T) {
 			}),
 			typ: Set{ElementType: Bool},
 		},
-		"unknown-with-invalid-refinement-type": {
-			hex: "d40000",
-			value: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
-				// This refinement will be ignored since only strings will attempt to encode this
-				refinement.KeyStringPrefix: refinement.NewStringPrefix("ignored"),
-			}),
-			typ: Bool,
-		},
-		"unknown-with-invalid-refinement-data": {
-			hex: "d40000",
-			value: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
-				// This refinement will be ignored since we don't know how to encode it
-				refinement.Key(100): refinement.NewStringPrefix("ignored"),
-			}),
-			typ: Bool,
-		},
 	}
 	for name, test := range tests {
 		name, test := name, test
@@ -731,6 +667,96 @@ func TestValueFromMsgPack(t *testing.T) {
 
 			if test.value.String() != val.String() {
 				t.Errorf("Unexpected results (-wanted +got): %s", cmp.Diff(test.value, val))
+			}
+		})
+	}
+}
+
+// This test covers certain scenarios where we ignore refinement data during marshalling that are either invalid or not needed.
+func TestMarshalMsgPack_refinement_exceptions(t *testing.T) {
+	t.Parallel()
+
+	// Hex encoding of the long prefix refinements that are eventually truncated in this test
+	longPrefixRefinement := "c801050c8201c202d9ff7072656669783a2f2f303132333435363738392d303132333435363738392d303132333435363738392d30313" +
+		"2333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d30313" +
+		"2333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d30313" +
+		"2333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d30313" +
+		"2333435363738392d30313233"
+
+	tests := map[string]struct {
+		value       Value
+		typ         Type
+		expectedHex string
+	}{
+		"unknown-dynamic-refinements-ignored": {
+			expectedHex: "d40000",
+			value: NewValue(DynamicPseudoType, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+			}),
+			typ: DynamicPseudoType,
+		},
+		"unknown-string-with-empty-prefix-refinement": {
+			expectedHex: "c7030c8101c2",
+			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:     refinement.NewNullness(false),
+				refinement.KeyStringPrefix: refinement.NewStringPrefix(""),
+			}),
+			typ: String,
+		},
+		"unknown-string-with-long-prefix-refinement-one": {
+			// This prefix will be cutoff at 256 bytes, so it will be equal to the other long prefix test.
+			expectedHex: longPrefixRefinement,
+			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+				refinement.KeyStringPrefix: refinement.NewStringPrefix(
+					"prefix://0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-" +
+						"0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-" +
+						"0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-thiswillbecutoff1",
+				),
+			}),
+			typ: String,
+		},
+		"unknown-string-with-long-prefix-refinement-two": {
+			// This prefix will be cutoff at 256 bytes, so it will be equal to the other long prefix test.
+			expectedHex: longPrefixRefinement,
+			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+				refinement.KeyStringPrefix: refinement.NewStringPrefix(
+					"prefix://0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-" +
+						"0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-" +
+						"0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-thiswillbecutoff2",
+				),
+			}),
+			typ: String,
+		},
+		"unknown-with-invalid-refinement-type": {
+			expectedHex: "d40000",
+			value: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				// This refinement will be ignored since only strings will attempt to encode this
+				refinement.KeyStringPrefix: refinement.NewStringPrefix("ignored"),
+			}),
+			typ: Bool,
+		},
+		"unknown-with-invalid-refinement-data": {
+			expectedHex: "d40000",
+			value: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				// This refinement will be ignored since we don't know how to encode it
+				refinement.Key(100): refinement.NewStringPrefix("ignored"),
+			}),
+			typ: Bool,
+		},
+	}
+	for name, test := range tests {
+		name, test := name, test
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			got, err := test.value.MarshalMsgPack(test.typ)
+			if err != nil {
+				t.Fatalf("unexpected error marshaling: %s", err)
+			}
+			res := hex.EncodeToString(got)
+			if res != test.expectedHex {
+				t.Errorf("expected msgpack to be %q, got %q", test.expectedHex, res)
 			}
 		})
 	}

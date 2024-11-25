@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/terraform-plugin-go/tftypes/refinement"
 )
 
 func numberComparer(i, j *big.Float) bool {
@@ -783,9 +784,166 @@ func TestValueEqual(t *testing.T) {
 			val2:  NewValue(String, UnknownValue),
 			equal: true,
 		},
+		"unknownEqual-bool-refinements": {
+			val1: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+			}),
+			val2: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+			}),
+			equal: true,
+		},
+		"unknownEqual-string-refinements": {
+			val1: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:     refinement.NewNullness(false),
+				refinement.KeyStringPrefix: refinement.NewStringPrefix("hello"),
+			}),
+			val2: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:     refinement.NewNullness(false),
+				refinement.KeyStringPrefix: refinement.NewStringPrefix("hello"),
+			}),
+			equal: true,
+		},
+		"unknownEqual-number-refinements": {
+			val1: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5), false),
+			}),
+			val2: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5), false),
+			}),
+			equal: true,
+		},
+		"unknownEqual-number-refinements-float": {
+			val1: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1.23), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5.67), false),
+			}),
+			val2: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1.23), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5.67), false),
+			}),
+			equal: true,
+		},
+		"unknownEqual-list-refinements": {
+			val1: NewValue(List{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:                   refinement.NewNullness(false),
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthLowerBound(1),
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthUpperBound(5),
+			}),
+			val2: NewValue(List{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:                   refinement.NewNullness(false),
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthLowerBound(1),
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthUpperBound(5),
+			}),
+			equal: true,
+		},
 		"unknownDiff": {
 			val1:  NewValue(String, UnknownValue),
 			val2:  NewValue(String, "world"),
+			equal: false,
+		},
+		"unknownDiff-bool-refinements": {
+			val1: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+			}),
+			val2: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(true),
+			}),
+			equal: false,
+		},
+		"unknownDiff-string-refinements": {
+			val1: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:     refinement.NewNullness(false),
+				refinement.KeyStringPrefix: refinement.NewStringPrefix("hello"),
+			}),
+			val2: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:     refinement.NewNullness(false),
+				refinement.KeyStringPrefix: refinement.NewStringPrefix("world"),
+			}),
+			equal: false,
+		},
+		"unknownDiff-number-refinements-lowerInclusiveDiff": {
+			val1: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5), true),
+			}),
+			val2: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1), false),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5), true),
+			}),
+			equal: false,
+		},
+		"unknownDiff-number-refinements-upperInclusiveDiff": {
+			val1: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5), true),
+			}),
+			val2: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5), false),
+			}),
+			equal: false,
+		},
+		"unknownDiff-number-refinements-lowerBoundDiff": {
+			val1: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5), true),
+			}),
+			val2: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(3), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5), true),
+			}),
+			equal: false,
+		},
+		"unknownDiff-number-refinements-upperBoundDiff": {
+			val1: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5), true),
+			}),
+			val2: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(3), true),
+			}),
+			equal: false,
+		},
+		"unknownDiff-list-refinements-lowerBoundDiff": {
+			val1: NewValue(List{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:                   refinement.NewNullness(false),
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthLowerBound(1),
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthUpperBound(5),
+			}),
+			val2: NewValue(List{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:                   refinement.NewNullness(false),
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthLowerBound(3),
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthUpperBound(5),
+			}),
+			equal: false,
+		},
+		"unknownDiff-list-refinements-upperBoundDiff": {
+			val1: NewValue(List{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:                   refinement.NewNullness(false),
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthLowerBound(1),
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthUpperBound(5),
+			}),
+			val2: NewValue(List{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:                   refinement.NewNullness(false),
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthLowerBound(1),
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthUpperBound(3),
+			}),
 			equal: false,
 		},
 		"listEqual": {
@@ -1721,6 +1879,59 @@ func TestValueString(t *testing.T) {
 			in:       Value{},
 			expected: "invalid typeless tftypes.Value<>",
 		},
+		"unknown-bool": {
+			in:       NewValue(Bool, UnknownValue),
+			expected: "tftypes.Bool<unknown>",
+		},
+		"unknown-bool-with-nullness-refinement": {
+			in: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+			}),
+			expected: `tftypes.Bool<unknown, not null>`,
+		},
+		"unknown-string": {
+			in:       NewValue(String, UnknownValue),
+			expected: "tftypes.String<unknown>",
+		},
+		"unknown-string-with-multiple-refinements": {
+			in: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:     refinement.NewNullness(false),
+				refinement.KeyStringPrefix: refinement.NewStringPrefix("str://"),
+			}),
+			expected: `tftypes.String<unknown, not null, prefix = "str://">`,
+		},
+		"unknown-number": {
+			in:       NewValue(Number, UnknownValue),
+			expected: "tftypes.Number<unknown>",
+		},
+		"unknown-number-with-multiple-refinements": {
+			in: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(5), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(10), true),
+			}),
+			expected: `tftypes.Number<unknown, not null, lower bound = 5 (inclusive), upper bound = 10 (inclusive)>`,
+		},
+		"unknown-number-float-with-multiple-refinements": {
+			in: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(5.67), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(10.123), true),
+			}),
+			expected: `tftypes.Number<unknown, not null, lower bound = 5.67 (inclusive), upper bound = 10.123 (inclusive)>`,
+		},
+		"unknown-list": {
+			in:       NewValue(List{ElementType: String}, UnknownValue),
+			expected: "tftypes.List[tftypes.String]<unknown>",
+		},
+		"unknown-list-with-multiple-refinements": {
+			in: NewValue(List{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:                   refinement.NewNullness(false),
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthLowerBound(2),
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthUpperBound(7),
+			}),
+			expected: `tftypes.List[tftypes.String]<unknown, not null, length lower bound = 2, length upper bound = 7>`,
+		},
 		"string": {
 			in:       NewValue(String, "hello"),
 			expected: "tftypes.String<\"hello\">",
@@ -1873,5 +2084,33 @@ func TestValueString(t *testing.T) {
 				t.Errorf("Unexpected results (-wanted, +got): %s", diff)
 			}
 		})
+	}
+}
+
+func TestValueRefine_immutable(t *testing.T) {
+	t.Parallel()
+
+	originalRefinements := refinement.Refinements{refinement.KeyStringPrefix: refinement.NewStringPrefix("hello")}
+	originalVal := NewValue(String, UnknownValue).Refine(originalRefinements)
+
+	// Attempt to mutate the original refinements map
+	originalRefinements[refinement.KeyStringPrefix] = refinement.NewStringPrefix("world")
+
+	if !originalVal.Equal(NewValue(String, UnknownValue).Refine(refinement.Refinements{refinement.KeyStringPrefix: refinement.NewStringPrefix("hello")})) {
+		t.Fatal("unexpected Refinements mutation")
+	}
+}
+
+func TestValueRefinements_immutable(t *testing.T) {
+	t.Parallel()
+
+	originalVal := NewValue(String, UnknownValue).Refine(refinement.Refinements{refinement.KeyStringPrefix: refinement.NewStringPrefix("hello")})
+	originalRefinements := originalVal.Refinements()
+
+	// Attempt to mutate the original refinements map
+	originalRefinements[refinement.KeyStringPrefix] = refinement.NewStringPrefix("world")
+
+	if !originalVal.Equal(NewValue(String, UnknownValue).Refine(refinement.Refinements{refinement.KeyStringPrefix: refinement.NewStringPrefix("hello")})) {
+		t.Fatal("unexpected Refinements mutation")
 	}
 }

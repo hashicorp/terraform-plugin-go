@@ -4,6 +4,7 @@
 package refinement
 
 import (
+	"fmt"
 	"math/big"
 )
 
@@ -13,14 +14,22 @@ type NumberLowerBound struct {
 	value     *big.Float
 }
 
-func (n NumberLowerBound) Equal(Refinement) bool {
-	// TODO: implement
-	return false
+func (n NumberLowerBound) Equal(other Refinement) bool {
+	otherVal, ok := other.(NumberLowerBound)
+	if !ok {
+		return false
+	}
+
+	return n.IsInclusive() == otherVal.IsInclusive() && n.LowerBound().Cmp(otherVal.LowerBound()) == 0
 }
 
 func (n NumberLowerBound) String() string {
-	// TODO: implement
-	return "todo - NumberLowerBound"
+	rangeDescription := "inclusive"
+	if !n.IsInclusive() {
+		rangeDescription = "exclusive"
+	}
+
+	return fmt.Sprintf("lower bound = %s (%s)", n.LowerBound().String(), rangeDescription)
 }
 
 // TODO: doc

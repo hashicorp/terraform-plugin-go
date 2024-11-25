@@ -63,10 +63,16 @@ func (val Value) String() string {
 		return typ.String() + "<null>"
 	}
 
-	// TODO: print refinements
-
 	if !val.IsKnown() {
-		return typ.String() + "<unknown>"
+		var res strings.Builder
+		res.WriteString(typ.String())
+		res.WriteString("<unknown")
+		if len(val.refinements) > 0 {
+			res.WriteString(", " + val.Refinements().String())
+		}
+		res.WriteString(">")
+
+		return res.String()
 	}
 
 	// everything else is built up
@@ -230,7 +236,13 @@ func (val Value) Equal(o Value) bool {
 		return false
 	}
 
-	// TODO: compare refinements
+	if len(val.refinements) != len(o.refinements) {
+		return false
+	}
+
+	if len(val.refinements) > 0 && !val.refinements.Equal(o.refinements) {
+		return false
+	}
 
 	deepEqual, err := val.deepEqual(o)
 	if err != nil {
@@ -242,9 +254,6 @@ func (val Value) Equal(o Value) bool {
 // Copy returns a defensively-copied clone of Value that shares no underlying
 // data structures with the original Value and can be mutated without
 // accidentally mutating the original.
-//
-// TODO: Make sure this actually works for refinements. Consuming packages should not be able to mutate refinements of val
-// TODO: Add docs referencing refinements
 func (val Value) Copy() Value {
 	newVal := val.value
 	switch v := val.value.(type) {
@@ -263,7 +272,15 @@ func (val Value) Copy() Value {
 	}
 
 	newTfValue := NewValue(val.Type(), newVal)
-	newTfValue.refinements = val.refinements
+
+	if len(val.refinements) > 0 {
+		newRefinements := make(refinement.Refinements, len(val.refinements))
+		for key, refnVal := range val.refinements {
+			newRefinements[key] = refnVal
+		}
+
+		newTfValue.refinements = newRefinements
+	}
 
 	return newTfValue
 }
@@ -611,19 +628,28 @@ func unexpectedValueTypeError(p *AttributePath, expected, got interface{}, typ T
 	return p.NewErrorf("unexpected value type %T, %s values must be of type %T", got, typ, expected)
 }
 
-// TODO: do we need to return an error? Like if you attempt to refine a value improperly (like string prefix on a number)?
+// TODO: doc, mention returning value if not unknown
 func (val Value) Refine(refinements refinement.Refinements) Value {
 	newVal := val.Copy()
 
+	// Refinements are only relevant for unknown values
+	if val.IsKnown() {
+		return newVal
+	}
+
 	if len(refinements) >= 0 {
-		newVal.refinements = refinements
+		newRefinements := make(refinement.Refinements, len(refinements))
+		for key, refnVal := range refinements {
+			newRefinements[key] = refnVal
+		}
+		newVal.refinements = newRefinements
 	}
 
 	return newVal
 }
 
+// TODO: doc, mention copy
 func (val Value) Refinements() refinement.Refinements {
-	// TODO: is this copy really needed?
 	valCopy := val.Copy()
 
 	return valCopy.refinements

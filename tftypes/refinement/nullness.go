@@ -8,14 +8,23 @@ type Nullness struct {
 	value bool
 }
 
-func (n Nullness) Equal(Refinement) bool {
-	// TODO: implement
-	return false
+func (n Nullness) Equal(other Refinement) bool {
+	otherVal, ok := other.(Nullness)
+	if !ok {
+		return false
+	}
+
+	return n.Nullness() == otherVal.Nullness()
 }
 
 func (n Nullness) String() string {
-	// TODO: implement
-	return "todo - Nullness"
+	if n.value {
+		// This case should never happen, as an unknown value that is definitely null should be
+		// represented as a known null value.
+		return "null"
+	}
+
+	return "not null"
 }
 
 // TODO: doc
