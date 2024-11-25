@@ -784,6 +784,11 @@ func TestValueEqual(t *testing.T) {
 			val2:  NewValue(String, UnknownValue),
 			equal: true,
 		},
+		"unknownEqual-empty-refinements": {
+			val1:  NewValue(Bool, UnknownValue),
+			val2:  NewValue(Bool, UnknownValue).Refine(refinement.Refinements{}),
+			equal: true,
+		},
 		"unknownEqual-bool-refinements": {
 			val1: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
 				refinement.KeyNullness: refinement.NewNullness(false),
@@ -846,6 +851,20 @@ func TestValueEqual(t *testing.T) {
 		"unknownDiff": {
 			val1:  NewValue(String, UnknownValue),
 			val2:  NewValue(String, "world"),
+			equal: false,
+		},
+		"unknownDiff-nil-refinements": {
+			val1: NewValue(Bool, UnknownValue),
+			val2: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(true),
+			}),
+			equal: false,
+		},
+		"unknownDiff-empty-refinements": {
+			val1: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(true),
+			}),
+			val2:  NewValue(Bool, UnknownValue).Refine(refinement.Refinements{}),
 			equal: false,
 		},
 		"unknownDiff-bool-refinements": {
