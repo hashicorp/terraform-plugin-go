@@ -535,6 +535,14 @@ func TestValueFromMsgPack(t *testing.T) {
 			}),
 			typ: List{ElementType: DynamicPseudoType},
 		},
+		// This encoding, while unlikely in practice, is supported. Terraform should collapse this to a known null value before reaching providers.
+		"unknown-with-nullness-true": {
+			hex: "c7030c8101c3",
+			value: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(true),
+			}),
+			typ: Bool,
+		},
 		"unknown-bool-with-nullness-refinement": {
 			hex: "c7030c8101c2",
 			value: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
@@ -671,9 +679,54 @@ func TestValueFromMsgPack(t *testing.T) {
 		})
 	}
 }
+func TestValueFromMsgPack_refinements(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		hex           string
+		expectedValue Value
+		typ           Type
+	}{
+		"unsupported-refinement-on-bool": {
+			// This hex value encodes the Nullness refinement as Key(100), which doesn't exist and should be ignored.
+			hex:           "c7030c8164c2",
+			expectedValue: NewValue(Bool, UnknownValue),
+			typ:           Bool,
+		},
+		"unsupported-refinement-on-prefixed-string": {
+			// This hex value encodes the Nullness refinement as Key(100), which doesn't exist and should be ignored.
+			// The hex value also includes a valid string prefix which should be preserved.
+			hex: "c70e0c8264c202a97072656669783a2f2f",
+			expectedValue: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyStringPrefix: refinement.NewStringPrefix("prefix://"),
+			}),
+			typ: String,
+		},
+	}
+	for name, test := range tests {
+		name, test := name, test
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			b, err := hex.DecodeString(test.hex)
+			if err != nil {
+				t.Fatalf("unexpected error parsing hex: %s", err)
+			}
+
+			val, err := ValueFromMsgPack(b, test.typ)
+			if err != nil {
+				t.Fatalf("unexpected error unmarshaling: %s", err)
+			}
+
+			if test.expectedValue.String() != val.String() {
+				t.Errorf("Unexpected results (-wanted +got): %s", cmp.Diff(test.expectedValue, val))
+			}
+		})
+	}
+}
 
 // This test covers certain scenarios where we ignore refinement data during marshalling that are either invalid or not needed.
-func TestMarshalMsgPack_refinement_exceptions(t *testing.T) {
+func TestMarshalMsgPack_refinements(t *testing.T) {
 	t.Parallel()
 
 	// Hex encoding of the long prefix refinements that are eventually truncated in this test
