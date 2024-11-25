@@ -499,3 +499,72 @@ func TestImportResourceStateClientCapabilities(t *testing.T) {
 		})
 	}
 }
+
+func TestOpenEphemeralResourceClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		capabilities *tfprotov5.OpenEphemeralResourceClientCapabilities
+		expected     []map[string]interface{}
+	}{
+		"nil": {
+			capabilities: nil,
+			expected: []map[string]interface{}{
+				{
+					"@level":   "trace",
+					"@message": "No announced client capabilities",
+					"@module":  "sdk.proto",
+				},
+			},
+		},
+		"empty": {
+			capabilities: &tfprotov5.OpenEphemeralResourceClientCapabilities{},
+			expected: []map[string]interface{}{
+				{
+					"@level":                                "trace",
+					"@message":                              "Announced client capabilities",
+					"@module":                               "sdk.proto",
+					"tf_client_capability_deferral_allowed": false,
+				},
+			},
+		},
+		"deferral_allowed": {
+			capabilities: &tfprotov5.OpenEphemeralResourceClientCapabilities{
+				DeferralAllowed: true,
+			},
+			expected: []map[string]interface{}{
+				{
+					"@level":                                "trace",
+					"@message":                              "Announced client capabilities",
+					"@module":                               "sdk.proto",
+					"tf_client_capability_deferral_allowed": true,
+				},
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			var output bytes.Buffer
+
+			ctx := tfsdklogtest.RootLogger(context.Background(), &output)
+			ctx = logging.ProtoSubsystemContext(ctx, tfsdklog.Options{})
+
+			tf5serverlogging.OpenEphemeralResourceClientCapabilities(ctx, testCase.capabilities)
+
+			entries, err := tfsdklogtest.MultilineJSONDecode(&output)
+
+			if err != nil {
+				t.Fatalf("unable to read multiple line JSON: %s", err)
+			}
+
+			if diff := cmp.Diff(entries, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}

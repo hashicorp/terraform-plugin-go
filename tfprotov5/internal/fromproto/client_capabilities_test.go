@@ -292,3 +292,43 @@ func TestImportResourceStateClientCapabilities(t *testing.T) {
 		})
 	}
 }
+
+func TestOpenEphemeralResourceClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfplugin5.ClientCapabilities
+		expected *tfprotov5.OpenEphemeralResourceClientCapabilities
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in:       &tfplugin5.ClientCapabilities{},
+			expected: &tfprotov5.OpenEphemeralResourceClientCapabilities{},
+		},
+		"DeferralAllowed": {
+			in: &tfplugin5.ClientCapabilities{
+				DeferralAllowed: true,
+			},
+			expected: &tfprotov5.OpenEphemeralResourceClientCapabilities{
+				DeferralAllowed: true,
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := fromproto.OpenEphemeralResourceClientCapabilities(testCase.in)
+
+			if diff := cmp.Diff(got, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}

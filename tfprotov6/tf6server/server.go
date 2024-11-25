@@ -717,7 +717,6 @@ func (s *server) ValidateResourceConfig(ctx context.Context, protoReq *tfplugin6
 
 	req := fromproto.ValidateResourceConfigRequest(protoReq)
 
-	tf6serverlogging.ValidateResourceConfigClientCapabilities(ctx, req.ClientCapabilities)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
@@ -855,7 +854,6 @@ func (s *server) ApplyResourceChange(ctx context.Context, protoReq *tfplugin6.Ap
 
 	req := fromproto.ApplyResourceChangeRequest(protoReq)
 
-	tf6serverlogging.ApplyResourceChangeClientCapabilities(ctx, req.ClientCapabilities)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "PlannedState", req.PlannedState)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "PriorState", req.PriorState)
@@ -1009,6 +1007,7 @@ func (s *server) ValidateEphemeralResourceConfig(ctx context.Context, protoReq *
 	rpc := "ValidateEphemeralResourceConfig"
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.EphemeralResourceContext(ctx, protoReq.TypeName)
 	ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
@@ -1037,6 +1036,8 @@ func (s *server) ValidateEphemeralResourceConfig(ctx context.Context, protoReq *
 
 	req := fromproto.ValidateEphemeralResourceConfigRequest(protoReq)
 
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
+
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
 	// TODO: Update this to call downstream once optional interface is removed
@@ -1059,6 +1060,7 @@ func (s *server) OpenEphemeralResource(ctx context.Context, protoReq *tfplugin6.
 	rpc := "OpenEphemeralResource"
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.EphemeralResourceContext(ctx, protoReq.TypeName)
 	ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
@@ -1087,6 +1089,9 @@ func (s *server) OpenEphemeralResource(ctx context.Context, protoReq *tfplugin6.
 
 	req := fromproto.OpenEphemeralResourceRequest(protoReq)
 
+	tf6serverlogging.OpenEphemeralResourceClientCapabilities(ctx, req.ClientCapabilities)
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
+
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
 	// TODO: Update this to call downstream once optional interface is removed
@@ -1099,6 +1104,12 @@ func (s *server) OpenEphemeralResource(ctx context.Context, protoReq *tfplugin6.
 	}
 
 	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "Result", resp.Result)
+	tf6serverlogging.Deferred(ctx, resp.Deferred)
+
+	if resp.Deferred != nil && (req.ClientCapabilities == nil || !req.ClientCapabilities.DeferralAllowed) {
+		resp.Diagnostics = append(resp.Diagnostics, invalidDeferredResponseDiag(resp.Deferred.Reason))
+	}
 
 	protoResp := toproto.OpenEphemeralResource_Response(resp)
 
@@ -1109,6 +1120,7 @@ func (s *server) RenewEphemeralResource(ctx context.Context, protoReq *tfplugin6
 	rpc := "RenewEphemeralResource"
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.EphemeralResourceContext(ctx, protoReq.TypeName)
 	ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
@@ -1159,6 +1171,7 @@ func (s *server) CloseEphemeralResource(ctx context.Context, protoReq *tfplugin6
 	rpc := "CloseEphemeralResource"
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.EphemeralResourceContext(ctx, protoReq.TypeName)
 	ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")

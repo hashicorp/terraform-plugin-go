@@ -19,8 +19,8 @@ jobs:
   protoc:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5.1.0
         with:
           go-version-file: 'go.mod'
       - uses: arduino/setup-protoc@c65c819552d16ad3c9b72d9dfd5ba5237b9c906b # v3.0.0
@@ -29,7 +29,7 @@ jobs:
           # pinned here to prevent unexpected differences. Follow the
           # https://github.com/protocolbuffers/protobuf repository for protoc
           # release updates.
-          version: '26.1'
+          version: '27.3'
       - run: go mod download
       - run: make tools
       - run: make protoc

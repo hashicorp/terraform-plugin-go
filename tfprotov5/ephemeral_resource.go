@@ -18,11 +18,11 @@ type EphemeralResourceMetadata struct {
 // EphemeralResourceServer is an interface containing the methods an ephemeral resource
 // implementation needs to fill.
 type EphemeralResourceServer interface {
-	// ValidateEphemeralResourceConfig is called when Terraform is checking that a
-	// ephemeral resource's configuration is valid. It is guaranteed to have types
+	// ValidateEphemeralResourceConfig is called when Terraform is checking that an
+	// ephemeral resource configuration is valid. It is guaranteed to have types
 	// conforming to your schema, but it is not guaranteed that all values
 	// will be known. This is your opportunity to do custom or advanced
-	// validation prior to ephemeral resource creation.
+	// validation prior to an ephemeral resource being opened.
 	ValidateEphemeralResourceConfig(context.Context, *ValidateEphemeralResourceConfigRequest) (*ValidateEphemeralResourceConfigResponse, error)
 
 	// OpenEphemeralResource is called when Terraform wants to open the ephemeral resource,
@@ -35,8 +35,7 @@ type EphemeralResourceServer interface {
 	// OpenEphemeralResource call or a previous RenewEphemeralResource call.
 	RenewEphemeralResource(context.Context, *RenewEphemeralResourceRequest) (*RenewEphemeralResourceResponse, error)
 
-	// CloseEphemeralResource is called when Terraform is closing the ephemeral resource at
-	// the end of the Terraform run.
+	// CloseEphemeralResource is called when Terraform is closing the ephemeral resource.
 	CloseEphemeralResource(context.Context, *CloseEphemeralResourceRequest) (*CloseEphemeralResourceResponse, error)
 }
 
@@ -85,27 +84,31 @@ type OpenEphemeralResourceRequest struct {
 	// This configuration will always be fully known. If Config contains unknown values,
 	// Terraform will defer the OpenEphemeralResource RPC until apply.
 	Config *DynamicValue
+
+	// ClientCapabilities defines optionally supported protocol features for the
+	// OpenEphemeralResource RPC, such as forward-compatible Terraform behavior changes.
+	ClientCapabilities *OpenEphemeralResourceClientCapabilities
 }
 
 // OpenEphemeralResourceResponse is the response from the provider about the current
 // state of the opened ephemeral resource.
 type OpenEphemeralResourceResponse struct {
-	// State is the provider's understanding of what the ephemeral resource's
-	// state is after it has been opened, represented as a `DynamicValue`.
+	// Result is the provider's understanding of what the ephemeral resource's
+	// data is after it has been opened, represented as a `DynamicValue`.
 	// See the documentation for `DynamicValue` for information about
 	// safely creating the `DynamicValue`.
 	//
 	// Any attribute, whether computed or not, that has a known value in
 	// the Config in the OpenEphemeralResourceRequest must be preserved
-	// exactly as it was in State.
+	// exactly as it was in Result.
 	//
 	// Any attribute in the Config in the OpenEphemeralResourceRequest
 	// that is unknown must take on a known value at this time. No unknown
-	// values are allowed in the State.
+	// values are allowed in the Result.
 	//
-	// The state should be represented as a tftypes.Object, with each
+	// The result should be represented as a tftypes.Object, with each
 	// attribute and nested block getting its own key and value.
-	State *DynamicValue
+	Result *DynamicValue
 
 	// Diagnostics report errors or warnings related to opening the
 	// requested ephemeral resource. Returning an empty slice
@@ -113,9 +116,8 @@ type OpenEphemeralResourceResponse struct {
 	// generated.
 	Diagnostics []*Diagnostic
 
-	// Private should be set to any state that the provider would like sent
-	// with requests for this ephemeral resource. This state will be associated with
-	// the ephemeral resource, but will not be considered when calculating diffs.
+	// Private should be set to any private data that the provider would like to be
+	// sent to the next Renew or Close call.
 	Private []byte
 
 	// RenewAt indicates to Terraform that the ephemeral resource
@@ -123,9 +125,9 @@ type OpenEphemeralResourceResponse struct {
 	// call the RenewEphemeralResource RPC when the specified time has passed.
 	RenewAt time.Time
 
-	// IsClosable indicates to Terraform whether the ephemeral resource
-	// implements the CloseEphemeralResource RPC.
-	IsClosable bool
+	// Deferred is used to indicate to Terraform that the OpenEphemeralResource operation
+	// needs to be deferred for a reason.
+	Deferred *Deferred
 }
 
 // RenewEphemeralResourceRequest is the request Terraform sends when it
@@ -134,27 +136,16 @@ type RenewEphemeralResourceRequest struct {
 	// TypeName is the type of resource Terraform is renewing.
 	TypeName string
 
-	// State is the state of the ephemeral resource from the OpenEphemeralResource
-	// RPC call. See the documentation on `DynamicValue` for more information
-	// about safely accessing the configuration.
+	// Private is any provider-defined private data stored with the
+	// ephemeral resource from the most recent Open or Renew call.
 	//
-	// The configuration is represented as a tftypes.Object, with each
-	// attribute and nested block getting its own key and value.
-	//
-	// This prior state will always be fully known.
-	State *DynamicValue
-
-	// Private is any provider-defined private state stored with the
-	// ephemeral resource. It is used for keeping state with the resource that is not
-	// meant to be included when calculating diffs.
-	//
-	// To ensure private state data is preserved, copy any necessary data to
+	// To ensure private data is preserved, copy any necessary data to
 	// the RenewEphemeralResourceResponse type Private field.
 	Private []byte
 }
 
-// RenewEphemeralResourceResponse is the response from the provider about the current
-// state of the renewed ephemeral resource.
+// RenewEphemeralResourceResponse is the response from the provider after an ephemeral resource
+// has been renewed.
 type RenewEphemeralResourceResponse struct {
 	// Diagnostics report errors or warnings related to renewing the
 	// requested ephemeral resource. Returning an empty slice
@@ -162,9 +153,8 @@ type RenewEphemeralResourceResponse struct {
 	// generated.
 	Diagnostics []*Diagnostic
 
-	// Private should be set to any state that the provider would like sent
-	// with requests for this ephemeral resource. This state will be associated with
-	// the ephemeral resource, but will not be considered when calculating diffs.
+	// Private should be set to any private data that the provider would like to be
+	// sent to the next Renew or Close call.
 	Private []byte
 
 	// RenewAt indicates to Terraform that the ephemeral resource
@@ -179,19 +169,8 @@ type CloseEphemeralResourceRequest struct {
 	// TypeName is the type of resource Terraform is closing.
 	TypeName string
 
-	// State is the state of the ephemeral resource from the OpenEphemeralResource
-	// RPC call. See the documentation on `DynamicValue` for more information
-	// about safely accessing the configuration.
-	//
-	// The configuration is represented as a tftypes.Object, with each
-	// attribute and nested block getting its own key and value.
-	//
-	// This prior state will always be fully known.
-	State *DynamicValue
-
-	// Private is any provider-defined private state stored with the
-	// ephemeral resource. It is used for keeping state with the resource that is not
-	// meant to be included when calculating diffs.
+	// Private is any provider-defined private data stored with the
+	// ephemeral resource from the most recent Open or Renew call.
 	Private []byte
 }
 
