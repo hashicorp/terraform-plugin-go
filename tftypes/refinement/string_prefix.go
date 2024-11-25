@@ -3,19 +3,24 @@
 
 package refinement
 
+import "fmt"
+
 // TODO: doc
 type StringPrefix struct {
 	value string
 }
 
-func (s StringPrefix) Equal(Refinement) bool {
-	// TODO: implement
-	return false
+func (s StringPrefix) Equal(other Refinement) bool {
+	otherVal, ok := other.(StringPrefix)
+	if !ok {
+		return false
+	}
+
+	return s.PrefixValue() == otherVal.PrefixValue()
 }
 
 func (s StringPrefix) String() string {
-	// TODO: implement
-	return "todo - stringPrefix"
+	return fmt.Sprintf("prefix = %q", s.PrefixValue())
 }
 
 // TODO: doc

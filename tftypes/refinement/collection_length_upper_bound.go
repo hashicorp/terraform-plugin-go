@@ -3,19 +3,24 @@
 
 package refinement
 
+import "fmt"
+
 // TODO: doc
 type CollectionLengthUpperBound struct {
 	value int64
 }
 
-func (n CollectionLengthUpperBound) Equal(Refinement) bool {
-	// TODO: implement
-	return false
+func (n CollectionLengthUpperBound) Equal(other Refinement) bool {
+	otherVal, ok := other.(CollectionLengthUpperBound)
+	if !ok {
+		return false
+	}
+
+	return n.UpperBound() == otherVal.UpperBound()
 }
 
 func (n CollectionLengthUpperBound) String() string {
-	// TODO: implement
-	return "todo - CollectionLengthUpperBound"
+	return fmt.Sprintf("length upper bound = %d", n.UpperBound())
 }
 
 // TODO: doc

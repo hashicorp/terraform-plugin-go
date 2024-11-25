@@ -4,6 +4,7 @@
 package refinement
 
 import (
+	"fmt"
 	"math/big"
 )
 
@@ -13,14 +14,22 @@ type NumberUpperBound struct {
 	value     *big.Float
 }
 
-func (n NumberUpperBound) Equal(Refinement) bool {
-	// TODO: implement
-	return false
+func (n NumberUpperBound) Equal(other Refinement) bool {
+	otherVal, ok := other.(NumberUpperBound)
+	if !ok {
+		return false
+	}
+
+	return n.IsInclusive() == otherVal.IsInclusive() && n.UpperBound().Cmp(otherVal.UpperBound()) == 0
 }
 
 func (n NumberUpperBound) String() string {
-	// TODO: implement
-	return "todo - NumberUpperBound"
+	rangeDescription := "inclusive"
+	if !n.IsInclusive() {
+		rangeDescription = "exclusive"
+	}
+
+	return fmt.Sprintf("upper bound = %s (%s)", n.UpperBound().String(), rangeDescription)
 }
 
 // TODO: doc

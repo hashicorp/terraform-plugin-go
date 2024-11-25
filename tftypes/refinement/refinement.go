@@ -5,6 +5,8 @@ package refinement
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 )
 
 type Key int64
@@ -78,10 +80,41 @@ type Refinement interface {
 // TODO: docs
 type Refinements map[Key]Refinement
 
-func (r Refinements) Equal(o Refinements) bool {
-	return false
+func (r Refinements) Equal(other Refinements) bool {
+	if len(r) != len(other) {
+		return false
+	}
+
+	for key, refnVal := range r {
+		otherRefnVal, ok := other[key]
+		if !ok {
+			// Didn't find a refinement at the same key
+			return false
+		}
+
+		if !refnVal.Equal(otherRefnVal) {
+			// Refinement data is not equal
+			return false
+		}
+	}
+
+	return true
 }
 func (r Refinements) String() string {
-	// TODO: Not sure when this is used, should just aggregate and call all underlying refinements.String() method
-	return "todo"
+	var res strings.Builder
+
+	keys := make([]Key, 0, len(r))
+	for k := range r {
+		keys = append(keys, k)
+	}
+
+	sort.Slice(keys, func(a, b int) bool { return keys[a] < keys[b] })
+	for pos, key := range keys {
+		if pos != 0 {
+			res.WriteString(", ")
+		}
+		res.WriteString(r[key].String())
+	}
+
+	return res.String()
 }

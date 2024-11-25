@@ -3,19 +3,24 @@
 
 package refinement
 
+import "fmt"
+
 // TODO: doc
 type CollectionLengthLowerBound struct {
 	value int64
 }
 
-func (n CollectionLengthLowerBound) Equal(Refinement) bool {
-	// TODO: implement
-	return false
+func (n CollectionLengthLowerBound) Equal(other Refinement) bool {
+	otherVal, ok := other.(CollectionLengthLowerBound)
+	if !ok {
+		return false
+	}
+
+	return n.LowerBound() == otherVal.LowerBound()
 }
 
 func (n CollectionLengthLowerBound) String() string {
-	// TODO: implement
-	return "todo - CollectionLengthLowerBound"
+	return fmt.Sprintf("length lower bound = %d", n.LowerBound())
 }
 
 // TODO: doc
