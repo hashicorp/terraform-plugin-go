@@ -17,7 +17,6 @@ import (
 	msgpackCodes "github.com/vmihailenco/msgpack/v5/msgpcode"
 )
 
-// https://github.com/zclconf/go-cty/blob/main/cty/msgpack/unknown.go#L32
 const unknownWithRefinementsExt = 0x0c
 
 type msgPackUnknownType struct{}
