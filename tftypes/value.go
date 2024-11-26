@@ -46,6 +46,8 @@ type Value struct {
 	typ   Type
 	value interface{}
 
+	// refinements represents the unknown value refinement data associated with this Value.
+	// This field is only populated for unknown values.
 	refinements refinement.Refinements
 }
 
