@@ -716,6 +716,7 @@ func (s *server) ValidateResourceTypeConfig(ctx context.Context, protoReq *tfplu
 
 	req := fromproto.ValidateResourceTypeConfigRequest(protoReq)
 
+	tf5serverlogging.ValidateResourceTypeConfigClientCapabilities(ctx, req.ClientCapabilities)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 
 	ctx = tf5serverlogging.DownstreamRequest(ctx)

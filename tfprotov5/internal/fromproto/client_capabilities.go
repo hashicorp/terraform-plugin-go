@@ -68,18 +68,6 @@ func PlanResourceChangeClientCapabilities(in *tfplugin5.ClientCapabilities) *tfp
 	return resp
 }
 
-func ApplyResourceChangeClientCapabilities(in *tfplugin5.ClientCapabilities) *tfprotov5.ApplyResourceChangeClientCapabilities {
-	if in == nil {
-		return nil
-	}
-
-	resp := &tfprotov5.ApplyResourceChangeClientCapabilities{
-		WriteOnlyAttributesAllowed: in.WriteOnlyAttributesAllowed,
-	}
-
-	return resp
-}
-
 func ImportResourceStateClientCapabilities(in *tfplugin5.ClientCapabilities) *tfprotov5.ImportResourceStateClientCapabilities {
 	if in == nil {
 		return nil

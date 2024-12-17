@@ -514,7 +514,6 @@ message ApplyResourceChange {
         DynamicValue config = 4;
         bytes planned_private = 5;
         DynamicValue provider_meta = 6;
-        ClientCapabilities client_capabilities = 7;
     }
     message Response {
         DynamicValue new_state = 1;

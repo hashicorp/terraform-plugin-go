@@ -417,10 +417,6 @@ type ApplyResourceChangeRequest struct {
 	//
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
-
-	// ClientCapabilities defines optionally supported protocol features for the
-	// ApplyResourceChangeRequest RPC, such as forward-compatible Terraform behavior changes.
-	ClientCapabilities *ApplyResourceChangeClientCapabilities
 }
 
 // ApplyResourceChangeResponse is the response from the provider about what the

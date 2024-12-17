@@ -213,46 +213,6 @@ func TestPlanResourceChangeClientCapabilities(t *testing.T) {
 	}
 }
 
-func TestApplyResourceChangeClientCapabilities(t *testing.T) {
-	t.Parallel()
-
-	testCases := map[string]struct {
-		in       *tfplugin5.ClientCapabilities
-		expected *tfprotov5.ApplyResourceChangeClientCapabilities
-	}{
-		"nil": {
-			in:       nil,
-			expected: nil,
-		},
-		"zero": {
-			in:       &tfplugin5.ClientCapabilities{},
-			expected: &tfprotov5.ApplyResourceChangeClientCapabilities{},
-		},
-		"WriteOnlyAttributesAllowed": {
-			in: &tfplugin5.ClientCapabilities{
-				WriteOnlyAttributesAllowed: true,
-			},
-			expected: &tfprotov5.ApplyResourceChangeClientCapabilities{
-				WriteOnlyAttributesAllowed: true,
-			},
-		},
-	}
-
-	for name, testCase := range testCases {
-		name, testCase := name, testCase
-
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
-			got := fromproto.ApplyResourceChangeClientCapabilities(testCase.in)
-
-			if diff := cmp.Diff(got, testCase.expected); diff != "" {
-				t.Errorf("unexpected difference: %s", diff)
-			}
-		})
-	}
-}
-
 func TestImportResourceStateClientCapabilities(t *testing.T) {
 	t.Parallel()
 

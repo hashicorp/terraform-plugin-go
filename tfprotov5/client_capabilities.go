@@ -48,15 +48,6 @@ type PlanResourceChangeClientCapabilities struct {
 	DeferralAllowed bool
 }
 
-// ApplyResourceChangeClientCapabilities allows Terraform to publish information
-// regarding optionally supported protocol features for the ApplyResourceChange RPC,
-// such as forward-compatible Terraform behavior changes.
-type ApplyResourceChangeClientCapabilities struct {
-	// WriteOnlyAttributesAllowed signals that the client is able to
-	// handle write_only attributes for managed resources.
-	WriteOnlyAttributesAllowed bool
-}
-
 // ImportResourceStateClientCapabilities allows Terraform to publish information
 // regarding optionally supported protocol features for the ImportResourceState RPC,
 // such as forward-compatible Terraform behavior changes.

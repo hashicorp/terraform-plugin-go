@@ -80,20 +80,6 @@ func PlanResourceChangeClientCapabilities(ctx context.Context, capabilities *tfp
 	logging.ProtocolTrace(ctx, "Announced client capabilities", responseFields)
 }
 
-// ApplyResourceChangeClientCapabilities generates a TRACE "Announced client capabilities" log.
-func ApplyResourceChangeClientCapabilities(ctx context.Context, capabilities *tfprotov6.ApplyResourceChangeClientCapabilities) {
-	if capabilities == nil {
-		logging.ProtocolTrace(ctx, "No announced client capabilities", map[string]interface{}{})
-		return
-	}
-
-	responseFields := map[string]interface{}{
-		logging.KeyClientCapabilityWriteOnlyAttributesAllowed: capabilities.WriteOnlyAttributesAllowed,
-	}
-
-	logging.ProtocolTrace(ctx, "Announced client capabilities", responseFields)
-}
-
 // ImportResourceStateClientCapabilities generates a TRACE "Announced client capabilities" log.
 func ImportResourceStateClientCapabilities(ctx context.Context, capabilities *tfprotov6.ImportResourceStateClientCapabilities) {
 	if capabilities == nil {

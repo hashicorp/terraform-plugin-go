@@ -28,18 +28,6 @@ func TestApplyResourceChangeRequest(t *testing.T) {
 			in:       &tfplugin5.ApplyResourceChange_Request{},
 			expected: &tfprotov5.ApplyResourceChangeRequest{},
 		},
-		"ClientCapabilities": {
-			in: &tfplugin5.ApplyResourceChange_Request{
-				ClientCapabilities: &tfplugin5.ClientCapabilities{
-					WriteOnlyAttributesAllowed: true,
-				},
-			},
-			expected: &tfprotov5.ApplyResourceChangeRequest{
-				ClientCapabilities: &tfprotov5.ApplyResourceChangeClientCapabilities{
-					WriteOnlyAttributesAllowed: true,
-				},
-			},
-		},
 		"Config": {
 			in: &tfplugin5.ApplyResourceChange_Request{
 				Config: testTfplugin5DynamicValue(),
