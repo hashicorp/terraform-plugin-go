@@ -49,7 +49,7 @@ const (
 	//
 	// In the future, it may be possible to include this information directly
 	// in the protocol buffers rather than recreating a constant here.
-	protocolVersionMinor uint = 7
+	protocolVersionMinor uint = 8
 )
 
 // protocolVersion represents the combined major and minor version numbers of
@@ -717,6 +717,7 @@ func (s *server) ValidateResourceConfig(ctx context.Context, protoReq *tfplugin6
 
 	req := fromproto.ValidateResourceConfigRequest(protoReq)
 
+	tf6serverlogging.ValidateResourceConfigClientCapabilities(ctx, req.ClientCapabilities)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)

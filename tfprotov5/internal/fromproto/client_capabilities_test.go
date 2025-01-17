@@ -7,10 +7,51 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
+
+func TestValidateResourceTypeConfigClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfplugin5.ClientCapabilities
+		expected *tfprotov5.ValidateResourceTypeConfigClientCapabilities
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in:       &tfplugin5.ClientCapabilities{},
+			expected: &tfprotov5.ValidateResourceTypeConfigClientCapabilities{},
+		},
+		"WriteOnlyAttributesAllowed": {
+			in: &tfplugin5.ClientCapabilities{
+				WriteOnlyAttributesAllowed: true,
+			},
+			expected: &tfprotov5.ValidateResourceTypeConfigClientCapabilities{
+				WriteOnlyAttributesAllowed: true,
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := fromproto.ValidateResourceTypeConfigClientCapabilities(testCase.in)
+
+			if diff := cmp.Diff(got, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
 
 func TestConfigureProviderClientCapabilities(t *testing.T) {
 	t.Parallel()

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
@@ -470,6 +471,18 @@ func TestValidateResourceTypeConfigRequest(t *testing.T) {
 		"zero": {
 			in:       &tfplugin5.ValidateResourceTypeConfig_Request{},
 			expected: &tfprotov5.ValidateResourceTypeConfigRequest{},
+		},
+		"ClientCapabilities": {
+			in: &tfplugin5.ValidateResourceTypeConfig_Request{
+				ClientCapabilities: &tfplugin5.ClientCapabilities{
+					WriteOnlyAttributesAllowed: true,
+				},
+			},
+			expected: &tfprotov5.ValidateResourceTypeConfigRequest{
+				ClientCapabilities: &tfprotov5.ValidateResourceTypeConfigClientCapabilities{
+					WriteOnlyAttributesAllowed: true,
+				},
+			},
 		},
 		"Config": {
 			in: &tfplugin5.ValidateResourceTypeConfig_Request{
