@@ -255,7 +255,7 @@ type SchemaAttribute struct {
 	Deprecated bool
 
 	// WriteOnly, when set to true, indicates that the attribute value will
-	// be provided via configuration and must be omitted from state. WriteOnly
+	// be provided via configuration and must be omitted from plan and state response objects. WriteOnly
 	// must be combined with Optional or Required, and is only valid for managed
 	// resource schemas.
 	WriteOnly bool
