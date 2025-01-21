@@ -1,0 +1,6 @@
+kind: BREAKING CHANGES
+body: 'tfprotov5+tfprotov6: Removed temporary `ProviderServerWithEphemeralResources`
+  interface type. Use `EphemeralResourceServer` instead.'
+time: 2025-01-21T17:45:09.953934-05:00
+custom:
+  Issue: "442"
