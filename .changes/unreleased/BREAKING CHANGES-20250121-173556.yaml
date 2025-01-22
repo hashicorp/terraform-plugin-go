@@ -1,7 +1,0 @@
-kind: BREAKING CHANGES
-body: 'tfprotov5+tfprotov6: `EphemeralResourceServer` interface is now required in
-  `ProviderServer`. Implementations not needing ephemeral resource support can return
-  errors from the `*EphemeralResource` methods.'
-time: 2025-01-21T17:35:56.137392-05:00
-custom:
-  Issue: "442"

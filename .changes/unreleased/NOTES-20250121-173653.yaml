@@ -1,7 +1,0 @@
-kind: NOTES
-body: 'all: To prevent compilation errors, ensure your Go module is updated to at least
-  terraform-plugin-framework@v1.13.0, terraform-plugin-mux@v0.17.0, terraform-plugin-sdk/v2@v2.35.0,
-  and terraform-plugin-testing@v1.11.0 before upgrading this dependency.'
-time: 2025-01-21T17:36:53.645571-05:00
-custom:
-  Issue: "442"

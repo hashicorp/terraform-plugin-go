@@ -1,5 +1,0 @@
-kind: FEATURES
-body: 'tfprotov5+tfprotov6: Upgraded protocols and added types to support write-only attributes'
-time: 2025-01-21T16:34:56.142885-05:00
-custom:
-    Issue: "462"
