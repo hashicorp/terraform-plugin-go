@@ -1,9 +1,9 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
-// Terraform Plugin RPC protocol version 6.8
+// Terraform Plugin RPC protocol version 6.9
 //
-// This file defines version 6.8 of the RPC protocol. To implement a plugin
+// This file defines version 6.9 of the RPC protocol. To implement a plugin
 // against this protocol, copy this definition into your own codebase and
 // use protoc to generate stubs for your target language.
 //
@@ -161,6 +161,31 @@ message Schema {
     Block block = 2;
 }
 
+// ResourceIdentitySchema is the identity schema for a Resource.
+message ResourceIdentitySchema {
+    // IdentityAttribute represents one value of data within resource identity.
+    // These are always used in resource identity comparisons.
+    message IdentityAttribute {
+        string name = 1;
+        bytes type = 2;
+        bool required_for_import = 3;
+    }
+
+    // The version of the schema
+    int64 identity_version = 1;
+
+    // The list of attributes that make up the identity of the resource
+    repeated IdentityAttribute identity_attributes = 2;
+}
+
+// ResourceIdentityData is a separate message for better extensibility
+message ResourceIdentityData {
+    // identity_data is the resource identity data for the given definition.
+    // It should be decoded using the identity schema.
+    DynamicValue identity_data = 1;
+}
+
+
 message Function {
     // parameters is the ordered list of positional function parameters.
     repeated Parameter parameters = 1;
@@ -282,10 +307,12 @@ service Provider {
     // GetSchema returns schema information for the provider, data resources,
     // and managed resources.
     rpc GetProviderSchema(GetProviderSchema.Request) returns (GetProviderSchema.Response);
+    rpc GetResourceIdentitySchemas(GetResourceIdentitySchemas.Request) returns (GetResourceIdentitySchemas.Response);
     rpc ValidateProviderConfig(ValidateProviderConfig.Request) returns (ValidateProviderConfig.Response);
     rpc ValidateResourceConfig(ValidateResourceConfig.Request) returns (ValidateResourceConfig.Response);
     rpc ValidateDataResourceConfig(ValidateDataResourceConfig.Request) returns (ValidateDataResourceConfig.Response);
     rpc UpgradeResourceState(UpgradeResourceState.Request) returns (UpgradeResourceState.Response);
+    rpc UpgradeResourceIdentity(UpgradeResourceIdentity.Request) returns (UpgradeResourceIdentity.Response);
 
     //////// One-time initialization, called before other functions below
     rpc ConfigureProvider(ConfigureProvider.Request) returns (ConfigureProvider.Response);
@@ -311,7 +338,7 @@ service Provider {
 
     // CallFunction runs the provider-defined function logic and returns
     // the result with any diagnostics.
-    rpc CallFunction(CallFunction.Request) returns (CallFunction.Response);
+    rpc CallFunction(CallFunction.Request) returns (CallFunction.Response);   
 
     //////// Graceful Shutdown
     rpc StopProvider(StopProvider.Request) returns (StopProvider.Response);
@@ -467,6 +494,7 @@ message ReadResource {
         // deferred is set if the provider is deferring the change. If set the caller
         // needs to handle the deferral.
         Deferred deferred = 4;
+        ResourceIdentityData new_identity = 5;
     }
 }
 
@@ -503,6 +531,7 @@ message PlanResourceChange {
         // deferred is set if the provider is deferring the change. If set the caller
         // needs to handle the deferral.
         Deferred deferred = 6;
+        ResourceIdentityData planned_identity = 7;
     }
 }
 
@@ -532,6 +561,7 @@ message ApplyResourceChange {
         //     ==== THIS MUST BE LEFT UNSET IN ALL OTHER SDKS ====
         //     ====              DO NOT USE THIS              ====
         bool legacy_type_system = 4;
+        ResourceIdentityData new_identity = 5;
     }
 }
 
@@ -540,12 +570,14 @@ message ImportResourceState {
         string type_name = 1;
         string id = 2;
         ClientCapabilities client_capabilities = 3;
+        ResourceIdentityData identity = 4;
     }
 
     message ImportedResource {
         string type_name = 1;
         DynamicValue state = 2;
         bytes private = 3;
+        ResourceIdentityData identity = 4;
     }
 
     message Response {
@@ -685,5 +717,32 @@ message CloseEphemeralResource {
     }
     message Response {
         repeated Diagnostic diagnostics = 1;
+    }
+}
+
+// Returns resource identity schemas for all resources
+message GetResourceIdentitySchemas {
+    message Request {
+    }
+    message Response {
+        map<string, ResourceIdentitySchema> identity_schemas = 1;
+        repeated Diagnostic diagnostics = 2;
+    }
+}
+
+message UpgradeResourceIdentity {
+    message Request {
+        string type_name = 1;
+
+        // version is the identity_schema_version number recorded in
+        // the state file
+        int64 version = 2;
+
+        // raw_identity is the stored identity from the state in json
+        bytes raw_identity = 3;
+    }
+    message Response {
+        ResourceIdentityData upgraded_identity = 1;
+        repeated Diagnostic diagnostics = 2;
     }
 }
