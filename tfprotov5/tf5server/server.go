@@ -541,6 +541,32 @@ func (s *server) GetSchema(ctx context.Context, protoReq *tfplugin5.GetProviderS
 	return protoResp, nil
 }
 
+func (s *server) GetResourceIdentitySchemas(ctx context.Context, protoReq *tfplugin5.GetResourceIdentitySchemas_Request) (*tfplugin5.GetResourceIdentitySchemas_Response, error) {
+	rpc := "GetResourceIdentitySchemas"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.GetResourceIdentitySchemasRequest(protoReq)
+
+	ctx = tf5serverlogging.DownstreamRequest(ctx)
+
+	resp, err := s.downstream.GetResourceIdentitySchemas(ctx, req)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.GetResourceIdentitySchemas_Response(resp)
+
+	return protoResp, nil
+}
+
 func (s *server) PrepareProviderConfig(ctx context.Context, protoReq *tfplugin5.PrepareProviderConfig_Request) (*tfplugin5.PrepareProviderConfig_Response, error) {
 	rpc := "PrepareProviderConfig"
 	ctx = s.loggingContext(ctx)
@@ -759,6 +785,34 @@ func (s *server) UpgradeResourceState(ctx context.Context, protoReq *tfplugin5.U
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "UpgradedState", resp.UpgradedState)
 
 	protoResp := toproto.UpgradeResourceState_Response(resp)
+
+	return protoResp, nil
+}
+
+func (s *server) UpgradeResourceIdentity(ctx context.Context, protoReq *tfplugin5.UpgradeResourceIdentity_Request) (*tfplugin5.UpgradeResourceIdentity_Response, error) {
+	rpc := "UpgradeResourceIdentity"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.ResourceContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.UpgradeResourceIdentityRequest(protoReq)
+
+	ctx = tf5serverlogging.DownstreamRequest(ctx)
+
+	resp, err := s.downstream.UpgradeResourceIdentity(ctx, req)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "UpgradedResourceIdentity", resp.UpgradedIdentity)
+
+	protoResp := toproto.UpgradeResourceIdentity_Response(resp)
 
 	return protoResp, nil
 }

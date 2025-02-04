@@ -31,6 +31,12 @@ type ResourceServer interface {
 	// state to upgrade it to the latest state schema.
 	UpgradeResourceState(context.Context, *UpgradeResourceStateRequest) (*UpgradeResourceStateResponse, error)
 
+	// UpgradeResourceIdentity is called when Terraform has encountered a
+	// resource with an identity state in a schema that doesn't match the schema's
+	// current version. It is the provider's responsibility to modify the
+	// identity state to upgrade it to the latest state schema.
+	UpgradeResourceIdentity(context.Context, *UpgradeResourceIdentityRequest) (*UpgradeResourceIdentityResponse, error)
+
 	// ReadResource is called when Terraform is refreshing a resource's
 	// state.
 	ReadResource(context.Context, *ReadResourceRequest) (*ReadResourceResponse, error)
@@ -130,6 +136,29 @@ type UpgradeResourceStateResponse struct {
 
 	// Diagnostics report errors or warnings related to upgrading the
 	// state of the requested resource. Returning an empty slice indicates
+	// a successful validation with no warnings or errors generated.
+	Diagnostics []*Diagnostic
+}
+
+type UpgradeResourceIdentityRequest struct {
+	// TypeName is the type of resource that Terraform needs to upgrade the
+	// identity state for.
+	TypeName string
+
+	// Version is the version of the identity state the resource currently has.
+	Version int64
+
+	// RawIdentity is the identity state as Terraform sees it right now. See the
+	// documentation for `RawIdentity` for information on how to work with the
+	// data it contains.
+	RawIdentity *RawIdentity
+}
+
+type UpgradeResourceIdentityResponse struct {
+	UpgradedIdentity *ResourceIdentityData
+
+	// Diagnostics report errors or warnings related to upgrading the
+	// identity of the requested resource. Returning an empty slice indicates
 	// a successful validation with no warnings or errors generated.
 	Diagnostics []*Diagnostic
 }
