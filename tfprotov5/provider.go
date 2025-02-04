@@ -22,6 +22,10 @@ type ProviderServer interface {
 	// and data sources.
 	GetProviderSchema(context.Context, *GetProviderSchemaRequest) (*GetProviderSchemaResponse, error)
 
+	// GetResourceIdentitySchemas is called when Terraform needs to know
+	// what the provider's resource identity schemas are.
+	GetResourceIdentitySchemas(context.Context, *GetResourceIdentitySchemasRequest) (*GetResourceIdentitySchemasResponse, error)
+
 	// PrepareProviderConfig is called to give a provider a chance to
 	// modify the configuration the user specified before validation.
 	PrepareProviderConfig(context.Context, *PrepareProviderConfigRequest) (*PrepareProviderConfigResponse, error)
@@ -61,29 +65,6 @@ type ProviderServer interface {
 	// ephemeral resource is to terraform-plugin-go, so they're their own
 	// interface that is composed into ProviderServer.
 	EphemeralResourceServer
-}
-
-// ProviderServerWithResourceIdentity is a temporary interface for servers
-// to implement Resource Identity RPC handling with:
-//
-// - GetResourceIdentitySchemas
-// - UpgradeResourceIdentity
-//
-// Deprecated: All methods will be moved into the
-// ProviderServer and ResourceServer interfaces and this interface will be removed in a future
-// version.
-type ProviderServerWithResourceIdentity interface {
-	ProviderServer
-
-	// GetResourceIdentitySchemas is called when Terraform needs to know
-	// what the provider's resource identity schemas are.
-	GetResourceIdentitySchemas(context.Context, *GetResourceIdentitySchemasRequest) (*GetResourceIdentitySchemasResponse, error) // This will go into the ProviderServer interface
-
-	// UpgradeResourceIdentity is called when Terraform has encountered a
-	// resource with an identity state in a schema that doesn't match the schema's
-	// current version. It is the provider's responsibility to modify the
-	// identity state to upgrade it to the latest state schema.
-	UpgradeResourceIdentity(context.Context, *UpgradeResourceIdentityRequest) (*UpgradeResourceIdentityResponse, error) // This will go into the ResourceServer interface
 }
 
 // GetMetadataRequest represents a GetMetadata RPC request.
@@ -170,14 +151,12 @@ type GetProviderSchemaResponse struct {
 	Diagnostics []*Diagnostic
 }
 
-// GetResourceIdentitySchemasRequest represents a Terraform RPC request for the
-// provider's resource identity schemas.
+// TODO comment
 type GetResourceIdentitySchemasRequest struct{}
 
-// GetResourceIdentitySchemasResponse represents a Terraform RPC response containing
-// the provider's resource identity schemas.
+// TODO comment
 type GetResourceIdentitySchemasResponse struct {
-	// IdentitySchemas is a map of resource names to the schema for the
+	// ResourceSchemas is a map of resource names to the schema for the
 	// identity specified for the resource. The name should be a
 	// resource name, and should be prefixed with your provider's shortname
 	// and an underscore. It should match the first label after `resource`

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
-// ErrUnknownRawIdentityType is returned when a RawIdentity has no JSON
+// ErrUnknownRawIdentityType is returned when a RawIdentity has no Flatmap or JSON
 // bytes set. This should never be returned during the normal operation of a
 // provider, and indicates one of the following:
 //
@@ -20,9 +20,9 @@ import (
 //
 // 3. The `RawIdentity` was generated or modified by something other than
 // terraform-plugin-go and is no longer a valid value.
-var ErrUnknownRawIdentityType = errors.New("RawIdentity had no JSON data set")
+var ErrUnknownRawIdentityType = errors.New("RawIdentity had no JSON or flatmap data set")
 
-// RawIdentity is the raw, undecoded identity state for providers to upgrade. It is
+// RawIdentity is the raw, undecoded state for providers to upgrade. It is
 // undecoded as Terraform, for whatever reason, doesn't have the previous
 // schema available to it, and so cannot decode the state itself and pushes
 // that responsibility off onto providers.

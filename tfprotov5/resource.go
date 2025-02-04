@@ -31,6 +31,12 @@ type ResourceServer interface {
 	// state to upgrade it to the latest state schema.
 	UpgradeResourceState(context.Context, *UpgradeResourceStateRequest) (*UpgradeResourceStateResponse, error)
 
+	// UpgradeResourceIdentity is called when Terraform has encountered a
+	// resource with an identity state in a schema that doesn't match the schema's
+	// current version. It is the provider's responsibility to modify the
+	// identity state to upgrade it to the latest state schema.
+	UpgradeResourceIdentity(context.Context, *UpgradeResourceIdentityRequest) (*UpgradeResourceIdentityResponse, error)
+
 	// ReadResource is called when Terraform is refreshing a resource's
 	// state.
 	ReadResource(context.Context, *ReadResourceRequest) (*ReadResourceResponse, error)
@@ -145,7 +151,7 @@ type UpgradeResourceIdentityRequest struct {
 	// RawIdentity is the identity state as Terraform sees it right now. See the
 	// documentation for `RawIdentity` for information on how to work with the
 	// data it contains.
-	RawState *RawState
+	RawIdentity *RawIdentity
 }
 
 type UpgradeResourceIdentityResponse struct {
@@ -160,7 +166,7 @@ type UpgradeResourceIdentityResponse struct {
 // ReadResourceRequest is the request Terraform sends when it wants to get the
 // latest state for a resource.
 type ReadResourceRequest struct {
-	// TypeName is the type of resource Terraform is requesting an updated
+	// TypeName is the type of resource Terraform is requesting an upated
 	// state for.
 	TypeName string
 
@@ -198,10 +204,6 @@ type ReadResourceRequest struct {
 	// ClientCapabilities defines optionally supported protocol features for the
 	// ReadResource RPC, such as forward-compatible Terraform behavior changes.
 	ClientCapabilities *ReadResourceClientCapabilities
-
-	// CurrentIdentity is the current identity of the resource as far as
-	// Terraform knows, represented as a `ResourceIdentityData`.
-	CurrentIdentity *ResourceIdentityData
 }
 
 // ReadResourceResponse is the response from the provider about the current
@@ -300,10 +302,6 @@ type PlanResourceChangeRequest struct {
 	// ClientCapabilities defines optionally supported protocol features for the
 	// PlanResourceChange RPC, such as forward-compatible Terraform behavior changes.
 	ClientCapabilities *PlanResourceChangeClientCapabilities
-
-	// PriorIdentity is the identity of the resource before the plan is
-	// applied, represented as a `ResourceIdentityData`.
-	PriorIdentity *ResourceIdentityData
 }
 
 // PlanResourceChangeResponse is the response from the provider about what the
@@ -448,10 +446,6 @@ type ApplyResourceChangeRequest struct {
 	//
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
-
-	// PriorIdentity is the identity of the resource before the plan is
-	// applied, represented as a `ResourceIdentityData`.
-	PriorIdentity *ResourceIdentityData
 }
 
 // ApplyResourceChangeResponse is the response from the provider about what the
@@ -583,12 +577,6 @@ type MoveResourceStateRequest struct {
 
 	// TargetTypeName is the target resource type for the move request.
 	TargetTypeName string
-
-	// SourceIdentity is the identity of the source resource.
-	SourceIdentity *RawState
-
-	// SourceIdentitySchemaVersion is the version of the source resource state.
-	SourceIdentitySchemaVersion int64
 }
 
 // MoveResourceStateResponse is the response from the provider containing
@@ -602,7 +590,4 @@ type MoveResourceStateResponse struct {
 
 	// Diagnostics report any warnings or errors related to moving the state.
 	Diagnostics []*Diagnostic
-
-	// TargetIdentity is the identity of the target resource.
-	TargetIdentity *ResourceIdentityData
 }
