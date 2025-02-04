@@ -36,6 +36,20 @@ func UpgradeResourceStateRequest(in *tfplugin5.UpgradeResourceState_Request) *tf
 	return resp
 }
 
+func UpgradeResourceIdentityRequest(in *tfplugin5.UpgradeResourceIdentity_Request) *tfprotov5.UpgradeResourceIdentityRequest {
+	if in == nil {
+		return nil
+	}
+
+	resp := &tfprotov5.UpgradeResourceIdentityRequest{
+		RawIdentity: RawIdentity(in.RawIdentity),
+		TypeName:    in.TypeName,
+		Version:     in.Version,
+	}
+
+	return resp
+}
+
 func ReadResourceRequest(in *tfplugin5.ReadResource_Request) *tfprotov5.ReadResourceRequest {
 	if in == nil {
 		return nil

@@ -45,6 +45,19 @@ func UpgradeResourceState_Response(in *tfprotov5.UpgradeResourceStateResponse) *
 	return resp
 }
 
+func UpgradeResourceIdentity_Response(in *tfprotov5.UpgradeResourceIdentityResponse) *tfplugin5.UpgradeResourceIdentity_Response {
+	if in == nil {
+		return nil
+	}
+
+	resp := &tfplugin5.UpgradeResourceIdentity_Response{
+		Diagnostics:      Diagnostics(in.Diagnostics),
+		UpgradedIdentity: ResourceIdentityData(in.UpgradedIdentity),
+	}
+
+	return resp
+}
+
 func ReadResource_Response(in *tfprotov5.ReadResourceResponse) *tfplugin5.ReadResource_Response {
 	if in == nil {
 		return nil
