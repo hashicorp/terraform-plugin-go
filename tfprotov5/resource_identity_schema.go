@@ -5,7 +5,7 @@ package tfprotov5
 
 import "github.com/hashicorp/terraform-plugin-go/tftypes"
 
-// TODO: comment
+// ResourceIdentitySchema is the identity schema for a Resource.
 type ResourceIdentitySchema struct {
 	// Version indicates which version of the schema this is. Versions
 	// should be monotonically incrementing numbers. When Terraform
@@ -21,7 +21,9 @@ type ResourceIdentitySchema struct {
 	IdentityAttributes []*ResourceIdentitySchemaAttribute
 }
 
-// TODO: comments
+// ResourceIdentitySchemaAttribute represents one value of data within
+// resource identity.
+// These are always used in resource identity comparisons.
 type ResourceIdentitySchemaAttribute struct {
 	// Name is the name of the attribute. This is what the user will put
 	// before the equals sign to assign a value to this attribute.
@@ -32,5 +34,8 @@ type ResourceIdentitySchemaAttribute struct {
 	// are supported and their behaviors.
 	Type tftypes.Type
 
+	// RequiredForImport indicates whether this attribute is required to
+	// import the resource. For example it might be false if the value
+	// can be derived from provider configuration.
 	RequiredForImport bool
 }

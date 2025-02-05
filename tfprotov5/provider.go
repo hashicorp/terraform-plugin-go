@@ -151,10 +151,12 @@ type GetProviderSchemaResponse struct {
 	Diagnostics []*Diagnostic
 }
 
-// TODO comment
+// GetResourceIdentitySchemasRequest represents a Terraform RPC request for the
+// provider's resource identity schemas.
 type GetResourceIdentitySchemasRequest struct{}
 
-// TODO comment
+// GetResourceIdentitySchemasResponse represents a Terraform RPC response containing
+// the provider's resource identity schemas.
 type GetResourceIdentitySchemasResponse struct {
 	// ResourceSchemas is a map of resource names to the schema for the
 	// identity specified for the resource. The name should be a
