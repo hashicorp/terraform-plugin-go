@@ -30,6 +30,8 @@ func ResourceIdentitySchema_IdentityAttribute(in *tfprotov5.ResourceIdentitySche
 		Name:              in.Name,
 		Type:              CtyType(in.Type),
 		RequiredForImport: in.RequiredForImport,
+		OptionalForImport: in.OptionalForImport,
+		Description:       in.Description,
 	}
 
 	return resp
