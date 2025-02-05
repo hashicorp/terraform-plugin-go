@@ -76,17 +76,19 @@ func TestApplyResourceChangeRequest(t *testing.T) {
 				TypeName: "test",
 			},
 		},
-		"PlannedIdentity": {
+		"PriorIdentity": {
 			in: &tfplugin5.ApplyResourceChange_Request{
-				PlannedIdentity: testTfplugin5ResourceIdentityData(),
+				PriorIdentity: testTfplugin5ResourceIdentityData(),
 			},
 			expected: &tfprotov5.ApplyResourceChangeRequest{
-				PlannedIdentity: testTfprotov5ResourceIdentityData(),
+				PriorIdentity: testTfprotov5ResourceIdentityData(),
 			},
 		},
 	}
 
 	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -142,17 +144,11 @@ func TestImportResourceStateRequest(t *testing.T) {
 				},
 			},
 		},
-		"Identity": {
-			in: &tfplugin5.ImportResourceState_Request{
-				Identity: testTfplugin5ResourceIdentityData(),
-			},
-			expected: &tfprotov5.ImportResourceStateRequest{
-				Identity: testTfprotov5ResourceIdentityData(),
-			},
-		},
 	}
 
 	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -239,6 +235,8 @@ func TestMoveResourceStateRequest(t *testing.T) {
 	}
 
 	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -337,6 +335,8 @@ func TestPlanResourceChangeRequest(t *testing.T) {
 	}
 
 	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -419,6 +419,8 @@ func TestReadResourceRequest(t *testing.T) {
 	}
 
 	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -473,6 +475,8 @@ func TestUpgradeResourceStateRequest(t *testing.T) {
 	}
 
 	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -527,6 +531,8 @@ func TestUpgradeResourceIdentityRequest(t *testing.T) {
 	}
 
 	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -585,6 +591,8 @@ func TestValidateResourceTypeConfigRequest(t *testing.T) {
 	}
 
 	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
