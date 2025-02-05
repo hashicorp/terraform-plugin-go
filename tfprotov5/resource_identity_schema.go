@@ -36,6 +36,16 @@ type ResourceIdentitySchemaAttribute struct {
 
 	// RequiredForImport indicates whether this attribute is required to
 	// import the resource. For example it might be false if the value
-	// can be derived from provider configuration.
+	// can be derived from provider configuration. Either this or OptionalForImport
+	// needs to be true.
 	RequiredForImport bool
+
+	// OptionalForImport indicates whether this attribute is optional to
+	// import the resource. For example it might be true if the value
+	// can be derived from provider configuration. Either this or RequiredForImport
+	// needs to be true.
+	OptionalForImport bool
+
+	// Description is a human-readable description of the attribute.
+	Description string
 }

@@ -61,6 +61,7 @@ func ReadResourceRequest(in *tfplugin5.ReadResource_Request) *tfprotov5.ReadReso
 		ProviderMeta:       DynamicValue(in.ProviderMeta),
 		TypeName:           in.TypeName,
 		ClientCapabilities: ReadResourceClientCapabilities(in.ClientCapabilities),
+		CurrentIdentity:    ResourceIdentityData(in.CurrentIdentity),
 	}
 
 	return resp
@@ -79,6 +80,7 @@ func PlanResourceChangeRequest(in *tfplugin5.PlanResourceChange_Request) *tfprot
 		ProviderMeta:       DynamicValue(in.ProviderMeta),
 		TypeName:           in.TypeName,
 		ClientCapabilities: PlanResourceChangeClientCapabilities(in.ClientCapabilities),
+		PriorIdentity:      ResourceIdentityData(in.PriorIdentity),
 	}
 
 	return resp
@@ -96,6 +98,7 @@ func ApplyResourceChangeRequest(in *tfplugin5.ApplyResourceChange_Request) *tfpr
 		PriorState:     DynamicValue(in.PriorState),
 		ProviderMeta:   DynamicValue(in.ProviderMeta),
 		TypeName:       in.TypeName,
+		PriorIdentity:  ResourceIdentityData(in.PriorIdentity),
 	}
 
 	return resp
@@ -127,6 +130,7 @@ func MoveResourceStateRequest(in *tfplugin5.MoveResourceState_Request) *tfprotov
 		SourceState:           RawState(in.SourceState),
 		SourceTypeName:        in.SourceTypeName,
 		TargetTypeName:        in.TargetTypeName,
+		SourceIdentity:        ResourceIdentityData(in.SourceIdentity),
 	}
 
 	return resp
