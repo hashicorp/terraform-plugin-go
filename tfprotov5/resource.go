@@ -31,12 +31,6 @@ type ResourceServer interface {
 	// state to upgrade it to the latest state schema.
 	UpgradeResourceState(context.Context, *UpgradeResourceStateRequest) (*UpgradeResourceStateResponse, error)
 
-	// UpgradeResourceIdentity is called when Terraform has encountered a
-	// resource with an identity state in a schema that doesn't match the schema's
-	// current version. It is the provider's responsibility to modify the
-	// identity state to upgrade it to the latest state schema.
-	UpgradeResourceIdentity(context.Context, *UpgradeResourceIdentityRequest) (*UpgradeResourceIdentityResponse, error)
-
 	// ReadResource is called when Terraform is refreshing a resource's
 	// state.
 	ReadResource(context.Context, *ReadResourceRequest) (*ReadResourceResponse, error)
