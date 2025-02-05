@@ -76,6 +76,38 @@ func TestGetProviderSchemaRequest(t *testing.T) {
 	}
 }
 
+func TestGetResourceIdentitySchemasRequest(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfplugin5.GetResourceIdentitySchemas_Request
+		expected *tfprotov5.GetResourceIdentitySchemasRequest
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in:       &tfplugin5.GetResourceIdentitySchemas_Request{},
+			expected: &tfprotov5.GetResourceIdentitySchemasRequest{},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := fromproto.GetResourceIdentitySchemasRequest(testCase.in)
+
+			if diff := cmp.Diff(got, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
+
 func TestConfigureProviderRequest(t *testing.T) {
 	t.Parallel()
 

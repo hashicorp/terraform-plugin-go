@@ -134,6 +134,29 @@ type UpgradeResourceStateResponse struct {
 	Diagnostics []*Diagnostic
 }
 
+type UpgradeResourceIdentityRequest struct {
+	// TypeName is the type of resource that Terraform needs to upgrade the
+	// identity state for.
+	TypeName string
+
+	// Version is the version of the identity state the resource currently has.
+	Version int64
+
+	// RawIdentity is the identity state as Terraform sees it right now. See the
+	// documentation for `RawIdentity` for information on how to work with the
+	// data it contains.
+	RawIdentity *RawIdentity
+}
+
+type UpgradeResourceIdentityResponse struct {
+	UpgradedIdentity *ResourceIdentityData
+
+	// Diagnostics report errors or warnings related to upgrading the
+	// identity of the requested resource. Returning an empty slice indicates
+	// a successful validation with no warnings or errors generated.
+	Diagnostics []*Diagnostic
+}
+
 // ReadResourceRequest is the request Terraform sends when it wants to get the
 // latest state for a resource.
 type ReadResourceRequest struct {
@@ -175,6 +198,10 @@ type ReadResourceRequest struct {
 	// ClientCapabilities defines optionally supported protocol features for the
 	// ReadResource RPC, such as forward-compatible Terraform behavior changes.
 	ClientCapabilities *ReadResourceClientCapabilities
+
+	// CurrentIdentity is the current identity of the resource as far as
+	// Terraform knows, represented as a `ResourceIdentityData`.
+	CurrentIdentity *ResourceIdentityData
 }
 
 // ReadResourceResponse is the response from the provider about the current
@@ -273,6 +300,10 @@ type PlanResourceChangeRequest struct {
 	// ClientCapabilities defines optionally supported protocol features for the
 	// PlanResourceChange RPC, such as forward-compatible Terraform behavior changes.
 	ClientCapabilities *PlanResourceChangeClientCapabilities
+
+	// PriorIdentity is the identity of the resource before the plan is
+	// applied, represented as a `ResourceIdentityData`.
+	PriorIdentity *ResourceIdentityData
 }
 
 // PlanResourceChangeResponse is the response from the provider about what the
@@ -417,6 +448,10 @@ type ApplyResourceChangeRequest struct {
 	//
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
+
+	// PriorIdentity is the identity of the resource before the plan is
+	// applied, represented as a `ResourceIdentityData`.
+	PriorIdentity *ResourceIdentityData
 }
 
 // ApplyResourceChangeResponse is the response from the provider about what the
@@ -548,6 +583,9 @@ type MoveResourceStateRequest struct {
 
 	// TargetTypeName is the target resource type for the move request.
 	TargetTypeName string
+
+	// SourceIdentity is the identity of the source resource.
+	SourceIdentity *ResourceIdentityData
 }
 
 // MoveResourceStateResponse is the response from the provider containing
@@ -561,4 +599,7 @@ type MoveResourceStateResponse struct {
 
 	// Diagnostics report any warnings or errors related to moving the state.
 	Diagnostics []*Diagnostic
+
+	// TargetIdentity is the identity of the target resource.
+	TargetIdentity *ResourceIdentityData
 }
