@@ -92,13 +92,13 @@ func ApplyResourceChangeRequest(in *tfplugin5.ApplyResourceChange_Request) *tfpr
 	}
 
 	resp := &tfprotov5.ApplyResourceChangeRequest{
-		Config:          DynamicValue(in.Config),
-		PlannedPrivate:  in.PlannedPrivate,
-		PlannedState:    DynamicValue(in.PlannedState),
-		PriorState:      DynamicValue(in.PriorState),
-		ProviderMeta:    DynamicValue(in.ProviderMeta),
-		TypeName:        in.TypeName,
-		PlannedIdentity: ResourceIdentityData(in.PlannedIdentity),
+		Config:         DynamicValue(in.Config),
+		PlannedPrivate: in.PlannedPrivate,
+		PlannedState:   DynamicValue(in.PlannedState),
+		PriorState:     DynamicValue(in.PriorState),
+		ProviderMeta:   DynamicValue(in.ProviderMeta),
+		TypeName:       in.TypeName,
+		PriorIdentity:  ResourceIdentityData(in.PriorIdentity),
 	}
 
 	return resp
@@ -113,7 +113,6 @@ func ImportResourceStateRequest(in *tfplugin5.ImportResourceState_Request) *tfpr
 		TypeName:           in.TypeName,
 		ID:                 in.Id,
 		ClientCapabilities: ImportResourceStateClientCapabilities(in.ClientCapabilities),
-		Identity:           ResourceIdentityData(in.Identity),
 	}
 
 	return resp
