@@ -1,6 +1,7 @@
 package tfprotov5
 
-// TODO: comments
+// ResourceIdentityData contains the raw undecoded identity data
+// for a resource.
 type ResourceIdentityData struct {
 	IdentityData *DynamicValue
 }
