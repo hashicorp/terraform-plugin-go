@@ -628,7 +628,7 @@ func (x *Schema) GetBlock() *Schema_Block {
 type ResourceIdentitySchema struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The version of the schema
-	IdentityVersion int64 `protobuf:"varint,1,opt,name=identity_version,json=identityVersion,proto3" json:"identity_version,omitempty"`
+	Version int64 `protobuf:"varint,1,opt,name=identity_version,json=identityVersion,proto3" json:"identity_version,omitempty"`
 	// The list of attributes that make up the identity of the resource
 	IdentityAttributes []*ResourceIdentitySchema_IdentityAttribute `protobuf:"bytes,2,rep,name=identity_attributes,json=identityAttributes,proto3" json:"identity_attributes,omitempty"`
 	unknownFields      protoimpl.UnknownFields

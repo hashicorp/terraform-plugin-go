@@ -725,6 +725,71 @@ func TestUpgradeResourceState_Response(t *testing.T) {
 	}
 }
 
+func TestUpgradeResourceIdentity_Response(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfprotov5.UpgradeResourceIdentityResponse
+		expected *tfplugin5.UpgradeResourceIdentity_Response
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in: &tfprotov5.UpgradeResourceIdentityResponse{},
+			expected: &tfplugin5.UpgradeResourceIdentity_Response{
+				Diagnostics: []*tfplugin5.Diagnostic{},
+			},
+		},
+		"Diagnostics": {
+			in: &tfprotov5.UpgradeResourceIdentityResponse{
+				Diagnostics: []*tfprotov5.Diagnostic{
+					testTfprotov5Diagnostic,
+				},
+			},
+			expected: &tfplugin5.UpgradeResourceIdentity_Response{
+				Diagnostics: []*tfplugin5.Diagnostic{
+					testTfplugin5Diagnostic,
+				},
+			},
+		},
+		"UpgradedIdentity": {
+			in: &tfprotov5.UpgradeResourceIdentityResponse{
+				UpgradedIdentity: testTfprotov5ResourceIdentityData(),
+			},
+			expected: &tfplugin5.UpgradeResourceIdentity_Response{
+				Diagnostics:      []*tfplugin5.Diagnostic{},
+				UpgradedIdentity: testTfplugin5ResourceIdentityData(),
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := toproto.UpgradeResourceIdentity_Response(testCase.in)
+
+			// Protocol Buffers generated types must have unexported fields
+			// ignored or cmp.Diff() will raise an error. This is easier than
+			// writing a custom Comparer for each type, which would have no
+			// benefits.
+			diffOpts := cmpopts.IgnoreUnexported(
+				tfplugin5.Diagnostic{},
+				tfplugin5.DynamicValue{},
+				tfplugin5.UpgradeResourceIdentity_Response{},
+			)
+
+			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
+
 func TestValidateResourceTypeConfig_Response(t *testing.T) {
 	t.Parallel()
 

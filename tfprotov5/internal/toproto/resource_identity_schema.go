@@ -14,7 +14,7 @@ func ResourceIdentitySchema(in *tfprotov5.ResourceIdentitySchema) *tfplugin5.Res
 	}
 
 	resp := &tfplugin5.ResourceIdentitySchema{
-		IdentityVersion:    in.Version,
+		Version:            in.Version,
 		IdentityAttributes: ResourceIdentitySchema_IdentityAttributes(in.IdentityAttributes),
 	}
 
