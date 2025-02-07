@@ -55,7 +55,7 @@ const (
 	KeyResourceType = "tf_resource_type"
 
 	// The resource identity being operated on, such as "s3_bucket"
-	KeyResourceIdentity = "tf_resource_identitu"
+	KeyResourceIdentity = "tf_resource_identity"
 
 	// The type of data source being operated on, such as "archive_file"
 	KeyDataSourceType = "tf_data_source_type"
