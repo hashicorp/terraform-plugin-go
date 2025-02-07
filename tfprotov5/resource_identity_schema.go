@@ -7,13 +7,13 @@ import "github.com/hashicorp/terraform-plugin-go/tftypes"
 
 // ResourceIdentitySchema is the identity schema for a Resource.
 type ResourceIdentitySchema struct {
-	// Version indicates which version of the schema this is. Versions
+	// IdentityVersion indicates which version of the schema this is. Versions
 	// should be monotonically incrementing numbers. When Terraform
 	// encounters a resource identity stored in state with a schema version
 	// lower that the identity schema version the provider advertises for
 	// that resource, Terraform requests the provider upgrade the resource's
 	// identity state.
-	Version int64
+	IdentityVersion int64
 
 	// IdentityAttributes is a list of attributes that uniquely identify a
 	// resource. These attributes are used to identify a resource in the

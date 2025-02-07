@@ -449,9 +449,9 @@ type ApplyResourceChangeRequest struct {
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
 
-	// PriorIdentity is the identity of the resource before the plan is
+	// PlannedIdentity is the identity of the resource before the plan is
 	// applied, represented as a `ResourceIdentityData`.
-	PriorIdentity *ResourceIdentityData
+	PlannedIdentity *ResourceIdentityData
 }
 
 // ApplyResourceChangeResponse is the response from the provider about what the

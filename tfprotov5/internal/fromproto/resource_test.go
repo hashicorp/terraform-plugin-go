@@ -76,12 +76,12 @@ func TestApplyResourceChangeRequest(t *testing.T) {
 				TypeName: "test",
 			},
 		},
-		"PriorIdentity": {
+		"PlannedIdentity": {
 			in: &tfplugin5.ApplyResourceChange_Request{
-				PriorIdentity: testTfplugin5ResourceIdentityData(),
+				PlannedIdentity: testTfplugin5ResourceIdentityData(),
 			},
 			expected: &tfprotov5.ApplyResourceChangeRequest{
-				PriorIdentity: testTfprotov5ResourceIdentityData(),
+				PlannedIdentity: testTfprotov5ResourceIdentityData(),
 			},
 		},
 	}

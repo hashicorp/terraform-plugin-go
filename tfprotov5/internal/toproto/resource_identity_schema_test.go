@@ -4,11 +4,12 @@
 package toproto_test
 
 import (
+	"testing"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/toproto"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
-	"testing"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
@@ -45,12 +46,12 @@ func TestResourceIdentitySchema(t *testing.T) {
 				},
 			},
 		},
-		"Version": {
+		"IdentityVersion": {
 			in: &tfprotov5.ResourceIdentitySchema{
-				Version: 123,
+				IdentityVersion: 123,
 			},
 			expected: &tfplugin5.ResourceIdentitySchema{
-				Version: 123,
+				IdentityVersion: 123,
 			},
 		},
 	}
