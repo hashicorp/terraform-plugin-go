@@ -528,7 +528,7 @@ message ApplyResourceChange {
         DynamicValue config = 4;
         bytes planned_private = 5;
         DynamicValue provider_meta = 6;
-        ResourceIdentityData prior_identity = 7;
+        ResourceIdentityData planned_identity = 7;
     }
     message Response {
         DynamicValue new_state = 1;
