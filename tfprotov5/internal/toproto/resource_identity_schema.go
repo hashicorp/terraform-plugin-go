@@ -38,6 +38,10 @@ func ResourceIdentitySchema_IdentityAttribute(in *tfprotov5.ResourceIdentitySche
 }
 
 func ResourceIdentitySchema_IdentityAttributes(in []*tfprotov5.ResourceIdentitySchemaAttribute) []*tfplugin5.ResourceIdentitySchema_IdentityAttribute {
+	if in == nil {
+		return nil
+	}
+
 	resp := make([]*tfplugin5.ResourceIdentitySchema_IdentityAttribute, 0, len(in))
 
 	for _, a := range in {

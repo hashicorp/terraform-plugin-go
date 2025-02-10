@@ -781,6 +781,7 @@ func TestUpgradeResourceIdentity_Response(t *testing.T) {
 				tfplugin5.Diagnostic{},
 				tfplugin5.DynamicValue{},
 				tfplugin5.UpgradeResourceIdentity_Response{},
+				tfplugin5.ResourceIdentityData{},
 			)
 
 			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {

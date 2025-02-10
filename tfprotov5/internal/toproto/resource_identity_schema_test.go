@@ -30,7 +30,7 @@ func TestResourceIdentitySchema(t *testing.T) {
 			in:       &tfprotov5.ResourceIdentitySchema{},
 			expected: &tfplugin5.ResourceIdentitySchema{},
 		},
-		"IdentityAttribute": {
+		"IdentityAttributes": {
 			in: &tfprotov5.ResourceIdentitySchema{
 				IdentityAttributes: []*tfprotov5.ResourceIdentitySchemaAttribute{
 					{
@@ -169,7 +169,7 @@ func TestResourceIdentitySchema_IdentityAttributes(t *testing.T) {
 	}{
 		"nil": {
 			in:       nil,
-			expected: []*tfplugin5.ResourceIdentitySchema_IdentityAttribute{},
+			expected: nil,
 		},
 		"zero": {
 			in:       []*tfprotov5.ResourceIdentitySchemaAttribute{},
