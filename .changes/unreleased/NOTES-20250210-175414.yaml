@@ -1,0 +1,5 @@
+kind: NOTES
+body: 'tfprotov5+tfprotov6: An upcoming release will require the `ProviderServerWithResourceIdentity` implementation as part of `ProviderServer`.'
+time: 2025-02-10T17:54:14.054598+01:00
+custom:
+    Issue: "476"
