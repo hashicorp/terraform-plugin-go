@@ -46,12 +46,12 @@ func TestResourceIdentitySchema(t *testing.T) {
 				},
 			},
 		},
-		"IdentityVersion": {
+		"Version": {
 			in: &tfprotov5.ResourceIdentitySchema{
-				IdentityVersion: 123,
+				Version: 123,
 			},
 			expected: &tfplugin5.ResourceIdentitySchema{
-				IdentityVersion: 123,
+				Version: 123,
 			},
 		},
 	}

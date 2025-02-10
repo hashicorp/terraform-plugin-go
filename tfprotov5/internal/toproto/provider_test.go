@@ -540,7 +540,7 @@ func TestGetResourceIdentitySchemas_Response(t *testing.T) {
 			in: &tfprotov5.GetResourceIdentitySchemasResponse{
 				IdentitySchemas: map[string]*tfprotov5.ResourceIdentitySchema{
 					"test": {
-						IdentityVersion: 1,
+						Version: 1,
 						IdentityAttributes: []*tfprotov5.ResourceIdentitySchemaAttribute{
 							{
 								Name:              "req",
@@ -560,7 +560,7 @@ func TestGetResourceIdentitySchemas_Response(t *testing.T) {
 				Diagnostics: []*tfplugin5.Diagnostic{},
 				IdentitySchemas: map[string]*tfplugin5.ResourceIdentitySchema{
 					"test": {
-						IdentityVersion: 1,
+						Version: 1,
 						IdentityAttributes: []*tfplugin5.ResourceIdentitySchema_IdentityAttribute{
 							{
 								Name:              "req",
