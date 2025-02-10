@@ -113,6 +113,7 @@ func ImportResourceStateRequest(in *tfplugin5.ImportResourceState_Request) *tfpr
 		TypeName:           in.TypeName,
 		ID:                 in.Id,
 		ClientCapabilities: ImportResourceStateClientCapabilities(in.ClientCapabilities),
+		Identity:           ResourceIdentityData(in.Identity),
 	}
 
 	return resp

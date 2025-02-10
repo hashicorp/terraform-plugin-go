@@ -144,6 +144,14 @@ func TestImportResourceStateRequest(t *testing.T) {
 				},
 			},
 		},
+		"Identity": {
+			in: &tfplugin5.ImportResourceState_Request{
+				Identity: testTfplugin5ResourceIdentityData(),
+			},
+			expected: &tfprotov5.ImportResourceStateRequest{
+				Identity: testTfprotov5ResourceIdentityData(),
+			},
+		},
 	}
 
 	for name, testCase := range testCases {

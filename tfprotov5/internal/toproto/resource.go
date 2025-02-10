@@ -68,6 +68,7 @@ func ReadResource_Response(in *tfprotov5.ReadResourceResponse) *tfplugin5.ReadRe
 		NewState:    DynamicValue(in.NewState),
 		Private:     in.Private,
 		Deferred:    Deferred(in.Deferred),
+		NewIdentity: ResourceIdentityData(in.NewIdentity),
 	}
 
 	return resp
@@ -85,6 +86,7 @@ func PlanResourceChange_Response(in *tfprotov5.PlanResourceChangeResponse) *tfpl
 		PlannedState:     DynamicValue(in.PlannedState),
 		RequiresReplace:  AttributePaths(in.RequiresReplace),
 		Deferred:         Deferred(in.Deferred),
+		PlannedIdentity:  ResourceIdentityData(in.PlannedIdentity),
 	}
 
 	return resp
@@ -100,6 +102,7 @@ func ApplyResourceChange_Response(in *tfprotov5.ApplyResourceChangeResponse) *tf
 		LegacyTypeSystem: in.UnsafeToUseLegacyTypeSystem, //nolint:staticcheck
 		NewState:         DynamicValue(in.NewState),
 		Private:          in.Private,
+		NewIdentity:      ResourceIdentityData(in.NewIdentity),
 	}
 
 	return resp
@@ -128,6 +131,7 @@ func ImportResourceState_ImportedResource(in *tfprotov5.ImportedResource) *tfplu
 		Private:  in.Private,
 		State:    DynamicValue(in.State),
 		TypeName: in.TypeName,
+		Identity: ResourceIdentityData(in.Identity),
 	}
 
 	return resp
