@@ -78,11 +78,15 @@ type ProviderClient interface {
 	// GetSchema returns schema information for the provider, data resources,
 	// and managed resources.
 	GetProviderSchema(ctx context.Context, in *GetProviderSchema_Request, opts ...grpc.CallOption) (*GetProviderSchema_Response, error)
+	// GetResourceIdentitySchemas returns the identity schemas for all managed
+	// resources.
 	GetResourceIdentitySchemas(ctx context.Context, in *GetResourceIdentitySchemas_Request, opts ...grpc.CallOption) (*GetResourceIdentitySchemas_Response, error)
 	ValidateProviderConfig(ctx context.Context, in *ValidateProviderConfig_Request, opts ...grpc.CallOption) (*ValidateProviderConfig_Response, error)
 	ValidateResourceConfig(ctx context.Context, in *ValidateResourceConfig_Request, opts ...grpc.CallOption) (*ValidateResourceConfig_Response, error)
 	ValidateDataResourceConfig(ctx context.Context, in *ValidateDataResourceConfig_Request, opts ...grpc.CallOption) (*ValidateDataResourceConfig_Response, error)
 	UpgradeResourceState(ctx context.Context, in *UpgradeResourceState_Request, opts ...grpc.CallOption) (*UpgradeResourceState_Response, error)
+	// UpgradeResourceIdentityData should return the upgraded resource identity
+	// data for a managed resource type.
 	UpgradeResourceIdentity(ctx context.Context, in *UpgradeResourceIdentity_Request, opts ...grpc.CallOption) (*UpgradeResourceIdentity_Response, error)
 	// ////// One-time initialization, called before other functions below
 	ConfigureProvider(ctx context.Context, in *ConfigureProvider_Request, opts ...grpc.CallOption) (*ConfigureProvider_Response, error)
@@ -348,11 +352,15 @@ type ProviderServer interface {
 	// GetSchema returns schema information for the provider, data resources,
 	// and managed resources.
 	GetProviderSchema(context.Context, *GetProviderSchema_Request) (*GetProviderSchema_Response, error)
+	// GetResourceIdentitySchemas returns the identity schemas for all managed
+	// resources.
 	GetResourceIdentitySchemas(context.Context, *GetResourceIdentitySchemas_Request) (*GetResourceIdentitySchemas_Response, error)
 	ValidateProviderConfig(context.Context, *ValidateProviderConfig_Request) (*ValidateProviderConfig_Response, error)
 	ValidateResourceConfig(context.Context, *ValidateResourceConfig_Request) (*ValidateResourceConfig_Response, error)
 	ValidateDataResourceConfig(context.Context, *ValidateDataResourceConfig_Request) (*ValidateDataResourceConfig_Response, error)
 	UpgradeResourceState(context.Context, *UpgradeResourceState_Request) (*UpgradeResourceState_Response, error)
+	// UpgradeResourceIdentityData should return the upgraded resource identity
+	// data for a managed resource type.
 	UpgradeResourceIdentity(context.Context, *UpgradeResourceIdentity_Request) (*UpgradeResourceIdentity_Response, error)
 	// ////// One-time initialization, called before other functions below
 	ConfigureProvider(context.Context, *ConfigureProvider_Request) (*ConfigureProvider_Response, error)

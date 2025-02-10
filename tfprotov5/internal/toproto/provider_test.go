@@ -505,6 +505,106 @@ func TestGetProviderSchema_Response(t *testing.T) {
 	}
 }
 
+func TestGetResourceIdentitySchemas_Response(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfprotov5.GetResourceIdentitySchemasResponse
+		expected *tfplugin5.GetResourceIdentitySchemas_Response
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in: &tfprotov5.GetResourceIdentitySchemasResponse{},
+			expected: &tfplugin5.GetResourceIdentitySchemas_Response{
+				Diagnostics:     []*tfplugin5.Diagnostic{},
+				IdentitySchemas: map[string]*tfplugin5.ResourceIdentitySchema{},
+			},
+		},
+		"Diagnostics": {
+			in: &tfprotov5.GetResourceIdentitySchemasResponse{
+				Diagnostics: []*tfprotov5.Diagnostic{
+					testTfprotov5Diagnostic,
+				},
+			},
+			expected: &tfplugin5.GetResourceIdentitySchemas_Response{
+				Diagnostics: []*tfplugin5.Diagnostic{
+					testTfplugin5Diagnostic,
+				},
+				IdentitySchemas: map[string]*tfplugin5.ResourceIdentitySchema{},
+			},
+		},
+		"IdentitySchemas": {
+			in: &tfprotov5.GetResourceIdentitySchemasResponse{
+				IdentitySchemas: map[string]*tfprotov5.ResourceIdentitySchema{
+					"test": {
+						Version: 1,
+						IdentityAttributes: []*tfprotov5.ResourceIdentitySchemaAttribute{
+							{
+								Name:              "req",
+								RequiredForImport: true,
+								Description:       "this one's required",
+							},
+							{
+								Name:              "opt",
+								OptionalForImport: true,
+								Description:       "this one's optional",
+							},
+						},
+					},
+				},
+			},
+			expected: &tfplugin5.GetResourceIdentitySchemas_Response{
+				Diagnostics: []*tfplugin5.Diagnostic{},
+				IdentitySchemas: map[string]*tfplugin5.ResourceIdentitySchema{
+					"test": {
+						Version: 1,
+						IdentityAttributes: []*tfplugin5.ResourceIdentitySchema_IdentityAttribute{
+							{
+								Name:              "req",
+								RequiredForImport: true,
+								Description:       "this one's required",
+							},
+							{
+								Name:              "opt",
+								OptionalForImport: true,
+								Description:       "this one's optional",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := toproto.GetResourceIdentitySchemas_Response(testCase.in)
+
+			// Protocol Buffers generated types must have unexported fields
+			// ignored or cmp.Diff() will raise an error. This is easier than
+			// writing a custom Comparer for each type, which would have no
+			// benefits.
+			diffOpts := cmpopts.IgnoreUnexported(
+				tfplugin5.Diagnostic{},
+				tfplugin5.GetResourceIdentitySchemas_Response{},
+				tfplugin5.ResourceIdentitySchema{},
+				tfplugin5.ResourceIdentitySchema_IdentityAttribute{},
+			)
+
+			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
+
 func TestPrepareProviderConfig_Response(t *testing.T) {
 	t.Parallel()
 
