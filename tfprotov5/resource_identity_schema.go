@@ -32,6 +32,13 @@ type ResourceIdentitySchemaAttribute struct {
 	// Type indicates the type of data the attribute expects. See the
 	// documentation for the tftypes package for information on what types
 	// are supported and their behaviors.
+	// For resource identity Terraform core only supports the following types:
+	// - bool
+	// - number
+	// - string
+	// - list of bool
+	// - list of number
+	// - list of string
 	Type tftypes.Type
 
 	// RequiredForImport indicates whether this attribute is required to

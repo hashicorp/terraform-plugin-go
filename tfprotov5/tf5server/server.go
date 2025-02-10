@@ -858,7 +858,9 @@ func (s *server) UpgradeResourceIdentity(ctx context.Context, protoReq *tfplugin
 	}
 
 	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
-	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "UpgradedResourceIdentity", resp.UpgradedIdentity)
+	if resp.UpgradedIdentity != nil {
+		logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "UpgradedResourceIdentity", resp.UpgradedIdentity.IdentityData)
+	}
 
 	protoResp := toproto.UpgradeResourceIdentity_Response(resp)
 

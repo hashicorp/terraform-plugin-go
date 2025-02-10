@@ -149,6 +149,8 @@ type UpgradeResourceIdentityRequest struct {
 }
 
 type UpgradeResourceIdentityResponse struct {
+	// UpgradedIdentity is the upgraded identity for the resource, represented as
+	// a `ResourceIdentityData`.
 	UpgradedIdentity *ResourceIdentityData
 
 	// Diagnostics report errors or warnings related to upgrading the
