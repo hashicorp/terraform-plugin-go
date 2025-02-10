@@ -91,15 +91,6 @@ func EphemeralResourceContext(ctx context.Context, ephemeralResource string) con
 	return ctx
 }
 
-// ResourceIdentityContext injects the resource identity into logger contexts.
-func ResourceIdentityContext(ctx context.Context, resourceIdentity string) context.Context {
-	ctx = tfsdklog.SetField(ctx, KeyResourceIdentity, resourceIdentity)
-	ctx = tfsdklog.SubsystemSetField(ctx, SubsystemProto, KeyResourceIdentity, resourceIdentity)
-	ctx = tflog.SetField(ctx, KeyResourceIdentity, resourceIdentity)
-
-	return ctx
-}
-
 // RpcContext injects the RPC name into logger contexts.
 func RpcContext(ctx context.Context, rpc string) context.Context {
 	ctx = tfsdklog.SetField(ctx, KeyRPC, rpc)
