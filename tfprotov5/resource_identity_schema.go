@@ -26,7 +26,7 @@ type ResourceIdentitySchema struct {
 // These are always used in resource identity comparisons.
 type ResourceIdentitySchemaAttribute struct {
 	// Name is the name of the attribute. This is what the user will put
-	// before the equals sign to assign a value to this attribute.
+	// before the equals sign to assign a value to this attribute during import.
 	Name string
 
 	// Type indicates the type of data the attribute expects. See the

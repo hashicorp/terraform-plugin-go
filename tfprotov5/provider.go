@@ -66,10 +66,8 @@ type ProviderServer interface {
 // ProviderServerWithResourceIdentity is a temporary interface for servers
 // to implement Resource Identity RPC handling with:
 //
-// - ValidateEphemeralResourceConfig
-// - OpenEphemeralResource
-// - RenewEphemeralResource
-// - CloseEphemeralResource
+// - GetResourceIdentitySchemas
+// - UpgradeResourceIdentity
 //
 // Deprecated: All methods will be moved into the
 // ProviderServer and ResourceServer interfaces and this interface will be removed in a future

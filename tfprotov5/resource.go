@@ -459,8 +459,8 @@ type ApplyResourceChangeRequest struct {
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
 
-	// PlannedIdentity is the identity of the resource before the plan is
-	// applied, represented as a `ResourceIdentityData`.
+	// PlannedIdentity is Terraform's plan for what the resource identity should look like
+	// after the changes are applied, represented as a `ResourceIdentityData`.
 	PlannedIdentity *ResourceIdentityData
 }
 

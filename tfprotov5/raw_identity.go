@@ -22,7 +22,7 @@ import (
 // terraform-plugin-go and is no longer a valid value.
 var ErrUnknownRawIdentityType = errors.New("RawIdentity had no JSON data set")
 
-// RawIdentity is the raw, undecoded state for providers to upgrade. It is
+// RawIdentity is the raw, undecoded identity state for providers to upgrade. It is
 // undecoded as Terraform, for whatever reason, doesn't have the previous
 // schema available to it, and so cannot decode the state itself and pushes
 // that responsibility off onto providers.
