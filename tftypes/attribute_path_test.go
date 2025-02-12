@@ -345,7 +345,6 @@ func TestWalkAttributePath(t *testing.T) {
 	}
 
 	for name, test := range tests {
-		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			result, remaining, err := WalkAttributePath(test.in, test.path)
@@ -683,7 +682,6 @@ func TestAttributePathEqual(t *testing.T) {
 	}
 
 	for name, test := range tests {
-		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			isEqual := test.path1.Equal(test.path2)
@@ -740,7 +738,6 @@ func TestAttributePathLastStep(t *testing.T) {
 	}
 
 	for name, tc := range testCases {
-		name, tc := name, tc
 
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -806,7 +803,6 @@ func TestAttributePathString(t *testing.T) {
 	}
 
 	for name, test := range tests {
-		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			str := test.path.String()
@@ -853,7 +849,6 @@ func TestAttributeNameEqual(t *testing.T) {
 	}
 
 	for name, tc := range testCases {
-		name, tc := name, tc
 
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -903,7 +898,6 @@ func TestElementKeyIntEqual(t *testing.T) {
 	}
 
 	for name, tc := range testCases {
-		name, tc := name, tc
 
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -953,7 +947,6 @@ func TestElementKeyStringEqual(t *testing.T) {
 	}
 
 	for name, tc := range testCases {
-		name, tc := name, tc
 
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -1003,8 +996,6 @@ func TestElementKeyValueEqual(t *testing.T) {
 	}
 
 	for name, tc := range testCases {
-		name, tc := name, tc
-
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 

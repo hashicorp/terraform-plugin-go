@@ -92,8 +92,6 @@ func TestDiagnostic(t *testing.T) {
 	}
 
 	for name, testCase := range testCases {
-		name, testCase := name, testCase
-
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -170,8 +168,6 @@ func TestDiagnostics(t *testing.T) {
 	}
 
 	for name, testCase := range testCases {
-		name, testCase := name, testCase
-
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -240,7 +236,6 @@ func TestForceValidUTF8(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		test := test
 		t.Run(test.Input, func(t *testing.T) {
 			t.Parallel()
 

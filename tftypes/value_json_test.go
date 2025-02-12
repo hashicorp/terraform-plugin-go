@@ -396,7 +396,6 @@ func TestValueFromJSON(t *testing.T) {
 		},
 	}
 	for name, test := range tests {
-		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			val, err := ValueFromJSON([]byte(test.json), test.typ)
@@ -456,7 +455,6 @@ func TestValueFromJSONWithOpts(t *testing.T) {
 		},
 	}
 	for name, test := range tests {
-		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			val, err := ValueFromJSONWithOpts([]byte(test.json), test.typ, ValueFromJSONOpts{
