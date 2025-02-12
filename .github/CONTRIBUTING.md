@@ -305,8 +305,6 @@ func TestExample(t *testing.T) {
         },
     }
     for name, testCase := range testCases {
-        // Do not omit this next line
-        name, testCase := name, testCase
         t.Run(name, func(t *testing.T) {
             t.Parallel()
             // Implement test referencing testCase fields

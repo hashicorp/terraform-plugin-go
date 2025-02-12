@@ -431,7 +431,6 @@ func TestValueAs(t *testing.T) {
 	}
 
 	for name, test := range tests {
-		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -709,7 +708,6 @@ func TestValueIsKnown(t *testing.T) {
 		},
 	}
 	for name, test := range tests {
-		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			known := test.value.IsKnown()
@@ -1203,7 +1201,6 @@ func TestValueEqual(t *testing.T) {
 		},
 	}
 	for name, test := range tests {
-		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			if result := test.val1.Equal(test.val2); result != test.equal {
@@ -1585,7 +1582,6 @@ func TestValueApplyTerraform5AttributePathStep(t *testing.T) {
 		},
 	}
 	for name, test := range tests {
-		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -1693,7 +1689,6 @@ func TestValueWalkAttributePath(t *testing.T) {
 	}
 
 	for name, test := range tests {
-		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			result, remaining, err := WalkAttributePath(test.val, test.path)
@@ -1864,7 +1859,6 @@ func TestValueString(t *testing.T) {
 	}
 
 	for name, test := range tests {
-		name, test := name, test
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
