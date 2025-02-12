@@ -177,7 +177,7 @@ type GetResourceIdentitySchemasRequest struct{}
 // GetResourceIdentitySchemasResponse represents a Terraform RPC response containing
 // the provider's resource identity schemas.
 type GetResourceIdentitySchemasResponse struct {
-	// ResourceSchemas is a map of resource names to the schema for the
+	// IdentitySchemas is a map of resource names to the schema for the
 	// identity specified for the resource. The name should be a
 	// resource name, and should be prefixed with your provider's shortname
 	// and an underscore. It should match the first label after `resource`
