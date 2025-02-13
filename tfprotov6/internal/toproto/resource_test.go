@@ -70,6 +70,15 @@ func TestApplyResourceChange_Response(t *testing.T) {
 				LegacyTypeSystem: true,
 			},
 		},
+		"NewIdentity": {
+			in: &tfprotov6.ApplyResourceChangeResponse{
+				NewIdentity: testTfprotov6ResourceIdentityData(),
+			},
+			expected: &tfplugin6.ApplyResourceChange_Response{
+				Diagnostics: []*tfplugin6.Diagnostic{},
+				NewIdentity: testTfplugin6ResourceIdentityData(),
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -88,6 +97,7 @@ func TestApplyResourceChange_Response(t *testing.T) {
 				tfplugin6.Diagnostic{},
 				tfplugin6.DynamicValue{},
 				tfplugin6.ApplyResourceChange_Response{},
+				tfplugin6.ResourceIdentityData{},
 			)
 
 			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {
@@ -270,6 +280,14 @@ func TestImportResourceState_ImportedResource(t *testing.T) {
 				TypeName: "test",
 			},
 		},
+		"Identity": {
+			in: &tfprotov6.ImportedResource{
+				Identity: testTfprotov6ResourceIdentityData(),
+			},
+			expected: &tfplugin6.ImportResourceState_ImportedResource{
+				Identity: testTfplugin6ResourceIdentityData(),
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -285,6 +303,7 @@ func TestImportResourceState_ImportedResource(t *testing.T) {
 			diffOpts := cmpopts.IgnoreUnexported(
 				tfplugin6.DynamicValue{},
 				tfplugin6.ImportResourceState_ImportedResource{},
+				tfplugin6.ResourceIdentityData{},
 			)
 
 			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {
@@ -530,6 +549,16 @@ func TestPlanResourceChange_Response(t *testing.T) {
 				},
 			},
 		},
+		"PlannedIdentity": {
+			in: &tfprotov6.PlanResourceChangeResponse{
+				PlannedIdentity: testTfprotov6ResourceIdentityData(),
+			},
+			expected: &tfplugin6.PlanResourceChange_Response{
+				Diagnostics:     []*tfplugin6.Diagnostic{},
+				RequiresReplace: []*tfplugin6.AttributePath{},
+				PlannedIdentity: testTfplugin6ResourceIdentityData(),
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -549,6 +578,7 @@ func TestPlanResourceChange_Response(t *testing.T) {
 				tfplugin6.DynamicValue{},
 				tfplugin6.PlanResourceChange_Response{},
 				tfplugin6.Deferred{},
+				tfplugin6.ResourceIdentityData{},
 			)
 
 			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {
@@ -618,6 +648,15 @@ func TestReadResource_Response(t *testing.T) {
 				},
 			},
 		},
+		"NewIdentity": {
+			in: &tfprotov6.ReadResourceResponse{
+				NewIdentity: testTfprotov6ResourceIdentityData(),
+			},
+			expected: &tfplugin6.ReadResource_Response{
+				Diagnostics: []*tfplugin6.Diagnostic{},
+				NewIdentity: testTfplugin6ResourceIdentityData(),
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -635,6 +674,7 @@ func TestReadResource_Response(t *testing.T) {
 				tfplugin6.DynamicValue{},
 				tfplugin6.ReadResource_Response{},
 				tfplugin6.Deferred{},
+				tfplugin6.ResourceIdentityData{},
 			)
 
 			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {
@@ -698,6 +738,71 @@ func TestUpgradeResourceState_Response(t *testing.T) {
 				tfplugin6.Diagnostic{},
 				tfplugin6.DynamicValue{},
 				tfplugin6.UpgradeResourceState_Response{},
+			)
+
+			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
+
+func TestUpgradeResourceIdentity_Response(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfprotov6.UpgradeResourceIdentityResponse
+		expected *tfplugin6.UpgradeResourceIdentity_Response
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in: &tfprotov6.UpgradeResourceIdentityResponse{},
+			expected: &tfplugin6.UpgradeResourceIdentity_Response{
+				Diagnostics: []*tfplugin6.Diagnostic{},
+			},
+		},
+		"Diagnostics": {
+			in: &tfprotov6.UpgradeResourceIdentityResponse{
+				Diagnostics: []*tfprotov6.Diagnostic{
+					testTfprotov6Diagnostic,
+				},
+			},
+			expected: &tfplugin6.UpgradeResourceIdentity_Response{
+				Diagnostics: []*tfplugin6.Diagnostic{
+					testTfplugin6Diagnostic,
+				},
+			},
+		},
+		"UpgradedIdentity": {
+			in: &tfprotov6.UpgradeResourceIdentityResponse{
+				UpgradedIdentity: testTfprotov6ResourceIdentityData(),
+			},
+			expected: &tfplugin6.UpgradeResourceIdentity_Response{
+				Diagnostics:      []*tfplugin6.Diagnostic{},
+				UpgradedIdentity: testTfplugin6ResourceIdentityData(),
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := toproto.UpgradeResourceIdentity_Response(testCase.in)
+
+			// Protocol Buffers generated types must have unexported fields
+			// ignored or cmp.Diff() will raise an error. This is easier than
+			// writing a custom Comparer for each type, which would have no
+			// benefits.
+			diffOpts := cmpopts.IgnoreUnexported(
+				tfplugin6.Diagnostic{},
+				tfplugin6.DynamicValue{},
+				tfplugin6.UpgradeResourceIdentity_Response{},
+				tfplugin6.ResourceIdentityData{},
 			)
 
 			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {

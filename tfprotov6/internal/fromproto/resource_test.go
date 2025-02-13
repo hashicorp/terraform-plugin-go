@@ -76,6 +76,14 @@ func TestApplyResourceChangeRequest(t *testing.T) {
 				TypeName: "test",
 			},
 		},
+		"PlannedIdentity": {
+			in: &tfplugin6.ApplyResourceChange_Request{
+				PlannedIdentity: testTfplugin6ResourceIdentityData(),
+			},
+			expected: &tfprotov6.ApplyResourceChangeRequest{
+				PlannedIdentity: testTfprotov6ResourceIdentityData(),
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -132,6 +140,14 @@ func TestImportResourceStateRequest(t *testing.T) {
 				ClientCapabilities: &tfprotov6.ImportResourceStateClientCapabilities{
 					DeferralAllowed: true,
 				},
+			},
+		},
+		"Identity": {
+			in: &tfplugin6.ImportResourceState_Request{
+				Identity: testTfplugin6ResourceIdentityData(),
+			},
+			expected: &tfprotov6.ImportResourceStateRequest{
+				Identity: testTfprotov6ResourceIdentityData(),
 			},
 		},
 	}
@@ -210,6 +226,14 @@ func TestMoveResourceStateRequest(t *testing.T) {
 			},
 			expected: &tfprotov6.MoveResourceStateRequest{
 				TargetTypeName: "test",
+			},
+		},
+		"SourceIdentity": {
+			in: &tfplugin6.MoveResourceState_Request{
+				SourceIdentity: testTfplugin6ResourceIdentityData(),
+			},
+			expected: &tfprotov6.MoveResourceStateRequest{
+				SourceIdentity: testTfprotov6ResourceIdentityData(),
 			},
 		},
 	}
@@ -302,6 +326,14 @@ func TestPlanResourceChangeRequest(t *testing.T) {
 				},
 			},
 		},
+		"PriorIdentity": {
+			in: &tfplugin6.PlanResourceChange_Request{
+				PriorIdentity: testTfplugin6ResourceIdentityData(),
+			},
+			expected: &tfprotov6.PlanResourceChangeRequest{
+				PriorIdentity: testTfprotov6ResourceIdentityData(),
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -376,6 +408,14 @@ func TestReadResourceRequest(t *testing.T) {
 				},
 			},
 		},
+		"CurrentIdentity": {
+			in: &tfplugin6.ReadResource_Request{
+				CurrentIdentity: testTfplugin6ResourceIdentityData(),
+			},
+			expected: &tfprotov6.ReadResourceRequest{
+				CurrentIdentity: testTfprotov6ResourceIdentityData(),
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
@@ -437,6 +477,61 @@ func TestUpgradeResourceStateRequest(t *testing.T) {
 			t.Parallel()
 
 			got := fromproto.UpgradeResourceStateRequest(testCase.in)
+
+			if diff := cmp.Diff(got, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
+
+func TestUpgradeResourceIdentityRequest(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfplugin6.UpgradeResourceIdentity_Request
+		expected *tfprotov6.UpgradeResourceIdentityRequest
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in:       &tfplugin6.UpgradeResourceIdentity_Request{},
+			expected: &tfprotov6.UpgradeResourceIdentityRequest{},
+		},
+		"RawIdentity": {
+			in: &tfplugin6.UpgradeResourceIdentity_Request{
+				RawIdentity: []byte("{}"),
+			},
+			expected: &tfprotov6.UpgradeResourceIdentityRequest{
+				RawIdentity: testTfprotov6RawIdentity(t, []byte("{}")),
+			},
+		},
+		"TypeName": {
+			in: &tfplugin6.UpgradeResourceIdentity_Request{
+				TypeName: "test",
+			},
+			expected: &tfprotov6.UpgradeResourceIdentityRequest{
+				TypeName: "test",
+			},
+		},
+		"Version": {
+			in: &tfplugin6.UpgradeResourceIdentity_Request{
+				Version: 123,
+			},
+			expected: &tfprotov6.UpgradeResourceIdentityRequest{
+				Version: 123,
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := fromproto.UpgradeResourceIdentityRequest(testCase.in)
 
 			if diff := cmp.Diff(got, testCase.expected); diff != "" {
 				t.Errorf("unexpected difference: %s", diff)
