@@ -1,0 +1,5 @@
+kind: FEATURES
+body: Add WithManagedDebugEnvFilePath() option that allows writing TF_REATTACH_PROVIDERS to an environment file
+time: 2025-03-07T15:38:00.962006+01:00
+custom:
+    Issue: "484"
