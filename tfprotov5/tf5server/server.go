@@ -104,6 +104,7 @@ type ServeConfig struct {
 	managedDebug                      bool
 	managedDebugReattachConfigTimeout time.Duration
 	managedDebugStopSignals           []os.Signal
+	managedDebugEnvFilePath           string
 
 	disableLogInitStderr bool
 	disableLogLocation   bool
@@ -174,6 +175,15 @@ func WithManagedDebugStopSignals(signals []os.Signal) ServeOpt {
 func WithManagedDebugReattachConfigTimeout(timeout time.Duration) ServeOpt {
 	return serveConfigFunc(func(in *ServeConfig) error {
 		in.managedDebugReattachConfigTimeout = timeout
+		return nil
+	})
+}
+
+// WithManagedDebugEnvFilePath returns a ServeOpt that will set the output path
+// for the managed debug process to write the reattach configuration into.
+func WithManagedDebugEnvFilePath(path string) ServeOpt {
+	return serveConfigFunc(func(in *ServeConfig) error {
+		in.managedDebugEnvFilePath = path
 		return nil
 	})
 }
@@ -379,6 +389,15 @@ func Serve(name string, serverFactory func() tfprotov5.ProviderServer, opts ...S
 	}
 
 	fmt.Println("")
+
+	if conf.managedDebugEnvFilePath != "" {
+		fmt.Printf("Writing reattach configuration to env file at path %s\n", conf.managedDebugEnvFilePath)
+
+		err = os.WriteFile(conf.managedDebugEnvFilePath, []byte(fmt.Sprintf("%s='%s'\n", envTfReattachProviders, strings.ReplaceAll(reattachStr, `'`, `'"'"'`))), 0644)
+		if err != nil {
+			return fmt.Errorf("Error writing to env file at path %s: %w", conf.managedDebugEnvFilePath, err)
+		}
+	}
 
 	// Wait for the server to be done.
 	<-conf.debugCloseCh
