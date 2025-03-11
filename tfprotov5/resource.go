@@ -609,6 +609,8 @@ type MoveResourceStateRequest struct {
 	TargetTypeName string
 
 	// SourceIdentity is the identity of the source resource.
+	//
+	// Only the underlying JSON field is populated.
 	SourceIdentity *RawState
 
 	// SourceIdentitySchemaVersion is the version of the source resource state.
