@@ -142,7 +142,7 @@ type UpgradeResourceIdentityRequest struct {
 	// RawIdentity is the identity state as Terraform sees it right now. See the
 	// documentation for `RawIdentity` for information on how to work with the
 	// data it contains.
-	RawIdentity *RawIdentity
+	RawState *RawState
 }
 
 type UpgradeResourceIdentityResponse struct {
@@ -606,7 +606,10 @@ type MoveResourceStateRequest struct {
 	TargetTypeName string
 
 	// SourceIdentity is the identity of the source resource.
-	SourceIdentity *ResourceIdentityData
+	SourceIdentity *RawState
+
+	// SourceIdentitySchemaVersion is the version of the source resource state.
+	SourceIdentitySchemaVersion int64
 }
 
 // MoveResourceStateResponse is the response from the provider containing

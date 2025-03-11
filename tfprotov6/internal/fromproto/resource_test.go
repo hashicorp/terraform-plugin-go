@@ -230,10 +230,10 @@ func TestMoveResourceStateRequest(t *testing.T) {
 		},
 		"SourceIdentity": {
 			in: &tfplugin6.MoveResourceState_Request{
-				SourceIdentity: testTfplugin6ResourceIdentityData(),
+				SourceIdentity: testTfplugin6RawState(t, []byte("{}")),
 			},
 			expected: &tfprotov6.MoveResourceStateRequest{
-				SourceIdentity: testTfprotov6ResourceIdentityData(),
+				SourceIdentity: testTfprotov6RawState(t, []byte("{}")),
 			},
 		},
 	}
@@ -502,10 +502,10 @@ func TestUpgradeResourceIdentityRequest(t *testing.T) {
 		},
 		"RawIdentity": {
 			in: &tfplugin6.UpgradeResourceIdentity_Request{
-				RawIdentity: []byte("{}"),
+				RawIdentity: testTfplugin6RawState(t, []byte("{}")),
 			},
 			expected: &tfprotov6.UpgradeResourceIdentityRequest{
-				RawIdentity: testTfprotov6RawIdentity(t, []byte("{}")),
+				RawState: testTfprotov6RawState(t, []byte("{}")),
 			},
 		},
 		"TypeName": {
