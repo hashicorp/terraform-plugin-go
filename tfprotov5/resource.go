@@ -145,12 +145,10 @@ type UpgradeResourceIdentityRequest struct {
 	// RawIdentity is the identity state as Terraform sees it right now. See the
 	// documentation for `RawIdentity` for information on how to work with the
 	// data it contains.
-	RawIdentity *RawIdentity
+	RawState *RawState
 }
 
 type UpgradeResourceIdentityResponse struct {
-	// UpgradedIdentity is the upgraded identity for the resource, represented as
-	// a `ResourceIdentityData`.
 	UpgradedIdentity *ResourceIdentityData
 
 	// Diagnostics report errors or warnings related to upgrading the
@@ -162,7 +160,7 @@ type UpgradeResourceIdentityResponse struct {
 // ReadResourceRequest is the request Terraform sends when it wants to get the
 // latest state for a resource.
 type ReadResourceRequest struct {
-	// TypeName is the type of resource Terraform is requesting an upated
+	// TypeName is the type of resource Terraform is requesting an updated
 	// state for.
 	TypeName string
 
@@ -232,10 +230,6 @@ type ReadResourceResponse struct {
 	// Deferred is used to indicate to Terraform that the ReadResource operation
 	// needs to be deferred for a reason.
 	Deferred *Deferred
-
-	// NewIdentity is the current identity of the resource according to the
-	// provider, represented as a `ResourceIdentityData`.
-	NewIdentity *ResourceIdentityData
 }
 
 // PlanResourceChangeRequest is the request Terraform sends when it is
@@ -392,10 +386,6 @@ type PlanResourceChangeResponse struct {
 	// Deferred is used to indicate to Terraform that the PlanResourceChange operation
 	// needs to be deferred for a reason.
 	Deferred *Deferred
-
-	// PlannedIdentity is the provider's indication of what the identity for the
-	// resource should be after apply, represented as a `ResourceIdentityData`
-	PlannedIdentity *ResourceIdentityData
 }
 
 // ApplyResourceChangeRequest is the request Terraform sends when it needs to
@@ -459,9 +449,9 @@ type ApplyResourceChangeRequest struct {
 	// This configuration will have known values for all fields.
 	ProviderMeta *DynamicValue
 
-	// PlannedIdentity is Terraform's plan for what the resource identity should look like
-	// after the changes are applied, represented as a `ResourceIdentityData`.
-	PlannedIdentity *ResourceIdentityData
+	// PriorIdentity is the identity of the resource before the plan is
+	// applied, represented as a `ResourceIdentityData`.
+	PriorIdentity *ResourceIdentityData
 }
 
 // ApplyResourceChangeResponse is the response from the provider about what the
@@ -507,10 +497,6 @@ type ApplyResourceChangeResponse struct {
 	//
 	// Deprecated: Really, just don't use this, you don't need it.
 	UnsafeToUseLegacyTypeSystem bool
-
-	// NewIdentity is the provider's understanding of what the resource's
-	// identity is after changes are applied, represented as a `ResourceIdentityData`.
-	NewIdentity *ResourceIdentityData
 }
 
 // ImportResourceStateRequest is the request Terraform sends when it wants a
@@ -523,17 +509,11 @@ type ImportResourceStateRequest struct {
 	// or resources. Providers decide and communicate to users the format
 	// for the ID, and use it to determine what resource or resources to
 	// import.
-	// ID is mutually exclusive with Identity
 	ID string
 
 	// ClientCapabilities defines optionally supported protocol features for the
 	// ImportResourceState RPC, such as forward-compatible Terraform behavior changes.
 	ClientCapabilities *ImportResourceStateClientCapabilities
-
-	// Identity is the user-supplied identifying information about the resource
-	// in the form of a `ResourceIdentityData`.
-	// Identity is mutually exclusive with ID.
-	Identity *ResourceIdentityData
 }
 
 // ImportResourceStateResponse is the response from the provider about the
@@ -572,10 +552,6 @@ type ImportedResource struct {
 	// with requests for this resource. This state will be associated with
 	// the resource, but will not be considered when calculating diffs.
 	Private []byte
-
-	// Identity is the identity of the imported resource in the form
-	// of a `ResourceIdentityData`.
-	Identity *ResourceIdentityData
 }
 
 // MoveResourceStateRequest is the request Terraform sends when it requests a
@@ -609,7 +585,10 @@ type MoveResourceStateRequest struct {
 	TargetTypeName string
 
 	// SourceIdentity is the identity of the source resource.
-	SourceIdentity *ResourceIdentityData
+	SourceIdentity *RawState
+
+	// SourceIdentitySchemaVersion is the version of the source resource state.
+	SourceIdentitySchemaVersion int64
 }
 
 // MoveResourceStateResponse is the response from the provider containing
