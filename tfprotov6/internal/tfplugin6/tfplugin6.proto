@@ -8,7 +8,7 @@
 // use protoc to generate stubs for your target language.
 //
 // This file will not be updated. Any minor versions of protocol 6 to follow
-// should copy this file and modify the copy while maintaing backwards
+// should copy this file and modify the copy while maintaining backwards
 // compatibility. Breaking changes, if any are required, will come
 // in a subsequent major version with its own separate proto definition.
 //
@@ -617,7 +617,9 @@ message MoveResourceState {
         // The private state of the resource being moved.
         bytes source_private = 6;
 
-        ResourceIdentityData source_identity = 7;
+        RawState source_identity = 7;
+
+        int64 source_identity_schema_version = 8;
     }
 
     message Response {
@@ -748,7 +750,7 @@ message UpgradeResourceIdentity {
         int64 version = 2;
 
         // raw_identity is the stored identity from the state in json
-        bytes raw_identity = 3;
+        RawState raw_identity = 3;
     }
     message Response {
         ResourceIdentityData upgraded_identity = 1;

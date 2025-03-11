@@ -598,7 +598,9 @@ message MoveResourceState {
         // The private state of the resource being moved.
         bytes source_private = 6;
 
-        ResourceIdentityData source_identity = 7;
+        RawState source_identity = 7;
+
+        int64 source_identity_schema_version = 8;
     }
 
     message Response {
@@ -765,7 +767,7 @@ message UpgradeResourceIdentity {
         int64 version = 2;
 
         // raw_identity is the stored identity from the state in json
-        bytes raw_identity = 3;
+        RawState raw_identity = 3;
     }
     message Response {
         ResourceIdentityData upgraded_identity = 1;
