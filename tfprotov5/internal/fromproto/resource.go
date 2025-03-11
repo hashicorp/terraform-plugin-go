@@ -130,7 +130,7 @@ func MoveResourceStateRequest(in *tfplugin5.MoveResourceState_Request) *tfprotov
 		SourceState:           RawState(in.SourceState),
 		SourceTypeName:        in.SourceTypeName,
 		TargetTypeName:        in.TargetTypeName,
-		SourceIdentity:        ResourceIdentityData(in.SourceIdentity),
+		SourceIdentity:        RawState(in.SourceIdentity),
 	}
 
 	return resp
