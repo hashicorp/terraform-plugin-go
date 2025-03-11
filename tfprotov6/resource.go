@@ -142,7 +142,7 @@ type UpgradeResourceIdentityRequest struct {
 	// RawIdentity is the identity state as Terraform sees it right now. See the
 	// documentation for `RawIdentity` for information on how to work with the
 	// data it contains.
-	RawState *RawState
+	RawIdentity *RawState
 }
 
 type UpgradeResourceIdentityResponse struct {
