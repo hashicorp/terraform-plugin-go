@@ -505,7 +505,7 @@ func TestUpgradeResourceIdentityRequest(t *testing.T) {
 				RawIdentity: testTfplugin5RawState(t, []byte("{}")),
 			},
 			expected: &tfprotov5.UpgradeResourceIdentityRequest{
-				RawState: testTfprotov5RawState(t, []byte("{}")),
+				RawIdentity: testTfprotov5RawState(t, []byte("{}")),
 			},
 		},
 		"TypeName": {
