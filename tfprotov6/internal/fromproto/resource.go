@@ -42,9 +42,9 @@ func UpgradeResourceIdentityRequest(in *tfplugin6.UpgradeResourceIdentity_Reques
 	}
 
 	resp := &tfprotov6.UpgradeResourceIdentityRequest{
-		RawState: RawState(in.RawIdentity),
-		TypeName: in.TypeName,
-		Version:  in.Version,
+		RawIdentity: RawState(in.RawIdentity),
+		TypeName:    in.TypeName,
+		Version:     in.Version,
 	}
 
 	return resp
