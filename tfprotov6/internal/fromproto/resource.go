@@ -42,7 +42,7 @@ func UpgradeResourceIdentityRequest(in *tfplugin6.UpgradeResourceIdentity_Reques
 	}
 
 	resp := &tfprotov6.UpgradeResourceIdentityRequest{
-		RawIdentity: RawIdentity(in.RawIdentity),
+		RawIdentity: RawState(in.RawIdentity),
 		TypeName:    in.TypeName,
 		Version:     in.Version,
 	}
@@ -131,7 +131,7 @@ func MoveResourceStateRequest(in *tfplugin6.MoveResourceState_Request) *tfprotov
 		SourceState:           RawState(in.SourceState),
 		SourceTypeName:        in.SourceTypeName,
 		TargetTypeName:        in.TargetTypeName,
-		SourceIdentity:        ResourceIdentityData(in.SourceIdentity),
+		SourceIdentity:        RawState(in.SourceIdentity),
 	}
 
 	return resp

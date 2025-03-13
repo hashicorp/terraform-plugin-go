@@ -8,7 +8,7 @@
 // use protoc to generate stubs for your target language.
 //
 // This file will not be updated. Any minor versions of protocol 6 to follow
-// should copy this file and modify the copy while maintaing backwards
+// should copy this file and modify the copy while maintaining backwards
 // compatibility. Breaking changes, if any are required, will come
 // in a subsequent major version with its own separate proto definition.
 //
@@ -653,7 +653,14 @@ message MoveResourceState {
         // The private state of the resource being moved.
         bytes source_private = 6;
 
-        ResourceIdentityData source_identity = 7;
+        // The raw identity of the resource being moved. Only the json field is
+        // populated, as there should be no legacy providers using the flatmap
+        // format that support newly introduced RPCs.
+        RawState source_identity = 7;
+
+        // The identity schema version of the resource type that the resource
+        // is being moved from.
+        int64 source_identity_schema_version = 8;
     }
 
     message Response {
@@ -790,7 +797,7 @@ message UpgradeResourceIdentity {
         // not have access to the identity schema of prior_version, so it's the
         // provider's responsibility to interpret this value using the
         // appropriate older schema. The raw_identity will be json encoded.
-        bytes raw_identity = 3;
+        RawState raw_identity = 3;
     }
     message Response {
         // upgraded_identity returns the upgraded resource identity data
