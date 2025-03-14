@@ -1,0 +1,6 @@
+kind: NOTES
+body: This alpha pre-release contains the protocol definitions for managed resource identity, which can used with Terraform v1.12.0-alpha20250312,
+    to store and read identity data during plan and apply workflows.
+time: 2025-03-14T10:13:13.942004-04:00
+custom:
+    Issue: "476"
