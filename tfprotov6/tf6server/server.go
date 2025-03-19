@@ -626,6 +626,8 @@ func (s *server) ConfigureProvider(ctx context.Context, protoReq *tfplugin6.Conf
 	tf6serverlogging.ConfigureProviderClientCapabilities(ctx, req.ClientCapabilities)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 
+	s.cancellationTokens = make(map[string]context.CancelFunc)
+
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
 	resp, err := s.downstream.ConfigureProvider(ctx, req)
