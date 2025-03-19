@@ -1317,7 +1317,6 @@ Events:
 		select {
 		case event, ok := <-eventsCh:
 			if !ok {
-				close(eventsCh)
 				break Events
 			}
 
@@ -1357,7 +1356,6 @@ Events:
 
 		case <-ctx.Done():
 			cancel()
-			close(eventsCh)
 		}
 	}
 
