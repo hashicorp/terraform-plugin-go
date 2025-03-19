@@ -44,7 +44,7 @@ type InvokeActionRequest struct {
 
 type InvokeActionResponse struct {
 	CancellationToken string
-	Events            <-chan InvokeActionEvent
+	Events            chan InvokeActionEvent
 	Diagnostics       []*Diagnostic
 }
 
