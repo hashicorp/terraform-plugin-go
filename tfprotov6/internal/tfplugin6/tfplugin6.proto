@@ -219,6 +219,25 @@ message ResourceIdentityData {
     DynamicValue identity_data = 1;
 }
 
+message ActionSchema {
+    // TODO: We will need a way to express lists / maps of resources / possibly multiple different resource types
+    message LinkedResource {
+        string type = 1;
+    }
+
+    // The version of the schema.
+    // Schemas are versioned, so that providers can upgrade a saved resource
+    // state when the schema is changed.
+    int64 version = 1;
+
+    // Block is the top level configuration block for this schema.
+    Schema.Block block = 2;
+
+    // LinkedResources is a map of stringified cty.Paths (to the attribute in the config)
+    // to the linked resource schema.
+    map<string, LinkedResource> linked_resources = 3;
+}
+
 
 message Function {
     // parameters is the ordered list of positional function parameters.
@@ -376,7 +395,12 @@ service Provider {
 
     // CallFunction runs the provider-defined function logic and returns
     // the result with any diagnostics.
-    rpc CallFunction(CallFunction.Request) returns (CallFunction.Response);   
+    rpc CallFunction(CallFunction.Request) returns (CallFunction.Response);
+
+    // Actions
+    rpc PlanAction(PlanAction.Request) returns (PlanAction.Response);
+    rpc InvokeAction(InvokeAction.Request) returns (stream InvokeAction.Event);
+    rpc CancelAction(CancelAction.Request) returns (CancelAction.Response);
 
     //////// Graceful Shutdown
     rpc StopProvider(StopProvider.Request) returns (StopProvider.Response);
@@ -429,6 +453,7 @@ message GetProviderSchema {
         // functions is a mapping of function names to definitions.
         map<string, Function> functions = 7;
         map<string, Schema> ephemeral_resource_schemas = 8;
+        map<string, ActionSchema> action_schemas = 9;
     }
 }
 
@@ -798,6 +823,82 @@ message UpgradeResourceIdentity {
 
         // diagnostics is the collection of warning and error diagnostics for this request
         repeated Diagnostic diagnostics = 2;
+    }
+}
+
+message PlanAction {
+    message Request {
+        string type_name = 1;
+        DynamicValue config = 2;
+    }
+    message Response {
+        repeated Diagnostic diagnostics = 1;
+        // An action might know that it will change a resource that has been passed in.
+        // The key of the map is the cty.Path in the config for the resource to change.
+        // The value is the new value of the resource instance.
+        map<string, DynamicValue> planned_resource_changes = 2;
+    }
+}
+
+message InvokeAction {
+    message Request {
+        string type_name = 1;
+        DynamicValue config = 2;
+    }
+
+    message Event {
+        oneof event {
+            Started started = 1;
+            Finished finished = 2;
+            Diagnostics diagnostics = 3;
+            Cancelled cancelled = 4;
+            Progress progress = 5;
+        }
+
+        // Sent when the action has started (to give us feedback and a way to cancel it).
+        message Started {
+            // This can be sent in a request to cancel the action.
+            string cancelation_token = 1;
+        }
+
+        // Sent when the action has completed successfully.
+        message Finished {
+            map<string, DynamicValue> outputs = 1;
+            // An action might change a resource that has been passed in.
+            // The key of the map is the cty.Path in the config for the resource to change.
+            // The value is the new value of the resource instance.
+            map<string, DynamicValue> resource_changes = 2;
+        }
+
+        // If one of the diagnostics is an error, the action is considered failed.
+        message Diagnostics {
+            repeated Diagnostic diagnostics = 1;
+        }
+
+        // Sent when the action has been cancelled.
+        message Cancelled {}
+
+        // Sent when the action is making progress, forwards stdout and stderr or sth similar.
+        message Progress {
+            repeated string stdout = 1;
+            repeated string stderr = 2;
+        }
+    }
+}
+
+message CancelAction {
+    message Request {
+        string cancelation_token = 1;
+        CancelType type = 2;
+    }
+
+    enum CancelType {
+        SOFT = 0;
+        HARD = 1;
+    }
+
+    message Response {
+        repeated Diagnostic diagnostics = 1;
     }
 }
 

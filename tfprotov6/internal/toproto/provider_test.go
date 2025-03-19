@@ -245,6 +245,51 @@ func TestGetProviderSchema_Response(t *testing.T) {
 		"zero": {
 			in: &tfprotov6.GetProviderSchemaResponse{},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:            map[string]*tfplugin6.ActionSchema{},
+				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
+				Diagnostics:              []*tfplugin6.Diagnostic{},
+				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
+				Functions:                map[string]*tfplugin6.Function{},
+				ResourceSchemas:          map[string]*tfplugin6.Schema{},
+			},
+		},
+		"Actions": {
+			in: &tfprotov6.GetProviderSchemaResponse{
+				ActionSchemas: map[string]*tfprotov6.ActionSchema{
+					"test": {
+						LinkedResources: map[string]*tfprotov6.LinkedResource{
+							"cty.GetAttrPath(\"object\")": {
+								TypeName: "test_type",
+							},
+						},
+						Block: &tfprotov6.SchemaBlock{
+							Attributes: []*tfprotov6.SchemaAttribute{
+								{
+									Name: "test",
+								},
+							},
+						},
+					},
+				},
+			},
+			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas: map[string]*tfplugin6.ActionSchema{
+					"test": {
+						LinkedResources: map[string]*tfplugin6.ActionSchema_LinkedResource{
+							"cty.GetAttrPath(\"object\")": {
+								Type: "test_type",
+							},
+						},
+						Block: &tfplugin6.Schema_Block{
+							Attributes: []*tfplugin6.Schema_Attribute{
+								{
+									Name: "test",
+								},
+							},
+							BlockTypes: []*tfplugin6.Schema_NestedBlock{},
+						},
+					},
+				},
 				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
@@ -267,6 +312,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas: map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas: map[string]*tfplugin6.Schema{
 					"test": {
 						Block: &tfplugin6.Schema_Block{
@@ -292,6 +338,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:     map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas: map[string]*tfplugin6.Schema{},
 				Diagnostics: []*tfplugin6.Diagnostic{
 					testTfplugin6Diagnostic,
@@ -316,6 +363,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:     map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas: map[string]*tfplugin6.Schema{},
 				Diagnostics:       []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{
@@ -345,6 +393,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:            map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
@@ -372,6 +421,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:            map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
 				Diagnostics:              []*tfplugin6.Diagnostic{},
@@ -402,6 +452,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:            map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
@@ -434,6 +485,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:            map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
@@ -459,6 +511,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:            map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
@@ -482,6 +535,8 @@ func TestGetProviderSchema_Response(t *testing.T) {
 			// writing a custom Comparer for each type, which would have no
 			// benefits.
 			diffOpts := cmpopts.IgnoreUnexported(
+				tfplugin6.ActionSchema{},
+				tfplugin6.ActionSchema_LinkedResource{},
 				tfplugin6.Diagnostic{},
 				tfplugin6.Function{},
 				tfplugin6.Function_Return{},

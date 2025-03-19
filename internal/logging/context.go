@@ -91,6 +91,15 @@ func EphemeralResourceContext(ctx context.Context, ephemeralResource string) con
 	return ctx
 }
 
+// ActionContext injects the action cancellation token into logger contexts.
+func ActionContext(ctx context.Context, actionCancellationToken string) context.Context {
+	ctx = tfsdklog.SetField(ctx, KeyActionCancellationToken, actionCancellationToken)
+	ctx = tfsdklog.SubsystemSetField(ctx, SubsystemProto, KeyActionCancellationToken, actionCancellationToken)
+	ctx = tflog.SetField(ctx, KeyActionCancellationToken, actionCancellationToken)
+
+	return ctx
+}
+
 // RpcContext injects the RPC name into logger contexts.
 func RpcContext(ctx context.Context, rpc string) context.Context {
 	ctx = tfsdklog.SetField(ctx, KeyRPC, rpc)

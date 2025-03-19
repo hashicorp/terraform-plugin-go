@@ -61,6 +61,12 @@ type ProviderServer interface {
 	// ephemeral resource is to terraform-plugin-go, so they're their own
 	// interface that is composed into ProviderServer.
 	EphemeralResourceServer
+
+	PlanAction(context.Context, *PlanActionRequest) (*PlanActionResponse, error)
+
+	InvokeAction(context.Context, *InvokeActionRequest, *InvokeActionResponse) error //Todo: change response signature?}
+
+	CancelAction(context.Context, *CancelActionRequest) (*CancelActionResponse, error)
 }
 
 // ProviderServerWithResourceIdentity is a temporary interface for servers
@@ -168,6 +174,28 @@ type GetProviderSchemaResponse struct {
 	// provider's schemas. Returning an empty slice indicates success, with
 	// no errors or warnings generated.
 	Diagnostics []*Diagnostic
+
+	ActionSchemas map[string]*ActionSchema
+}
+
+type LinkedResource struct {
+	TypeName string
+}
+
+type ActionSchema struct {
+	// Version indicates which version of the schema this is. Versions
+	// should be monotonically incrementing numbers. When Terraform
+	// encounters a resource stored in state with a schema version lower
+	// that the schema version the provider advertises for that resource,
+	// Terraform requests the provider upgrade the resource's state.
+	Version int64
+
+	// Block is the root level of the schema, the collection of attributes
+	// and blocks that make up a resource, data source, provider, or other
+	// configuration block.
+	Block *SchemaBlock
+
+	LinkedResources map[string]*LinkedResource
 }
 
 // GetResourceIdentitySchemasRequest represents a Terraform RPC request for the

@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 	"os/signal"
 	"regexp"
@@ -424,6 +425,8 @@ type server struct {
 
 	// protocolVersion is the protocol version for the server.
 	protocolVersion string
+
+	cancellationTokens map[string]context.CancelFunc
 }
 
 func mergeStop(ctx context.Context, cancel context.CancelFunc, stopCh chan struct{}) {
@@ -1242,6 +1245,148 @@ func (s *server) CloseEphemeralResource(ctx context.Context, protoReq *tfplugin6
 	return protoResp, nil
 }
 
+func (s *server) PlanAction(ctx context.Context, protoReq *tfplugin6.PlanAction_Request) (*tfplugin6.PlanAction_Response, error) {
+	rpc := "PlanAction"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.ActionContext(ctx, protoReq.TypeName) //TODO: handle both cancellation token and typename
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.PlanActionRequest(protoReq)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	resp, err := s.downstream.PlanAction(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]any{logging.KeyError: err})
+		return nil, err
+	}
+
+	//TODO: log response message
+	//tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.PlanAction_Response(resp)
+
+	return protoResp, nil
+}
+
+func (s *server) InvokeAction(protoReq *tfplugin6.InvokeAction_Request, protoStreamResp grpc.ServerStreamingServer[tfplugin6.InvokeAction_Event]) error {
+	rpc := "InvokeAction"
+	ctx := s.loggingContext(protoStreamResp.Context())
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.ActionContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.InvokeActionRequest(protoReq)
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	eventsCh := make(chan tfprotov6.InvokeActionEvent)
+
+	resp := tfprotov6.InvokeActionResponse{
+		Events: eventsCh,
+	}
+
+	// Create action cancellation context
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	cancellationToken := req.TypeName + randomString(32)
+	s.cancellationTokens[cancellationToken] = cancel
+
+	// Send the started event
+	protoStreamResp.Send(&tfplugin6.InvokeAction_Event{
+		Event: &tfplugin6.InvokeAction_Event_Started_{
+			Started: &tfplugin6.InvokeAction_Event_Started{
+				CancelationToken: cancellationToken,
+			},
+		},
+	})
+
+	// Call downstream implementation in goroutine
+	go s.downstream.InvokeAction(ctx, req, &resp)
+
+Events:
+	for {
+		defer delete(s.cancellationTokens, cancellationToken)
+		select {
+		case event, ok := <-eventsCh:
+			if !ok {
+				close(eventsCh)
+				break Events
+			}
+
+			switch actionEvent := event.(type) {
+			case *tfprotov6.ProgressActionEvent:
+				tfplugin6Event := &tfplugin6.InvokeAction_Event{
+					Event: toproto.InvokeAction_Event_Progress_(actionEvent),
+				}
+
+				protoStreamResp.Send(tfplugin6Event)
+
+			case *tfprotov6.DiagnosticsActionEvent:
+				tfplugin6Event := &tfplugin6.InvokeAction_Event{
+					Event: toproto.InvokeAction_Event_Diagnostics_(actionEvent),
+				}
+
+				protoStreamResp.Send(tfplugin6Event)
+
+			case *tfprotov6.FinishedActionEvent:
+				tfplugin6Event := &tfplugin6.InvokeAction_Event{
+					Event: toproto.InvokeAction_Event_Finished_(actionEvent),
+				}
+
+				protoStreamResp.Send(tfplugin6Event)
+
+			case *tfprotov6.CancelledActionEvent:
+				tfplugin6Event := &tfplugin6.InvokeAction_Event{
+					Event: toproto.InvokeAction_Event_Cancelled_(actionEvent),
+				}
+
+				protoStreamResp.Send(tfplugin6Event)
+
+				// Should I close the channel and break here?
+			default:
+				panic(fmt.Sprintf("unexpected event type: %T", event))
+			}
+
+		case <-ctx.Done():
+			cancel()
+			close(eventsCh)
+		}
+	}
+
+	return nil
+}
+func (s *server) CancelAction(ctx context.Context, protoReq *tfplugin6.CancelAction_Request) (*tfplugin6.CancelAction_Response, error) {
+	rpc := "CancelAction"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.ActionContext(ctx, protoReq.GetCancelationToken())
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.CancelActionRequest(protoReq)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	resp, err := s.downstream.CancelAction(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]any{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.CancelAction_Response(resp)
+
+	return protoResp, nil
+}
+
 func invalidDeferredResponseDiag(reason tfprotov6.DeferredReason) *tfprotov6.Diagnostic {
 	return &tfprotov6.Diagnostic{
 		Severity: tfprotov6.DiagnosticSeverityError,
@@ -1250,4 +1395,15 @@ func invalidDeferredResponseDiag(reason tfprotov6.DeferredReason) *tfprotov6.Dia
 			"This is an issue with the provider and should be reported to the provider developers.\n\n" +
 			fmt.Sprintf("Deferred reason - %q", reason.String()),
 	}
+}
+
+func randomString(length int) string {
+	seededRand := rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	charset := "abcdefghijklmnopqrstuvwxyz"
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
 }
