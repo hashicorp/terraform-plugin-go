@@ -62,11 +62,7 @@ type ProviderServer interface {
 	// interface that is composed into ProviderServer.
 	EphemeralResourceServer
 
-	PlanAction(context.Context, *PlanActionRequest) (*PlanActionResponse, error)
-
-	InvokeAction(context.Context, *InvokeActionRequest, *InvokeActionResponse) error //Todo: change response signature?}
-
-	CancelAction(context.Context, *CancelActionRequest) (*CancelActionResponse, error)
+	ActionServer
 }
 
 // ProviderServerWithResourceIdentity is a temporary interface for servers

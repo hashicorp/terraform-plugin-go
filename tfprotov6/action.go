@@ -3,33 +3,19 @@
 
 package tfprotov6
 
-// Function describes the definition of a function. Result must be defined.
+import (
+	"context"
+)
+
+type ActionServer interface {
+	PlanAction(context.Context, *PlanActionRequest) (*PlanActionResponse, error)
+
+	InvokeAction(context.Context, *InvokeActionRequest, *InvokeActionResponse) error //Todo: change response signature?}
+
+	CancelAction(context.Context, *CancelActionRequest) (*CancelActionResponse, error)
+}
+
 type Action struct {
-	// Parameters is the ordered list of positional function parameters.
-	Parameters []*FunctionParameter
-
-	// VariadicParameter is an optional final parameter which accepts zero or
-	// more argument values, in which Terraform will send an ordered list of the
-	// parameter type.
-	VariadicParameter *FunctionParameter
-
-	// Return is the function result.
-	Return *FunctionReturn
-
-	// Summary is the shortened human-readable documentation for the function.
-	Summary string
-
-	// Description is the longer human-readable documentation for the function.
-	Description string
-
-	// DescriptionKind indicates the formatting and encoding that the
-	// Description field is using.
-	DescriptionKind StringKind
-
-	// DeprecationMessage is the human-readable documentation if the function
-	// is deprecated. This message should be practitioner oriented to explain
-	// how their configuration should be updated.
-	DeprecationMessage string
 }
 
 type CancelActionRequest struct {
