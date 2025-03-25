@@ -21,6 +21,37 @@ type ResourceIdentitySchema struct {
 	IdentityAttributes []*ResourceIdentitySchemaAttribute
 }
 
+// ValueType returns the tftypes.Type for a ResourceIdentitySchema.
+//
+// If ResourceIdentitySchema is missing, an empty Object is returned.
+func (s *ResourceIdentitySchema) ValueType() tftypes.Type {
+	if s == nil {
+		return tftypes.Object{
+			AttributeTypes: map[string]tftypes.Type{},
+		}
+	}
+
+	attributeTypes := map[string]tftypes.Type{}
+
+	for _, attribute := range s.IdentityAttributes {
+		if attribute == nil {
+			continue
+		}
+
+		attributeType := attribute.ValueType()
+
+		if attributeType == nil {
+			continue
+		}
+
+		attributeTypes[attribute.Name] = attributeType
+	}
+
+	return tftypes.Object{
+		AttributeTypes: attributeTypes,
+	}
+}
+
 // ResourceIdentitySchemaAttribute represents one value of data within
 // resource identity.
 // These are always used in resource identity comparisons.
@@ -55,4 +86,15 @@ type ResourceIdentitySchemaAttribute struct {
 
 	// Description is a human-readable description of the attribute.
 	Description string
+}
+
+// ValueType returns the tftypes.Type for a ResourceIdentitySchemaAttribute.
+//
+// If ResourceIdentitySchemaAttribute is missing, nil is returned.
+func (s *ResourceIdentitySchemaAttribute) ValueType() tftypes.Type {
+	if s == nil {
+		return nil
+	}
+
+	return s.Type
 }
