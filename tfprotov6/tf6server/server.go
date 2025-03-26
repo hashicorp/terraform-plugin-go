@@ -1279,7 +1279,7 @@ func (s *server) InvokeAction(protoReq *tfplugin6.InvokeAction_Request, protoStr
 	ctx := s.loggingContext(protoStreamResp.Context())
 	ctx = logging.RpcContext(ctx, rpc)
 	ctx = logging.ActionContext(ctx, protoReq.TypeName)
-	ctx = s.stoppableContext(ctx)
+	//ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
 
@@ -1361,7 +1361,7 @@ func (s *server) CancelAction(ctx context.Context, protoReq *tfplugin6.CancelAct
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
 	ctx = logging.ActionContext(ctx, protoReq.GetCancelationToken())
-	ctx = s.stoppableContext(ctx)
+	//ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
 
