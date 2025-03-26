@@ -1287,6 +1287,7 @@ func (s *server) InvokeAction(protoReq *tfplugin6.InvokeAction_Request, protoStr
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
 	eventsCh := make(chan tfprotov6.InvokeActionEvent)
+	defer close(eventsCh)
 
 	resp := tfprotov6.InvokeActionResponse{
 		Events: eventsCh,
@@ -1324,7 +1325,6 @@ Events:
 				}
 
 				protoStreamResp.Send(tfplugin6Event)
-				return nil
 
 			case *tfprotov6.CancelledActionEvent:
 				tfplugin6Event := &tfplugin6.InvokeAction_Event{
@@ -1332,7 +1332,6 @@ Events:
 				}
 
 				protoStreamResp.Send(tfplugin6Event)
-				return nil
 
 				// Should I close the channel and break here?
 			default:
