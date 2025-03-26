@@ -1357,6 +1357,10 @@ Events:
 	return nil
 }
 func (s *server) CancelAction(ctx context.Context, protoReq *tfplugin6.CancelAction_Request) (*tfplugin6.CancelAction_Response, error) {
+	if ctx.Err() != nil {
+		fmt.Printf("Context has an error %s", ctx.Err())
+	}
+
 	rpc := "CancelAction"
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
