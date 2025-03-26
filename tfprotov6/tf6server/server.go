@@ -1295,75 +1295,75 @@ func (s *server) InvokeAction(protoReq *tfplugin6.InvokeAction_Request, protoStr
 	// Call downstream implementation in goroutine
 	go s.downstream.InvokeAction(ctx, req, &resp)
 
-Events:
-	for {
-		select {
-		case event, ok := <-eventsCh:
-			if !ok {
-				logging.ProtocolTrace(ctx, "Breaking Events loop")
-				break Events
+	go func() {
+		for {
+			select {
+			case event, ok := <-eventsCh:
+				if !ok {
+					logging.ProtocolTrace(ctx, "Breaking Events loop")
+					return
+				}
+
+				switch actionEvent := event.(type) {
+				case *tfprotov6.StartedActionEvent:
+					logging.ProtocolTrace(ctx, "Sending StartedActionEvent")
+					tfplugin6Event := &tfplugin6.InvokeAction_Event{
+						Event: toproto.InvokeAction_Event_Started_(actionEvent),
+					}
+
+					protoStreamResp.Send(tfplugin6Event)
+					logging.ProtocolTrace(ctx, "Sent StartedActionEvent")
+				case *tfprotov6.ProgressActionEvent:
+					logging.ProtocolTrace(ctx, "Sending ProgressActionEvent")
+					tfplugin6Event := &tfplugin6.InvokeAction_Event{
+						Event: toproto.InvokeAction_Event_Progress_(actionEvent),
+					}
+
+					protoStreamResp.Send(tfplugin6Event)
+					logging.ProtocolTrace(ctx, "Sent ProgressActionEvent")
+
+				case *tfprotov6.DiagnosticsActionEvent:
+					logging.ProtocolTrace(ctx, "Sending DiagnosticsActionEvent")
+					tfplugin6Event := &tfplugin6.InvokeAction_Event{
+						Event: toproto.InvokeAction_Event_Diagnostics_(actionEvent),
+					}
+
+					protoStreamResp.Send(tfplugin6Event)
+					logging.ProtocolTrace(ctx, "Sent DiagnosticsActionEvent")
+				case *tfprotov6.FinishedActionEvent:
+					logging.ProtocolTrace(ctx, "Sending FinishedActionEvent")
+					tfplugin6Event := &tfplugin6.InvokeAction_Event{
+						Event: toproto.InvokeAction_Event_Finished_(actionEvent),
+					}
+
+					protoStreamResp.Send(tfplugin6Event)
+					logging.ProtocolTrace(ctx, "Sent FinishedActionEvent")
+
+				case *tfprotov6.CancelledActionEvent:
+					logging.ProtocolTrace(ctx, "Sending CancelledActionEvent")
+					tfplugin6Event := &tfplugin6.InvokeAction_Event{
+						Event: toproto.InvokeAction_Event_Cancelled_(actionEvent),
+					}
+
+					protoStreamResp.Send(tfplugin6Event)
+					logging.ProtocolTrace(ctx, "Sent CancelledActionEvent")
+
+				default:
+					panic(fmt.Sprintf("unexpected event type: %T", event))
+				}
+
+			case <-ctx.Done():
+				logging.ProtocolTrace(ctx, "Recieved context cancellation, sending cancelled event")
+
+				protoStreamResp.Send(&tfplugin6.InvokeAction_Event{
+					Event: &tfplugin6.InvokeAction_Event_Cancelled_{
+						Cancelled: &tfplugin6.InvokeAction_Event_Cancelled{},
+					},
+				})
+				return
 			}
-
-			switch actionEvent := event.(type) {
-			case *tfprotov6.StartedActionEvent:
-				logging.ProtocolTrace(ctx, "Sending StartedActionEvent")
-				tfplugin6Event := &tfplugin6.InvokeAction_Event{
-					Event: toproto.InvokeAction_Event_Started_(actionEvent),
-				}
-
-				protoStreamResp.Send(tfplugin6Event)
-				logging.ProtocolTrace(ctx, "Sent StartedActionEvent")
-			case *tfprotov6.ProgressActionEvent:
-				logging.ProtocolTrace(ctx, "Sending ProgressActionEvent")
-				tfplugin6Event := &tfplugin6.InvokeAction_Event{
-					Event: toproto.InvokeAction_Event_Progress_(actionEvent),
-				}
-
-				protoStreamResp.Send(tfplugin6Event)
-				logging.ProtocolTrace(ctx, "Sent ProgressActionEvent")
-
-			case *tfprotov6.DiagnosticsActionEvent:
-				logging.ProtocolTrace(ctx, "Sending DiagnosticsActionEvent")
-				tfplugin6Event := &tfplugin6.InvokeAction_Event{
-					Event: toproto.InvokeAction_Event_Diagnostics_(actionEvent),
-				}
-
-				protoStreamResp.Send(tfplugin6Event)
-				logging.ProtocolTrace(ctx, "Sent DiagnosticsActionEvent")
-			case *tfprotov6.FinishedActionEvent:
-				logging.ProtocolTrace(ctx, "Sending FinishedActionEvent")
-				tfplugin6Event := &tfplugin6.InvokeAction_Event{
-					Event: toproto.InvokeAction_Event_Finished_(actionEvent),
-				}
-
-				protoStreamResp.Send(tfplugin6Event)
-				logging.ProtocolTrace(ctx, "Sent FinishedActionEvent")
-
-			case *tfprotov6.CancelledActionEvent:
-				logging.ProtocolTrace(ctx, "Sending CancelledActionEvent")
-				tfplugin6Event := &tfplugin6.InvokeAction_Event{
-					Event: toproto.InvokeAction_Event_Cancelled_(actionEvent),
-				}
-
-				protoStreamResp.Send(tfplugin6Event)
-				logging.ProtocolTrace(ctx, "Sent CancelledActionEvent")
-
-			default:
-				panic(fmt.Sprintf("unexpected event type: %T", event))
-			}
-
-		case <-ctx.Done():
-			logging.ProtocolTrace(ctx, "Recieved context cancellation, sending cancelled event")
-
-			protoStreamResp.Send(&tfplugin6.InvokeAction_Event{
-				Event: &tfplugin6.InvokeAction_Event_Cancelled_{
-					Cancelled: &tfplugin6.InvokeAction_Event_Cancelled{},
-				},
-			})
-
-			return nil
 		}
-	}
+	}()
 	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 
 	return nil
