@@ -1297,7 +1297,6 @@ func (s *server) InvokeAction(protoReq *tfplugin6.InvokeAction_Request, protoStr
 
 Events:
 	for {
-		defer close(eventsCh)
 		select {
 		case event, ok := <-eventsCh:
 			if !ok {
