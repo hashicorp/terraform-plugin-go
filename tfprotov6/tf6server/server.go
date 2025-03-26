@@ -1292,28 +1292,12 @@ func (s *server) InvokeAction(protoReq *tfplugin6.InvokeAction_Request, protoStr
 		Events: eventsCh,
 	}
 
-	// Create action cancellation context
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	cancellationToken := req.TypeName + randomString(32)
-	s.cancellationTokens[cancellationToken] = cancel
-
-	// Send the started event
-	protoStreamResp.Send(&tfplugin6.InvokeAction_Event{
-		Event: &tfplugin6.InvokeAction_Event_Started_{
-			Started: &tfplugin6.InvokeAction_Event_Started{
-				CancelationToken: cancellationToken,
-			},
-		},
-	})
-
 	// Call downstream implementation in goroutine
 	go s.downstream.InvokeAction(ctx, req, &resp)
 
 Events:
 	for {
-		defer delete(s.cancellationTokens, cancellationToken)
+		defer close(eventsCh)
 		select {
 		case event, ok := <-eventsCh:
 			if !ok {
@@ -1341,6 +1325,7 @@ Events:
 				}
 
 				protoStreamResp.Send(tfplugin6Event)
+				return nil
 
 			case *tfprotov6.CancelledActionEvent:
 				tfplugin6Event := &tfplugin6.InvokeAction_Event{
@@ -1348,6 +1333,7 @@ Events:
 				}
 
 				protoStreamResp.Send(tfplugin6Event)
+				return nil
 
 				// Should I close the channel and break here?
 			default:
@@ -1355,7 +1341,13 @@ Events:
 			}
 
 		case <-ctx.Done():
-			cancel()
+			protoStreamResp.Send(&tfplugin6.InvokeAction_Event{
+				Event: &tfplugin6.InvokeAction_Event_Cancelled_{
+					Cancelled: &tfplugin6.InvokeAction_Event_Cancelled{},
+				},
+			})
+
+			return nil
 		}
 	}
 
@@ -1371,7 +1363,6 @@ func (s *server) CancelAction(ctx context.Context, protoReq *tfplugin6.CancelAct
 	defer logging.ProtocolTrace(ctx, "Served request")
 
 	req := fromproto.CancelActionRequest(protoReq)
-
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
 	resp, err := s.downstream.CancelAction(ctx, req)
