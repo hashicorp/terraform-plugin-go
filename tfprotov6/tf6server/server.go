@@ -1304,6 +1304,12 @@ Events:
 			}
 
 			switch actionEvent := event.(type) {
+			case *tfprotov6.StartedActionEvent:
+				tfplugin6Event := &tfplugin6.InvokeAction_Event{
+					Event: toproto.InvokeAction_Event_Started_(actionEvent),
+				}
+
+				protoStreamResp.Send(tfplugin6Event)
 			case *tfprotov6.ProgressActionEvent:
 				tfplugin6Event := &tfplugin6.InvokeAction_Event{
 					Event: toproto.InvokeAction_Event_Progress_(actionEvent),
