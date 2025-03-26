@@ -1287,7 +1287,6 @@ func (s *server) InvokeAction(protoReq *tfplugin6.InvokeAction_Request, protoStr
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
 	eventsCh := make(chan tfprotov6.InvokeActionEvent)
-	defer close(eventsCh)
 
 	resp := tfprotov6.InvokeActionResponse{
 		Events: eventsCh,
