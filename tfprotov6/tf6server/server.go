@@ -1267,7 +1267,7 @@ func (s *server) PlanAction(ctx context.Context, protoReq *tfplugin6.PlanAction_
 	}
 
 	//TODO: log response message
-	//tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 
 	protoResp := toproto.PlanAction_Response(resp)
 
@@ -1279,91 +1279,22 @@ func (s *server) InvokeAction(protoReq *tfplugin6.InvokeAction_Request, protoStr
 	ctx := s.loggingContext(protoStreamResp.Context())
 	ctx = logging.RpcContext(ctx, rpc)
 	ctx = logging.ActionContext(ctx, protoReq.TypeName)
-	//ctx = s.stoppableContext(ctx)
+	ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
 
 	req := fromproto.InvokeActionRequest(protoReq)
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	eventsCh := make(chan tfprotov6.InvokeActionEvent)
-
 	resp := tfprotov6.InvokeActionResponse{
-		Events: eventsCh,
+		CallbackServer: toproto.InvokeActionCallBackServer{
+			protoStreamResp,
+		},
 	}
 
-	// Call downstream implementation in goroutine
-	go s.downstream.InvokeAction(ctx, req, &resp)
+	// Call downstream implementation
+	s.downstream.InvokeAction(ctx, req, &resp)
 
-	go func() {
-		for {
-			select {
-			case event, ok := <-eventsCh:
-				if !ok {
-					logging.ProtocolTrace(ctx, "Breaking Events loop")
-					return
-				}
-
-				switch actionEvent := event.(type) {
-				case *tfprotov6.StartedActionEvent:
-					logging.ProtocolTrace(ctx, "Sending StartedActionEvent")
-					tfplugin6Event := &tfplugin6.InvokeAction_Event{
-						Event: toproto.InvokeAction_Event_Started_(actionEvent),
-					}
-
-					protoStreamResp.Send(tfplugin6Event)
-					logging.ProtocolTrace(ctx, "Sent StartedActionEvent")
-				case *tfprotov6.ProgressActionEvent:
-					logging.ProtocolTrace(ctx, "Sending ProgressActionEvent")
-					tfplugin6Event := &tfplugin6.InvokeAction_Event{
-						Event: toproto.InvokeAction_Event_Progress_(actionEvent),
-					}
-
-					protoStreamResp.Send(tfplugin6Event)
-					logging.ProtocolTrace(ctx, "Sent ProgressActionEvent")
-
-				case *tfprotov6.DiagnosticsActionEvent:
-					logging.ProtocolTrace(ctx, "Sending DiagnosticsActionEvent")
-					tfplugin6Event := &tfplugin6.InvokeAction_Event{
-						Event: toproto.InvokeAction_Event_Diagnostics_(actionEvent),
-					}
-
-					protoStreamResp.Send(tfplugin6Event)
-					logging.ProtocolTrace(ctx, "Sent DiagnosticsActionEvent")
-				case *tfprotov6.FinishedActionEvent:
-					logging.ProtocolTrace(ctx, "Sending FinishedActionEvent")
-					tfplugin6Event := &tfplugin6.InvokeAction_Event{
-						Event: toproto.InvokeAction_Event_Finished_(actionEvent),
-					}
-
-					protoStreamResp.Send(tfplugin6Event)
-					logging.ProtocolTrace(ctx, "Sent FinishedActionEvent")
-
-				case *tfprotov6.CancelledActionEvent:
-					logging.ProtocolTrace(ctx, "Sending CancelledActionEvent")
-					tfplugin6Event := &tfplugin6.InvokeAction_Event{
-						Event: toproto.InvokeAction_Event_Cancelled_(actionEvent),
-					}
-
-					protoStreamResp.Send(tfplugin6Event)
-					logging.ProtocolTrace(ctx, "Sent CancelledActionEvent")
-
-				default:
-					panic(fmt.Sprintf("unexpected event type: %T", event))
-				}
-
-			case <-ctx.Done():
-				logging.ProtocolTrace(ctx, "Recieved context cancellation, sending cancelled event")
-
-				protoStreamResp.Send(&tfplugin6.InvokeAction_Event{
-					Event: &tfplugin6.InvokeAction_Event_Cancelled_{
-						Cancelled: &tfplugin6.InvokeAction_Event_Cancelled{},
-					},
-				})
-				return
-			}
-		}
-	}()
 	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 
 	return nil
@@ -1373,7 +1304,7 @@ func (s *server) CancelAction(ctx context.Context, protoReq *tfplugin6.CancelAct
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
 	ctx = logging.ActionContext(ctx, protoReq.GetCancelationToken())
-	//ctx = s.stoppableContext(ctx)
+	ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
 

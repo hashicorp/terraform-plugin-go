@@ -44,8 +44,12 @@ type InvokeActionRequest struct {
 
 type InvokeActionResponse struct {
 	CancellationToken string
-	Events            chan InvokeActionEvent
+	CallbackServer    InvokeActionCallBackServer
 	Diagnostics       []*Diagnostic
+}
+
+type InvokeActionCallBackServer interface {
+	Send(ctx context.Context, event InvokeActionEvent) error
 }
 
 // Invoke Action Events
