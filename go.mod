@@ -2,7 +2,7 @@ module github.com/hashicorp/terraform-plugin-go
 
 go 1.23.0
 
-toolchain go1.23.7
+toolchain go1.24.1
 
 require (
 	github.com/google/go-cmp v0.7.0
@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/terraform-registry-address v0.2.4
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	google.golang.org/grpc v1.71.0
+	google.golang.org/grpc v1.71.1
 	google.golang.org/protobuf v1.36.6
 )
 
