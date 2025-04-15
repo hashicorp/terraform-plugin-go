@@ -14,16 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/toproto"
 )
 
-func testTfprotov6ActionResourceChanges() map[string]*tfprotov6.DynamicValue {
-	return map[string]*tfprotov6.DynamicValue{
-		"cty.GetAttrPath(\"object\")": testTfprotov6DynamicValue(),
-	}
-}
-
-func testTfplugin6ActionResourceChanges() map[string]*tfplugin6.DynamicValue {
-	return toproto.ActionResourceChanges(testTfprotov6ActionResourceChanges())
-}
-
 func TestActionResourceChanges(t *testing.T) {
 	t.Parallel()
 

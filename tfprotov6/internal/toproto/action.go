@@ -40,8 +40,8 @@ func PlanAction_Response(in *tfprotov6.PlanActionResponse) *tfplugin6.PlanAction
 	}
 
 	resp := &tfplugin6.PlanAction_Response{
-		Diagnostics:            Diagnostics(in.Diagnostics),
-		PlannedResourceChanges: ActionResourceChanges(in.PlannedResourceChanges),
+		Diagnostics: Diagnostics(in.Diagnostics),
+		NewConfig:   DynamicValue(in.NewConfig),
 	}
 
 	return resp

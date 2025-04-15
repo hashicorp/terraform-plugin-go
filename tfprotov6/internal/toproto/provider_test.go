@@ -257,9 +257,10 @@ func TestGetProviderSchema_Response(t *testing.T) {
 			in: &tfprotov6.GetProviderSchemaResponse{
 				ActionSchemas: map[string]*tfprotov6.ActionSchema{
 					"test": {
-						LinkedResources: map[string]*tfprotov6.LinkedResource{
-							"cty.GetAttrPath(\"object\")": {
-								TypeName: "test_type",
+						LinkedResources: []*tfprotov6.LinkedResource{
+							{
+								TypeName:  "test_type",
+								Attribute: tftypes.NewAttributePath().WithAttributeName("object"),
 							},
 						},
 						Block: &tfprotov6.SchemaBlock{
@@ -275,9 +276,18 @@ func TestGetProviderSchema_Response(t *testing.T) {
 			expected: &tfplugin6.GetProviderSchema_Response{
 				ActionSchemas: map[string]*tfplugin6.ActionSchema{
 					"test": {
-						LinkedResources: map[string]*tfplugin6.ActionSchema_LinkedResource{
-							"cty.GetAttrPath(\"object\")": {
+						LinkedResources: []*tfplugin6.ActionSchema_LinkedResource{
+							{
 								Type: "test_type",
+								Attribute: &tfplugin6.AttributePath{
+									Steps: []*tfplugin6.AttributePath_Step{
+										{
+											Selector: &tfplugin6.AttributePath_Step_AttributeName{
+												AttributeName: "object",
+											},
+										},
+									},
+								},
 							},
 						},
 						Block: &tfplugin6.Schema_Block{
@@ -537,6 +547,8 @@ func TestGetProviderSchema_Response(t *testing.T) {
 			diffOpts := cmpopts.IgnoreUnexported(
 				tfplugin6.ActionSchema{},
 				tfplugin6.ActionSchema_LinkedResource{},
+				tfplugin6.AttributePath{},
+				tfplugin6.AttributePath_Step{},
 				tfplugin6.Diagnostic{},
 				tfplugin6.Function{},
 				tfplugin6.Function_Return{},

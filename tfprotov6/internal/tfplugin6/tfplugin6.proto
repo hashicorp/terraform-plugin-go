@@ -222,7 +222,8 @@ message ResourceIdentityData {
 message ActionSchema {
     // TODO: We will need a way to express lists / maps of resources / possibly multiple different resource types
     message LinkedResource {
-        string type = 1;
+        AttributePath attribute = 1;
+        string type = 2;
     }
 
     // The version of the schema.
@@ -233,9 +234,8 @@ message ActionSchema {
     // Block is the top level configuration block for this schema.
     Schema.Block block = 2;
 
-    // LinkedResources is a map of stringified cty.Paths (to the attribute in the config)
-    // to the linked resource schema.
-    map<string, LinkedResource> linked_resources = 3;
+    // LinkedResources is a list of resources that are linked to this action.
+    repeated LinkedResource linked_resources = 3;
 }
 
 
@@ -833,10 +833,10 @@ message PlanAction {
     }
     message Response {
         repeated Diagnostic diagnostics = 1;
-        // An action might know that it will change a resource that has been passed in.
-        // The key of the map is the cty.Path in the config for the resource to change.
-        // The value is the new value of the resource instance.
-        map<string, DynamicValue> planned_resource_changes = 2;
+        // new_config is the passed in config with any changes made by the action.
+        // The action schema contains links to the resources that are changed by the action and will
+        // change as a result of this.
+        DynamicValue new_config = 2;
     }
 }
 

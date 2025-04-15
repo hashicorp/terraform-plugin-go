@@ -33,8 +33,8 @@ type PlanActionRequest struct {
 }
 
 type PlanActionResponse struct {
-	Diagnostics            []*Diagnostic
-	PlannedResourceChanges map[string]*DynamicValue
+	Diagnostics []*Diagnostic
+	NewConfig   *DynamicValue
 }
 
 type InvokeActionRequest struct {

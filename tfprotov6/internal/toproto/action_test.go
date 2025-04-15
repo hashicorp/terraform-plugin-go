@@ -81,8 +81,7 @@ func TestPlanAction_Response(t *testing.T) {
 		"zero": {
 			in: &tfprotov6.PlanActionResponse{},
 			expected: &tfplugin6.PlanAction_Response{
-				Diagnostics:            []*tfplugin6.Diagnostic{},
-				PlannedResourceChanges: map[string]*tfplugin6.DynamicValue{},
+				Diagnostics: []*tfplugin6.Diagnostic{},
 			},
 		},
 		"Diagnostics": {
@@ -95,16 +94,15 @@ func TestPlanAction_Response(t *testing.T) {
 				Diagnostics: []*tfplugin6.Diagnostic{
 					testTfplugin6Diagnostic,
 				},
-				PlannedResourceChanges: map[string]*tfplugin6.DynamicValue{},
 			},
 		},
 		"Planned Resource Changes": {
 			in: &tfprotov6.PlanActionResponse{
-				PlannedResourceChanges: testTfprotov6ActionResourceChanges(),
+				NewConfig: testTfprotov6DynamicValue(),
 			},
 			expected: &tfplugin6.PlanAction_Response{
-				PlannedResourceChanges: testTfplugin6ActionResourceChanges(),
-				Diagnostics:            []*tfplugin6.Diagnostic{},
+				NewConfig:   testTfplugin6DynamicValue(),
+				Diagnostics: []*tfplugin6.Diagnostic{},
 			},
 		},
 	}

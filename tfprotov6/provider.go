@@ -5,6 +5,8 @@ package tfprotov6
 
 import (
 	"context"
+
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 // ProviderServer is an interface that reflects that Terraform protocol.
@@ -175,7 +177,8 @@ type GetProviderSchemaResponse struct {
 }
 
 type LinkedResource struct {
-	TypeName string
+	TypeName  string
+	Attribute *tftypes.AttributePath
 }
 
 type ActionSchema struct {
@@ -191,7 +194,7 @@ type ActionSchema struct {
 	// configuration block.
 	Block *SchemaBlock
 
-	LinkedResources map[string]*LinkedResource
+	LinkedResources []*LinkedResource
 }
 
 // GetResourceIdentitySchemasRequest represents a Terraform RPC request for the

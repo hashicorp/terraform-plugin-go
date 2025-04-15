@@ -5,12 +5,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
 )
 
-func LinkedResources(in map[string]*tfprotov6.LinkedResource) map[string]*tfplugin6.ActionSchema_LinkedResource {
-	resp := make(map[string]*tfplugin6.ActionSchema_LinkedResource)
+func LinkedResources(in []*tfprotov6.LinkedResource) []*tfplugin6.ActionSchema_LinkedResource {
+	resp := make([]*tfplugin6.ActionSchema_LinkedResource, len(in))
 
-	for k, v := range in {
-		resp[k] = &tfplugin6.ActionSchema_LinkedResource{
-			Type: v.TypeName,
+	for i, v := range in {
+		resp[i] = &tfplugin6.ActionSchema_LinkedResource{
+			Type:      v.TypeName,
+			Attribute: AttributePath(v.Attribute),
 		}
 	}
 
