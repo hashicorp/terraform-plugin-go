@@ -62,30 +62,29 @@ var _ InvokeActionEvent = &StartedActionEvent{}
 
 type StartedActionEvent struct {
 	CancellationToken string
+	Diagnostics       []*Diagnostic
 }
 
 func (s *StartedActionEvent) isInvokeActionEvent() {}
 
 type FinishedActionEvent struct {
-	Outputs         map[string]*DynamicValue
-	ResourceChanges map[string]*DynamicValue
+	Outputs     map[string]*DynamicValue
+	NewConfig   *DynamicValue
+	Diagnostics []*Diagnostic
 }
 
 func (f *FinishedActionEvent) isInvokeActionEvent() {}
 
-type DiagnosticsActionEvent struct {
+type CancelledActionEvent struct {
 	Diagnostics []*Diagnostic
 }
-
-func (d *DiagnosticsActionEvent) isInvokeActionEvent() {}
-
-type CancelledActionEvent struct{}
 
 func (c *CancelledActionEvent) isInvokeActionEvent() {}
 
 type ProgressActionEvent struct {
-	StdOut []string
-	StdErr []string
+	StdOut      []string
+	StdErr      []string
+	Diagnostics []*Diagnostic
 }
 
 var _ InvokeActionEvent = &ProgressActionEvent{}

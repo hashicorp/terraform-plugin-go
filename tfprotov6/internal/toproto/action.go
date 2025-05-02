@@ -55,6 +55,7 @@ func InvokeAction_Event_Started_(in *tfprotov6.StartedActionEvent) *tfplugin6.In
 	resp := &tfplugin6.InvokeAction_Event_Started_{
 		Started: &tfplugin6.InvokeAction_Event_Started{
 			CancelationToken: in.CancellationToken,
+			Diagnostics:      Diagnostics(in.Diagnostics),
 		},
 	}
 
@@ -68,8 +69,9 @@ func InvokeAction_Event_Progress_(in *tfprotov6.ProgressActionEvent) *tfplugin6.
 
 	resp := &tfplugin6.InvokeAction_Event_Progress_{
 		Progress: &tfplugin6.InvokeAction_Event_Progress{
-			Stdout: in.StdOut,
-			Stderr: in.StdErr,
+			Stdout:      in.StdOut,
+			Stderr:      in.StdErr,
+			Diagnostics: Diagnostics(in.Diagnostics),
 		},
 	}
 
@@ -83,21 +85,8 @@ func InvokeAction_Event_Finished_(in *tfprotov6.FinishedActionEvent) *tfplugin6.
 
 	resp := &tfplugin6.InvokeAction_Event_Finished_{
 		Finished: &tfplugin6.InvokeAction_Event_Finished{
-			Outputs:         ActionResourceChanges(in.Outputs),
-			ResourceChanges: ActionResourceChanges(in.ResourceChanges),
-		},
-	}
-
-	return resp
-}
-
-func InvokeAction_Event_Diagnostics_(in *tfprotov6.DiagnosticsActionEvent) *tfplugin6.InvokeAction_Event_Diagnostics_ {
-	if in == nil {
-		return nil
-	}
-
-	resp := &tfplugin6.InvokeAction_Event_Diagnostics_{
-		Diagnostics: &tfplugin6.InvokeAction_Event_Diagnostics{
+			Outputs:     ActionResourceChanges(in.Outputs),
+			NewConfig:   DynamicValue(in.NewConfig),
 			Diagnostics: Diagnostics(in.Diagnostics),
 		},
 	}
@@ -111,7 +100,9 @@ func InvokeAction_Event_Cancelled_(in *tfprotov6.CancelledActionEvent) *tfplugin
 	}
 
 	resp := &tfplugin6.InvokeAction_Event_Cancelled_{
-		Cancelled: &tfplugin6.InvokeAction_Event_Cancelled{},
+		Cancelled: &tfplugin6.InvokeAction_Event_Cancelled{
+			Diagnostics: Diagnostics(in.Diagnostics),
+		},
 	}
 
 	return resp

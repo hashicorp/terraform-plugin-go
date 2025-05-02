@@ -31,13 +31,6 @@ func (i InvokeActionCallBackServer) Send(ctx context.Context, event tfprotov6.In
 		}
 
 		return i.ProtoServer.Send(tfplugin6Event)
-	case *tfprotov6.DiagnosticsActionEvent:
-		logging.ProtocolTrace(ctx, "Sending DiagnosticsActionEvent")
-		tfplugin6Event := &tfplugin6.InvokeAction_Event{
-			Event: InvokeAction_Event_Diagnostics_(actionEvent),
-		}
-
-		return i.ProtoServer.Send(tfplugin6Event)
 	case *tfprotov6.FinishedActionEvent:
 		logging.ProtocolTrace(ctx, "Sending FinishedActionEvent")
 		tfplugin6Event := &tfplugin6.InvokeAction_Event{

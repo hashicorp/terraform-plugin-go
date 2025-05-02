@@ -5918,7 +5918,6 @@ type InvokeAction_Event struct {
 	//
 	//	*InvokeAction_Event_Started_
 	//	*InvokeAction_Event_Finished_
-	//	*InvokeAction_Event_Diagnostics_
 	//	*InvokeAction_Event_Cancelled_
 	//	*InvokeAction_Event_Progress_
 	Event         isInvokeAction_Event_Event `protobuf_oneof:"event"`
@@ -5981,15 +5980,6 @@ func (x *InvokeAction_Event) GetFinished() *InvokeAction_Event_Finished {
 	return nil
 }
 
-func (x *InvokeAction_Event) GetDiagnostics() *InvokeAction_Event_Diagnostics {
-	if x != nil {
-		if x, ok := x.Event.(*InvokeAction_Event_Diagnostics_); ok {
-			return x.Diagnostics
-		}
-	}
-	return nil
-}
-
 func (x *InvokeAction_Event) GetCancelled() *InvokeAction_Event_Cancelled {
 	if x != nil {
 		if x, ok := x.Event.(*InvokeAction_Event_Cancelled_); ok {
@@ -6020,23 +6010,17 @@ type InvokeAction_Event_Finished_ struct {
 	Finished *InvokeAction_Event_Finished `protobuf:"bytes,2,opt,name=finished,proto3,oneof"`
 }
 
-type InvokeAction_Event_Diagnostics_ struct {
-	Diagnostics *InvokeAction_Event_Diagnostics `protobuf:"bytes,3,opt,name=diagnostics,proto3,oneof"`
-}
-
 type InvokeAction_Event_Cancelled_ struct {
-	Cancelled *InvokeAction_Event_Cancelled `protobuf:"bytes,4,opt,name=cancelled,proto3,oneof"`
+	Cancelled *InvokeAction_Event_Cancelled `protobuf:"bytes,3,opt,name=cancelled,proto3,oneof"`
 }
 
 type InvokeAction_Event_Progress_ struct {
-	Progress *InvokeAction_Event_Progress `protobuf:"bytes,5,opt,name=progress,proto3,oneof"`
+	Progress *InvokeAction_Event_Progress `protobuf:"bytes,4,opt,name=progress,proto3,oneof"`
 }
 
 func (*InvokeAction_Event_Started_) isInvokeAction_Event_Event() {}
 
 func (*InvokeAction_Event_Finished_) isInvokeAction_Event_Event() {}
-
-func (*InvokeAction_Event_Diagnostics_) isInvokeAction_Event_Event() {}
 
 func (*InvokeAction_Event_Cancelled_) isInvokeAction_Event_Event() {}
 
@@ -6046,7 +6030,8 @@ func (*InvokeAction_Event_Progress_) isInvokeAction_Event_Event() {}
 type InvokeAction_Event_Started struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// This can be sent in a request to cancel the action.
-	CancelationToken string `protobuf:"bytes,1,opt,name=cancelation_token,json=cancelationToken,proto3" json:"cancelation_token,omitempty"`
+	CancelationToken string        `protobuf:"bytes,1,opt,name=cancelation_token,json=cancelationToken,proto3" json:"cancelation_token,omitempty"`
+	Diagnostics      []*Diagnostic `protobuf:"bytes,2,rep,name=diagnostics,proto3" json:"diagnostics,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -6088,16 +6073,21 @@ func (x *InvokeAction_Event_Started) GetCancelationToken() string {
 	return ""
 }
 
+func (x *InvokeAction_Event_Started) GetDiagnostics() []*Diagnostic {
+	if x != nil {
+		return x.Diagnostics
+	}
+	return nil
+}
+
 // Sent when the action has completed successfully.
 type InvokeAction_Event_Finished struct {
-	state   protoimpl.MessageState   `protogen:"open.v1"`
-	Outputs map[string]*DynamicValue `protobuf:"bytes,1,rep,name=outputs,proto3" json:"outputs,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// An action might change a resource that has been passed in.
-	// The key of the map is the cty.Path in the config for the resource to change.
-	// The value is the new value of the resource instance.
-	ResourceChanges map[string]*DynamicValue `protobuf:"bytes,2,rep,name=resource_changes,json=resourceChanges,proto3" json:"resource_changes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state         protoimpl.MessageState   `protogen:"open.v1"`
+	Outputs       map[string]*DynamicValue `protobuf:"bytes,1,rep,name=outputs,proto3" json:"outputs,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	NewConfig     *DynamicValue            `protobuf:"bytes,2,opt,name=new_config,json=newConfig,proto3" json:"new_config,omitempty"`
+	Diagnostics   []*Diagnostic            `protobuf:"bytes,3,rep,name=diagnostics,proto3" json:"diagnostics,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *InvokeAction_Event_Finished) Reset() {
@@ -6137,52 +6127,14 @@ func (x *InvokeAction_Event_Finished) GetOutputs() map[string]*DynamicValue {
 	return nil
 }
 
-func (x *InvokeAction_Event_Finished) GetResourceChanges() map[string]*DynamicValue {
+func (x *InvokeAction_Event_Finished) GetNewConfig() *DynamicValue {
 	if x != nil {
-		return x.ResourceChanges
+		return x.NewConfig
 	}
 	return nil
 }
 
-// If one of the diagnostics is an error, the action is considered failed.
-type InvokeAction_Event_Diagnostics struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Diagnostics   []*Diagnostic          `protobuf:"bytes,1,rep,name=diagnostics,proto3" json:"diagnostics,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *InvokeAction_Event_Diagnostics) Reset() {
-	*x = InvokeAction_Event_Diagnostics{}
-	mi := &file_tfplugin6_proto_msgTypes[110]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *InvokeAction_Event_Diagnostics) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*InvokeAction_Event_Diagnostics) ProtoMessage() {}
-
-func (x *InvokeAction_Event_Diagnostics) ProtoReflect() protoreflect.Message {
-	mi := &file_tfplugin6_proto_msgTypes[110]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use InvokeAction_Event_Diagnostics.ProtoReflect.Descriptor instead.
-func (*InvokeAction_Event_Diagnostics) Descriptor() ([]byte, []int) {
-	return file_tfplugin6_proto_rawDescGZIP(), []int{36, 1, 2}
-}
-
-func (x *InvokeAction_Event_Diagnostics) GetDiagnostics() []*Diagnostic {
+func (x *InvokeAction_Event_Finished) GetDiagnostics() []*Diagnostic {
 	if x != nil {
 		return x.Diagnostics
 	}
@@ -6192,13 +6144,14 @@ func (x *InvokeAction_Event_Diagnostics) GetDiagnostics() []*Diagnostic {
 // Sent when the action has been cancelled.
 type InvokeAction_Event_Cancelled struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Diagnostics   []*Diagnostic          `protobuf:"bytes,1,rep,name=diagnostics,proto3" json:"diagnostics,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *InvokeAction_Event_Cancelled) Reset() {
 	*x = InvokeAction_Event_Cancelled{}
-	mi := &file_tfplugin6_proto_msgTypes[111]
+	mi := &file_tfplugin6_proto_msgTypes[110]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6210,7 +6163,7 @@ func (x *InvokeAction_Event_Cancelled) String() string {
 func (*InvokeAction_Event_Cancelled) ProtoMessage() {}
 
 func (x *InvokeAction_Event_Cancelled) ProtoReflect() protoreflect.Message {
-	mi := &file_tfplugin6_proto_msgTypes[111]
+	mi := &file_tfplugin6_proto_msgTypes[110]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6223,7 +6176,14 @@ func (x *InvokeAction_Event_Cancelled) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InvokeAction_Event_Cancelled.ProtoReflect.Descriptor instead.
 func (*InvokeAction_Event_Cancelled) Descriptor() ([]byte, []int) {
-	return file_tfplugin6_proto_rawDescGZIP(), []int{36, 1, 3}
+	return file_tfplugin6_proto_rawDescGZIP(), []int{36, 1, 2}
+}
+
+func (x *InvokeAction_Event_Cancelled) GetDiagnostics() []*Diagnostic {
+	if x != nil {
+		return x.Diagnostics
+	}
+	return nil
 }
 
 // Sent when the action is making progress, forwards stdout and stderr or sth similar.
@@ -6231,13 +6191,14 @@ type InvokeAction_Event_Progress struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Stdout        []string               `protobuf:"bytes,1,rep,name=stdout,proto3" json:"stdout,omitempty"`
 	Stderr        []string               `protobuf:"bytes,2,rep,name=stderr,proto3" json:"stderr,omitempty"`
+	Diagnostics   []*Diagnostic          `protobuf:"bytes,3,rep,name=diagnostics,proto3" json:"diagnostics,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *InvokeAction_Event_Progress) Reset() {
 	*x = InvokeAction_Event_Progress{}
-	mi := &file_tfplugin6_proto_msgTypes[112]
+	mi := &file_tfplugin6_proto_msgTypes[111]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6249,7 +6210,7 @@ func (x *InvokeAction_Event_Progress) String() string {
 func (*InvokeAction_Event_Progress) ProtoMessage() {}
 
 func (x *InvokeAction_Event_Progress) ProtoReflect() protoreflect.Message {
-	mi := &file_tfplugin6_proto_msgTypes[112]
+	mi := &file_tfplugin6_proto_msgTypes[111]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6262,7 +6223,7 @@ func (x *InvokeAction_Event_Progress) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InvokeAction_Event_Progress.ProtoReflect.Descriptor instead.
 func (*InvokeAction_Event_Progress) Descriptor() ([]byte, []int) {
-	return file_tfplugin6_proto_rawDescGZIP(), []int{36, 1, 4}
+	return file_tfplugin6_proto_rawDescGZIP(), []int{36, 1, 3}
 }
 
 func (x *InvokeAction_Event_Progress) GetStdout() []string {
@@ -6279,6 +6240,13 @@ func (x *InvokeAction_Event_Progress) GetStderr() []string {
 	return nil
 }
 
+func (x *InvokeAction_Event_Progress) GetDiagnostics() []*Diagnostic {
+	if x != nil {
+		return x.Diagnostics
+	}
+	return nil
+}
+
 type CancelAction_Request struct {
 	state            protoimpl.MessageState  `protogen:"open.v1"`
 	CancelationToken string                  `protobuf:"bytes,1,opt,name=cancelation_token,json=cancelationToken,proto3" json:"cancelation_token,omitempty"`
@@ -6289,7 +6257,7 @@ type CancelAction_Request struct {
 
 func (x *CancelAction_Request) Reset() {
 	*x = CancelAction_Request{}
-	mi := &file_tfplugin6_proto_msgTypes[115]
+	mi := &file_tfplugin6_proto_msgTypes[113]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6301,7 +6269,7 @@ func (x *CancelAction_Request) String() string {
 func (*CancelAction_Request) ProtoMessage() {}
 
 func (x *CancelAction_Request) ProtoReflect() protoreflect.Message {
-	mi := &file_tfplugin6_proto_msgTypes[115]
+	mi := &file_tfplugin6_proto_msgTypes[113]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6340,7 +6308,7 @@ type CancelAction_Response struct {
 
 func (x *CancelAction_Response) Reset() {
 	*x = CancelAction_Response{}
-	mi := &file_tfplugin6_proto_msgTypes[116]
+	mi := &file_tfplugin6_proto_msgTypes[114]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6352,7 +6320,7 @@ func (x *CancelAction_Response) String() string {
 func (*CancelAction_Response) ProtoMessage() {}
 
 func (x *CancelAction_Response) ProtoReflect() protoreflect.Message {
-	mi := &file_tfplugin6_proto_msgTypes[116]
+	mi := &file_tfplugin6_proto_msgTypes[114]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6772,34 +6740,33 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\bResponse\x127\n" +
 	"\vdiagnostics\x18\x01 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnostics\x126\n" +
 	"\n" +
-	"new_config\x18\x02 \x01(\v2\x17.tfplugin6.DynamicValueR\tnewConfig\"\xa0\b\n" +
+	"new_config\x18\x02 \x01(\v2\x17.tfplugin6.DynamicValueR\tnewConfig\"\xe0\a\n" +
 	"\fInvokeAction\x1aW\n" +
 	"\aRequest\x12\x1b\n" +
 	"\ttype_name\x18\x01 \x01(\tR\btypeName\x12/\n" +
-	"\x06config\x18\x02 \x01(\v2\x17.tfplugin6.DynamicValueR\x06config\x1a\xb6\a\n" +
+	"\x06config\x18\x02 \x01(\v2\x17.tfplugin6.DynamicValueR\x06config\x1a\xf6\x06\n" +
 	"\x05Event\x12A\n" +
 	"\astarted\x18\x01 \x01(\v2%.tfplugin6.InvokeAction.Event.StartedH\x00R\astarted\x12D\n" +
-	"\bfinished\x18\x02 \x01(\v2&.tfplugin6.InvokeAction.Event.FinishedH\x00R\bfinished\x12M\n" +
-	"\vdiagnostics\x18\x03 \x01(\v2).tfplugin6.InvokeAction.Event.DiagnosticsH\x00R\vdiagnostics\x12G\n" +
-	"\tcancelled\x18\x04 \x01(\v2'.tfplugin6.InvokeAction.Event.CancelledH\x00R\tcancelled\x12D\n" +
-	"\bprogress\x18\x05 \x01(\v2&.tfplugin6.InvokeAction.Event.ProgressH\x00R\bprogress\x1a6\n" +
+	"\bfinished\x18\x02 \x01(\v2&.tfplugin6.InvokeAction.Event.FinishedH\x00R\bfinished\x12G\n" +
+	"\tcancelled\x18\x03 \x01(\v2'.tfplugin6.InvokeAction.Event.CancelledH\x00R\tcancelled\x12D\n" +
+	"\bprogress\x18\x04 \x01(\v2&.tfplugin6.InvokeAction.Event.ProgressH\x00R\bprogress\x1ao\n" +
 	"\aStarted\x12+\n" +
-	"\x11cancelation_token\x18\x01 \x01(\tR\x10cancelationToken\x1a\xf3\x02\n" +
+	"\x11cancelation_token\x18\x01 \x01(\tR\x10cancelationToken\x127\n" +
+	"\vdiagnostics\x18\x02 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnostics\x1a\x9f\x02\n" +
 	"\bFinished\x12M\n" +
-	"\aoutputs\x18\x01 \x03(\v23.tfplugin6.InvokeAction.Event.Finished.OutputsEntryR\aoutputs\x12f\n" +
-	"\x10resource_changes\x18\x02 \x03(\v2;.tfplugin6.InvokeAction.Event.Finished.ResourceChangesEntryR\x0fresourceChanges\x1aS\n" +
+	"\aoutputs\x18\x01 \x03(\v23.tfplugin6.InvokeAction.Event.Finished.OutputsEntryR\aoutputs\x126\n" +
+	"\n" +
+	"new_config\x18\x02 \x01(\v2\x17.tfplugin6.DynamicValueR\tnewConfig\x127\n" +
+	"\vdiagnostics\x18\x03 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnostics\x1aS\n" +
 	"\fOutputsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12-\n" +
-	"\x05value\x18\x02 \x01(\v2\x17.tfplugin6.DynamicValueR\x05value:\x028\x01\x1a[\n" +
-	"\x14ResourceChangesEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12-\n" +
-	"\x05value\x18\x02 \x01(\v2\x17.tfplugin6.DynamicValueR\x05value:\x028\x01\x1aF\n" +
-	"\vDiagnostics\x127\n" +
-	"\vdiagnostics\x18\x01 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnostics\x1a\v\n" +
-	"\tCancelled\x1a:\n" +
+	"\x05value\x18\x02 \x01(\v2\x17.tfplugin6.DynamicValueR\x05value:\x028\x01\x1aD\n" +
+	"\tCancelled\x127\n" +
+	"\vdiagnostics\x18\x01 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnostics\x1as\n" +
 	"\bProgress\x12\x16\n" +
 	"\x06stdout\x18\x01 \x03(\tR\x06stdout\x12\x16\n" +
-	"\x06stderr\x18\x02 \x03(\tR\x06stderrB\a\n" +
+	"\x06stderr\x18\x02 \x03(\tR\x06stderr\x127\n" +
+	"\vdiagnostics\x18\x03 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnosticsB\a\n" +
 	"\x05event\"\xe5\x01\n" +
 	"\fCancelAction\x1an\n" +
 	"\aRequest\x12+\n" +
@@ -6856,7 +6823,7 @@ func file_tfplugin6_proto_rawDescGZIP() []byte {
 }
 
 var file_tfplugin6_proto_enumTypes = make([]protoimpl.EnumInfo, 6)
-var file_tfplugin6_proto_msgTypes = make([]protoimpl.MessageInfo, 117)
+var file_tfplugin6_proto_msgTypes = make([]protoimpl.MessageInfo, 115)
 var file_tfplugin6_proto_goTypes = []any{
 	(StringKind)(0),                                  // 0: tfplugin6.StringKind
 	(Diagnostic_Severity)(0),                         // 1: tfplugin6.Diagnostic.Severity
@@ -6974,14 +6941,12 @@ var file_tfplugin6_proto_goTypes = []any{
 	(*InvokeAction_Event)(nil),               // 113: tfplugin6.InvokeAction.Event
 	(*InvokeAction_Event_Started)(nil),       // 114: tfplugin6.InvokeAction.Event.Started
 	(*InvokeAction_Event_Finished)(nil),      // 115: tfplugin6.InvokeAction.Event.Finished
-	(*InvokeAction_Event_Diagnostics)(nil),   // 116: tfplugin6.InvokeAction.Event.Diagnostics
-	(*InvokeAction_Event_Cancelled)(nil),     // 117: tfplugin6.InvokeAction.Event.Cancelled
-	(*InvokeAction_Event_Progress)(nil),      // 118: tfplugin6.InvokeAction.Event.Progress
-	nil,                                      // 119: tfplugin6.InvokeAction.Event.Finished.OutputsEntry
-	nil,                                      // 120: tfplugin6.InvokeAction.Event.Finished.ResourceChangesEntry
-	(*CancelAction_Request)(nil),             // 121: tfplugin6.CancelAction.Request
-	(*CancelAction_Response)(nil),            // 122: tfplugin6.CancelAction.Response
-	(*timestamppb.Timestamp)(nil),            // 123: google.protobuf.Timestamp
+	(*InvokeAction_Event_Cancelled)(nil),     // 116: tfplugin6.InvokeAction.Event.Cancelled
+	(*InvokeAction_Event_Progress)(nil),      // 117: tfplugin6.InvokeAction.Event.Progress
+	nil,                                      // 118: tfplugin6.InvokeAction.Event.Finished.OutputsEntry
+	(*CancelAction_Request)(nil),             // 119: tfplugin6.CancelAction.Request
+	(*CancelAction_Response)(nil),            // 120: tfplugin6.CancelAction.Response
+	(*timestamppb.Timestamp)(nil),            // 121: google.protobuf.Timestamp
 }
 var file_tfplugin6_proto_depIdxs = []int32{
 	1,   // 0: tfplugin6.Diagnostic.severity:type_name -> tfplugin6.Diagnostic.Severity
@@ -7098,11 +7063,11 @@ var file_tfplugin6_proto_depIdxs = []int32{
 	6,   // 111: tfplugin6.OpenEphemeralResource.Request.config:type_name -> tfplugin6.DynamicValue
 	18,  // 112: tfplugin6.OpenEphemeralResource.Request.client_capabilities:type_name -> tfplugin6.ClientCapabilities
 	7,   // 113: tfplugin6.OpenEphemeralResource.Response.diagnostics:type_name -> tfplugin6.Diagnostic
-	123, // 114: tfplugin6.OpenEphemeralResource.Response.renew_at:type_name -> google.protobuf.Timestamp
+	121, // 114: tfplugin6.OpenEphemeralResource.Response.renew_at:type_name -> google.protobuf.Timestamp
 	6,   // 115: tfplugin6.OpenEphemeralResource.Response.result:type_name -> tfplugin6.DynamicValue
 	19,  // 116: tfplugin6.OpenEphemeralResource.Response.deferred:type_name -> tfplugin6.Deferred
 	7,   // 117: tfplugin6.RenewEphemeralResource.Response.diagnostics:type_name -> tfplugin6.Diagnostic
-	123, // 118: tfplugin6.RenewEphemeralResource.Response.renew_at:type_name -> google.protobuf.Timestamp
+	121, // 118: tfplugin6.RenewEphemeralResource.Response.renew_at:type_name -> google.protobuf.Timestamp
 	7,   // 119: tfplugin6.CloseEphemeralResource.Response.diagnostics:type_name -> tfplugin6.Diagnostic
 	107, // 120: tfplugin6.GetResourceIdentitySchemas.Response.identity_schemas:type_name -> tfplugin6.GetResourceIdentitySchemas.Response.IdentitySchemasEntry
 	7,   // 121: tfplugin6.GetResourceIdentitySchemas.Response.diagnostics:type_name -> tfplugin6.Diagnostic
@@ -7115,71 +7080,72 @@ var file_tfplugin6_proto_depIdxs = []int32{
 	6,   // 128: tfplugin6.InvokeAction.Request.config:type_name -> tfplugin6.DynamicValue
 	114, // 129: tfplugin6.InvokeAction.Event.started:type_name -> tfplugin6.InvokeAction.Event.Started
 	115, // 130: tfplugin6.InvokeAction.Event.finished:type_name -> tfplugin6.InvokeAction.Event.Finished
-	116, // 131: tfplugin6.InvokeAction.Event.diagnostics:type_name -> tfplugin6.InvokeAction.Event.Diagnostics
-	117, // 132: tfplugin6.InvokeAction.Event.cancelled:type_name -> tfplugin6.InvokeAction.Event.Cancelled
-	118, // 133: tfplugin6.InvokeAction.Event.progress:type_name -> tfplugin6.InvokeAction.Event.Progress
-	119, // 134: tfplugin6.InvokeAction.Event.Finished.outputs:type_name -> tfplugin6.InvokeAction.Event.Finished.OutputsEntry
-	120, // 135: tfplugin6.InvokeAction.Event.Finished.resource_changes:type_name -> tfplugin6.InvokeAction.Event.Finished.ResourceChangesEntry
-	7,   // 136: tfplugin6.InvokeAction.Event.Diagnostics.diagnostics:type_name -> tfplugin6.Diagnostic
-	6,   // 137: tfplugin6.InvokeAction.Event.Finished.OutputsEntry.value:type_name -> tfplugin6.DynamicValue
-	6,   // 138: tfplugin6.InvokeAction.Event.Finished.ResourceChangesEntry.value:type_name -> tfplugin6.DynamicValue
-	5,   // 139: tfplugin6.CancelAction.Request.type:type_name -> tfplugin6.CancelAction.CancelType
-	7,   // 140: tfplugin6.CancelAction.Response.diagnostics:type_name -> tfplugin6.Diagnostic
-	56,  // 141: tfplugin6.Provider.GetMetadata:input_type -> tfplugin6.GetMetadata.Request
-	62,  // 142: tfplugin6.Provider.GetProviderSchema:input_type -> tfplugin6.GetProviderSchema.Request
-	105, // 143: tfplugin6.Provider.GetResourceIdentitySchemas:input_type -> tfplugin6.GetResourceIdentitySchemas.Request
-	69,  // 144: tfplugin6.Provider.ValidateProviderConfig:input_type -> tfplugin6.ValidateProviderConfig.Request
-	73,  // 145: tfplugin6.Provider.ValidateResourceConfig:input_type -> tfplugin6.ValidateResourceConfig.Request
-	75,  // 146: tfplugin6.Provider.ValidateDataResourceConfig:input_type -> tfplugin6.ValidateDataResourceConfig.Request
-	71,  // 147: tfplugin6.Provider.UpgradeResourceState:input_type -> tfplugin6.UpgradeResourceState.Request
-	108, // 148: tfplugin6.Provider.UpgradeResourceIdentity:input_type -> tfplugin6.UpgradeResourceIdentity.Request
-	77,  // 149: tfplugin6.Provider.ConfigureProvider:input_type -> tfplugin6.ConfigureProvider.Request
-	79,  // 150: tfplugin6.Provider.ReadResource:input_type -> tfplugin6.ReadResource.Request
-	81,  // 151: tfplugin6.Provider.PlanResourceChange:input_type -> tfplugin6.PlanResourceChange.Request
-	83,  // 152: tfplugin6.Provider.ApplyResourceChange:input_type -> tfplugin6.ApplyResourceChange.Request
-	85,  // 153: tfplugin6.Provider.ImportResourceState:input_type -> tfplugin6.ImportResourceState.Request
-	88,  // 154: tfplugin6.Provider.MoveResourceState:input_type -> tfplugin6.MoveResourceState.Request
-	90,  // 155: tfplugin6.Provider.ReadDataSource:input_type -> tfplugin6.ReadDataSource.Request
-	97,  // 156: tfplugin6.Provider.ValidateEphemeralResourceConfig:input_type -> tfplugin6.ValidateEphemeralResourceConfig.Request
-	99,  // 157: tfplugin6.Provider.OpenEphemeralResource:input_type -> tfplugin6.OpenEphemeralResource.Request
-	101, // 158: tfplugin6.Provider.RenewEphemeralResource:input_type -> tfplugin6.RenewEphemeralResource.Request
-	103, // 159: tfplugin6.Provider.CloseEphemeralResource:input_type -> tfplugin6.CloseEphemeralResource.Request
-	92,  // 160: tfplugin6.Provider.GetFunctions:input_type -> tfplugin6.GetFunctions.Request
-	95,  // 161: tfplugin6.Provider.CallFunction:input_type -> tfplugin6.CallFunction.Request
-	110, // 162: tfplugin6.Provider.PlanAction:input_type -> tfplugin6.PlanAction.Request
-	112, // 163: tfplugin6.Provider.InvokeAction:input_type -> tfplugin6.InvokeAction.Request
-	121, // 164: tfplugin6.Provider.CancelAction:input_type -> tfplugin6.CancelAction.Request
-	45,  // 165: tfplugin6.Provider.StopProvider:input_type -> tfplugin6.StopProvider.Request
-	57,  // 166: tfplugin6.Provider.GetMetadata:output_type -> tfplugin6.GetMetadata.Response
-	63,  // 167: tfplugin6.Provider.GetProviderSchema:output_type -> tfplugin6.GetProviderSchema.Response
-	106, // 168: tfplugin6.Provider.GetResourceIdentitySchemas:output_type -> tfplugin6.GetResourceIdentitySchemas.Response
-	70,  // 169: tfplugin6.Provider.ValidateProviderConfig:output_type -> tfplugin6.ValidateProviderConfig.Response
-	74,  // 170: tfplugin6.Provider.ValidateResourceConfig:output_type -> tfplugin6.ValidateResourceConfig.Response
-	76,  // 171: tfplugin6.Provider.ValidateDataResourceConfig:output_type -> tfplugin6.ValidateDataResourceConfig.Response
-	72,  // 172: tfplugin6.Provider.UpgradeResourceState:output_type -> tfplugin6.UpgradeResourceState.Response
-	109, // 173: tfplugin6.Provider.UpgradeResourceIdentity:output_type -> tfplugin6.UpgradeResourceIdentity.Response
-	78,  // 174: tfplugin6.Provider.ConfigureProvider:output_type -> tfplugin6.ConfigureProvider.Response
-	80,  // 175: tfplugin6.Provider.ReadResource:output_type -> tfplugin6.ReadResource.Response
-	82,  // 176: tfplugin6.Provider.PlanResourceChange:output_type -> tfplugin6.PlanResourceChange.Response
-	84,  // 177: tfplugin6.Provider.ApplyResourceChange:output_type -> tfplugin6.ApplyResourceChange.Response
-	87,  // 178: tfplugin6.Provider.ImportResourceState:output_type -> tfplugin6.ImportResourceState.Response
-	89,  // 179: tfplugin6.Provider.MoveResourceState:output_type -> tfplugin6.MoveResourceState.Response
-	91,  // 180: tfplugin6.Provider.ReadDataSource:output_type -> tfplugin6.ReadDataSource.Response
-	98,  // 181: tfplugin6.Provider.ValidateEphemeralResourceConfig:output_type -> tfplugin6.ValidateEphemeralResourceConfig.Response
-	100, // 182: tfplugin6.Provider.OpenEphemeralResource:output_type -> tfplugin6.OpenEphemeralResource.Response
-	102, // 183: tfplugin6.Provider.RenewEphemeralResource:output_type -> tfplugin6.RenewEphemeralResource.Response
-	104, // 184: tfplugin6.Provider.CloseEphemeralResource:output_type -> tfplugin6.CloseEphemeralResource.Response
-	93,  // 185: tfplugin6.Provider.GetFunctions:output_type -> tfplugin6.GetFunctions.Response
-	96,  // 186: tfplugin6.Provider.CallFunction:output_type -> tfplugin6.CallFunction.Response
-	111, // 187: tfplugin6.Provider.PlanAction:output_type -> tfplugin6.PlanAction.Response
-	113, // 188: tfplugin6.Provider.InvokeAction:output_type -> tfplugin6.InvokeAction.Event
-	122, // 189: tfplugin6.Provider.CancelAction:output_type -> tfplugin6.CancelAction.Response
-	46,  // 190: tfplugin6.Provider.StopProvider:output_type -> tfplugin6.StopProvider.Response
-	166, // [166:191] is the sub-list for method output_type
-	141, // [141:166] is the sub-list for method input_type
-	141, // [141:141] is the sub-list for extension type_name
-	141, // [141:141] is the sub-list for extension extendee
-	0,   // [0:141] is the sub-list for field type_name
+	116, // 131: tfplugin6.InvokeAction.Event.cancelled:type_name -> tfplugin6.InvokeAction.Event.Cancelled
+	117, // 132: tfplugin6.InvokeAction.Event.progress:type_name -> tfplugin6.InvokeAction.Event.Progress
+	7,   // 133: tfplugin6.InvokeAction.Event.Started.diagnostics:type_name -> tfplugin6.Diagnostic
+	118, // 134: tfplugin6.InvokeAction.Event.Finished.outputs:type_name -> tfplugin6.InvokeAction.Event.Finished.OutputsEntry
+	6,   // 135: tfplugin6.InvokeAction.Event.Finished.new_config:type_name -> tfplugin6.DynamicValue
+	7,   // 136: tfplugin6.InvokeAction.Event.Finished.diagnostics:type_name -> tfplugin6.Diagnostic
+	7,   // 137: tfplugin6.InvokeAction.Event.Cancelled.diagnostics:type_name -> tfplugin6.Diagnostic
+	7,   // 138: tfplugin6.InvokeAction.Event.Progress.diagnostics:type_name -> tfplugin6.Diagnostic
+	6,   // 139: tfplugin6.InvokeAction.Event.Finished.OutputsEntry.value:type_name -> tfplugin6.DynamicValue
+	5,   // 140: tfplugin6.CancelAction.Request.type:type_name -> tfplugin6.CancelAction.CancelType
+	7,   // 141: tfplugin6.CancelAction.Response.diagnostics:type_name -> tfplugin6.Diagnostic
+	56,  // 142: tfplugin6.Provider.GetMetadata:input_type -> tfplugin6.GetMetadata.Request
+	62,  // 143: tfplugin6.Provider.GetProviderSchema:input_type -> tfplugin6.GetProviderSchema.Request
+	105, // 144: tfplugin6.Provider.GetResourceIdentitySchemas:input_type -> tfplugin6.GetResourceIdentitySchemas.Request
+	69,  // 145: tfplugin6.Provider.ValidateProviderConfig:input_type -> tfplugin6.ValidateProviderConfig.Request
+	73,  // 146: tfplugin6.Provider.ValidateResourceConfig:input_type -> tfplugin6.ValidateResourceConfig.Request
+	75,  // 147: tfplugin6.Provider.ValidateDataResourceConfig:input_type -> tfplugin6.ValidateDataResourceConfig.Request
+	71,  // 148: tfplugin6.Provider.UpgradeResourceState:input_type -> tfplugin6.UpgradeResourceState.Request
+	108, // 149: tfplugin6.Provider.UpgradeResourceIdentity:input_type -> tfplugin6.UpgradeResourceIdentity.Request
+	77,  // 150: tfplugin6.Provider.ConfigureProvider:input_type -> tfplugin6.ConfigureProvider.Request
+	79,  // 151: tfplugin6.Provider.ReadResource:input_type -> tfplugin6.ReadResource.Request
+	81,  // 152: tfplugin6.Provider.PlanResourceChange:input_type -> tfplugin6.PlanResourceChange.Request
+	83,  // 153: tfplugin6.Provider.ApplyResourceChange:input_type -> tfplugin6.ApplyResourceChange.Request
+	85,  // 154: tfplugin6.Provider.ImportResourceState:input_type -> tfplugin6.ImportResourceState.Request
+	88,  // 155: tfplugin6.Provider.MoveResourceState:input_type -> tfplugin6.MoveResourceState.Request
+	90,  // 156: tfplugin6.Provider.ReadDataSource:input_type -> tfplugin6.ReadDataSource.Request
+	97,  // 157: tfplugin6.Provider.ValidateEphemeralResourceConfig:input_type -> tfplugin6.ValidateEphemeralResourceConfig.Request
+	99,  // 158: tfplugin6.Provider.OpenEphemeralResource:input_type -> tfplugin6.OpenEphemeralResource.Request
+	101, // 159: tfplugin6.Provider.RenewEphemeralResource:input_type -> tfplugin6.RenewEphemeralResource.Request
+	103, // 160: tfplugin6.Provider.CloseEphemeralResource:input_type -> tfplugin6.CloseEphemeralResource.Request
+	92,  // 161: tfplugin6.Provider.GetFunctions:input_type -> tfplugin6.GetFunctions.Request
+	95,  // 162: tfplugin6.Provider.CallFunction:input_type -> tfplugin6.CallFunction.Request
+	110, // 163: tfplugin6.Provider.PlanAction:input_type -> tfplugin6.PlanAction.Request
+	112, // 164: tfplugin6.Provider.InvokeAction:input_type -> tfplugin6.InvokeAction.Request
+	119, // 165: tfplugin6.Provider.CancelAction:input_type -> tfplugin6.CancelAction.Request
+	45,  // 166: tfplugin6.Provider.StopProvider:input_type -> tfplugin6.StopProvider.Request
+	57,  // 167: tfplugin6.Provider.GetMetadata:output_type -> tfplugin6.GetMetadata.Response
+	63,  // 168: tfplugin6.Provider.GetProviderSchema:output_type -> tfplugin6.GetProviderSchema.Response
+	106, // 169: tfplugin6.Provider.GetResourceIdentitySchemas:output_type -> tfplugin6.GetResourceIdentitySchemas.Response
+	70,  // 170: tfplugin6.Provider.ValidateProviderConfig:output_type -> tfplugin6.ValidateProviderConfig.Response
+	74,  // 171: tfplugin6.Provider.ValidateResourceConfig:output_type -> tfplugin6.ValidateResourceConfig.Response
+	76,  // 172: tfplugin6.Provider.ValidateDataResourceConfig:output_type -> tfplugin6.ValidateDataResourceConfig.Response
+	72,  // 173: tfplugin6.Provider.UpgradeResourceState:output_type -> tfplugin6.UpgradeResourceState.Response
+	109, // 174: tfplugin6.Provider.UpgradeResourceIdentity:output_type -> tfplugin6.UpgradeResourceIdentity.Response
+	78,  // 175: tfplugin6.Provider.ConfigureProvider:output_type -> tfplugin6.ConfigureProvider.Response
+	80,  // 176: tfplugin6.Provider.ReadResource:output_type -> tfplugin6.ReadResource.Response
+	82,  // 177: tfplugin6.Provider.PlanResourceChange:output_type -> tfplugin6.PlanResourceChange.Response
+	84,  // 178: tfplugin6.Provider.ApplyResourceChange:output_type -> tfplugin6.ApplyResourceChange.Response
+	87,  // 179: tfplugin6.Provider.ImportResourceState:output_type -> tfplugin6.ImportResourceState.Response
+	89,  // 180: tfplugin6.Provider.MoveResourceState:output_type -> tfplugin6.MoveResourceState.Response
+	91,  // 181: tfplugin6.Provider.ReadDataSource:output_type -> tfplugin6.ReadDataSource.Response
+	98,  // 182: tfplugin6.Provider.ValidateEphemeralResourceConfig:output_type -> tfplugin6.ValidateEphemeralResourceConfig.Response
+	100, // 183: tfplugin6.Provider.OpenEphemeralResource:output_type -> tfplugin6.OpenEphemeralResource.Response
+	102, // 184: tfplugin6.Provider.RenewEphemeralResource:output_type -> tfplugin6.RenewEphemeralResource.Response
+	104, // 185: tfplugin6.Provider.CloseEphemeralResource:output_type -> tfplugin6.CloseEphemeralResource.Response
+	93,  // 186: tfplugin6.Provider.GetFunctions:output_type -> tfplugin6.GetFunctions.Response
+	96,  // 187: tfplugin6.Provider.CallFunction:output_type -> tfplugin6.CallFunction.Response
+	111, // 188: tfplugin6.Provider.PlanAction:output_type -> tfplugin6.PlanAction.Response
+	113, // 189: tfplugin6.Provider.InvokeAction:output_type -> tfplugin6.InvokeAction.Event
+	120, // 190: tfplugin6.Provider.CancelAction:output_type -> tfplugin6.CancelAction.Response
+	46,  // 191: tfplugin6.Provider.StopProvider:output_type -> tfplugin6.StopProvider.Response
+	167, // [167:192] is the sub-list for method output_type
+	142, // [142:167] is the sub-list for method input_type
+	142, // [142:142] is the sub-list for extension type_name
+	142, // [142:142] is the sub-list for extension extendee
+	0,   // [0:142] is the sub-list for field type_name
 }
 
 func init() { file_tfplugin6_proto_init() }
@@ -7200,7 +7166,6 @@ func file_tfplugin6_proto_init() {
 	file_tfplugin6_proto_msgTypes[107].OneofWrappers = []any{
 		(*InvokeAction_Event_Started_)(nil),
 		(*InvokeAction_Event_Finished_)(nil),
-		(*InvokeAction_Event_Diagnostics_)(nil),
 		(*InvokeAction_Event_Cancelled_)(nil),
 		(*InvokeAction_Event_Progress_)(nil),
 	}
@@ -7210,7 +7175,7 @@ func file_tfplugin6_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_tfplugin6_proto_rawDesc), len(file_tfplugin6_proto_rawDesc)),
 			NumEnums:      6,
-			NumMessages:   117,
+			NumMessages:   115,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
