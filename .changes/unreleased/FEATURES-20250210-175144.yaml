@@ -1,5 +1,0 @@
-kind: FEATURES
-body: 'tfprotov5+tfprotov6: Upgraded protocols and added types to support the new resource identity feature'
-time: 2025-02-10T17:51:44.461603+01:00
-custom:
-    Issue: "476"
