@@ -111,6 +111,9 @@ type GetMetadataResponse struct {
 
 	// EphemeralResources returns metadata for all ephemeral resources.
 	EphemeralResources []EphemeralResourceMetadata
+
+	// ListResources returns metadata for all list resources.
+	ListResources []ListResourceMetadata
 }
 
 // GetProviderSchemaRequest represents a Terraform RPC request for the
@@ -163,6 +166,9 @@ type GetProviderSchemaResponse struct {
 	// shortname and an underscore. It should match the first label after
 	// `ephemeral` in a user's configuration.
 	EphemeralResourceSchemas map[string]*Schema
+
+	// ListResourceSchemas is a map of resource identity schemas and names.
+	ListResourceSchemas map[string]*Schema
 
 	// Diagnostics report errors or warnings related to returning the
 	// provider's schemas. Returning an empty slice indicates success, with
