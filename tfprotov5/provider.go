@@ -61,6 +61,10 @@ type ProviderServer interface {
 	// ephemeral resource is to terraform-plugin-go, so they're their own
 	// interface that is composed into ProviderServer.
 	EphemeralResourceServer
+
+	// ListResourceServer is an interface encapsulating all the list
+	// resource-related RPC requests.
+	ListResourceServer
 }
 
 // ProviderServerWithResourceIdentity is a temporary interface for servers

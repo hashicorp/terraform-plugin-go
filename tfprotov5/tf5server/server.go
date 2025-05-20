@@ -1250,3 +1250,32 @@ func invalidDeferredResponseDiag(reason tfprotov5.DeferredReason) *tfprotov5.Dia
 			fmt.Sprintf("Deferred reason - %q", reason.String()),
 	}
 }
+
+func (s *server) ValidateListResourceConfig(ctx context.Context, protoReq *tfplugin5.ValidateListResourceConfig_Request) (*tfplugin5.ValidateListResourceConfig_Response, error) {
+	rpc := "ValidateListResourceConfig"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.ResourceContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.ValidateListResourceConfigRequest(protoReq)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
+
+	ctx = tf5serverlogging.DownstreamRequest(ctx)
+
+	resp, err := s.downstream.ValidateListResourceConfig(ctx, req)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.ValidateListResourceConfig_Response(resp)
+
+	return protoResp, nil
+}
