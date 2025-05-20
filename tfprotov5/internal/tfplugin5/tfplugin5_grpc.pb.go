@@ -64,6 +64,8 @@ const (
 	Provider_ValidateListResourceConfig_FullMethodName      = "/tfplugin5.Provider/ValidateListResourceConfig"
 	Provider_GetFunctions_FullMethodName                    = "/tfplugin5.Provider/GetFunctions"
 	Provider_CallFunction_FullMethodName                    = "/tfplugin5.Provider/CallFunction"
+	Provider_PlanAction_FullMethodName                      = "/tfplugin5.Provider/PlanAction"
+	Provider_InvokeAction_FullMethodName                    = "/tfplugin5.Provider/InvokeAction"
 	Provider_Stop_FullMethodName                            = "/tfplugin5.Provider/Stop"
 )
 
@@ -112,6 +114,9 @@ type ProviderClient interface {
 	// CallFunction runs the provider-defined function logic and returns
 	// the result with any diagnostics.
 	CallFunction(ctx context.Context, in *CallFunction_Request, opts ...grpc.CallOption) (*CallFunction_Response, error)
+	// ////// Actions Lifecycle
+	PlanAction(ctx context.Context, in *PlanAction_Request, opts ...grpc.CallOption) (*PlanAction_Response, error)
+	InvokeAction(ctx context.Context, in *InvokeAction_Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[InvokeAction_Event], error)
 	// ////// Graceful Shutdown
 	Stop(ctx context.Context, in *Stop_Request, opts ...grpc.CallOption) (*Stop_Response, error)
 }
@@ -363,6 +368,35 @@ func (c *providerClient) CallFunction(ctx context.Context, in *CallFunction_Requ
 	return out, nil
 }
 
+func (c *providerClient) PlanAction(ctx context.Context, in *PlanAction_Request, opts ...grpc.CallOption) (*PlanAction_Response, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PlanAction_Response)
+	err := c.cc.Invoke(ctx, Provider_PlanAction_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *providerClient) InvokeAction(ctx context.Context, in *InvokeAction_Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[InvokeAction_Event], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Provider_ServiceDesc.Streams[1], Provider_InvokeAction_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[InvokeAction_Request, InvokeAction_Event]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Provider_InvokeActionClient = grpc.ServerStreamingClient[InvokeAction_Event]
+
 func (c *providerClient) Stop(ctx context.Context, in *Stop_Request, opts ...grpc.CallOption) (*Stop_Response, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Stop_Response)
@@ -418,6 +452,9 @@ type ProviderServer interface {
 	// CallFunction runs the provider-defined function logic and returns
 	// the result with any diagnostics.
 	CallFunction(context.Context, *CallFunction_Request) (*CallFunction_Response, error)
+	// ////// Actions Lifecycle
+	PlanAction(context.Context, *PlanAction_Request) (*PlanAction_Response, error)
+	InvokeAction(*InvokeAction_Request, grpc.ServerStreamingServer[InvokeAction_Event]) error
 	// ////// Graceful Shutdown
 	Stop(context.Context, *Stop_Request) (*Stop_Response, error)
 	mustEmbedUnimplementedProviderServer()
@@ -498,6 +535,12 @@ func (UnimplementedProviderServer) GetFunctions(context.Context, *GetFunctions_R
 }
 func (UnimplementedProviderServer) CallFunction(context.Context, *CallFunction_Request) (*CallFunction_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CallFunction not implemented")
+}
+func (UnimplementedProviderServer) PlanAction(context.Context, *PlanAction_Request) (*PlanAction_Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PlanAction not implemented")
+}
+func (UnimplementedProviderServer) InvokeAction(*InvokeAction_Request, grpc.ServerStreamingServer[InvokeAction_Event]) error {
+	return status.Errorf(codes.Unimplemented, "method InvokeAction not implemented")
 }
 func (UnimplementedProviderServer) Stop(context.Context, *Stop_Request) (*Stop_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Stop not implemented")
@@ -930,6 +973,35 @@ func _Provider_CallFunction_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Provider_PlanAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlanAction_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).PlanAction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Provider_PlanAction_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).PlanAction(ctx, req.(*PlanAction_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Provider_InvokeAction_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(InvokeAction_Request)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ProviderServer).InvokeAction(m, &grpc.GenericServerStream[InvokeAction_Request, InvokeAction_Event]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Provider_InvokeActionServer = grpc.ServerStreamingServer[InvokeAction_Event]
+
 func _Provider_Stop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Stop_Request)
 	if err := dec(in); err != nil {
@@ -1044,6 +1116,10 @@ var Provider_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Provider_CallFunction_Handler,
 		},
 		{
+			MethodName: "PlanAction",
+			Handler:    _Provider_PlanAction_Handler,
+		},
+		{
 			MethodName: "Stop",
 			Handler:    _Provider_Stop_Handler,
 		},
@@ -1052,6 +1128,11 @@ var Provider_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "ListResource",
 			Handler:       _Provider_ListResource_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "InvokeAction",
+			Handler:       _Provider_InvokeAction_Handler,
 			ServerStreams: true,
 		},
 	},
