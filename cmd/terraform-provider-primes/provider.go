@@ -12,117 +12,78 @@ type PrimeNumberProvider struct {
 }
 
 func (p PrimeNumberProvider) GetMetadata(ctx context.Context, request *tfprotov5.GetMetadataRequest) (*tfprotov5.GetMetadataResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	return &tfprotov5.GetMetadataResponse{
+		ListResources: []tfprotov5.ListResourceMetadata{
+			{
+				TypeName: "prime",
+			},
+		},
+	}, nil
 }
 
 func (p PrimeNumberProvider) GetProviderSchema(ctx context.Context, request *tfprotov5.GetProviderSchemaRequest) (*tfprotov5.GetProviderSchemaResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	return &tfprotov5.GetProviderSchemaResponse{
+		Provider: &tfprotov5.Schema{},
+		ListResourceSchemas: map[string]*tfprotov5.Schema{
+			"prime": p.primeSchema(),
+		},
+	}, nil
+}
+
+func (p PrimeNumberProvider) primeSchema() *tfprotov5.Schema {
+	return &tfprotov5.Schema{
+		Block: &tfprotov5.SchemaBlock{
+			Attributes: []*tfprotov5.SchemaAttribute{
+				{
+					Name:        "number",
+					Type:        tftypes.Number,
+					Description: "The nth prime",
+				},
+				{
+					Name:        "ordinal",
+					Type:        tftypes.Number,
+					Description: "n",
+				},
+			},
+		},
+	}
 }
 
 func (p PrimeNumberProvider) PrepareProviderConfig(ctx context.Context, request *tfprotov5.PrepareProviderConfigRequest) (*tfprotov5.PrepareProviderConfigResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	return &tfprotov5.PrepareProviderConfigResponse{
+		PreparedConfig: request.Config,
+	}, nil
 }
 
 func (p PrimeNumberProvider) ConfigureProvider(ctx context.Context, request *tfprotov5.ConfigureProviderRequest) (*tfprotov5.ConfigureProviderResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	return &tfprotov5.ConfigureProviderResponse{}, nil
 }
-
-func (p PrimeNumberProvider) StopProvider(ctx context.Context, request *tfprotov5.StopProviderRequest) (*tfprotov5.StopProviderResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) ValidateResourceTypeConfig(ctx context.Context, request *tfprotov5.ValidateResourceTypeConfigRequest) (*tfprotov5.ValidateResourceTypeConfigResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) UpgradeResourceState(ctx context.Context, request *tfprotov5.UpgradeResourceStateRequest) (*tfprotov5.UpgradeResourceStateResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) ReadResource(ctx context.Context, request *tfprotov5.ReadResourceRequest) (*tfprotov5.ReadResourceResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) PlanResourceChange(ctx context.Context, request *tfprotov5.PlanResourceChangeRequest) (*tfprotov5.PlanResourceChangeResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) ApplyResourceChange(ctx context.Context, request *tfprotov5.ApplyResourceChangeRequest) (*tfprotov5.ApplyResourceChangeResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) ImportResourceState(ctx context.Context, request *tfprotov5.ImportResourceStateRequest) (*tfprotov5.ImportResourceStateResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) MoveResourceState(ctx context.Context, request *tfprotov5.MoveResourceStateRequest) (*tfprotov5.MoveResourceStateResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) ValidateDataSourceConfig(ctx context.Context, request *tfprotov5.ValidateDataSourceConfigRequest) (*tfprotov5.ValidateDataSourceConfigResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) ReadDataSource(ctx context.Context, request *tfprotov5.ReadDataSourceRequest) (*tfprotov5.ReadDataSourceResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) CallFunction(ctx context.Context, request *tfprotov5.CallFunctionRequest) (*tfprotov5.CallFunctionResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) GetFunctions(ctx context.Context, request *tfprotov5.GetFunctionsRequest) (*tfprotov5.GetFunctionsResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) ValidateEphemeralResourceConfig(ctx context.Context, request *tfprotov5.ValidateEphemeralResourceConfigRequest) (*tfprotov5.ValidateEphemeralResourceConfigResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) OpenEphemeralResource(ctx context.Context, request *tfprotov5.OpenEphemeralResourceRequest) (*tfprotov5.OpenEphemeralResourceResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) RenewEphemeralResource(ctx context.Context, request *tfprotov5.RenewEphemeralResourceRequest) (*tfprotov5.RenewEphemeralResourceResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) CloseEphemeralResource(ctx context.Context, request *tfprotov5.CloseEphemeralResourceRequest) (*tfprotov5.CloseEphemeralResourceResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p PrimeNumberProvider) ValidateListResourceConfig(ctx context.Context, request *tfprotov5.ValidateListResourceConfigRequest) (*tfprotov5.ValidateListResourceConfigResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (p PrimeNumberProvider) ListResource(ctx context.Context, request *tfprotov5.ListResourceRequest) (*tfprotov5.ListResourceResponse, error) {
 	events := func(yield func(tfprotov5.ListResourceEvent) bool) {
 		primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97}
-		for _, prime := range primes {
-			displayName := fmt.Sprintf("%d is a prime number", prime)
 
-			resourceObject, err := tfprotov5.NewDynamicValue(tftypes.Number, tftypes.NewValue(tftypes.Number, prime))
+		var suffix string
+		for i, prime := range primes {
+			ordinal := i + 1
+			switch {
+			case ordinal == 1, ordinal >= 20 && ordinal%10 == 1:
+				suffix = "st"
+			case ordinal == 2, ordinal >= 20 && ordinal%10 == 2:
+				suffix = "nd"
+			case ordinal == 3, ordinal >= 20 && ordinal%10 == 3:
+				suffix = "rd"
+			default:
+				suffix = "th"
+			}
+			displayName := fmt.Sprintf("The %d%s prime is %d", ordinal, suffix, prime)
+
+			typ := p.primeSchema().ValueType()
+			value := map[string]tftypes.Value{
+				"number":  tftypes.NewValue(tftypes.Number, prime),
+				"ordinal": tftypes.NewValue(tftypes.Number, ordinal),
+			}
+
+			resourceObject, err := tfprotov5.NewDynamicValue(typ, tftypes.NewValue(typ, value))
 			if err != nil {
 				panic(err)
 			}
@@ -140,4 +101,7 @@ func (p PrimeNumberProvider) ListResource(ctx context.Context, request *tfprotov
 	return &tfprotov5.ListResourceResponse{
 		ListResourceEvents: events,
 	}, nil
+}
+func (p PrimeNumberProvider) ValidateListResourceConfig(ctx context.Context, request *tfprotov5.ValidateListResourceConfigRequest) (*tfprotov5.ValidateListResourceConfigResponse, error) {
+	return &tfprotov5.ValidateListResourceConfigResponse{}, nil
 }
