@@ -25,7 +25,7 @@ type ListResourceServer interface {
 	// validation prior to an list resource being opened.
 	ValidateListResourceConfig(context.Context, *ValidateListResourceConfigRequest) (*ValidateListResourceConfigResponse, error)
 
-	ListResource(*ListResourceRequest) (*ListResourceResponse, error)
+	ListResource(context.Context, *ListResourceRequest) (*ListResourceResponse, error)
 }
 
 // ListResourceRequest is the request Terraform sends when ...

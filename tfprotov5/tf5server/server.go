@@ -1293,8 +1293,8 @@ func (s *server) ListResource(protoReq *tfplugin5.ListResource_Request, protoStr
 	req := fromproto.ListResourceRequest(protoReq)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config) // TODO
 
-	// ctx = tf5serverlogging.DownstreamRequest(ctx) // TODO
-	resp, err := s.downstream.ListResource(req)
+	ctx = tf5serverlogging.DownstreamRequest(ctx) // TODO
+	resp, err := s.downstream.ListResource(ctx, req)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
 		return err
