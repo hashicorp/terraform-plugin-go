@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"time"
 )
 
 type PrimeNumberProvider struct {
@@ -117,7 +118,7 @@ func (p PrimeNumberProvider) ValidateListResourceConfig(ctx context.Context, req
 
 func (p PrimeNumberProvider) ListResource(ctx context.Context, request *tfprotov5.ListResourceRequest) (*tfprotov5.ListResourceResponse, error) {
 	events := func(yield func(tfprotov5.ListResourceEvent) bool) {
-		primes := []int{2, 3, 5, 7, 11, 13, 17, 23, 29, 31}
+		primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97}
 		for _, prime := range primes {
 			displayName := fmt.Sprintf("%d is a prime number", prime)
 
@@ -130,6 +131,9 @@ func (p PrimeNumberProvider) ListResource(ctx context.Context, request *tfprotov
 				DisplayName:    displayName,
 				ResourceObject: &resourceObject,
 			})
+
+			fmt.Println("1 second nap")
+			time.Sleep(1 * time.Second)
 		}
 	}
 

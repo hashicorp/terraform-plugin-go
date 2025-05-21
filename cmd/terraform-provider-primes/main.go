@@ -12,7 +12,7 @@ func main() {
 
 	serveOpts := []tf5server.ServeOpt{
 		tf5server.WithManagedDebug(),
-		tf5server.WithManagedDebugEnvFilePath("reattach.env"),
+		tf5server.WithManagedDebugEnvFilePath(".env.reattach"),
 	}
 	tf5server.Serve("terraform.io/playground/primes", providerFn, serveOpts...)
 }
