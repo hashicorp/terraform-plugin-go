@@ -18,12 +18,8 @@ func GetMetadata_ListResourceMetadata(in *tfprotov5.ListResourceMetadata) *tfplu
 	}
 }
 
-func ListResource_ListResourceEvent(in *tfprotov5.ListResourceEvent) tfplugin5.ListResource_Event {
-	if in == nil {
-		return nil
-	}
-
-	return tfplugin5.ListResource_Event{
+func ListResource_ListResourceEvent(in *tfprotov5.ListResourceEvent) *tfplugin5.ListResource_Event {
+	return &tfplugin5.ListResource_Event{
 		ResourceObject: DynamicValue(in.ResourceObject),
 		Identity:       ResourceIdentityData(in.Identity),
 		Diagnostic:     Diagnostics(in.Diagnostics),

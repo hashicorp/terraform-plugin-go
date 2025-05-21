@@ -45,6 +45,9 @@ type ListResourceResponse struct {
 }
 
 type ListResourceEvent struct {
+	// DisplayName is the display name of the resource. This is a ...
+	DisplayName string
+
 	// ResourceObject is the resource object that Terraform will use to ...
 	ResourceObject *DynamicValue
 
