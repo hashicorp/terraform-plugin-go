@@ -19,65 +19,54 @@ plugin.GRPCController
 plugin.GRPCStdio
 tfplugin5.Provider
 
+$ grpcurl -plaintext $(cmd/terraform-provider-primes/reattach.sh) tfplugin5.Provider.GetSchema
+{
+  "provider": {},
+  "listResourceSchemas": {
+    "prime": {
+      "block": {
+        "attributes": [
+          {
+            "name": "number",
+            "type": "Im51bWJlciI=",
+            "description": "The nth prime"
+          },
+          {
+            "name": "ordinal",
+            "type": "Im51bWJlciI=",
+            "description": "n"
+          }
+        ]
+      }
+    }
+  }
+}
+
 $ grpcurl -plaintext $(cmd/terraform-provider-primes/reattach.sh) tfplugin5.Provider.ListResource
+➜  terraform-plugin-go git:(add-list-resource-rpc) ✗ grpcurl -plaintext $(cmd/terraform-provider-primes/reattach.sh) tfplugin5.Provider.ListResource
 {
-  "displayName": "2 is a prime number",
+  "displayName": "The 1st prime is 2",
   "resourceObject": {
-    "msgpack": "Ag=="
+    "msgpack": "gqZudW1iZXICp29yZGluYWwB"
   }
 }
 {
-  "displayName": "3 is a prime number",
+  "displayName": "The 2nd prime is 3",
   "resourceObject": {
-    "msgpack": "Aw=="
+    "msgpack": "gqZudW1iZXIDp29yZGluYWwC"
   }
 }
 {
-  "displayName": "5 is a prime number",
+  "displayName": "The 3rd prime is 5",
   "resourceObject": {
-    "msgpack": "BQ=="
+    "msgpack": "gqZudW1iZXIFp29yZGluYWwD"
   }
 }
 {
-  "displayName": "7 is a prime number",
+  "displayName": "The 4th prime is 7",
   "resourceObject": {
-    "msgpack": "Bw=="
+    "msgpack": "gqZudW1iZXIHp29yZGluYWwE"
   }
 }
-{
-  "displayName": "11 is a prime number",
-  "resourceObject": {
-    "msgpack": "Cw=="
-  }
-}
-{
-  "displayName": "13 is a prime number",
-  "resourceObject": {
-    "msgpack": "DQ=="
-  }
-}
-{
-  "displayName": "17 is a prime number",
-  "resourceObject": {
-    "msgpack": "EQ=="
-  }
-}
-{
-  "displayName": "23 is a prime number",
-  "resourceObject": {
-    "msgpack": "Fw=="
-  }
-}
-{
-  "displayName": "29 is a prime number",
-  "resourceObject": {
-    "msgpack": "HQ=="
-  }
-}
-{
-  "displayName": "31 is a prime number",
-  "resourceObject": {
-    "msgpack": "Hw=="
-  }
-}
+...
 ```
