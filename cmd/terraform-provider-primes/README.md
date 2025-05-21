@@ -43,7 +43,6 @@ $ grpcurl -plaintext $(cmd/terraform-provider-primes/reattach.sh) tfplugin5.Prov
 }
 
 $ grpcurl -plaintext $(cmd/terraform-provider-primes/reattach.sh) tfplugin5.Provider.ListResource
-➜  terraform-plugin-go git:(add-list-resource-rpc) ✗ grpcurl -plaintext $(cmd/terraform-provider-primes/reattach.sh) tfplugin5.Provider.ListResource
 {
   "displayName": "The 1st prime is 2",
   "resourceObject": {
