@@ -18,3 +18,15 @@ func ValidateListResourceConfigRequest(in *tfplugin5.ValidateListResourceConfig_
 		Config:   DynamicValue(in.Config),
 	}
 }
+
+func ListResourceRequest(in *tfplugin5.ListResource_Request) *tfprotov5.ListResourceRequest {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.ListResourceRequest{
+		TypeName:              in.TypeName,
+		Config:                DynamicValue(in.Config),
+		IncludeResourceObject: in.IncludeResourceObject,
+	}
+}

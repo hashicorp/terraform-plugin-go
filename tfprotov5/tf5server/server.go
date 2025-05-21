@@ -1279,3 +1279,34 @@ func (s *server) ValidateListResourceConfig(ctx context.Context, protoReq *tfplu
 
 	return protoResp, nil
 }
+
+func (s *server) ListResource(protoReq *tfplugin5.ListResource_Request, protoStream grpc.ServerStreamingServer[tfplugin5.ListResource_Event]) error {
+	rpc := "ListResource"
+	ctx := protoStream.Context()
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)                    // TODO
+	ctx = logging.ResourceContext(ctx, protoReq.TypeName) // TODO
+	ctx = s.stoppableContext(ctx)                         // TODO
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.ListResourceRequest(protoReq)
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config) // TODO
+
+	// ctx = tf5serverlogging.DownstreamRequest(ctx) // TODO
+	resp, err := s.downstream.ListResource(req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return err
+	}
+
+	for ev := range resp.ListResourceEvents {
+		protoEv := toproto.ListResource_ListResourceResult(ev)
+		if err := protoStream.Send(protoEv); err != nil {
+			logging.ProtocolError(ctx, "Error sending event", map[string]any{logging.KeyError: err})
+			return err
+		}
+	}
+
+	return nil
+}

@@ -18,6 +18,18 @@ func GetMetadata_ListResourceMetadata(in *tfprotov5.ListResourceMetadata) *tfplu
 	}
 }
 
+func ListResource_ListResourceEvent(in *tfprotov5.ListResourceEvent) tfplugin5.ListResource_Event {
+	if in == nil {
+		return nil
+	}
+
+	return tfplugin5.ListResource_Event{
+		ResourceObject: DynamicValue(in.ResourceObject),
+		Identity:       ResourceIdentityData(in.Identity),
+		Diagnostic:     Diagnostics(in.Diagnostics),
+	}
+}
+
 func ValidateListResourceConfig_Response(in *tfprotov5.ValidateListResourceConfigResponse) *tfplugin5.ValidateListResourceConfig_Response {
 	if in == nil {
 		return nil

@@ -5,6 +5,7 @@ package tfprotov5
 
 import (
 	"context"
+	"iter"
 )
 
 // ListResourceMetadata describes metadata for an list resource in the GetMetadata
@@ -23,6 +24,35 @@ type ListResourceServer interface {
 	// will be known. This is your opportunity to do custom or advanced
 	// validation prior to an list resource being opened.
 	ValidateListResourceConfig(context.Context, *ValidateListResourceConfigRequest) (*ValidateListResourceConfigResponse, error)
+
+	ListResource(*ListResourceRequest) (*ListResourceResponse, error)
+}
+
+// ListResourceRequest is the request Terraform sends when ...
+type ListResourceRequest struct {
+	// TypeName is the type of resource ...
+	TypeName string
+
+	// Config is the configuration the user supplied for that list resource ...
+	Config *DynamicValue
+
+	// IncludeResourceObject is a boolean indicating whether the ...
+	IncludeResourceObject bool
+}
+
+type ListResourceResponse struct {
+	ListResourceEvents iter.Seq[ListResourceEvent]
+}
+
+type ListResourceEvent struct {
+	// ResourceObject is the resource object that Terraform will use to ...
+	ResourceObject *DynamicValue
+
+	// Identity is the identity of the resource. This is a ...
+	Identity *ResourceIdentityData
+
+	// Diagnostics report errors or warnings related to the given ...
+	Diagnostics []*Diagnostic
 }
 
 // ValidateListResourceConfigRequest is the request Terraform sends when it
