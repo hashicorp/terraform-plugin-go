@@ -19,5 +19,65 @@ plugin.GRPCController
 plugin.GRPCStdio
 tfplugin5.Provider
 
-
+$ grpcurl -plaintext $(cmd/terraform-provider-primes/reattach.sh) tfplugin5.Provider.ListResource
+{
+  "displayName": "2 is a prime number",
+  "resourceObject": {
+    "msgpack": "Ag=="
+  }
+}
+{
+  "displayName": "3 is a prime number",
+  "resourceObject": {
+    "msgpack": "Aw=="
+  }
+}
+{
+  "displayName": "5 is a prime number",
+  "resourceObject": {
+    "msgpack": "BQ=="
+  }
+}
+{
+  "displayName": "7 is a prime number",
+  "resourceObject": {
+    "msgpack": "Bw=="
+  }
+}
+{
+  "displayName": "11 is a prime number",
+  "resourceObject": {
+    "msgpack": "Cw=="
+  }
+}
+{
+  "displayName": "13 is a prime number",
+  "resourceObject": {
+    "msgpack": "DQ=="
+  }
+}
+{
+  "displayName": "17 is a prime number",
+  "resourceObject": {
+    "msgpack": "EQ=="
+  }
+}
+{
+  "displayName": "23 is a prime number",
+  "resourceObject": {
+    "msgpack": "Fw=="
+  }
+}
+{
+  "displayName": "29 is a prime number",
+  "resourceObject": {
+    "msgpack": "HQ=="
+  }
+}
+{
+  "displayName": "31 is a prime number",
+  "resourceObject": {
+    "msgpack": "Hw=="
+  }
+}
 ```
