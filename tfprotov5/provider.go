@@ -24,7 +24,7 @@ type ProviderServer interface {
 
 	// GetResourceIdentitySchemas is called when Terraform needs to know
 	// what the provider's resource identity schemas are.
-	GetResourceIdentitySchemas(context.Context, *GetResourceIdentitySchemasRequest) (*GetResourceIdentitySchemasResponse, error) // This will go into the ProviderServer interface
+	GetResourceIdentitySchemas(context.Context, *GetResourceIdentitySchemasRequest) (*GetResourceIdentitySchemasResponse, error)
 
 	// PrepareProviderConfig is called to give a provider a chance to
 	// modify the configuration the user specified before validation.
