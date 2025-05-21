@@ -14,5 +14,5 @@ func main() {
 		tf5server.WithManagedDebug(),
 		tf5server.WithManagedDebugEnvFilePath(".env.reattach"),
 	}
-	tf5server.Serve("terraform.io/playground/primes", providerFn, serveOpts...)
+	tf5server.Serve("terraform.io/playground/primes", providerFn, serveOpts...) //nolint:errcheck
 }
