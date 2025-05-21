@@ -1,0 +1,7 @@
+kind: BREAKING CHANGES
+body: 'tfprotov5+tfprotov6: `GetResourceIdentitySchemas` and `UpgradeResourceIdentity` RPC calls are now required in
+  `ProviderServer` and `ResourceServer`. Implementations that don''t support resource identity can return empty responses from the `GetResourceIdentitySchemas` method
+  and an error message the `UpgradeResourceIdentity` method.'
+time: 2025-05-21T14:53:26.293403-04:00
+custom:
+    Issue: "516"

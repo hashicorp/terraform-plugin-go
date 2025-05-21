@@ -1,0 +1,5 @@
+kind: BREAKING CHANGES
+body: 'tfprotov5+tfprotov6: Removed temporary `ProviderServerWithResourceIdentity` interface type. Use `ProviderServer` instead.'
+time: 2025-05-21T14:52:43.175919-04:00
+custom:
+    Issue: "516"
