@@ -2,8 +2,13 @@ package main
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 )
+
+func (p PrimeNumberProvider) UpgradeResourceIdentity(ctx context.Context, request *tfprotov5.UpgradeResourceIdentityRequest) (*tfprotov5.UpgradeResourceIdentityResponse, error) {
+	panic("not implemented")
+}
 
 func (p PrimeNumberProvider) StopProvider(ctx context.Context, request *tfprotov5.StopProviderRequest) (*tfprotov5.StopProviderResponse, error) {
 	panic("not implemented")

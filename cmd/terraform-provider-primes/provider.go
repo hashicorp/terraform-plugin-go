@@ -22,9 +22,33 @@ func (p PrimeNumberProvider) GetMetadata(ctx context.Context, request *tfprotov5
 	}, nil
 }
 
+func (p PrimeNumberProvider) GetResourceIdentitySchemas(ctx context.Context, request *tfprotov5.GetResourceIdentitySchemasRequest) (*tfprotov5.GetResourceIdentitySchemasResponse, error) {
+	return &tfprotov5.GetResourceIdentitySchemasResponse{
+		IdentitySchemas: map[string]*tfprotov5.ResourceIdentitySchema{
+			"prime": &tfprotov5.ResourceIdentitySchema{
+				IdentityAttributes: []*tfprotov5.ResourceIdentitySchemaAttribute{
+					{
+						Name:              "number",
+						Type:              tftypes.Number,
+						RequiredForImport: true,
+					},
+				},
+			},
+		},
+	}, nil
+}
+
 func (p PrimeNumberProvider) GetProviderSchema(ctx context.Context, request *tfprotov5.GetProviderSchemaRequest) (*tfprotov5.GetProviderSchemaResponse, error) {
 	return &tfprotov5.GetProviderSchemaResponse{
-		Provider: &tfprotov5.Schema{},
+		Provider: &tfprotov5.Schema{
+			Block: &tfprotov5.SchemaBlock{
+				Description:     "Prime Provider",
+				DescriptionKind: tfprotov5.StringKindPlain,
+			},
+		},
+		ResourceSchemas: map[string]*tfprotov5.Schema{
+			"prime": p.primeSchema(),
+		},
 		ListResourceSchemas: map[string]*tfprotov5.Schema{
 			"prime": p.primeSchema(),
 		},
@@ -36,14 +60,18 @@ func (p PrimeNumberProvider) primeSchema() *tfprotov5.Schema {
 		Block: &tfprotov5.SchemaBlock{
 			Attributes: []*tfprotov5.SchemaAttribute{
 				{
-					Name:        "number",
-					Type:        tftypes.Number,
-					Description: "The nth prime",
+					Name:            "number",
+					Type:            tftypes.Number,
+					Description:     "The nth prime",
+					DescriptionKind: tfprotov5.StringKindPlain,
+					Optional:        true,
 				},
 				{
-					Name:        "ordinal",
-					Type:        tftypes.Number,
-					Description: "n",
+					Name:            "ordinal",
+					Type:            tftypes.Number,
+					Description:     "n",
+					DescriptionKind: tfprotov5.StringKindPlain,
+					Optional:        true,
 				},
 			},
 		},
