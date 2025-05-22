@@ -356,5 +356,5 @@ of whether the downstream provider servers implement them fully, like the `GetRe
 Using a temporary interface for RPCs like this, enables provider servers to not fully implement the RPC, but indicates to core that they are implemented:
 - https://github.com/hashicorp/terraform/blob/10f3524bc525733584c4cad6eda6038518a8f1e0/internal/plugin6/grpc_provider.go#L134-L139
 
-For "global" RPCs like this, it's better to either ensure our temporary interface checks allow the downstream provider servers to not implement said RPC (i.e. not return a diagnostic),
+For "global" RPCs like this, it's better to either ensure our temporary interface checks allow the downstream provider servers to not implement said RPC (i.e. [don't return a diagnostic](https://github.com/hashicorp/terraform-plugin-go/blob/2030c6ca744896f2e8d5a5c60ed87989a57ef0ce/tfprotov6/tf6server/server.go#L579-L595)),
 or, just require that the downstream provider servers implement the new RPC methods in the `ProviderServer` interface and accept the CI errors that will result.
