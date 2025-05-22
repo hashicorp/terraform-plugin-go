@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
-	"time"
 )
 
 type PrimeNumberProvider struct {
@@ -88,10 +89,14 @@ func (p PrimeNumberProvider) ListResource(ctx context.Context, request *tfprotov
 				panic(err)
 			}
 
-			yield(tfprotov5.ListResourceEvent{
+			protoEv := tfprotov5.ListResourceEvent{
 				DisplayName:    displayName,
 				ResourceObject: &resourceObject,
-			})
+			}
+			if !yield(protoEv) {
+				fmt.Println("let's stop here")
+				return
+			}
 
 			fmt.Println("1 second nap")
 			time.Sleep(1 * time.Second)
@@ -102,6 +107,7 @@ func (p PrimeNumberProvider) ListResource(ctx context.Context, request *tfprotov
 		ListResourceEvents: events,
 	}, nil
 }
+
 func (p PrimeNumberProvider) ValidateListResourceConfig(ctx context.Context, request *tfprotov5.ValidateListResourceConfigRequest) (*tfprotov5.ValidateListResourceConfigResponse, error) {
 	return &tfprotov5.ValidateListResourceConfigResponse{}, nil
 }
