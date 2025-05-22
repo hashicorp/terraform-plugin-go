@@ -329,3 +329,32 @@ Select the branch to cut the release from (default is main).
 
 Input the `Release version number` which is the Semantic Release number including
 the `v` prefix (i.e. `v1.4.0`) and click `Run workflow` to kickoff the release.
+
+
+### Temporary Interfaces for New RPCs
+
+As the `terraform-plugin-go` Go module represents the protocol for Terraform providers communicating with [Terraform core](https://github.com/hashicorp/terraform),
+this module is the first to receive updates whenever a new RPC is added. This module defines what RPCs must be implemented by downstream provider servers,
+such as `terraform-plugin-framework` and `terraform-plugin-sdk/v2`, which is represented by the [`tfprotov5/6.ProviderServer` interface](https://github.com/hashicorp/terraform-plugin-go/blob/3fd901baa420da6d63c8bb999304291117ff09df/tfprotov6/provider.go#L10-L12).
+
+Whenever we add new RPCs to this interface, we typically introduce a temporary interface in the first module release, to allow downstream provider servers time
+to implement said RPCs. For example:
+- https://github.com/hashicorp/terraform-plugin-go/blob/3cebe39d453f6a37b9e6fe94d53a8f6e6f8f42ee/tfprotov5/provider.go#L59-L76
+
+This allows downstream provider servers a chance to implement the RPCs, while not immediately breaking the CI of actual providers that may be upgrading their `terraform-plugin-go` implementations
+which are not using the new RPCs yet. Once the downstream provider servers have been updated and released, we can remove the temporary interface in the next release without making any changes to
+`terraform-plugin-framework` or `terraform-plugin-sdk/v2`.
+- https://github.com/hashicorp/terraform-plugin-go/pull/465
+
+#### When to consider avoiding this approach
+
+Temporary interfaces work great for RPCs that are optional to implement for a provider server AND are not in the main path of Terraform core. For example, all the ephemeral resource
+RPCs are only called when an ephemeral resource is supported in the provider. However, this approach can introduce bugs if used in an RPC that is always called by Terraform Core, regardless
+of whether the downstream provider servers implement them fully, like the `GetResourceIdentitySchemas` RPC:
+- https://github.com/hashicorp/terraform-plugin-framework/issues/1148
+
+Using a temporary interface for RPCs like this, enables provider servers to not fully implement the RPC, but indicates to core that they are implemented:
+- https://github.com/hashicorp/terraform/blob/10f3524bc525733584c4cad6eda6038518a8f1e0/internal/plugin6/grpc_provider.go#L134-L139
+
+For "global" RPCs like this, it's better to either ensure our temporary interface checks allow the downstream provider servers to not implement said RPC (i.e. not return a diagnostic),
+or, just require that the downstream provider servers implement the new RPC methods in the `ProviderServer` interface and accept the CI errors that will result.
