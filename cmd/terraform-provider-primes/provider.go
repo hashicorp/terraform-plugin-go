@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"iter"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
@@ -88,32 +89,47 @@ func (p PrimeNumberProvider) ConfigureProvider(ctx context.Context, request *tfp
 	return &tfprotov5.ConfigureProviderResponse{}, nil
 }
 
-func (p PrimeNumberProvider) ListResource(ctx context.Context, request *tfprotov5.ListResourceRequest) (*tfprotov5.ListResourceResponse, error) {
-	events := func(yield func(tfprotov5.ListResourceEvent) bool) {
-		primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97}
+func (p PrimeNumberProvider) ordinalSuffixes() iter.Seq[string] {
+	return func(yield func(string) bool) {
+		for i := 1; ; i++ {
+			switch {
+			case i == 1, i >= 20 && i%10 == 1:
+				yield("st")
+			case i == 2, i >= 20 && i%10 == 2:
+				yield("nd")
+			case i == 3, i >= 20 && i%10 == 3:
+				yield("rd")
+			default:
+				yield("th")
+			}
 
-		var suffix string
+		}
+	}
+}
+
+func (p PrimeNumberProvider) convertToDynamicValue(number int, ordinal int) (tfprotov5.DynamicValue, error) {
+	typ := p.primeSchema().ValueType()
+	value := map[string]tftypes.Value{
+		"number":  tftypes.NewValue(tftypes.Number, number),
+		"ordinal": tftypes.NewValue(tftypes.Number, ordinal),
+	}
+
+	return tfprotov5.NewDynamicValue(typ, tftypes.NewValue(typ, value))
+}
+
+func (p PrimeNumberProvider) ListResource(ctx context.Context, request *tfprotov5.ListResourceRequest) (*tfprotov5.ListResourceResponse, error) {
+	primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97}
+
+	nextSuffix, stop := iter.Pull(p.ordinalSuffixes())
+	defer stop()
+
+	events := func(yield func(tfprotov5.ListResourceEvent) bool) {
 		for i, prime := range primes {
 			ordinal := i + 1
-			switch {
-			case ordinal == 1, ordinal >= 20 && ordinal%10 == 1:
-				suffix = "st"
-			case ordinal == 2, ordinal >= 20 && ordinal%10 == 2:
-				suffix = "nd"
-			case ordinal == 3, ordinal >= 20 && ordinal%10 == 3:
-				suffix = "rd"
-			default:
-				suffix = "th"
-			}
+			suffix, _ := nextSuffix()
 			displayName := fmt.Sprintf("The %d%s prime is %d", ordinal, suffix, prime)
 
-			typ := p.primeSchema().ValueType()
-			value := map[string]tftypes.Value{
-				"number":  tftypes.NewValue(tftypes.Number, prime),
-				"ordinal": tftypes.NewValue(tftypes.Number, ordinal),
-			}
-
-			resourceObject, err := tfprotov5.NewDynamicValue(typ, tftypes.NewValue(typ, value))
+			resourceObject, err := p.convertToDynamicValue(prime, ordinal)
 			if err != nil {
 				panic(err)
 			}
