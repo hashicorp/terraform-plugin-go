@@ -87,6 +87,7 @@ func (p PrimeNumberProvider) PrepareProviderConfig(ctx context.Context, request 
 func (p PrimeNumberProvider) ConfigureProvider(ctx context.Context, request *tfprotov5.ConfigureProviderRequest) (*tfprotov5.ConfigureProviderResponse, error) {
 	return &tfprotov5.ConfigureProviderResponse{}, nil
 }
+
 func (p PrimeNumberProvider) ListResource(ctx context.Context, request *tfprotov5.ListResourceRequest) (*tfprotov5.ListResourceResponse, error) {
 	events := func(yield func(tfprotov5.ListResourceEvent) bool) {
 		primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97}
@@ -138,4 +139,8 @@ func (p PrimeNumberProvider) ListResource(ctx context.Context, request *tfprotov
 
 func (p PrimeNumberProvider) ValidateListResourceConfig(ctx context.Context, request *tfprotov5.ValidateListResourceConfigRequest) (*tfprotov5.ValidateListResourceConfigResponse, error) {
 	return &tfprotov5.ValidateListResourceConfigResponse{}, nil
+}
+
+func (p PrimeNumberProvider) StopProvider(ctx context.Context, request *tfprotov5.StopProviderRequest) (*tfprotov5.StopProviderResponse, error) {
+	return &tfprotov5.StopProviderResponse{}, nil
 }

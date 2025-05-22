@@ -10,10 +10,6 @@ func (p PrimeNumberProvider) UpgradeResourceIdentity(ctx context.Context, reques
 	panic("not implemented")
 }
 
-func (p PrimeNumberProvider) StopProvider(ctx context.Context, request *tfprotov5.StopProviderRequest) (*tfprotov5.StopProviderResponse, error) {
-	panic("not implemented")
-}
-
 func (p PrimeNumberProvider) ValidateResourceTypeConfig(ctx context.Context, request *tfprotov5.ValidateResourceTypeConfigRequest) (*tfprotov5.ValidateResourceTypeConfigResponse, error) {
 	panic("not implemented")
 }

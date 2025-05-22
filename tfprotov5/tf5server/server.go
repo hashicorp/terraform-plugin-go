@@ -1253,10 +1253,17 @@ func (s *server) ListResource(protoReq *tfplugin5.ListResource_Request, protoStr
 	}
 
 	for ev := range resp.ListResourceEvents {
-		protoEv := toproto.ListResource_ListResourceEvent(&ev)
-		if err := protoStream.Send(protoEv); err != nil {
-			logging.ProtocolError(ctx, "Error sending event", map[string]any{logging.KeyError: err})
-			return err
+		select {
+		case <-ctx.Done():
+			logging.ProtocolTrace(ctx, "Context done")
+			return nil
+
+		default:
+			protoEv := toproto.ListResource_ListResourceEvent(&ev)
+			if err := protoStream.Send(protoEv); err != nil {
+				logging.ProtocolError(ctx, "Error sending event", map[string]any{logging.KeyError: err})
+				return err
+			}
 		}
 	}
 
