@@ -572,31 +572,7 @@ func (s *server) GetResourceIdentitySchemas(ctx context.Context, protoReq *tfplu
 
 	ctx = tf5serverlogging.DownstreamRequest(ctx)
 
-	// TODO: Remove this check and error in preference of
-	// s.downstream.GetResourceIdentitySchemas below once ProviderServer interface
-	// implements this RPC method.
-	// nolint:staticcheck
-	resourceIdentityProviderServer, ok := s.downstream.(tfprotov5.ProviderServerWithResourceIdentity)
-	if !ok {
-		logging.ProtocolError(ctx, "ProviderServer does not implement GetResourceIdentitySchemas")
-
-		protoResp := &tfplugin5.GetResourceIdentitySchemas_Response{
-			Diagnostics: []*tfplugin5.Diagnostic{
-				{
-					Severity: tfplugin5.Diagnostic_ERROR,
-					Summary:  "Provider GetResourceIdentitySchemas Not Implemented",
-					Detail: "A GetResourceIdentitySchemas call was received by the provider, however the provider does not implement the call. " +
-						"Either upgrade the provider to a version that implements resource identity support or this is a bug in Terraform that should be reported to the Terraform maintainers.",
-				},
-			},
-		}
-
-		return protoResp, nil
-	}
-
-	// TODO: Update this to call downstream once optional interface is removed
-	// resp, err := s.downstream.GetResourceIdentitySchemas(ctx, req)
-	resp, err := resourceIdentityProviderServer.GetResourceIdentitySchemas(ctx, req)
+	resp, err := s.downstream.GetResourceIdentitySchemas(ctx, req)
 
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -845,31 +821,7 @@ func (s *server) UpgradeResourceIdentity(ctx context.Context, protoReq *tfplugin
 
 	ctx = tf5serverlogging.DownstreamRequest(ctx)
 
-	// TODO: Remove this check and error in preference of
-	// s.downstream.UpgradeResourceIdentity below once ProviderServer interface
-	// implements this RPC method.
-	// nolint:staticcheck
-	resourceIdentityProviderServer, ok := s.downstream.(tfprotov5.ProviderServerWithResourceIdentity)
-	if !ok {
-		logging.ProtocolError(ctx, "ProviderServer does not implement UpgradeResourceIdentity")
-
-		protoResp := &tfplugin5.UpgradeResourceIdentity_Response{
-			Diagnostics: []*tfplugin5.Diagnostic{
-				{
-					Severity: tfplugin5.Diagnostic_ERROR,
-					Summary:  "Provider UpgradeResourceIdentity Not Implemented",
-					Detail: "A UpgradeResourceIdentity call was received by the provider, however the provider does not implement the call. " +
-						"Either upgrade the provider to a version that implements resource identity support or this is a bug in Terraform that should be reported to the Terraform maintainers.",
-				},
-			},
-		}
-
-		return protoResp, nil
-	}
-
-	// TODO: Update this to call downstream once optional interface is removed
-	// resp, err := s.downstream.UpgradeResourceIdentity(ctx, req)
-	resp, err := resourceIdentityProviderServer.UpgradeResourceIdentity(ctx, req)
+	resp, err := s.downstream.UpgradeResourceIdentity(ctx, req)
 
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -1278,4 +1230,42 @@ func (s *server) ValidateListResourceConfig(ctx context.Context, protoReq *tfplu
 	protoResp := toproto.ValidateListResourceConfig_Response(resp)
 
 	return protoResp, nil
+}
+
+func (s *server) ListResource(protoReq *tfplugin5.ListResource_Request, protoStream grpc.ServerStreamingServer[tfplugin5.ListResource_Event]) error {
+	rpc := "ListResource"
+	ctx := protoStream.Context()
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)                    // TODO
+	ctx = logging.ResourceContext(ctx, protoReq.TypeName) // TODO
+	ctx = s.stoppableContext(ctx)                         // TODO
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.ListResourceRequest(protoReq)
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config) // TODO
+
+	ctx = tf5serverlogging.DownstreamRequest(ctx) // TODO
+	resp, err := s.downstream.ListResource(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return err
+	}
+
+	for ev := range resp.ListResourceEvents {
+		select {
+		case <-ctx.Done():
+			logging.ProtocolTrace(ctx, "Context done")
+			return nil
+
+		default:
+			protoEv := toproto.ListResource_ListResourceEvent(&ev)
+			if err := protoStream.Send(protoEv); err != nil {
+				logging.ProtocolError(ctx, "Error sending event", map[string]any{logging.KeyError: err})
+				return err
+			}
+		}
+	}
+
+	return nil
 }
