@@ -25,7 +25,7 @@ func (p PrimeNumberProvider) GetMetadata(ctx context.Context, request *tfprotov5
 func (p PrimeNumberProvider) GetResourceIdentitySchemas(ctx context.Context, request *tfprotov5.GetResourceIdentitySchemasRequest) (*tfprotov5.GetResourceIdentitySchemasResponse, error) {
 	return &tfprotov5.GetResourceIdentitySchemasResponse{
 		IdentitySchemas: map[string]*tfprotov5.ResourceIdentitySchema{
-			"prime": &tfprotov5.ResourceIdentitySchema{
+			"prime": {
 				IdentityAttributes: []*tfprotov5.ResourceIdentitySchemaAttribute{
 					{
 						Name:              "number",
