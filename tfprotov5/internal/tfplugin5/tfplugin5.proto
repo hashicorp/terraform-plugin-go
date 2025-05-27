@@ -849,7 +849,7 @@ message ListResource {
     }
 
     message Event {
-        // identity is the resource identity data of the resource instance.
+        // identity is the resource identity data of the resource instance
         ResourceIdentityData identity = 1;
 
         // display_name can be displayed in a UI to make it easier for humans to identify a resource
