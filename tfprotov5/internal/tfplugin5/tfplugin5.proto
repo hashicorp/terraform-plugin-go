@@ -294,14 +294,14 @@ message ActionSchema {
     // An action can cause action drift to a linked resource, terraform will
     // update the linked resource with the drifted value.
     message LinkedResource {
-        message LinkedAttributes {
+        message LinkedAttribute {
             // The attribute path of the linked attribute.
             AttributePath attribute = 1;
         }
 
         AttributePath attribute = 1;
         string type = 2;
-        repeated LinkedAttributes linked_attributes = 3;
+        repeated LinkedAttribute linked_attributes = 3;
     }
 
     // The version of the schema.
