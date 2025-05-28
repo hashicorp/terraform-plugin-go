@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/internal/logging"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/fromproto"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/streamproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tf5serverlogging"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/toproto"
@@ -1191,6 +1192,115 @@ func (s *server) CloseEphemeralResource(ctx context.Context, protoReq *tfplugin5
 	protoResp := toproto.CloseEphemeralResource_Response(resp)
 
 	return protoResp, nil
+}
+
+func (s *server) PlanAction(ctx context.Context, protoReq *tfplugin5.PlanAction_Request) (*tfplugin5.PlanAction_Response, error) {
+	rpc := "PlanAction"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.PlanActionRequest(protoReq)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
+
+	ctx = tf5serverlogging.DownstreamRequest(ctx)
+
+	// TODO: Remove this check and error in preference of
+	// s.downstream.PlanAction below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	actionsProviderServer, ok := s.downstream.(tfprotov5.ProviderServerWithActions)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement PlanAction")
+
+		protoResp := &tfplugin5.PlanAction_Response{
+			Diagnostics: []*tfplugin5.Diagnostic{
+				{
+					Severity: tfplugin5.Diagnostic_ERROR,
+					Summary:  "Provider PlanAction Not Implemented",
+					Detail: "A PlanAction call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements actions support or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	// TODO: Update this to call downstream once optional interface is removed
+	// resp, err := s.downstream.PlanAction(ctx, req)
+	resp, err := actionsProviderServer.PlanAction(ctx, req)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.PlanAction_Response(resp)
+
+	return protoResp, nil
+
+}
+
+func (s *server) InvokeAction(protoReq *tfplugin5.InvokeAction_Request, protoStreamingServer grpc.ServerStreamingServer[tfplugin5.InvokeAction_Event]) error {
+	rpc := "InvokeAction"
+	ctx := protoStreamingServer.Context()
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = s.stoppableContext(ctx) // TODO: maybe all this context stuff doesn't do anything because we can't pass it to the downstream server?
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request") // TODO: do we want to log like this for streaming?
+	// TODO: all the context stuff might need some rework, maybe it needs some way to be passed to the streaming server returned by streamproto?
+
+	req := fromproto.InvokeActionRequest(protoReq)
+
+	streamingServer := streamproto.InvokeActionStreamingServer(protoStreamingServer)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "PlannedConfig", req.PlannedConfig)
+
+	// ctx = tf5serverlogging.DownstreamRequest(ctx) // TODO: we need something like this for streaming events
+
+	// TODO: Remove this check and error in preference of
+	// s.downstream.InvokeAction below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	actionsProviderServer, ok := s.downstream.(tfprotov5.ProviderServerWithActions)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement InvokeAction")
+
+		protoEvent := &tfplugin5.InvokeAction_Event{
+			Event: &tfplugin5.InvokeAction_Event_Started_{
+				Started: &tfplugin5.InvokeAction_Event_Started{
+					Diagnostics: []*tfplugin5.Diagnostic{
+						{
+							Severity: tfplugin5.Diagnostic_ERROR,
+							Summary:  "Provider InvokeAction Not Implemented",
+							Detail: "A InvokeAction call was received by the provider, however the provider does not implement the call. " +
+								"Either upgrade the provider to a version that implements actions support or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+						},
+					},
+				},
+			},
+		}
+		return protoStreamingServer.Send(protoEvent)
+	}
+
+	// TODO: Update this to call downstream once optional interface is removed
+	// err := s.downstream.InvokeAction(req, &streamingServer)
+	err := actionsProviderServer.InvokeAction(req, &streamingServer)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return err
+	}
+
+	// tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics) // TODO: find an alternative for logging diagnostics in streaming
+
+	return nil
 }
 
 func invalidDeferredResponseDiag(reason tfprotov5.DeferredReason) *tfprotov5.Diagnostic {
