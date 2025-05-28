@@ -2820,10 +2820,10 @@ func (x *Function_Return) GetType() []byte {
 // An action can cause action drift to a linked resource, terraform will
 // update the linked resource with the drifted value.
 type ActionSchema_LinkedResource struct {
-	state            protoimpl.MessageState                          `protogen:"open.v1"`
-	Attribute        *AttributePath                                  `protobuf:"bytes,1,opt,name=attribute,proto3" json:"attribute,omitempty"`
-	Type             string                                          `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	LinkedAttributes []*ActionSchema_LinkedResource_LinkedAttributes `protobuf:"bytes,3,rep,name=linked_attributes,json=linkedAttributes,proto3" json:"linked_attributes,omitempty"`
+	state            protoimpl.MessageState                         `protogen:"open.v1"`
+	Attribute        *AttributePath                                 `protobuf:"bytes,1,opt,name=attribute,proto3" json:"attribute,omitempty"`
+	Type             string                                         `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	LinkedAttributes []*ActionSchema_LinkedResource_LinkedAttribute `protobuf:"bytes,3,rep,name=linked_attributes,json=linkedAttributes,proto3" json:"linked_attributes,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -2872,14 +2872,14 @@ func (x *ActionSchema_LinkedResource) GetType() string {
 	return ""
 }
 
-func (x *ActionSchema_LinkedResource) GetLinkedAttributes() []*ActionSchema_LinkedResource_LinkedAttributes {
+func (x *ActionSchema_LinkedResource) GetLinkedAttributes() []*ActionSchema_LinkedResource_LinkedAttribute {
 	if x != nil {
 		return x.LinkedAttributes
 	}
 	return nil
 }
 
-type ActionSchema_LinkedResource_LinkedAttributes struct {
+type ActionSchema_LinkedResource_LinkedAttribute struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The attribute path of the linked attribute.
 	Attribute     *AttributePath `protobuf:"bytes,1,opt,name=attribute,proto3" json:"attribute,omitempty"`
@@ -2887,20 +2887,20 @@ type ActionSchema_LinkedResource_LinkedAttributes struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ActionSchema_LinkedResource_LinkedAttributes) Reset() {
-	*x = ActionSchema_LinkedResource_LinkedAttributes{}
+func (x *ActionSchema_LinkedResource_LinkedAttribute) Reset() {
+	*x = ActionSchema_LinkedResource_LinkedAttribute{}
 	mi := &file_tfplugin6_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ActionSchema_LinkedResource_LinkedAttributes) String() string {
+func (x *ActionSchema_LinkedResource_LinkedAttribute) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ActionSchema_LinkedResource_LinkedAttributes) ProtoMessage() {}
+func (*ActionSchema_LinkedResource_LinkedAttribute) ProtoMessage() {}
 
-func (x *ActionSchema_LinkedResource_LinkedAttributes) ProtoReflect() protoreflect.Message {
+func (x *ActionSchema_LinkedResource_LinkedAttribute) ProtoReflect() protoreflect.Message {
 	mi := &file_tfplugin6_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2912,12 +2912,12 @@ func (x *ActionSchema_LinkedResource_LinkedAttributes) ProtoReflect() protorefle
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ActionSchema_LinkedResource_LinkedAttributes.ProtoReflect.Descriptor instead.
-func (*ActionSchema_LinkedResource_LinkedAttributes) Descriptor() ([]byte, []int) {
+// Deprecated: Use ActionSchema_LinkedResource_LinkedAttribute.ProtoReflect.Descriptor instead.
+func (*ActionSchema_LinkedResource_LinkedAttribute) Descriptor() ([]byte, []int) {
 	return file_tfplugin6_proto_rawDescGZIP(), []int{10, 0, 0}
 }
 
-func (x *ActionSchema_LinkedResource_LinkedAttributes) GetAttribute() *AttributePath {
+func (x *ActionSchema_LinkedResource_LinkedAttribute) GetAttribute() *AttributePath {
 	if x != nil {
 		return x.Attribute
 	}
@@ -6663,16 +6663,16 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\vdescription\x18\x05 \x01(\tR\vdescription\x12@\n" +
 	"\x10description_kind\x18\x06 \x01(\x0e2\x15.tfplugin6.StringKindR\x0fdescriptionKind\x1a\x1c\n" +
 	"\x06Return\x12\x12\n" +
-	"\x04type\x18\x01 \x01(\fR\x04type\"\xbb\x03\n" +
+	"\x04type\x18\x01 \x01(\fR\x04type\"\xb9\x03\n" +
 	"\fActionSchema\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\x03R\aversion\x12-\n" +
 	"\x05block\x18\x02 \x01(\v2\x17.tfplugin6.Schema.BlockR\x05block\x12Q\n" +
-	"\x10linked_resources\x18\x03 \x03(\v2&.tfplugin6.ActionSchema.LinkedResourceR\x0flinkedResources\x1a\x8e\x02\n" +
+	"\x10linked_resources\x18\x03 \x03(\v2&.tfplugin6.ActionSchema.LinkedResourceR\x0flinkedResources\x1a\x8c\x02\n" +
 	"\x0eLinkedResource\x126\n" +
 	"\tattribute\x18\x01 \x01(\v2\x18.tfplugin6.AttributePathR\tattribute\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\tR\x04type\x12d\n" +
-	"\x11linked_attributes\x18\x03 \x03(\v27.tfplugin6.ActionSchema.LinkedResource.LinkedAttributesR\x10linkedAttributes\x1aJ\n" +
-	"\x10LinkedAttributes\x126\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\x12c\n" +
+	"\x11linked_attributes\x18\x03 \x03(\v26.tfplugin6.ActionSchema.LinkedResource.LinkedAttributeR\x10linkedAttributes\x1aI\n" +
+	"\x0fLinkedAttribute\x126\n" +
 	"\tattribute\x18\x01 \x01(\v2\x18.tfplugin6.AttributePathR\tattribute\"\xa8\x01\n" +
 	"\x12ServerCapabilities\x12!\n" +
 	"\fplan_destroy\x18\x01 \x01(\bR\vplanDestroy\x12?\n" +
@@ -7031,116 +7031,116 @@ func file_tfplugin6_proto_rawDescGZIP() []byte {
 var file_tfplugin6_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
 var file_tfplugin6_proto_msgTypes = make([]protoimpl.MessageInfo, 119)
 var file_tfplugin6_proto_goTypes = []any{
-	(StringKind)(0),                                      // 0: tfplugin6.StringKind
-	(Diagnostic_Severity)(0),                             // 1: tfplugin6.Diagnostic.Severity
-	(Schema_NestedBlock_NestingMode)(0),                  // 2: tfplugin6.Schema.NestedBlock.NestingMode
-	(Schema_Object_NestingMode)(0),                       // 3: tfplugin6.Schema.Object.NestingMode
-	(Deferred_Reason)(0),                                 // 4: tfplugin6.Deferred.Reason
-	(*DynamicValue)(nil),                                 // 5: tfplugin6.DynamicValue
-	(*Diagnostic)(nil),                                   // 6: tfplugin6.Diagnostic
-	(*FunctionError)(nil),                                // 7: tfplugin6.FunctionError
-	(*AttributePath)(nil),                                // 8: tfplugin6.AttributePath
-	(*StopProvider)(nil),                                 // 9: tfplugin6.StopProvider
-	(*RawState)(nil),                                     // 10: tfplugin6.RawState
-	(*Schema)(nil),                                       // 11: tfplugin6.Schema
-	(*ResourceIdentitySchema)(nil),                       // 12: tfplugin6.ResourceIdentitySchema
-	(*ResourceIdentityData)(nil),                         // 13: tfplugin6.ResourceIdentityData
-	(*Function)(nil),                                     // 14: tfplugin6.Function
-	(*ActionSchema)(nil),                                 // 15: tfplugin6.ActionSchema
-	(*ServerCapabilities)(nil),                           // 16: tfplugin6.ServerCapabilities
-	(*ClientCapabilities)(nil),                           // 17: tfplugin6.ClientCapabilities
-	(*Deferred)(nil),                                     // 18: tfplugin6.Deferred
-	(*GetMetadata)(nil),                                  // 19: tfplugin6.GetMetadata
-	(*GetProviderSchema)(nil),                            // 20: tfplugin6.GetProviderSchema
-	(*ValidateProviderConfig)(nil),                       // 21: tfplugin6.ValidateProviderConfig
-	(*UpgradeResourceState)(nil),                         // 22: tfplugin6.UpgradeResourceState
-	(*ValidateResourceConfig)(nil),                       // 23: tfplugin6.ValidateResourceConfig
-	(*ValidateDataResourceConfig)(nil),                   // 24: tfplugin6.ValidateDataResourceConfig
-	(*ConfigureProvider)(nil),                            // 25: tfplugin6.ConfigureProvider
-	(*ReadResource)(nil),                                 // 26: tfplugin6.ReadResource
-	(*PlanResourceChange)(nil),                           // 27: tfplugin6.PlanResourceChange
-	(*ApplyResourceChange)(nil),                          // 28: tfplugin6.ApplyResourceChange
-	(*ImportResourceState)(nil),                          // 29: tfplugin6.ImportResourceState
-	(*MoveResourceState)(nil),                            // 30: tfplugin6.MoveResourceState
-	(*ReadDataSource)(nil),                               // 31: tfplugin6.ReadDataSource
-	(*GetFunctions)(nil),                                 // 32: tfplugin6.GetFunctions
-	(*CallFunction)(nil),                                 // 33: tfplugin6.CallFunction
-	(*ValidateEphemeralResourceConfig)(nil),              // 34: tfplugin6.ValidateEphemeralResourceConfig
-	(*OpenEphemeralResource)(nil),                        // 35: tfplugin6.OpenEphemeralResource
-	(*RenewEphemeralResource)(nil),                       // 36: tfplugin6.RenewEphemeralResource
-	(*CloseEphemeralResource)(nil),                       // 37: tfplugin6.CloseEphemeralResource
-	(*GetResourceIdentitySchemas)(nil),                   // 38: tfplugin6.GetResourceIdentitySchemas
-	(*UpgradeResourceIdentity)(nil),                      // 39: tfplugin6.UpgradeResourceIdentity
-	(*ListResource)(nil),                                 // 40: tfplugin6.ListResource
-	(*ValidateListResourceConfig)(nil),                   // 41: tfplugin6.ValidateListResourceConfig
-	(*PlanAction)(nil),                                   // 42: tfplugin6.PlanAction
-	(*InvokeAction)(nil),                                 // 43: tfplugin6.InvokeAction
-	(*AttributePath_Step)(nil),                           // 44: tfplugin6.AttributePath.Step
-	(*StopProvider_Request)(nil),                         // 45: tfplugin6.StopProvider.Request
-	(*StopProvider_Response)(nil),                        // 46: tfplugin6.StopProvider.Response
-	nil,                                                  // 47: tfplugin6.RawState.FlatmapEntry
-	(*Schema_Block)(nil),                                 // 48: tfplugin6.Schema.Block
-	(*Schema_Attribute)(nil),                             // 49: tfplugin6.Schema.Attribute
-	(*Schema_NestedBlock)(nil),                           // 50: tfplugin6.Schema.NestedBlock
-	(*Schema_Object)(nil),                                // 51: tfplugin6.Schema.Object
-	(*ResourceIdentitySchema_IdentityAttribute)(nil),     // 52: tfplugin6.ResourceIdentitySchema.IdentityAttribute
-	(*Function_Parameter)(nil),                           // 53: tfplugin6.Function.Parameter
-	(*Function_Return)(nil),                              // 54: tfplugin6.Function.Return
-	(*ActionSchema_LinkedResource)(nil),                  // 55: tfplugin6.ActionSchema.LinkedResource
-	(*ActionSchema_LinkedResource_LinkedAttributes)(nil), // 56: tfplugin6.ActionSchema.LinkedResource.LinkedAttributes
-	(*GetMetadata_Request)(nil),                          // 57: tfplugin6.GetMetadata.Request
-	(*GetMetadata_Response)(nil),                         // 58: tfplugin6.GetMetadata.Response
-	(*GetMetadata_FunctionMetadata)(nil),                 // 59: tfplugin6.GetMetadata.FunctionMetadata
-	(*GetMetadata_DataSourceMetadata)(nil),               // 60: tfplugin6.GetMetadata.DataSourceMetadata
-	(*GetMetadata_ResourceMetadata)(nil),                 // 61: tfplugin6.GetMetadata.ResourceMetadata
-	(*GetMetadata_EphemeralResourceMetadata)(nil),        // 62: tfplugin6.GetMetadata.EphemeralResourceMetadata
-	(*GetMetadata_ListResourceMetadata)(nil),             // 63: tfplugin6.GetMetadata.ListResourceMetadata
-	(*GetProviderSchema_Request)(nil),                    // 64: tfplugin6.GetProviderSchema.Request
-	(*GetProviderSchema_Response)(nil),                   // 65: tfplugin6.GetProviderSchema.Response
-	nil,                                                  // 66: tfplugin6.GetProviderSchema.Response.ResourceSchemasEntry
-	nil,                                                  // 67: tfplugin6.GetProviderSchema.Response.DataSourceSchemasEntry
-	nil,                                                  // 68: tfplugin6.GetProviderSchema.Response.FunctionsEntry
-	nil,                                                  // 69: tfplugin6.GetProviderSchema.Response.EphemeralResourceSchemasEntry
-	nil,                                                  // 70: tfplugin6.GetProviderSchema.Response.ListResourceSchemasEntry
-	nil,                                                  // 71: tfplugin6.GetProviderSchema.Response.ActionSchemasEntry
-	(*ValidateProviderConfig_Request)(nil),               // 72: tfplugin6.ValidateProviderConfig.Request
-	(*ValidateProviderConfig_Response)(nil),              // 73: tfplugin6.ValidateProviderConfig.Response
-	(*UpgradeResourceState_Request)(nil),                 // 74: tfplugin6.UpgradeResourceState.Request
-	(*UpgradeResourceState_Response)(nil),                // 75: tfplugin6.UpgradeResourceState.Response
-	(*ValidateResourceConfig_Request)(nil),               // 76: tfplugin6.ValidateResourceConfig.Request
-	(*ValidateResourceConfig_Response)(nil),              // 77: tfplugin6.ValidateResourceConfig.Response
-	(*ValidateDataResourceConfig_Request)(nil),           // 78: tfplugin6.ValidateDataResourceConfig.Request
-	(*ValidateDataResourceConfig_Response)(nil),          // 79: tfplugin6.ValidateDataResourceConfig.Response
-	(*ConfigureProvider_Request)(nil),                    // 80: tfplugin6.ConfigureProvider.Request
-	(*ConfigureProvider_Response)(nil),                   // 81: tfplugin6.ConfigureProvider.Response
-	(*ReadResource_Request)(nil),                         // 82: tfplugin6.ReadResource.Request
-	(*ReadResource_Response)(nil),                        // 83: tfplugin6.ReadResource.Response
-	(*PlanResourceChange_Request)(nil),                   // 84: tfplugin6.PlanResourceChange.Request
-	(*PlanResourceChange_Response)(nil),                  // 85: tfplugin6.PlanResourceChange.Response
-	(*ApplyResourceChange_Request)(nil),                  // 86: tfplugin6.ApplyResourceChange.Request
-	(*ApplyResourceChange_Response)(nil),                 // 87: tfplugin6.ApplyResourceChange.Response
-	(*ImportResourceState_Request)(nil),                  // 88: tfplugin6.ImportResourceState.Request
-	(*ImportResourceState_ImportedResource)(nil),         // 89: tfplugin6.ImportResourceState.ImportedResource
-	(*ImportResourceState_Response)(nil),                 // 90: tfplugin6.ImportResourceState.Response
-	(*MoveResourceState_Request)(nil),                    // 91: tfplugin6.MoveResourceState.Request
-	(*MoveResourceState_Response)(nil),                   // 92: tfplugin6.MoveResourceState.Response
-	(*ReadDataSource_Request)(nil),                       // 93: tfplugin6.ReadDataSource.Request
-	(*ReadDataSource_Response)(nil),                      // 94: tfplugin6.ReadDataSource.Response
-	(*GetFunctions_Request)(nil),                         // 95: tfplugin6.GetFunctions.Request
-	(*GetFunctions_Response)(nil),                        // 96: tfplugin6.GetFunctions.Response
-	nil,                                                  // 97: tfplugin6.GetFunctions.Response.FunctionsEntry
-	(*CallFunction_Request)(nil),                         // 98: tfplugin6.CallFunction.Request
-	(*CallFunction_Response)(nil),                        // 99: tfplugin6.CallFunction.Response
-	(*ValidateEphemeralResourceConfig_Request)(nil),      // 100: tfplugin6.ValidateEphemeralResourceConfig.Request
-	(*ValidateEphemeralResourceConfig_Response)(nil),     // 101: tfplugin6.ValidateEphemeralResourceConfig.Response
-	(*OpenEphemeralResource_Request)(nil),                // 102: tfplugin6.OpenEphemeralResource.Request
-	(*OpenEphemeralResource_Response)(nil),               // 103: tfplugin6.OpenEphemeralResource.Response
-	(*RenewEphemeralResource_Request)(nil),               // 104: tfplugin6.RenewEphemeralResource.Request
-	(*RenewEphemeralResource_Response)(nil),              // 105: tfplugin6.RenewEphemeralResource.Response
-	(*CloseEphemeralResource_Request)(nil),               // 106: tfplugin6.CloseEphemeralResource.Request
-	(*CloseEphemeralResource_Response)(nil),              // 107: tfplugin6.CloseEphemeralResource.Response
-	(*GetResourceIdentitySchemas_Request)(nil),           // 108: tfplugin6.GetResourceIdentitySchemas.Request
-	(*GetResourceIdentitySchemas_Response)(nil),          // 109: tfplugin6.GetResourceIdentitySchemas.Response
+	(StringKind)(0),                                     // 0: tfplugin6.StringKind
+	(Diagnostic_Severity)(0),                            // 1: tfplugin6.Diagnostic.Severity
+	(Schema_NestedBlock_NestingMode)(0),                 // 2: tfplugin6.Schema.NestedBlock.NestingMode
+	(Schema_Object_NestingMode)(0),                      // 3: tfplugin6.Schema.Object.NestingMode
+	(Deferred_Reason)(0),                                // 4: tfplugin6.Deferred.Reason
+	(*DynamicValue)(nil),                                // 5: tfplugin6.DynamicValue
+	(*Diagnostic)(nil),                                  // 6: tfplugin6.Diagnostic
+	(*FunctionError)(nil),                               // 7: tfplugin6.FunctionError
+	(*AttributePath)(nil),                               // 8: tfplugin6.AttributePath
+	(*StopProvider)(nil),                                // 9: tfplugin6.StopProvider
+	(*RawState)(nil),                                    // 10: tfplugin6.RawState
+	(*Schema)(nil),                                      // 11: tfplugin6.Schema
+	(*ResourceIdentitySchema)(nil),                      // 12: tfplugin6.ResourceIdentitySchema
+	(*ResourceIdentityData)(nil),                        // 13: tfplugin6.ResourceIdentityData
+	(*Function)(nil),                                    // 14: tfplugin6.Function
+	(*ActionSchema)(nil),                                // 15: tfplugin6.ActionSchema
+	(*ServerCapabilities)(nil),                          // 16: tfplugin6.ServerCapabilities
+	(*ClientCapabilities)(nil),                          // 17: tfplugin6.ClientCapabilities
+	(*Deferred)(nil),                                    // 18: tfplugin6.Deferred
+	(*GetMetadata)(nil),                                 // 19: tfplugin6.GetMetadata
+	(*GetProviderSchema)(nil),                           // 20: tfplugin6.GetProviderSchema
+	(*ValidateProviderConfig)(nil),                      // 21: tfplugin6.ValidateProviderConfig
+	(*UpgradeResourceState)(nil),                        // 22: tfplugin6.UpgradeResourceState
+	(*ValidateResourceConfig)(nil),                      // 23: tfplugin6.ValidateResourceConfig
+	(*ValidateDataResourceConfig)(nil),                  // 24: tfplugin6.ValidateDataResourceConfig
+	(*ConfigureProvider)(nil),                           // 25: tfplugin6.ConfigureProvider
+	(*ReadResource)(nil),                                // 26: tfplugin6.ReadResource
+	(*PlanResourceChange)(nil),                          // 27: tfplugin6.PlanResourceChange
+	(*ApplyResourceChange)(nil),                         // 28: tfplugin6.ApplyResourceChange
+	(*ImportResourceState)(nil),                         // 29: tfplugin6.ImportResourceState
+	(*MoveResourceState)(nil),                           // 30: tfplugin6.MoveResourceState
+	(*ReadDataSource)(nil),                              // 31: tfplugin6.ReadDataSource
+	(*GetFunctions)(nil),                                // 32: tfplugin6.GetFunctions
+	(*CallFunction)(nil),                                // 33: tfplugin6.CallFunction
+	(*ValidateEphemeralResourceConfig)(nil),             // 34: tfplugin6.ValidateEphemeralResourceConfig
+	(*OpenEphemeralResource)(nil),                       // 35: tfplugin6.OpenEphemeralResource
+	(*RenewEphemeralResource)(nil),                      // 36: tfplugin6.RenewEphemeralResource
+	(*CloseEphemeralResource)(nil),                      // 37: tfplugin6.CloseEphemeralResource
+	(*GetResourceIdentitySchemas)(nil),                  // 38: tfplugin6.GetResourceIdentitySchemas
+	(*UpgradeResourceIdentity)(nil),                     // 39: tfplugin6.UpgradeResourceIdentity
+	(*ListResource)(nil),                                // 40: tfplugin6.ListResource
+	(*ValidateListResourceConfig)(nil),                  // 41: tfplugin6.ValidateListResourceConfig
+	(*PlanAction)(nil),                                  // 42: tfplugin6.PlanAction
+	(*InvokeAction)(nil),                                // 43: tfplugin6.InvokeAction
+	(*AttributePath_Step)(nil),                          // 44: tfplugin6.AttributePath.Step
+	(*StopProvider_Request)(nil),                        // 45: tfplugin6.StopProvider.Request
+	(*StopProvider_Response)(nil),                       // 46: tfplugin6.StopProvider.Response
+	nil,                                                 // 47: tfplugin6.RawState.FlatmapEntry
+	(*Schema_Block)(nil),                                // 48: tfplugin6.Schema.Block
+	(*Schema_Attribute)(nil),                            // 49: tfplugin6.Schema.Attribute
+	(*Schema_NestedBlock)(nil),                          // 50: tfplugin6.Schema.NestedBlock
+	(*Schema_Object)(nil),                               // 51: tfplugin6.Schema.Object
+	(*ResourceIdentitySchema_IdentityAttribute)(nil),    // 52: tfplugin6.ResourceIdentitySchema.IdentityAttribute
+	(*Function_Parameter)(nil),                          // 53: tfplugin6.Function.Parameter
+	(*Function_Return)(nil),                             // 54: tfplugin6.Function.Return
+	(*ActionSchema_LinkedResource)(nil),                 // 55: tfplugin6.ActionSchema.LinkedResource
+	(*ActionSchema_LinkedResource_LinkedAttribute)(nil), // 56: tfplugin6.ActionSchema.LinkedResource.LinkedAttribute
+	(*GetMetadata_Request)(nil),                         // 57: tfplugin6.GetMetadata.Request
+	(*GetMetadata_Response)(nil),                        // 58: tfplugin6.GetMetadata.Response
+	(*GetMetadata_FunctionMetadata)(nil),                // 59: tfplugin6.GetMetadata.FunctionMetadata
+	(*GetMetadata_DataSourceMetadata)(nil),              // 60: tfplugin6.GetMetadata.DataSourceMetadata
+	(*GetMetadata_ResourceMetadata)(nil),                // 61: tfplugin6.GetMetadata.ResourceMetadata
+	(*GetMetadata_EphemeralResourceMetadata)(nil),       // 62: tfplugin6.GetMetadata.EphemeralResourceMetadata
+	(*GetMetadata_ListResourceMetadata)(nil),            // 63: tfplugin6.GetMetadata.ListResourceMetadata
+	(*GetProviderSchema_Request)(nil),                   // 64: tfplugin6.GetProviderSchema.Request
+	(*GetProviderSchema_Response)(nil),                  // 65: tfplugin6.GetProviderSchema.Response
+	nil,                                                 // 66: tfplugin6.GetProviderSchema.Response.ResourceSchemasEntry
+	nil,                                                 // 67: tfplugin6.GetProviderSchema.Response.DataSourceSchemasEntry
+	nil,                                                 // 68: tfplugin6.GetProviderSchema.Response.FunctionsEntry
+	nil,                                                 // 69: tfplugin6.GetProviderSchema.Response.EphemeralResourceSchemasEntry
+	nil,                                                 // 70: tfplugin6.GetProviderSchema.Response.ListResourceSchemasEntry
+	nil,                                                 // 71: tfplugin6.GetProviderSchema.Response.ActionSchemasEntry
+	(*ValidateProviderConfig_Request)(nil),              // 72: tfplugin6.ValidateProviderConfig.Request
+	(*ValidateProviderConfig_Response)(nil),             // 73: tfplugin6.ValidateProviderConfig.Response
+	(*UpgradeResourceState_Request)(nil),                // 74: tfplugin6.UpgradeResourceState.Request
+	(*UpgradeResourceState_Response)(nil),               // 75: tfplugin6.UpgradeResourceState.Response
+	(*ValidateResourceConfig_Request)(nil),              // 76: tfplugin6.ValidateResourceConfig.Request
+	(*ValidateResourceConfig_Response)(nil),             // 77: tfplugin6.ValidateResourceConfig.Response
+	(*ValidateDataResourceConfig_Request)(nil),          // 78: tfplugin6.ValidateDataResourceConfig.Request
+	(*ValidateDataResourceConfig_Response)(nil),         // 79: tfplugin6.ValidateDataResourceConfig.Response
+	(*ConfigureProvider_Request)(nil),                   // 80: tfplugin6.ConfigureProvider.Request
+	(*ConfigureProvider_Response)(nil),                  // 81: tfplugin6.ConfigureProvider.Response
+	(*ReadResource_Request)(nil),                        // 82: tfplugin6.ReadResource.Request
+	(*ReadResource_Response)(nil),                       // 83: tfplugin6.ReadResource.Response
+	(*PlanResourceChange_Request)(nil),                  // 84: tfplugin6.PlanResourceChange.Request
+	(*PlanResourceChange_Response)(nil),                 // 85: tfplugin6.PlanResourceChange.Response
+	(*ApplyResourceChange_Request)(nil),                 // 86: tfplugin6.ApplyResourceChange.Request
+	(*ApplyResourceChange_Response)(nil),                // 87: tfplugin6.ApplyResourceChange.Response
+	(*ImportResourceState_Request)(nil),                 // 88: tfplugin6.ImportResourceState.Request
+	(*ImportResourceState_ImportedResource)(nil),        // 89: tfplugin6.ImportResourceState.ImportedResource
+	(*ImportResourceState_Response)(nil),                // 90: tfplugin6.ImportResourceState.Response
+	(*MoveResourceState_Request)(nil),                   // 91: tfplugin6.MoveResourceState.Request
+	(*MoveResourceState_Response)(nil),                  // 92: tfplugin6.MoveResourceState.Response
+	(*ReadDataSource_Request)(nil),                      // 93: tfplugin6.ReadDataSource.Request
+	(*ReadDataSource_Response)(nil),                     // 94: tfplugin6.ReadDataSource.Response
+	(*GetFunctions_Request)(nil),                        // 95: tfplugin6.GetFunctions.Request
+	(*GetFunctions_Response)(nil),                       // 96: tfplugin6.GetFunctions.Response
+	nil,                                                 // 97: tfplugin6.GetFunctions.Response.FunctionsEntry
+	(*CallFunction_Request)(nil),                        // 98: tfplugin6.CallFunction.Request
+	(*CallFunction_Response)(nil),                       // 99: tfplugin6.CallFunction.Response
+	(*ValidateEphemeralResourceConfig_Request)(nil),     // 100: tfplugin6.ValidateEphemeralResourceConfig.Request
+	(*ValidateEphemeralResourceConfig_Response)(nil),    // 101: tfplugin6.ValidateEphemeralResourceConfig.Response
+	(*OpenEphemeralResource_Request)(nil),               // 102: tfplugin6.OpenEphemeralResource.Request
+	(*OpenEphemeralResource_Response)(nil),              // 103: tfplugin6.OpenEphemeralResource.Response
+	(*RenewEphemeralResource_Request)(nil),              // 104: tfplugin6.RenewEphemeralResource.Request
+	(*RenewEphemeralResource_Response)(nil),             // 105: tfplugin6.RenewEphemeralResource.Response
+	(*CloseEphemeralResource_Request)(nil),              // 106: tfplugin6.CloseEphemeralResource.Request
+	(*CloseEphemeralResource_Response)(nil),             // 107: tfplugin6.CloseEphemeralResource.Response
+	(*GetResourceIdentitySchemas_Request)(nil),          // 108: tfplugin6.GetResourceIdentitySchemas.Request
+	(*GetResourceIdentitySchemas_Response)(nil),         // 109: tfplugin6.GetResourceIdentitySchemas.Response
 	nil,                                         // 110: tfplugin6.GetResourceIdentitySchemas.Response.IdentitySchemasEntry
 	(*UpgradeResourceIdentity_Request)(nil),     // 111: tfplugin6.UpgradeResourceIdentity.Request
 	(*UpgradeResourceIdentity_Response)(nil),    // 112: tfplugin6.UpgradeResourceIdentity.Response
@@ -7183,8 +7183,8 @@ var file_tfplugin6_proto_depIdxs = []int32{
 	3,   // 22: tfplugin6.Schema.Object.nesting:type_name -> tfplugin6.Schema.Object.NestingMode
 	0,   // 23: tfplugin6.Function.Parameter.description_kind:type_name -> tfplugin6.StringKind
 	8,   // 24: tfplugin6.ActionSchema.LinkedResource.attribute:type_name -> tfplugin6.AttributePath
-	56,  // 25: tfplugin6.ActionSchema.LinkedResource.linked_attributes:type_name -> tfplugin6.ActionSchema.LinkedResource.LinkedAttributes
-	8,   // 26: tfplugin6.ActionSchema.LinkedResource.LinkedAttributes.attribute:type_name -> tfplugin6.AttributePath
+	56,  // 25: tfplugin6.ActionSchema.LinkedResource.linked_attributes:type_name -> tfplugin6.ActionSchema.LinkedResource.LinkedAttribute
+	8,   // 26: tfplugin6.ActionSchema.LinkedResource.LinkedAttribute.attribute:type_name -> tfplugin6.AttributePath
 	16,  // 27: tfplugin6.GetMetadata.Response.server_capabilities:type_name -> tfplugin6.ServerCapabilities
 	6,   // 28: tfplugin6.GetMetadata.Response.diagnostics:type_name -> tfplugin6.Diagnostic
 	60,  // 29: tfplugin6.GetMetadata.Response.data_sources:type_name -> tfplugin6.GetMetadata.DataSourceMetadata
