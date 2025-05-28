@@ -250,6 +250,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				EphemeralResourceSchemas: map[string]*tfplugin5.Schema{},
 				Functions:                map[string]*tfplugin5.Function{},
 				ResourceSchemas:          map[string]*tfplugin5.Schema{},
+				ActionSchemas:            map[string]*tfplugin5.ActionSchema{},
 			},
 		},
 		"DataSources": {
@@ -283,6 +284,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				EphemeralResourceSchemas: map[string]*tfplugin5.Schema{},
 				Functions:                map[string]*tfplugin5.Function{},
 				ResourceSchemas:          map[string]*tfplugin5.Schema{},
+				ActionSchemas:            map[string]*tfplugin5.ActionSchema{},
 			},
 		},
 		"Diagnostics": {
@@ -299,6 +301,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				EphemeralResourceSchemas: map[string]*tfplugin5.Schema{},
 				Functions:                map[string]*tfplugin5.Function{},
 				ResourceSchemas:          map[string]*tfplugin5.Schema{},
+				ActionSchemas:            map[string]*tfplugin5.ActionSchema{},
 			},
 		},
 		"EphemeralResources": {
@@ -332,6 +335,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 				Functions:       map[string]*tfplugin5.Function{},
 				ResourceSchemas: map[string]*tfplugin5.Schema{},
+				ActionSchemas:   map[string]*tfplugin5.ActionSchema{},
 			},
 		},
 		"Functions": {
@@ -357,6 +361,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 					},
 				},
 				ResourceSchemas: map[string]*tfplugin5.Schema{},
+				ActionSchemas:   map[string]*tfplugin5.ActionSchema{},
 			},
 		},
 		"Provider": {
@@ -387,6 +392,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 					},
 				},
 				ResourceSchemas: map[string]*tfplugin5.Schema{},
+				ActionSchemas:   map[string]*tfplugin5.ActionSchema{},
 			},
 		},
 		"ProviderMeta": {
@@ -417,6 +423,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 					},
 				},
 				ResourceSchemas: map[string]*tfplugin5.Schema{},
+				ActionSchemas:   map[string]*tfplugin5.ActionSchema{},
 			},
 		},
 		"Resources": {
@@ -450,6 +457,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 						},
 					},
 				},
+				ActionSchemas: map[string]*tfplugin5.ActionSchema{},
 			},
 		},
 		"ServerCapabilities": {
@@ -464,6 +472,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				EphemeralResourceSchemas: map[string]*tfplugin5.Schema{},
 				Functions:                map[string]*tfplugin5.Function{},
 				ResourceSchemas:          map[string]*tfplugin5.Schema{},
+				ActionSchemas:            map[string]*tfplugin5.ActionSchema{},
 				ServerCapabilities: &tfplugin5.ServerCapabilities{
 					PlanDestroy: true,
 				},
