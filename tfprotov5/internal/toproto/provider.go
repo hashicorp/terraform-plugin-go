@@ -55,6 +55,7 @@ func GetProviderSchema_Response(in *tfprotov5.GetProviderSchemaResponse) *tfplug
 		ProviderMeta:             Schema(in.ProviderMeta),
 		ResourceSchemas:          make(map[string]*tfplugin5.Schema, len(in.ResourceSchemas)),
 		ServerCapabilities:       ServerCapabilities(in.ServerCapabilities),
+		ActionSchemas:            make(map[string]*tfplugin5.ActionSchema, len(in.ActionSchemas)),
 	}
 
 	for name, schema := range in.EphemeralResourceSchemas {
@@ -71,6 +72,10 @@ func GetProviderSchema_Response(in *tfprotov5.GetProviderSchemaResponse) *tfplug
 
 	for name, function := range in.Functions {
 		resp.Functions[name] = Function(function)
+	}
+
+	for name, actionSchema := range in.ActionSchemas {
+		resp.ActionSchemas[name] = ActionSchema(actionSchema)
 	}
 
 	return resp

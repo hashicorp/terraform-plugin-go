@@ -67,6 +67,21 @@ type ProviderServer interface {
 	EphemeralResourceServer
 }
 
+// ProviderServerWithActions is a temporary interface for servers
+// to implement Action RPCs
+//
+// - PlanAction
+// - InvokeAction
+//
+// Deprecated: All methods will be moved into the
+// ProviderServer interface and this interface will be removed in a future
+// version.
+type ProviderServerWithActions interface {
+	ProviderServer
+
+	ActionServer
+}
+
 // GetMetadataRequest represents a GetMetadata RPC request.
 type GetMetadataRequest struct{}
 
@@ -144,6 +159,8 @@ type GetProviderSchemaResponse struct {
 	// shortname and an underscore. It should match the first label after
 	// `ephemeral` in a user's configuration.
 	EphemeralResourceSchemas map[string]*Schema
+
+	ActionSchemas map[string]*ActionSchema
 
 	// Diagnostics report errors or warnings related to returning the
 	// provider's schemas. Returning an empty slice indicates success, with
