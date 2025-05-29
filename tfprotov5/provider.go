@@ -72,7 +72,6 @@ type ProviderServer interface {
 	   ListResourceServer*/
 }
 
-
 // ProviderServerWithListResource is a temporary interface for servers
 // to implement List Resource RPC handling with:
 //
