@@ -67,9 +67,9 @@ type ProviderServer interface {
 	EphemeralResourceServer
 
 	/* // Add this back once temporary interface is removed
-	// ListResourceServer is an interface encapsulating all the list
-	// resource-related RPC requests.
-	ListResourceServer*/
+	   // ListResourceServer is an interface encapsulating all the list
+	   // resource-related RPC requests.
+	   ListResourceServer*/
 }
 
 
