@@ -7,7 +7,7 @@ import (
 	"context"
 )
 
-// ListResourceMetadata describes metadata for an list resource in the GetMetadata
+// ListResourceMetadata describes metadata for a list resource in the GetMetadata
 // RPC.
 type ListResourceMetadata struct {
 	// TypeName is the name of the list resource.
@@ -21,14 +21,14 @@ type ListResourceServer interface {
 	// list resource configuration is valid. It is guaranteed to have types
 	// conforming to your schema, but it is not guaranteed that all values
 	// will be known. This is your opportunity to do custom or advanced
-	// validation prior to an list resource being opened.
+	// validation prior to a list resource being used.
 	ValidateListResourceConfig(context.Context, *ValidateListResourceConfigRequest) (*ValidateListResourceConfigResponse, error)
 }
 
 // ValidateListResourceConfigRequest is the request Terraform sends when it
 // wants to validate an list resource's configuration.
 type ValidateListResourceConfigRequest struct {
-	// TypeName is the type of resource Terraform is validating.
+	// TypeName is the type of list resource Terraform is validating.
 	TypeName string
 
 	// Config is the configuration the user supplied for that list resource. See

@@ -1207,7 +1207,7 @@ func (s *server) ValidateListResourceConfig(ctx context.Context, protoReq *tfplu
 	rpc := "ValidateListResourceConfig"
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
-	ctx = logging.ResourceContext(ctx, protoReq.TypeName)
+	ctx = logging.ListResourceContext(ctx, protoReq.TypeName)
 	ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")

@@ -21,7 +21,7 @@ type ListResourceServer interface {
 	// list resource configuration is valid. It is guaranteed to have types
 	// conforming to your schema, but it is not guaranteed that all values
 	// will be known. This is your opportunity to do custom or advanced
-	// validation prior to an list resource being opened.
+	// validation prior to a list resource being used.
 	ValidateListResourceConfig(context.Context, *ValidateListResourceConfigRequest) (*ValidateListResourceConfigResponse, error)
 }
 
