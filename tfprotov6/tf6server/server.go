@@ -1203,3 +1203,56 @@ func invalidDeferredResponseDiag(reason tfprotov6.DeferredReason) *tfprotov6.Dia
 			fmt.Sprintf("Deferred reason - %q", reason.String()),
 	}
 }
+
+func (s *server) ValidateListResourceConfig(ctx context.Context, protoReq *tfplugin6.ValidateListResourceConfig_Request) (*tfplugin6.ValidateListResourceConfig_Response, error) {
+	rpc := "ValidateListResourceConfig"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.ResourceContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.ValidateListResourceConfigRequest(protoReq)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	// TODO: Remove this check and error in preference of
+	// s.downstream.ValidateListResourceConfig below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	listResourceServer, ok := s.downstream.(tfprotov6.ProviderServerWithListResource)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement ValidateListResourceConfig")
+
+		protoResp := &tfplugin6.ValidateListResourceConfig_Response{
+			Diagnostics: []*tfplugin6.Diagnostic{
+				{
+					Severity: tfplugin6.Diagnostic_ERROR,
+					Summary:  "Provider ValidateListResourceConfig Not Implemented",
+					Detail: "A ValidateListResourceConfig call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements list support or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	// TODO: Update this to call downstream once optional interface is removed
+	// resp, err := s.downstream.ValidateListResourceConfig(ctx, req)
+	resp, err := listResourceServer.ValidateListResourceConfig(ctx, req)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.ValidateListResourceConfig_Response(resp)
+
+	return protoResp, nil
+}
