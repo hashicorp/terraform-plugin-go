@@ -5,6 +5,7 @@ package tfprotov5
 
 import (
 	"context"
+	"iter"
 )
 
 // ListResourceMetadata describes metadata for a list resource in the GetMetadata
@@ -12,6 +13,61 @@ import (
 type ListResourceMetadata struct {
 	// TypeName is the name of the list resource.
 	TypeName string
+}
+
+// ListResourceRequest is the request Terraform sends when it wants to evaluate
+// a list block, typically in response to a `terraform query` command.
+type ListResourceRequest struct {
+	// TypeName is the type of list resource that Terraform is evaluating.
+	TypeName string
+
+	// Config is the configuration the user supplied for a list block. See the
+	// documentation on `DynamicValue` for more information about safely
+	// accessing the configuration.
+	//
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
+	//
+	// This configuration may contain unknown values if a user uses
+	// interpolation or other functionality that would prevent Terraform from
+	// knowing the value at request time. Any attributes not directly set in
+	// the configuration will be null.
+	Config *DynamicValue
+
+	// IncludeResource is a boolean indicating whether to populate the Resource
+	// field in list results.
+	IncludeResource bool // TODO: propose rename in protocol: IncludeResourceObject -> IncludeResource
+}
+
+// ListResourceServerStream represents a streaming response to a
+// ListResourceRequest.  An instance of this struct is supplied as an argument
+// to the provider's ListResource implementation. The provider should set a
+// Results iterator function that yields zero or more results of type
+// ListResourceResult.
+//
+// For convenience, a provider implementation may choose to convert a slice of
+// results into an iterator using [slices.Values].
+//
+// [slices.Values]: https://pkg.go.dev/slices#Values
+type ListResourceServerStream struct {
+	Results iter.Seq[ListResourceResult]
+}
+
+type ListResourceResult struct { // TODO: propose rename in protocol: ListResource_Event -> ListResource_Result
+	// DisplayName is the display name of the resource. This is a ...
+	DisplayName string
+
+	// Resource is the data for the resource, as determined by the provider.
+	Resource *DynamicValue // TODO: propose rename in protocol: ResourceObject -> Resource
+
+	// Identity is the identity data for the resource, as determined by the
+	// provider.
+	Identity *ResourceIdentityData
+
+	// Diagnostics report errors or warnings related to retrieving the current
+	// state of the resource. An empty slice indicates a successful validation
+	// with no warnings or errors.
+	Diagnostics []*Diagnostic
 }
 
 // ListResourceServer is an interface containing the methods an list resource
@@ -23,6 +79,10 @@ type ListResourceServer interface {
 	// will be known. This is your opportunity to do custom or advanced
 	// validation prior to a list resource being used.
 	ValidateListResourceConfig(context.Context, *ValidateListResourceConfigRequest) (*ValidateListResourceConfigResponse, error)
+
+	// ListResource is called when Terraform is evaluating a list block,
+	// typically in response to a `terraform query` command.
+	ListResource(context.Context, *ListResourceRequest) (*ListResourceServerStream, error)
 }
 
 // ValidateListResourceConfigRequest is the request Terraform sends when it
@@ -31,17 +91,17 @@ type ValidateListResourceConfigRequest struct {
 	// TypeName is the type of list resource Terraform is validating.
 	TypeName string
 
-	// Config is the configuration the user supplied for that list resource. See
-	// the documentation on `DynamicValue` for more information about
-	// safely accessing the configuration.
+	// Config is the configuration the user supplied for a list block. See the
+	// documentation on `DynamicValue` for more information about safely
+	// accessing the configuration.
 	//
 	// The configuration is represented as a tftypes.Object, with each
 	// attribute and nested block getting its own key and value.
 	//
 	// This configuration may contain unknown values if a user uses
-	// interpolation or other functionality that would prevent Terraform
-	// from knowing the value at request time. Any attributes not directly
-	// set in the configuration will be null.
+	// interpolation or other functionality that would prevent Terraform from
+	// knowing the value at request time. Any attributes not directly set in
+	// the configuration will be null.
 	Config *DynamicValue
 }
 
