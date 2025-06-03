@@ -42,7 +42,7 @@ type ListResourceRequest struct {
 // ListResourceServerStream represents a streaming response to a
 // ListResourceRequest.  An instance of this struct is supplied as an argument
 // to the provider's ListResource implementation. The provider should set a
-// Results iterator function that yields zero or more results of type
+// Results iterator function that pushes zero or more results of type
 // ListResourceResult.
 //
 // For convenience, a provider implementation may choose to convert a slice of
