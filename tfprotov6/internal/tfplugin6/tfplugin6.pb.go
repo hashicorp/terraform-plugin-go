@@ -2816,8 +2816,8 @@ func (x *Function_Return) GetType() []byte {
 	return nil
 }
 
-// A LinkedResource is a resource that is linked to an action action.
-// An action can cause action drift to a linked resource, terraform will
+// A LinkedResource is a resource that is linked to an action.
+// An action can cause action drift to a linked resource, and terraform will
 // update the linked resource with the drifted value.
 type ActionSchema_LinkedResource struct {
 	state            protoimpl.MessageState                         `protogen:"open.v1"`
