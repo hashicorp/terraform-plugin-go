@@ -1287,6 +1287,8 @@ func (s *server) ListResource(protoReq *tfplugin5.ListResource_Request, protoStr
 			return nil
 
 		default:
+			tf5serverlogging.DownstreamServerEvent(ctx, ev.Diagnostics)
+
 			protoEv := toproto.ListResource_ListResourceEvent(&ev)
 			if err := protoStream.Send(protoEv); err != nil {
 				logging.ProtocolError(ctx, "Error sending event", map[string]any{logging.KeyError: err})
