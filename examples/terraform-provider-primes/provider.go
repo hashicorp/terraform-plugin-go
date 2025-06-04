@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
-var _ tfprotov5.ProviderServerWithListResource = PrimeNumberProvider{} //nolint:staticcheck -- yes, this is temporary interface
+var _ tfprotov5.ProviderServerWithListResource = PrimeNumberProvider{} //nolint:staticcheck
 
 type PrimeNumberProvider struct {
 }
