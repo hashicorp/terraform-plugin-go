@@ -17,6 +17,8 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/hashicorp/terraform-plugin-go/internal/logging"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
@@ -1194,16 +1196,6 @@ func (s *server) CloseEphemeralResource(ctx context.Context, protoReq *tfplugin6
 	return protoResp, nil
 }
 
-func invalidDeferredResponseDiag(reason tfprotov6.DeferredReason) *tfprotov6.Diagnostic {
-	return &tfprotov6.Diagnostic{
-		Severity: tfprotov6.DiagnosticSeverityError,
-		Summary:  "Invalid Deferred Response",
-		Detail: "Provider returned a deferred response but the Terraform request did not indicate support for deferred actions." +
-			"This is an issue with the provider and should be reported to the provider developers.\n\n" +
-			fmt.Sprintf("Deferred reason - %q", reason.String()),
-	}
-}
-
 func (s *server) ValidateListResourceConfig(ctx context.Context, protoReq *tfplugin6.ValidateListResourceConfig_Request) (*tfplugin6.ValidateListResourceConfig_Response, error) {
 	rpc := "ValidateListResourceConfig"
 	ctx = s.loggingContext(ctx)
@@ -1255,4 +1247,64 @@ func (s *server) ValidateListResourceConfig(ctx context.Context, protoReq *tfplu
 	protoResp := toproto.ValidateListResourceConfig_Response(resp)
 
 	return protoResp, nil
+}
+
+func (s *server) ListResource(protoReq *tfplugin6.ListResource_Request, protoStream grpc.ServerStreamingServer[tfplugin6.ListResource_Event]) error {
+	rpc := "ListResource"
+	ctx := protoStream.Context()
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.ListResourceContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.ListResourceRequest(protoReq)
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	// TODO: Remove this check and error in preference of
+	// s.downstream.ValidateListResourceConfig below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	downstream, ok := s.downstream.(tfprotov6.ProviderServerWithListResource)
+	if !ok {
+		err := status.Error(codes.Unimplemented, "ProviderServer does not implement ListResource")
+		logging.ProtocolError(ctx, err.Error())
+		return err
+	}
+
+	resp, err := downstream.ListResource(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return err
+	}
+
+	for ev := range resp.Results {
+		select {
+		case <-ctx.Done():
+			logging.ProtocolTrace(ctx, "Context done")
+			return nil
+
+		default:
+			protoEv := toproto.ListResource_ListResourceEvent(&ev)
+			if err := protoStream.Send(protoEv); err != nil {
+				logging.ProtocolError(ctx, "Error sending event", map[string]any{logging.KeyError: err})
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func invalidDeferredResponseDiag(reason tfprotov6.DeferredReason) *tfprotov6.Diagnostic {
+	return &tfprotov6.Diagnostic{
+		Severity: tfprotov6.DiagnosticSeverityError,
+		Summary:  "Invalid Deferred Response",
+		Detail: "Provider returned a deferred response but the Terraform request did not indicate support for deferred actions." +
+			"This is an issue with the provider and should be reported to the provider developers.\n\n" +
+			fmt.Sprintf("Deferred reason - %q", reason.String()),
+	}
 }
