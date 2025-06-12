@@ -53,6 +53,9 @@ type ListResourceServerStream struct {
 	Results iter.Seq[ListResourceResult]
 }
 
+// NoListResults is a convenient value to return when there are no list results.
+var NoListResults = func(func(ListResourceResult) bool) {}
+
 type ListResourceResult struct { // TODO: propose rename in protocol: ListResource_Event -> ListResource_Result
 	// DisplayName is the display name of the resource. This is a ...
 	DisplayName string
