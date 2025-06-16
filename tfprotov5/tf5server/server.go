@@ -1210,8 +1210,7 @@ func (s *server) ValidateListResourceConfig(ctx context.Context, protoReq *tfplu
 
 	ctx = tf5serverlogging.DownstreamRequest(ctx)
 
-	// TODO: Remove this check and error in preference of
-	// s.downstream.ValidateListResourceConfig below once ProviderServer interface
+	// TODO: Remove this check and error once ProviderServer interface
 	// implements this RPC method.
 	// nolint:staticcheck
 	listResourceServer, ok := s.downstream.(tfprotov5.ProviderServerWithListResource)

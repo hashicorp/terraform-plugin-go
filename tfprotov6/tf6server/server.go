@@ -1264,8 +1264,7 @@ func (s *server) ListResource(protoReq *tfplugin6.ListResource_Request, protoStr
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	// TODO: Remove this check and error in preference of
-	// s.downstream.ValidateListResourceConfig below once ProviderServer interface
+	// TODO: Remove this check and error once ProviderServer interface
 	// implements this RPC method.
 	// nolint:staticcheck
 	downstream, ok := s.downstream.(tfprotov6.ProviderServerWithListResource)
