@@ -30,6 +30,7 @@ jobs:
           # https://github.com/protocolbuffers/protobuf repository for protoc
           # release updates.
           version: '29.3'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - run: go mod download
       - run: make tools
       - run: make protoc
