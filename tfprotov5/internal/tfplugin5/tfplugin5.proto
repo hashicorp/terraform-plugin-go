@@ -294,24 +294,33 @@ message ActionSchema {
     // An action can cause action drift to a linked resource, and terraform will
     // update the linked resource with the drifted value.
     message LinkedResource {
-        message LinkedAttribute {
-            // The attribute path of the linked attribute.
-            AttributePath attribute = 1;
-        }
-
-        AttributePath attribute = 1;
-        string type = 2;
-        repeated LinkedAttribute linked_attributes = 3;
+        string type_name = 1;
     }
 
-    // The version of the schema.
-    int64 version = 1;
+    message Unlinked {}
 
-    // Block is the top level configuration block for this schema.
-    Schema.Block block = 2;
+    message Lifecycle {
+        enum ExecutionOrder {
+            INVALID = 0;
+            BEFORE = 1;
+            AFTER = 2;
+        }
 
-    // LinkedResource is a list of resource that can be updated by the action.
-    repeated LinkedResource linked_resources = 3;
+        ExecutionOrder executes = 1; // before or after the resource operation
+        LinkedResource linked_resource = 2; // the resource that is linked to the action
+    }
+
+    message Linked {
+        repeated LinkedResource linked_resources = 1;
+    }
+    
+    Schema schema = 1; // of the action itself
+
+    oneof type {
+        Unlinked unlinked = 2;
+        Lifecycle lifecycle = 3;
+        Linked linked = 4;
+    }
 }
 
 // Deferred is a message that indicates that change is deferred for a reason.
@@ -905,50 +914,85 @@ message ValidateListResourceConfig {
 
 message PlanAction {
     message Request {
-        string type_name = 1;
-        DynamicValue config = 2;
+        message LinkedResource {
+            DynamicValue prior_state = 1;
+            // planned_state describes the value the linked resource has been last planned with.
+            // This could also be the output of a predecessor action.
+            DynamicValue planned_state = 2;
+            DynamicValue config = 3;
+            ResourceIdentityData prior_identity = 4;
+        }
+        
+        string action_type = 1;
+
+        // linked resources, this should match the order the resources are specified in the schema.
+        repeated LinkedResource linked_resources = 2;
+
+        // config of the action, based on the schema of the actual action
+        repeated DynamicValue proposed_action_data = 6;
+
+        // metadata
+        DynamicValue provider_meta = 7;
+        ClientCapabilities client_capabilities = 8;
     }
     message Response {
-        repeated Diagnostic diagnostics = 1;
-        // new_config is the passed in config with any changes made by the action.
-        // The action schema contains links to the resources that are changed by the action and will
-        // change as a result of this.
-        DynamicValue new_config = 2; 
+        message LinkedResource {
+            DynamicValue planned_state = 1;
+            ResourceIdentityData planned_identity = 2;
+        }
+
+        // planned changes to the linked resources in the order they are specified in the schema.
+        repeated LinkedResource linked_resources = 1;
+        repeated Diagnostic diagnostics = 2;
+
+        // metadata
+        Deferred deferred = 3;
     }
 }
 
 message InvokeAction {
     message Request {
-        string type_name = 1;
-        DynamicValue planned_config = 2;
+        message LinkedResource {
+    	    DynamicValue prior_state = 1; 
+            // planned_state describes the value the linked resource has been last planned 
+            // with. This could also be the output of a predecessor action.
+            DynamicValue planned_state = 2;
+            DynamicValue config = 3;
+            ResourceIdentityData planned_identity = 4;
+        }
+        string action_type = 1;
+
+        // linked resources, matching the order they are specified in the schema
+        repeated LinkedResource linked_resources = 2;
+
+        // response from the plan
+        DynamicValue planned_action_data = 3;
+
+        // metadata
+        DynamicValue provider_meta = 4;
     }
 
     message Event {
-        oneof event {
-            Started started = 1;
-            Finished finished = 2;
-            Progress progress = 3;
+      message Progress {
+        // message to be printed in the console / HCPT
+        string message = 1;
+      }
+      message Completed {
+        message LinkedResource {
+            DynamicValue new_state = 1;
+            ResourceIdentityData new_identity = 2;
+            // Can only be set if error diagnostics are present. 
+            bool requires_replace = 3;
         }
-
-        message Started {
-            // This can be sent in a request to cancel the action.
-            string cancellation_token = 1;
-            repeated Diagnostic diagnostics = 2;
-        }
-
-        message Finished {
-            // The action schema contains links to the resources that are changed by the action and 
-            // will change as a result of this.
-            DynamicValue new_config = 1; 
-
-            bool cancelled = 2;
-            repeated Diagnostic diagnostics = 3;
-        }
-
-        message Progress {
-            repeated string stdout = 1;
-            repeated string stderr = 2;
-            repeated Diagnostic diagnostics = 3;
-        }
+         // linked resources, matching the order they are specified in the schema
+        repeated LinkedResource linked_resources = 1;
+        
+        repeated Diagnostic diagnostics = 3;
     }
+    oneof type {
+      Progress progress = 1;
+      Completed completed = 2;
+    }
+  }
+
 }
