@@ -310,6 +310,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
 				ListResourceSchemas:      map[string]*tfplugin6.Schema{},
+				StateStoreSchemas:        map[string]*tfplugin6.Schema{},
 				Functions:                map[string]*tfplugin6.Function{},
 				ResourceSchemas:          map[string]*tfplugin6.Schema{},
 			},
@@ -353,6 +354,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
 				ListResourceSchemas:      map[string]*tfplugin6.Schema{},
+				StateStoreSchemas:        map[string]*tfplugin6.Schema{},
 				Functions:                map[string]*tfplugin6.Function{},
 				ResourceSchemas:          map[string]*tfplugin6.Schema{},
 			},
@@ -388,6 +390,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
 				ListResourceSchemas:      map[string]*tfplugin6.Schema{},
+				StateStoreSchemas:        map[string]*tfplugin6.Schema{},
 				Functions:                map[string]*tfplugin6.Function{},
 				ResourceSchemas:          map[string]*tfplugin6.Schema{},
 			},
@@ -406,6 +409,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
 				ListResourceSchemas:      map[string]*tfplugin6.Schema{},
+				StateStoreSchemas:        map[string]*tfplugin6.Schema{},
 				Functions:                map[string]*tfplugin6.Function{},
 				ResourceSchemas:          map[string]*tfplugin6.Schema{},
 			},
@@ -441,6 +445,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 					},
 				},
 				ListResourceSchemas: map[string]*tfplugin6.Schema{},
+				StateStoreSchemas:   map[string]*tfplugin6.Schema{},
 				Functions:           map[string]*tfplugin6.Function{},
 				ResourceSchemas:     map[string]*tfplugin6.Schema{},
 			},
@@ -461,6 +466,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
 				ListResourceSchemas:      map[string]*tfplugin6.Schema{},
+				StateStoreSchemas:        map[string]*tfplugin6.Schema{},
 				Functions: map[string]*tfplugin6.Function{
 					"test": {
 						Parameters: []*tfplugin6.Function_Parameter{},
@@ -503,8 +509,9 @@ func TestGetProviderSchema_Response(t *testing.T) {
 						},
 					},
 				},
-				Functions:       map[string]*tfplugin6.Function{},
-				ResourceSchemas: map[string]*tfplugin6.Schema{},
+				StateStoreSchemas: map[string]*tfplugin6.Schema{},
+				Functions:         map[string]*tfplugin6.Function{},
+				ResourceSchemas:   map[string]*tfplugin6.Schema{},
 			},
 		},
 		"Provider": {
@@ -525,6 +532,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
 				ListResourceSchemas:      map[string]*tfplugin6.Schema{},
+				StateStoreSchemas:        map[string]*tfplugin6.Schema{},
 				Functions:                map[string]*tfplugin6.Function{},
 				Provider: &tfplugin6.Schema{
 					Block: &tfplugin6.Schema_Block{
@@ -557,6 +565,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
 				ListResourceSchemas:      map[string]*tfplugin6.Schema{},
+				StateStoreSchemas:        map[string]*tfplugin6.Schema{},
 				Functions:                map[string]*tfplugin6.Function{},
 				ProviderMeta: &tfplugin6.Schema{
 					Block: &tfplugin6.Schema_Block{
@@ -591,6 +600,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
 				ListResourceSchemas:      map[string]*tfplugin6.Schema{},
+				StateStoreSchemas:        map[string]*tfplugin6.Schema{},
 				Functions:                map[string]*tfplugin6.Function{},
 				ResourceSchemas: map[string]*tfplugin6.Schema{
 					"test": {
@@ -618,6 +628,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
 				ListResourceSchemas:      map[string]*tfplugin6.Schema{},
+				StateStoreSchemas:        map[string]*tfplugin6.Schema{},
 				Functions:                map[string]*tfplugin6.Function{},
 				ResourceSchemas:          map[string]*tfplugin6.Schema{},
 				ServerCapabilities: &tfplugin6.ServerCapabilities{
@@ -651,7 +662,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				tfplugin6.ServerCapabilities{},
 			)
 
-			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {
+			if diff := cmp.Diff(testCase.expected, got, diffOpts); diff != "" {
 				t.Errorf("unexpected difference: %s", diff)
 			}
 		})

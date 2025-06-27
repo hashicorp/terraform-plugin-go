@@ -201,6 +201,9 @@ type GetProviderSchemaResponse struct {
 	// shortname and an underscore.
 	ActionSchemas map[string]*ActionSchema
 
+	// StateStoreSchemas is a map of state store name and its schema
+	StateStoreSchemas map[string]*Schema
+
 	// Diagnostics report errors or warnings related to returning the
 	// provider's schemas. Returning an empty slice indicates success, with
 	// no errors or warnings generated.
