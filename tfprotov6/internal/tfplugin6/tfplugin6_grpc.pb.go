@@ -64,6 +64,8 @@ const (
 	Provider_ValidateListResourceConfig_FullMethodName      = "/tfplugin6.Provider/ValidateListResourceConfig"
 	Provider_GetFunctions_FullMethodName                    = "/tfplugin6.Provider/GetFunctions"
 	Provider_CallFunction_FullMethodName                    = "/tfplugin6.Provider/CallFunction"
+	Provider_ValidateStateStoreConfig_FullMethodName        = "/tfplugin6.Provider/ValidateStateStoreConfig"
+	Provider_ConfigureStateStore_FullMethodName             = "/tfplugin6.Provider/ConfigureStateStore"
 	Provider_StopProvider_FullMethodName                    = "/tfplugin6.Provider/StopProvider"
 )
 
@@ -112,6 +114,10 @@ type ProviderClient interface {
 	// CallFunction runs the provider-defined function logic and returns
 	// the result with any diagnostics.
 	CallFunction(ctx context.Context, in *CallFunction_Request, opts ...grpc.CallOption) (*CallFunction_Response, error)
+	// ValidateStateStoreConfig performs configuration validation
+	ValidateStateStoreConfig(ctx context.Context, in *ValidateStateStore_Request, opts ...grpc.CallOption) (*ValidateStateStore_Response, error)
+	// ConfigureStateStore configures the state store, such as S3 connection in the context of already configured provider
+	ConfigureStateStore(ctx context.Context, in *ConfigureStateStore_Request, opts ...grpc.CallOption) (*ConfigureStateStore_Response, error)
 	// ////// Graceful Shutdown
 	StopProvider(ctx context.Context, in *StopProvider_Request, opts ...grpc.CallOption) (*StopProvider_Response, error)
 }
@@ -363,6 +369,26 @@ func (c *providerClient) CallFunction(ctx context.Context, in *CallFunction_Requ
 	return out, nil
 }
 
+func (c *providerClient) ValidateStateStoreConfig(ctx context.Context, in *ValidateStateStore_Request, opts ...grpc.CallOption) (*ValidateStateStore_Response, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ValidateStateStore_Response)
+	err := c.cc.Invoke(ctx, Provider_ValidateStateStoreConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *providerClient) ConfigureStateStore(ctx context.Context, in *ConfigureStateStore_Request, opts ...grpc.CallOption) (*ConfigureStateStore_Response, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ConfigureStateStore_Response)
+	err := c.cc.Invoke(ctx, Provider_ConfigureStateStore_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *providerClient) StopProvider(ctx context.Context, in *StopProvider_Request, opts ...grpc.CallOption) (*StopProvider_Response, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(StopProvider_Response)
@@ -418,6 +444,10 @@ type ProviderServer interface {
 	// CallFunction runs the provider-defined function logic and returns
 	// the result with any diagnostics.
 	CallFunction(context.Context, *CallFunction_Request) (*CallFunction_Response, error)
+	// ValidateStateStoreConfig performs configuration validation
+	ValidateStateStoreConfig(context.Context, *ValidateStateStore_Request) (*ValidateStateStore_Response, error)
+	// ConfigureStateStore configures the state store, such as S3 connection in the context of already configured provider
+	ConfigureStateStore(context.Context, *ConfigureStateStore_Request) (*ConfigureStateStore_Response, error)
 	// ////// Graceful Shutdown
 	StopProvider(context.Context, *StopProvider_Request) (*StopProvider_Response, error)
 	mustEmbedUnimplementedProviderServer()
@@ -498,6 +528,12 @@ func (UnimplementedProviderServer) GetFunctions(context.Context, *GetFunctions_R
 }
 func (UnimplementedProviderServer) CallFunction(context.Context, *CallFunction_Request) (*CallFunction_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CallFunction not implemented")
+}
+func (UnimplementedProviderServer) ValidateStateStoreConfig(context.Context, *ValidateStateStore_Request) (*ValidateStateStore_Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateStateStoreConfig not implemented")
+}
+func (UnimplementedProviderServer) ConfigureStateStore(context.Context, *ConfigureStateStore_Request) (*ConfigureStateStore_Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfigureStateStore not implemented")
 }
 func (UnimplementedProviderServer) StopProvider(context.Context, *StopProvider_Request) (*StopProvider_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StopProvider not implemented")
@@ -930,6 +966,42 @@ func _Provider_CallFunction_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Provider_ValidateStateStoreConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateStateStore_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).ValidateStateStoreConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Provider_ValidateStateStoreConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).ValidateStateStoreConfig(ctx, req.(*ValidateStateStore_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Provider_ConfigureStateStore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfigureStateStore_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).ConfigureStateStore(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Provider_ConfigureStateStore_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).ConfigureStateStore(ctx, req.(*ConfigureStateStore_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Provider_StopProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(StopProvider_Request)
 	if err := dec(in); err != nil {
@@ -1042,6 +1114,14 @@ var Provider_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CallFunction",
 			Handler:    _Provider_CallFunction_Handler,
+		},
+		{
+			MethodName: "ValidateStateStoreConfig",
+			Handler:    _Provider_ValidateStateStoreConfig_Handler,
+		},
+		{
+			MethodName: "ConfigureStateStore",
+			Handler:    _Provider_ConfigureStateStore_Handler,
 		},
 		{
 			MethodName: "StopProvider",
