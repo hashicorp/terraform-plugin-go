@@ -391,6 +391,19 @@ service Provider {
     rpc PlanAction(PlanAction.Request) returns (PlanAction.Response);
     rpc InvokeAction(InvokeAction.Request) returns (stream InvokeAction.Event);
 
+    // ValidateStateStoreConfig performs configuration validation
+    rpc ValidateStateStoreConfig(ValidateStateStore.Request) returns (ValidateStateStore.Response);
+    // ConfigureStateStore configures the state store, such as S3 connection in the context of already configured provider
+    rpc ConfigureStateStore(ConfigureStateStore.Request) returns (ConfigureStateStore.Response);
+    // ReadStateBytes streams byte chunks of a given state file from a state store
+    rpc ReadStateBytes(ReadStateBytes.Request) returns (stream ReadStateBytes.Response);
+    // WriteStateBytes streams byte chunks of a given state file into a state store
+    rpc WriteStateBytes(stream WriteStateBytes.RequestChunk) returns (WriteStateBytes.Response);
+    // GetStates returns a list of all states (i.e. CE workspaces) managed by a given state store
+    rpc GetStates(GetStates.Request) returns (GetStates.Response);
+    // DeleteState instructs a given state store to delete a specific state (i.e. a CE workspace)
+    rpc DeleteState(DeleteState.Request) returns (DeleteState.Response);
+
     //////// Graceful Shutdown
     rpc StopProvider(StopProvider.Request) returns (StopProvider.Response);
 }
@@ -454,7 +467,7 @@ message GetProviderSchema {
         map<string, Function> functions = 7;
         map<string, Schema> ephemeral_resource_schemas = 8;
         map<string, Schema> list_resource_schemas = 9;
-        reserved 10; // TODO: Field number 10 will be used by state stores
+        map<string, Schema> state_store_schemas = 10;
         map<string, ActionSchema> action_schemas = 11;
     }
 }
@@ -923,4 +936,78 @@ message InvokeAction {
       Completed completed = 2;
     }
   }
+
+}
+
+message ValidateStateStore {
+    message Request {
+        string type_name = 1;
+        DynamicValue config = 2;
+    }
+    message Response {
+        repeated Diagnostic diagnostics = 1;
+    }
+}
+
+message ConfigureStateStore {
+    message Request {
+        string type_name = 1;
+        DynamicValue config = 2;
+    }
+    message Response {
+        repeated Diagnostic diagnostics = 1;
+    }
+}
+
+message ReadStateBytes {
+    message Request {
+        string type_name = 1;
+        string state_id = 2;
+    }
+    message Response {
+        bytes bytes = 1;
+        int64 total_length = 2;
+        StateRange range = 3;
+        repeated Diagnostic diagnostics = 4;
+    }
+}
+
+message WriteStateBytes {
+    message RequestChunk {
+        // TODO: Can we decouple this outside of the stream?
+        string type_name = 1;
+        string state_id = 3;
+
+        bytes bytes = 2;
+        int64 total_length = 4;
+        StateRange range = 5;
+    }
+    message Response {
+        repeated Diagnostic diagnostics = 1;
+    }
+}
+
+message StateRange {
+    int64 start = 1;
+    int64 end = 2;
+}
+
+message GetStates {
+	message Request {
+		string type_name = 1;
+    }
+    message Response {
+        repeated string state_id = 1;
+        repeated Diagnostic diagnostics = 2;
+    }
+}
+
+message DeleteState {
+	message Request {
+		string type_name = 1;
+		string state_id = 2;
+    }
+	message Response {
+        repeated Diagnostic diagnostics = 1;
+    }
 }
