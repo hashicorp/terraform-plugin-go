@@ -31,8 +31,7 @@ type PlanActionRequest struct {
 
 	LinkedResources []*ProposedLinkedResource
 
-	// TODO: this is just config of the action?
-	ProposedActionData *DynamicValue
+	Config *DynamicValue
 
 	// ClientCapabilities defines optionally supported protocol features for the
 	// PlanAction RPC, such as forward-compatible Terraform behavior changes.
@@ -71,8 +70,7 @@ type InvokeActionRequest struct {
 
 	LinkedResources []*InvokeLinkedResource
 
-	// TODO: this is just config of the action? since there is no output from the action itself
-	PlannedActionData *DynamicValue
+	Config *DynamicValue
 }
 
 // TODO: pkg docs
