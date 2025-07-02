@@ -278,3 +278,41 @@ func TestOpenEphemeralResourceClientCapabilities(t *testing.T) {
 		})
 	}
 }
+
+func TestPlanActionClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfplugin5.ClientCapabilities
+		expected *tfprotov5.PlanActionClientCapabilities
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in:       &tfplugin5.ClientCapabilities{},
+			expected: &tfprotov5.PlanActionClientCapabilities{},
+		},
+		"DeferralAllowed": {
+			in: &tfplugin5.ClientCapabilities{
+				DeferralAllowed: true,
+			},
+			expected: &tfprotov5.PlanActionClientCapabilities{
+				DeferralAllowed: true,
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := fromproto.PlanActionClientCapabilities(testCase.in)
+
+			if diff := cmp.Diff(got, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
