@@ -1,0 +1,5 @@
+kind: NOTES
+body: This alpha pre-release contains the protocol definitions and Go type definitions for list resources, which are a new type of resource.
+time: 2025-07-03T16:36:29.624307-04:00
+custom:
+    Issue: "512"
