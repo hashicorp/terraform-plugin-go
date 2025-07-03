@@ -17,6 +17,7 @@ func ListResourceRequest(in *tfplugin5.ListResource_Request) *tfprotov5.ListReso
 		TypeName:        in.TypeName,
 		Config:          DynamicValue(in.Config),
 		IncludeResource: in.IncludeResourceObject,
+		Limit:           in.Limit,
 	}
 }
 
