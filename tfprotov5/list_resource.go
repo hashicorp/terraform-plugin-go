@@ -37,6 +37,9 @@ type ListResourceRequest struct {
 	// IncludeResource is a boolean indicating whether to populate the Resource
 	// field in list results.
 	IncludeResource bool // TODO: propose rename in protocol: IncludeResourceObject -> IncludeResource
+
+	// Limit specifies the maximum number of results that Terraform is expecting.
+	Limit int64
 }
 
 // ListResourceServerStream represents a streaming response to a

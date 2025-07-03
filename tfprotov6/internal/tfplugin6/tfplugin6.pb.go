@@ -6098,8 +6098,11 @@ type ListResource_Request struct {
 	// when include_resource_object is set to true, the provider should
 	// include the full resource object for each result
 	IncludeResourceObject bool `protobuf:"varint,3,opt,name=include_resource_object,json=includeResourceObject,proto3" json:"include_resource_object,omitempty"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
+	// The maximum number of results that Terraform is expecting.
+	// The stream will stop, once this limit is reached.
+	Limit         int64 `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListResource_Request) Reset() {
@@ -6151,6 +6154,13 @@ func (x *ListResource_Request) GetIncludeResourceObject() bool {
 		return x.IncludeResourceObject
 	}
 	return false
+}
+
+func (x *ListResource_Request) GetLimit() int64 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
 }
 
 type ListResource_Event struct {
@@ -7362,12 +7372,13 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\fraw_identity\x18\x03 \x01(\v2\x13.tfplugin6.RawStateR\vrawIdentity\x1a\x91\x01\n" +
 	"\bResponse\x12L\n" +
 	"\x11upgraded_identity\x18\x01 \x01(\v2\x1f.tfplugin6.ResourceIdentityDataR\x10upgradedIdentity\x127\n" +
-	"\vdiagnostics\x18\x02 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnostics\"\x9c\x03\n" +
-	"\fListResource\x1a\x8f\x01\n" +
+	"\vdiagnostics\x18\x02 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnostics\"\xb2\x03\n" +
+	"\fListResource\x1a\xa5\x01\n" +
 	"\aRequest\x12\x1b\n" +
 	"\ttype_name\x18\x01 \x01(\tR\btypeName\x12/\n" +
 	"\x06config\x18\x02 \x01(\v2\x17.tfplugin6.DynamicValueR\x06config\x126\n" +
-	"\x17include_resource_object\x18\x03 \x01(\bR\x15includeResourceObject\x1a\xf9\x01\n" +
+	"\x17include_resource_object\x18\x03 \x01(\bR\x15includeResourceObject\x12\x14\n" +
+	"\x05limit\x18\x04 \x01(\x03R\x05limit\x1a\xf9\x01\n" +
 	"\x05Event\x12;\n" +
 	"\bidentity\x18\x01 \x01(\v2\x1f.tfplugin6.ResourceIdentityDataR\bidentity\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12E\n" +
