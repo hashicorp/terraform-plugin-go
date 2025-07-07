@@ -485,3 +485,69 @@ func TestOpenEphemeralResourceClientCapabilities(t *testing.T) {
 		})
 	}
 }
+func TestPlanActionClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		capabilities *tfprotov6.PlanActionClientCapabilities
+		expected     []map[string]interface{}
+	}{
+		"nil": {
+			capabilities: nil,
+			expected: []map[string]interface{}{
+				{
+					"@level":   "trace",
+					"@message": "No announced client capabilities",
+					"@module":  "sdk.proto",
+				},
+			},
+		},
+		"empty": {
+			capabilities: &tfprotov6.PlanActionClientCapabilities{},
+			expected: []map[string]interface{}{
+				{
+					"@level":                                "trace",
+					"@message":                              "Announced client capabilities",
+					"@module":                               "sdk.proto",
+					"tf_client_capability_deferral_allowed": false,
+				},
+			},
+		},
+		"deferral_allowed": {
+			capabilities: &tfprotov6.PlanActionClientCapabilities{
+				DeferralAllowed: true,
+			},
+			expected: []map[string]interface{}{
+				{
+					"@level":                                "trace",
+					"@message":                              "Announced client capabilities",
+					"@module":                               "sdk.proto",
+					"tf_client_capability_deferral_allowed": true,
+				},
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			var output bytes.Buffer
+
+			ctx := tfsdklogtest.RootLogger(context.Background(), &output)
+			ctx = logging.ProtoSubsystemContext(ctx, tfsdklog.Options{})
+
+			tf6serverlogging.PlanActionClientCapabilities(ctx, testCase.capabilities)
+
+			entries, err := tfsdklogtest.MultilineJSONDecode(&output)
+
+			if err != nil {
+				t.Fatalf("unable to read multiple line JSON: %s", err)
+			}
+
+			if diff := cmp.Diff(entries, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}

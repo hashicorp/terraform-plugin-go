@@ -82,6 +82,29 @@ func TestGetMetadata_Response(t *testing.T) {
 		"zero": {
 			in: &tfprotov6.GetMetadataResponse{},
 			expected: &tfplugin6.GetMetadata_Response{
+				Actions:            []*tfplugin6.GetMetadata_ActionMetadata{},
+				DataSources:        []*tfplugin6.GetMetadata_DataSourceMetadata{},
+				Diagnostics:        []*tfplugin6.Diagnostic{},
+				EphemeralResources: []*tfplugin6.GetMetadata_EphemeralResourceMetadata{},
+				ListResources:      []*tfplugin6.GetMetadata_ListResourceMetadata{},
+				Functions:          []*tfplugin6.GetMetadata_FunctionMetadata{},
+				Resources:          []*tfplugin6.GetMetadata_ResourceMetadata{},
+			},
+		},
+		"Actions": {
+			in: &tfprotov6.GetMetadataResponse{
+				Actions: []tfprotov6.ActionMetadata{
+					{
+						TypeName: "test",
+					},
+				},
+			},
+			expected: &tfplugin6.GetMetadata_Response{
+				Actions: []*tfplugin6.GetMetadata_ActionMetadata{
+					{
+						TypeName: "test",
+					},
+				},
 				DataSources:        []*tfplugin6.GetMetadata_DataSourceMetadata{},
 				Diagnostics:        []*tfplugin6.Diagnostic{},
 				EphemeralResources: []*tfplugin6.GetMetadata_EphemeralResourceMetadata{},
@@ -99,6 +122,7 @@ func TestGetMetadata_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetMetadata_Response{
+				Actions: []*tfplugin6.GetMetadata_ActionMetadata{},
 				DataSources: []*tfplugin6.GetMetadata_DataSourceMetadata{
 					{
 						TypeName: "test",
@@ -118,6 +142,7 @@ func TestGetMetadata_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetMetadata_Response{
+				Actions:     []*tfplugin6.GetMetadata_ActionMetadata{},
 				DataSources: []*tfplugin6.GetMetadata_DataSourceMetadata{},
 				Diagnostics: []*tfplugin6.Diagnostic{
 					testTfplugin6Diagnostic,
@@ -137,6 +162,7 @@ func TestGetMetadata_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetMetadata_Response{
+				Actions:     []*tfplugin6.GetMetadata_ActionMetadata{},
 				DataSources: []*tfplugin6.GetMetadata_DataSourceMetadata{},
 				Diagnostics: []*tfplugin6.Diagnostic{},
 				EphemeralResources: []*tfplugin6.GetMetadata_EphemeralResourceMetadata{
@@ -158,15 +184,38 @@ func TestGetMetadata_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetMetadata_Response{
+				Actions:            []*tfplugin6.GetMetadata_ActionMetadata{},
 				DataSources:        []*tfplugin6.GetMetadata_DataSourceMetadata{},
+				Diagnostics:        []*tfplugin6.Diagnostic{},
 				EphemeralResources: []*tfplugin6.GetMetadata_EphemeralResourceMetadata{},
 				ListResources:      []*tfplugin6.GetMetadata_ListResourceMetadata{},
-				Diagnostics:        []*tfplugin6.Diagnostic{},
 				Functions: []*tfplugin6.GetMetadata_FunctionMetadata{
 					{
 						Name: "test",
 					},
 				},
+				Resources: []*tfplugin6.GetMetadata_ResourceMetadata{},
+			},
+		},
+		"ListResources": {
+			in: &tfprotov6.GetMetadataResponse{
+				ListResources: []tfprotov6.ListResourceMetadata{
+					{
+						TypeName: "test",
+					},
+				},
+			},
+			expected: &tfplugin6.GetMetadata_Response{
+				Actions:            []*tfplugin6.GetMetadata_ActionMetadata{},
+				DataSources:        []*tfplugin6.GetMetadata_DataSourceMetadata{},
+				Diagnostics:        []*tfplugin6.Diagnostic{},
+				EphemeralResources: []*tfplugin6.GetMetadata_EphemeralResourceMetadata{},
+				ListResources: []*tfplugin6.GetMetadata_ListResourceMetadata{
+					{
+						TypeName: "test",
+					},
+				},
+				Functions: []*tfplugin6.GetMetadata_FunctionMetadata{},
 				Resources: []*tfplugin6.GetMetadata_ResourceMetadata{},
 			},
 		},
@@ -179,6 +228,7 @@ func TestGetMetadata_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetMetadata_Response{
+				Actions:            []*tfplugin6.GetMetadata_ActionMetadata{},
 				DataSources:        []*tfplugin6.GetMetadata_DataSourceMetadata{},
 				Diagnostics:        []*tfplugin6.Diagnostic{},
 				EphemeralResources: []*tfplugin6.GetMetadata_EphemeralResourceMetadata{},
@@ -198,6 +248,7 @@ func TestGetMetadata_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetMetadata_Response{
+				Actions:            []*tfplugin6.GetMetadata_ActionMetadata{},
 				DataSources:        []*tfplugin6.GetMetadata_DataSourceMetadata{},
 				Diagnostics:        []*tfplugin6.Diagnostic{},
 				EphemeralResources: []*tfplugin6.GetMetadata_EphemeralResourceMetadata{},
@@ -223,9 +274,11 @@ func TestGetMetadata_Response(t *testing.T) {
 			// benefits.
 			diffOpts := cmpopts.IgnoreUnexported(
 				tfplugin6.Diagnostic{},
+				tfplugin6.GetMetadata_ActionMetadata{},
 				tfplugin6.GetMetadata_DataSourceMetadata{},
 				tfplugin6.GetMetadata_EphemeralResourceMetadata{},
 				tfplugin6.GetMetadata_FunctionMetadata{},
+				tfplugin6.GetMetadata_ListResourceMetadata{},
 				tfplugin6.GetMetadata_Response{},
 				tfplugin6.GetMetadata_ResourceMetadata{},
 				tfplugin6.ServerCapabilities{},
@@ -252,6 +305,50 @@ func TestGetProviderSchema_Response(t *testing.T) {
 		"zero": {
 			in: &tfprotov6.GetProviderSchemaResponse{},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:            map[string]*tfplugin6.ActionSchema{},
+				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
+				Diagnostics:              []*tfplugin6.Diagnostic{},
+				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
+				ListResourceSchemas:      map[string]*tfplugin6.Schema{},
+				Functions:                map[string]*tfplugin6.Function{},
+				ResourceSchemas:          map[string]*tfplugin6.Schema{},
+			},
+		},
+		"Actions": {
+			in: &tfprotov6.GetProviderSchemaResponse{
+				ActionSchemas: map[string]*tfprotov6.ActionSchema{
+					"test": {
+						Schema: &tfprotov6.Schema{
+							Block: &tfprotov6.SchemaBlock{
+								Attributes: []*tfprotov6.SchemaAttribute{
+									{
+										Name: "test",
+									},
+								},
+							},
+						},
+						Type: tfprotov6.UnlinkedActionSchemaType{},
+					},
+				},
+			},
+			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas: map[string]*tfplugin6.ActionSchema{
+					"test": {
+						Schema: &tfplugin6.Schema{
+							Block: &tfplugin6.Schema_Block{
+								Attributes: []*tfplugin6.Schema_Attribute{
+									{
+										Name: "test",
+									},
+								},
+								BlockTypes: []*tfplugin6.Schema_NestedBlock{},
+							},
+						},
+						Type: &tfplugin6.ActionSchema_Unlinked_{
+							Unlinked: &tfplugin6.ActionSchema_Unlinked{},
+						},
+					},
+				},
 				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
@@ -275,6 +372,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas: map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas: map[string]*tfplugin6.Schema{
 					"test": {
 						Block: &tfplugin6.Schema_Block{
@@ -301,6 +399,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:     map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas: map[string]*tfplugin6.Schema{},
 				Diagnostics: []*tfplugin6.Diagnostic{
 					testTfplugin6Diagnostic,
@@ -326,6 +425,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:     map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas: map[string]*tfplugin6.Schema{},
 				Diagnostics:       []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{
@@ -356,6 +456,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:            map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
@@ -368,6 +469,41 @@ func TestGetProviderSchema_Response(t *testing.T) {
 						},
 					},
 				},
+				ResourceSchemas: map[string]*tfplugin6.Schema{},
+			},
+		},
+		"ListResources": {
+			in: &tfprotov6.GetProviderSchemaResponse{
+				ListResourceSchemas: map[string]*tfprotov6.Schema{
+					"test": {
+						Block: &tfprotov6.SchemaBlock{
+							Attributes: []*tfprotov6.SchemaAttribute{
+								{
+									Name: "test",
+								},
+							},
+						},
+					},
+				},
+			},
+			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:            map[string]*tfplugin6.ActionSchema{},
+				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
+				Diagnostics:              []*tfplugin6.Diagnostic{},
+				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
+				ListResourceSchemas: map[string]*tfplugin6.Schema{
+					"test": {
+						Block: &tfplugin6.Schema_Block{
+							Attributes: []*tfplugin6.Schema_Attribute{
+								{
+									Name: "test",
+								},
+							},
+							BlockTypes: []*tfplugin6.Schema_NestedBlock{},
+						},
+					},
+				},
+				Functions:       map[string]*tfplugin6.Function{},
 				ResourceSchemas: map[string]*tfplugin6.Schema{},
 			},
 		},
@@ -384,10 +520,11 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:            map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
+				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
 				ListResourceSchemas:      map[string]*tfplugin6.Schema{},
-				Diagnostics:              []*tfplugin6.Diagnostic{},
 				Functions:                map[string]*tfplugin6.Function{},
 				Provider: &tfplugin6.Schema{
 					Block: &tfplugin6.Schema_Block{
@@ -415,6 +552,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:            map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
@@ -448,6 +586,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:            map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
@@ -474,6 +613,7 @@ func TestGetProviderSchema_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.GetProviderSchema_Response{
+				ActionSchemas:            map[string]*tfplugin6.ActionSchema{},
 				DataSourceSchemas:        map[string]*tfplugin6.Schema{},
 				Diagnostics:              []*tfplugin6.Diagnostic{},
 				EphemeralResourceSchemas: map[string]*tfplugin6.Schema{},
@@ -499,6 +639,9 @@ func TestGetProviderSchema_Response(t *testing.T) {
 			// benefits.
 			diffOpts := cmpopts.IgnoreUnexported(
 				tfplugin6.Diagnostic{},
+				tfplugin6.ActionSchema{},
+				tfplugin6.ActionSchema_Unlinked{},
+				tfplugin6.ActionSchema_Unlinked_{},
 				tfplugin6.Function{},
 				tfplugin6.Function_Return{},
 				tfplugin6.GetProviderSchema_Response{},
