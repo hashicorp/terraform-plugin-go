@@ -1,0 +1,5 @@
+kind: NOTES
+body: 'tfprotov5+tfprotov6: An upcoming release will require the `ValidateListResourceConfig` and `ListResource` implementations as part of `ProviderServer`.'
+time: 2025-07-03T16:37:08.835514-04:00
+custom:
+    Issue: "514"
