@@ -88,7 +88,8 @@ func (l LifecycleExecutionOrder) String() string {
 // LinkedResourceSchema does not contain the entire schema definition of the linked resource, which must be obtained by the provider in order to
 // decode the linked resource plan/state/identity protocol data during PlanAction and InvokeAction.
 type LinkedResourceSchema struct {
-	// TypeName is the name of the managed resource which can have it's resource state changed by the action.
+	// TypeName is the name of the managed resource which can have it's resource state changed by the action. The name should be prefixed with
+	// the provider shortname and an underscore.
 	TypeName string
 
 	// Description is a human-readable description of the linked resource.
