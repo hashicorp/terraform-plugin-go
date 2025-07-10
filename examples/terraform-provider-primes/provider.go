@@ -30,15 +30,7 @@ func (p PrimeNumberProvider) GetMetadata(ctx context.Context, request *tfprotov5
 func (p PrimeNumberProvider) GetResourceIdentitySchemas(ctx context.Context, request *tfprotov5.GetResourceIdentitySchemasRequest) (*tfprotov5.GetResourceIdentitySchemasResponse, error) {
 	return &tfprotov5.GetResourceIdentitySchemasResponse{
 		IdentitySchemas: map[string]*tfprotov5.ResourceIdentitySchema{
-			"prime": {
-				IdentityAttributes: []*tfprotov5.ResourceIdentitySchemaAttribute{
-					{
-						Name:              "number",
-						Type:              tftypes.Number,
-						RequiredForImport: true,
-					},
-				},
-			},
+			"prime": p.primeIdentitySchema(),
 		},
 	}, nil
 }
@@ -82,6 +74,17 @@ func (p PrimeNumberProvider) primeSchema() *tfprotov5.Schema {
 		},
 	}
 }
+func (p PrimeNumberProvider) primeIdentitySchema() *tfprotov5.ResourceIdentitySchema {
+	return &tfprotov5.ResourceIdentitySchema{
+		IdentityAttributes: []*tfprotov5.ResourceIdentitySchemaAttribute{
+			{
+				Name:              "number",
+				Type:              tftypes.Number,
+				RequiredForImport: true,
+			},
+		},
+	}
+}
 
 func (p PrimeNumberProvider) PrepareProviderConfig(ctx context.Context, request *tfprotov5.PrepareProviderConfigRequest) (*tfprotov5.PrepareProviderConfigResponse, error) {
 	return &tfprotov5.PrepareProviderConfigResponse{
@@ -103,6 +106,22 @@ func (p PrimeNumberProvider) convertToDynamicValue(number int, ordinal int) (tfp
 	return tfprotov5.NewDynamicValue(typ, tftypes.NewValue(typ, value))
 }
 
+func (p PrimeNumberProvider) convertToResourceIdentity(number int) (tfprotov5.ResourceIdentityData, error) {
+	typ := p.primeIdentitySchema().ValueType()
+	value := map[string]tftypes.Value{
+		"number": tftypes.NewValue(tftypes.Number, number),
+	}
+
+	dynamicValue, err := tfprotov5.NewDynamicValue(typ, tftypes.NewValue(typ, value))
+	if err != nil {
+		return tfprotov5.ResourceIdentityData{}, fmt.Errorf("failed to create dynamic value: %w", err)
+	}
+
+	return tfprotov5.ResourceIdentityData{
+		IdentityData: &dynamicValue,
+	}, nil
+}
+
 func (p PrimeNumberProvider) ListResource(ctx context.Context, request *tfprotov5.ListResourceRequest) (*tfprotov5.ListResourceServerStream, error) {
 	primes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97}
 
@@ -116,9 +135,15 @@ func (p PrimeNumberProvider) ListResource(ctx context.Context, request *tfprotov
 				panic(err)
 			}
 
+			resourceIdentity, err := p.convertToResourceIdentity(prime)
+			if err != nil {
+				panic(err)
+			}
+
 			protoEv := tfprotov5.ListResourceResult{
 				DisplayName: displayName,
 				Resource:    &resourceObject,
+				Identity:    &resourceIdentity,
 			}
 			if !push(protoEv) {
 				fmt.Println("let's stop here")
