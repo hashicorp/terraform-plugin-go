@@ -109,6 +109,15 @@ type ValidateListResourceConfigRequest struct {
 	// knowing the value at request time. Any attributes not directly set in
 	// the configuration will be null.
 	Config *DynamicValue
+
+	// IncludeResourceObject is the value of the include_resource
+	// argument in the list block. This is a DynamicValue so that it can
+	// contain unknown values.
+	IncludeResourceObject *DynamicValue
+
+	// Limit is the maximum number of results to return. This is a
+	// DynamicValue so that it can contain unknown values.
+	Limit *DynamicValue
 }
 
 // ValidateListResourceConfigResponse is the response from the provider about
