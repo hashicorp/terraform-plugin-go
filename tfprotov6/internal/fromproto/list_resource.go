@@ -27,7 +27,9 @@ func ValidateListResourceConfigRequest(in *tfplugin6.ValidateListResourceConfig_
 	}
 
 	return &tfprotov6.ValidateListResourceConfigRequest{
-		TypeName: in.TypeName,
-		Config:   DynamicValue(in.Config),
+		TypeName:              in.TypeName,
+		Config:                DynamicValue(in.Config),
+		IncludeResourceObject: DynamicValue(in.IncludeResourceObject),
+		Limit:                 DynamicValue(in.Limit),
 	}
 }
