@@ -8,6 +8,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
+func ValidateActionConfigRequest(in *tfplugin5.ValidateActionConfig_Request) *tfprotov5.ValidateActionConfigRequest {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.ValidateActionConfigRequest{
+		ActionType: in.ActionType,
+		Config:     DynamicValue(in.Config),
+	}
+}
+
 func PlanActionRequest(in *tfplugin5.PlanAction_Request) *tfprotov5.PlanActionRequest {
 	if in == nil {
 		return nil

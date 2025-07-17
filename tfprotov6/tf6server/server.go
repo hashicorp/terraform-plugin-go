@@ -1299,6 +1299,56 @@ func (s *server) ListResource(protoReq *tfplugin6.ListResource_Request, protoStr
 	return nil
 }
 
+func (s *server) ValidateActionConfig(ctx context.Context, protoReq *tfplugin6.ValidateActionConfig_Request) (*tfplugin6.ValidateActionConfig_Response, error) {
+	rpc := "ValidateActionConfig"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.ActionContext(ctx, protoReq.ActionType)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.ValidateActionConfigRequest(protoReq)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	// TODO: Remove this check and error in preference of
+	// s.downstream.ValidateActionConfig below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	actionsProviderServer, ok := s.downstream.(tfprotov6.ProviderServerWithActions)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement ValidateActionConfig")
+
+		protoResp := &tfplugin6.ValidateActionConfig_Response{
+			Diagnostics: []*tfplugin6.Diagnostic{
+				{
+					Severity: tfplugin6.Diagnostic_ERROR,
+					Summary:  "Provider ValidateActionConfig Not Implemented",
+					Detail: "A ValidateActionConfig call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements action support or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	resp, err := actionsProviderServer.ValidateActionConfig(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]any{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.ValidateActionConfig_Response(resp)
+
+	return protoResp, nil
+}
+
 func (s *server) PlanAction(ctx context.Context, protoReq *tfplugin6.PlanAction_Request) (*tfplugin6.PlanAction_Response, error) {
 	rpc := "PlanAction"
 	ctx = s.loggingContext(ctx)

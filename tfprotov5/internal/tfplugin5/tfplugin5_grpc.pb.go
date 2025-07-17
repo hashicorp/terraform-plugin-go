@@ -64,6 +64,7 @@ const (
 	Provider_ValidateListResourceConfig_FullMethodName      = "/tfplugin5.Provider/ValidateListResourceConfig"
 	Provider_GetFunctions_FullMethodName                    = "/tfplugin5.Provider/GetFunctions"
 	Provider_CallFunction_FullMethodName                    = "/tfplugin5.Provider/CallFunction"
+	Provider_ValidateActionConfig_FullMethodName            = "/tfplugin5.Provider/ValidateActionConfig"
 	Provider_PlanAction_FullMethodName                      = "/tfplugin5.Provider/PlanAction"
 	Provider_InvokeAction_FullMethodName                    = "/tfplugin5.Provider/InvokeAction"
 	Provider_Stop_FullMethodName                            = "/tfplugin5.Provider/Stop"
@@ -115,6 +116,7 @@ type ProviderClient interface {
 	// the result with any diagnostics.
 	CallFunction(ctx context.Context, in *CallFunction_Request, opts ...grpc.CallOption) (*CallFunction_Response, error)
 	// ////// Actions Lifecycle
+	ValidateActionConfig(ctx context.Context, in *ValidateActionConfig_Request, opts ...grpc.CallOption) (*ValidateActionConfig_Response, error)
 	PlanAction(ctx context.Context, in *PlanAction_Request, opts ...grpc.CallOption) (*PlanAction_Response, error)
 	InvokeAction(ctx context.Context, in *InvokeAction_Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[InvokeAction_Event], error)
 	// ////// Graceful Shutdown
@@ -368,6 +370,16 @@ func (c *providerClient) CallFunction(ctx context.Context, in *CallFunction_Requ
 	return out, nil
 }
 
+func (c *providerClient) ValidateActionConfig(ctx context.Context, in *ValidateActionConfig_Request, opts ...grpc.CallOption) (*ValidateActionConfig_Response, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ValidateActionConfig_Response)
+	err := c.cc.Invoke(ctx, Provider_ValidateActionConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *providerClient) PlanAction(ctx context.Context, in *PlanAction_Request, opts ...grpc.CallOption) (*PlanAction_Response, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PlanAction_Response)
@@ -453,6 +465,7 @@ type ProviderServer interface {
 	// the result with any diagnostics.
 	CallFunction(context.Context, *CallFunction_Request) (*CallFunction_Response, error)
 	// ////// Actions Lifecycle
+	ValidateActionConfig(context.Context, *ValidateActionConfig_Request) (*ValidateActionConfig_Response, error)
 	PlanAction(context.Context, *PlanAction_Request) (*PlanAction_Response, error)
 	InvokeAction(*InvokeAction_Request, grpc.ServerStreamingServer[InvokeAction_Event]) error
 	// ////// Graceful Shutdown
@@ -535,6 +548,9 @@ func (UnimplementedProviderServer) GetFunctions(context.Context, *GetFunctions_R
 }
 func (UnimplementedProviderServer) CallFunction(context.Context, *CallFunction_Request) (*CallFunction_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CallFunction not implemented")
+}
+func (UnimplementedProviderServer) ValidateActionConfig(context.Context, *ValidateActionConfig_Request) (*ValidateActionConfig_Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateActionConfig not implemented")
 }
 func (UnimplementedProviderServer) PlanAction(context.Context, *PlanAction_Request) (*PlanAction_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PlanAction not implemented")
@@ -973,6 +989,24 @@ func _Provider_CallFunction_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Provider_ValidateActionConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateActionConfig_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).ValidateActionConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Provider_ValidateActionConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).ValidateActionConfig(ctx, req.(*ValidateActionConfig_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Provider_PlanAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PlanAction_Request)
 	if err := dec(in); err != nil {
@@ -1114,6 +1148,10 @@ var Provider_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CallFunction",
 			Handler:    _Provider_CallFunction_Handler,
+		},
+		{
+			MethodName: "ValidateActionConfig",
+			Handler:    _Provider_ValidateActionConfig_Handler,
 		},
 		{
 			MethodName: "PlanAction",
