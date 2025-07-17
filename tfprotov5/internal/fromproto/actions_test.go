@@ -12,6 +12,52 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
+func TestValidateActionConfigRequest(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfplugin5.ValidateActionConfig_Request
+		expected *tfprotov5.ValidateActionConfigRequest
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in:       &tfplugin5.ValidateActionConfig_Request{},
+			expected: &tfprotov5.ValidateActionConfigRequest{},
+		},
+		"Config": {
+			in: &tfplugin5.ValidateActionConfig_Request{
+				Config: testTfplugin5DynamicValue(),
+			},
+			expected: &tfprotov5.ValidateActionConfigRequest{
+				Config: testTfprotov5DynamicValue(),
+			},
+		},
+		"ActionType": {
+			in: &tfplugin5.ValidateActionConfig_Request{
+				ActionType: "test",
+			},
+			expected: &tfprotov5.ValidateActionConfigRequest{
+				ActionType: "test",
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := fromproto.ValidateActionConfigRequest(testCase.in)
+
+			if diff := cmp.Diff(got, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
+
 func TestPlanActionRequest(t *testing.T) {
 	t.Parallel()
 
