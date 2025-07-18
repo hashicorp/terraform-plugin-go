@@ -25,6 +25,7 @@ package tftypes
 
 import (
 	"errors"
+	"slices"
 )
 
 // stopWalkError is a well-known error for immediately stopping walk() without
@@ -148,6 +149,143 @@ func walk(path *AttributePath, val Value, cb func(*AttributePath, Value) (bool, 
 		for _, el := range v {
 			elementPath := path.WithElementKeyValue(el)
 			shouldContinue, err := walk(elementPath, el, cb)
+
+			if err != nil {
+				return false, elementPath.NewError(err)
+			}
+
+			if !shouldContinue {
+				return false, nil
+			}
+		}
+	}
+
+	return true, nil
+}
+
+// OrderedWalk traverses a Value, calling the passed function for every element and
+// attribute in the Value. The AttributePath passed to the callback function
+// will identify which attribute or element is currently being surfaced by the
+// Walk, and the passed Value will be the element or attribute at that
+// AttributePath. Returning true from the callback function will indicate that
+// any attributes or elements of the surfaced Value should be walked, too;
+// returning false short-circuits the walk at that element or attribute, and
+// does not visit any of its descendants. The return value of the callback does
+// not matter when the Value that has been surfaced has no elements or
+// attributes. Walk uses a depth-first traversal.
+func OrderedWalk(val Value, cb func(*AttributePath, Value) (bool, error)) error {
+	_, err := orderedWalk(NewAttributePath(), val, cb)
+
+	return err
+}
+
+// orderedWalk is the internal implementation of Walk(). It includes a bool return for
+// whether callers should continue walking any remaining Value.
+func orderedWalk(path *AttributePath, val Value, cb func(*AttributePath, Value) (bool, error)) (bool, error) {
+	shouldContinue, err := cb(path, val)
+
+	if errors.Is(err, stopWalkError) {
+		return false, nil
+	}
+
+	if err != nil {
+		return false, path.NewError(err)
+	}
+
+	if !shouldContinue {
+		// The callback bool return is intended to signal that this Value should
+		// no longer be descended. Changing this behavior is a breaking change.
+		// A stopWalkError can be used to signal that all remaining Value can be
+		// skipped.
+		return true, nil
+	}
+
+	if val.IsNull() || !val.IsKnown() {
+		return true, nil
+	}
+
+	switch val.Type().(type) {
+	case List, Tuple:
+		v, ok := val.value.([]Value)
+
+		if !ok {
+			return false, path.NewErrorf("cannot convert %T into []tftypes.Value", val.value)
+		}
+
+		for pos, el := range v {
+			elementPath := path.WithElementKeyInt(pos)
+			shouldContinue, err := orderedWalk(elementPath, el, cb)
+
+			if err != nil {
+				return false, elementPath.NewError(err)
+			}
+
+			if !shouldContinue {
+				return false, nil
+			}
+		}
+	case Map:
+		v, ok := val.value.(map[string]Value)
+
+		if !ok {
+			return false, path.NewErrorf("cannot convert %T into map[string]tftypes.Value", val.value)
+		}
+
+		keys := make([]string, 0, len(v))
+		for key := range v {
+			keys = append(keys, key)
+		}
+		slices.Sort(keys)
+
+		for _, k := range keys {
+			el := v[k]
+			elementPath := path.WithElementKeyString(k)
+			shouldContinue, err := orderedWalk(elementPath, el, cb)
+
+			if err != nil {
+				return false, elementPath.NewError(err)
+			}
+
+			if !shouldContinue {
+				return false, nil
+			}
+		}
+	case Object:
+		v, ok := val.value.(map[string]Value)
+
+		if !ok {
+			return false, path.NewErrorf("cannot convert %T into map[string]tftypes.Value", val.value)
+		}
+
+		keys := make([]string, 0, len(v))
+		for key := range v {
+			keys = append(keys, key)
+		}
+		slices.Sort(keys)
+
+		for _, k := range keys {
+			el := v[k]
+			attributePath := path.WithAttributeName(k)
+			shouldContinue, err := orderedWalk(attributePath, el, cb)
+
+			if err != nil {
+				return false, attributePath.NewError(err)
+			}
+
+			if !shouldContinue {
+				return false, nil
+			}
+		}
+	case Set:
+		v, ok := val.value.([]Value)
+
+		if !ok {
+			return false, path.NewErrorf("cannot convert %T into []tftypes.Value", val.value)
+		}
+
+		for _, el := range v {
+			elementPath := path.WithElementKeyValue(el)
+			shouldContinue, err := orderedWalk(elementPath, el, cb)
 
 			if err != nil {
 				return false, elementPath.NewError(err)
