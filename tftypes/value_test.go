@@ -723,6 +723,106 @@ func TestValueIsKnown(t *testing.T) {
 	}
 }
 
+func TestValueIsNull(t *testing.T) {
+	t.Parallel()
+	type testCase struct {
+		value               Value
+		expectedIsNull      bool
+		expectedIsFullyNull bool
+	}
+
+	simpleObjectTyp := Object{
+		AttributeTypes: map[string]Type{
+			"capacity": Number,
+		},
+		OptionalAttributes: map[string]struct{}{
+			"capacity": {},
+		},
+	}
+
+	networkTyp := Object{
+		AttributeTypes: map[string]Type{
+			"name":  String,
+			"speed": Number,
+		},
+	}
+	objectTyp := Object{
+		AttributeTypes: map[string]Type{
+			"id":      String,
+			"network": networkTyp,
+		},
+	}
+
+	tests := map[string]testCase{
+		"nil-object": {
+			value:               NewValue(simpleObjectTyp, nil),
+			expectedIsNull:      true,
+			expectedIsFullyNull: true,
+		},
+		"simple-object-with-empty-attributes-map": {
+			value:               NewValue(simpleObjectTyp, map[string]Value{}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+		"simple-object-with-nil-primitive": {
+			value:               NewValue(simpleObjectTyp, map[string]Value{"capacity": NewValue(Number, nil)}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+		"simple-object-with-non-nil-primitive": {
+			value:               NewValue(simpleObjectTyp, map[string]Value{"capacity": NewValue(Number, 4096)}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"object-with-no-nils": {
+			value: NewValue(objectTyp, map[string]Value{
+				"id": NewValue(String, "#00decaf"),
+				"network": NewValue(networkTyp, map[string]Value{
+					"name":  NewValue(String, "eth0"),
+					"speed": NewValue(Number, 1000000000),
+				}),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"object-with-shallow-nils": {
+			value: NewValue(objectTyp, map[string]Value{
+				"id":      NewValue(String, nil),
+				"network": NewValue(networkTyp, nil),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+		"object-with-deep-nils": {
+			value: NewValue(objectTyp, map[string]Value{
+				"id": NewValue(String, nil),
+				"network": NewValue(networkTyp, map[string]Value{
+					"name":  NewValue(String, nil),
+					"speed": NewValue(Number, nil),
+				}),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			actualIsNull := test.value.IsNull()
+			actualIsFullyNull := test.value.IsFullyNull()
+
+			if test.expectedIsNull != actualIsNull {
+				t.Errorf("expected IsNull() to be %v; actual: %v", test.expectedIsNull, actualIsNull)
+			}
+
+			if test.expectedIsFullyNull != actualIsFullyNull {
+				t.Errorf("expected IsFullyNull() to be %v; actual: %v", test.expectedIsNull, actualIsNull)
+			}
+		})
+	}
+}
+
 func TestValueEqual(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
