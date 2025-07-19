@@ -744,6 +744,10 @@ func TestValueIsNull(t *testing.T) {
 		ElementType: String,
 	}
 
+	simpleSetTyp := Set{
+		ElementType: String,
+	}
+
 	networkTyp := Object{
 		AttributeTypes: map[string]Type{
 			"name":   String,
@@ -820,9 +824,32 @@ func TestValueIsNull(t *testing.T) {
 			expectedIsNull:      false,
 			expectedIsFullyNull: true,
 		},
+		"object-with-some-nils": {
+			value: NewValue(objectTyp, map[string]Value{
+				"id": NewValue(String, nil),
+				"network": NewValue(networkTyp, map[string]Value{
+					"name":  NewValue(String, nil),
+					"speed": NewValue(Number, 1000),
+					"labels": NewValue(simpleListTyp, []Value{
+						NewValue(String, nil),
+					}),
+				}),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
 		"simple-list-with-no-nils": {
 			value: NewValue(simpleListTyp, []Value{
 				NewValue(String, "restarting"),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"simple-list-with-some-nils": {
+			value: NewValue(simpleListTyp, []Value{
+				NewValue(String, "east-mars"),
+				NewValue(String, "south-mars"),
+				NewValue(String, nil),
 			}),
 			expectedIsNull:      false,
 			expectedIsFullyNull: false,
@@ -837,6 +864,13 @@ func TestValueIsNull(t *testing.T) {
 		"list-with-deep-nils": {
 			value: NewValue(listTyp, []Value{
 				NewValue(networkTyp, nil),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+		"simple-set-with-shallow-nils": {
+			value: NewValue(simpleSetTyp, []Value{
+				NewValue(String, nil),
 			}),
 			expectedIsNull:      false,
 			expectedIsFullyNull: true,
