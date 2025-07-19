@@ -740,17 +740,27 @@ func TestValueIsNull(t *testing.T) {
 		},
 	}
 
+	simpleListTyp := List{
+		ElementType: String,
+	}
+
 	networkTyp := Object{
 		AttributeTypes: map[string]Type{
-			"name":  String,
-			"speed": Number,
+			"name":   String,
+			"speed":  Number,
+			"labels": simpleListTyp,
 		},
 	}
+
 	objectTyp := Object{
 		AttributeTypes: map[string]Type{
 			"id":      String,
 			"network": networkTyp,
 		},
+	}
+
+	listTyp := List{
+		ElementType: networkTyp,
 	}
 
 	tests := map[string]testCase{
@@ -780,6 +790,9 @@ func TestValueIsNull(t *testing.T) {
 				"network": NewValue(networkTyp, map[string]Value{
 					"name":  NewValue(String, "eth0"),
 					"speed": NewValue(Number, 1000000000),
+					"labels": NewValue(simpleListTyp, []Value{
+						NewValue(String, "connected"),
+					}),
 				}),
 			}),
 			expectedIsNull:      false,
@@ -799,7 +812,31 @@ func TestValueIsNull(t *testing.T) {
 				"network": NewValue(networkTyp, map[string]Value{
 					"name":  NewValue(String, nil),
 					"speed": NewValue(Number, nil),
+					"labels": NewValue(simpleListTyp, []Value{
+						NewValue(String, nil),
+					}),
 				}),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+		"simple-list-with-no-nils": {
+			value: NewValue(simpleListTyp, []Value{
+				NewValue(String, "restarting"),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"simple-list-with-shallow-nils": {
+			value: NewValue(simpleListTyp, []Value{
+				NewValue(String, nil),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+		"list-with-deep-nils": {
+			value: NewValue(listTyp, []Value{
+				NewValue(networkTyp, nil),
 			}),
 			expectedIsNull:      false,
 			expectedIsFullyNull: true,
@@ -809,6 +846,7 @@ func TestValueIsNull(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
+
 			actualIsNull := test.value.IsNull()
 			actualIsFullyNull := test.value.IsFullyNull()
 
