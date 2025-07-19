@@ -574,6 +574,37 @@ func (val Value) IsNull() bool {
 	return val.value == nil
 }
 
+func (val Value) IsFullyNull() bool {
+	switch val.Type().(type) {
+	case primitive:
+		return val.IsNull()
+	case List, Set, Tuple:
+		sliceVal, ok := val.value.([]Value)
+		if !ok {
+			return true
+		}
+		for _, v := range sliceVal {
+			if !v.IsFullyNull() {
+				return false
+			}
+		}
+		return true
+	case Map, Object:
+		mapVal, ok := val.value.(map[string]Value)
+		if !ok {
+			return true
+		}
+		for _, v := range mapVal {
+			if !v.IsFullyNull() {
+				return false
+			}
+		}
+		return true
+	default:
+		panic(fmt.Sprintf("unknown type %T", val.Type()))
+	}
+}
+
 // MarshalMsgPack returns a msgpack representation of the Value. This is used
 // for constructing tfprotov5.DynamicValues.
 //
