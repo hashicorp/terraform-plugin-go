@@ -16,6 +16,13 @@ type ActionMetadata struct {
 
 // ActionServer is an interface containing the methods an action implementation needs to fill.
 type ActionServer interface {
+	// ValidateActionConfig is called when Terraform is checking that an
+	// action configuration is valid. It is guaranteed to have types
+	// conforming to your schema, but it is not guaranteed that all values
+	// will be known. This is your opportunity to do custom or advanced
+	// validation prior to an action being planned/invoked.
+	ValidateActionConfig(context.Context, *ValidateActionConfigRequest) (*ValidateActionConfigResponse, error)
+
 	// PlanAction is called when Terraform is attempting to
 	// calculate a plan for an action. Depending on the type defined in
 	// the action schema, Terraform may also pass the plan of linked resources
@@ -30,6 +37,35 @@ type ActionServer interface {
 	//
 	// If an error occurs, the provider sends a complete event with the relevant diagnostics.
 	InvokeAction(context.Context, *InvokeActionRequest) (*InvokeActionServerStream, error)
+}
+
+// ValidateActionConfigRequest is the request Terraform sends when it
+// wants to validate an action's configuration.
+type ValidateActionConfigRequest struct {
+	// ActionType is the type of action Terraform is validating.
+	ActionType string
+
+	// Config is the configuration the user supplied for that action. See
+	// the documentation on `DynamicValue` for more information about
+	// safely accessing the configuration.
+	//
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
+	//
+	// This configuration may contain unknown values if a user uses
+	// interpolation or other functionality that would prevent Terraform
+	// from knowing the value at request time. Any attributes not directly
+	// set in the configuration will be null.
+	Config *DynamicValue
+}
+
+// ValidateActionConfigResponse is the response from the provider about
+// the validity of an action's configuration.
+type ValidateActionConfigResponse struct {
+	// Diagnostics report errors or warnings related to the given
+	// configuration. Returning an empty slice indicates a successful
+	// validation with no warnings or errors generated.
+	Diagnostics []*Diagnostic
 }
 
 // PlanActionRequest is the request Terraform sends when it is attempting to

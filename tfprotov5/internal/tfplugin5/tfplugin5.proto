@@ -395,6 +395,7 @@ service Provider {
     rpc CallFunction(CallFunction.Request) returns (CallFunction.Response);
 
     //////// Actions Lifecycle
+    rpc ValidateActionConfig(ValidateActionConfig.Request) returns (ValidateActionConfig.Response);
     rpc PlanAction(PlanAction.Request) returns (PlanAction.Response);
     rpc InvokeAction(InvokeAction.Request) returns (stream InvokeAction.Event);
 
@@ -416,7 +417,8 @@ message GetMetadata {
         repeated FunctionMetadata functions = 5;
         repeated EphemeralResourceMetadata ephemeral_resources = 6;
         repeated ListResourceMetadata list_resources = 7;
-        repeated ActionMetadata actions = 8;
+        // TODO: Field number 8 will be used by state stores
+        repeated ActionMetadata actions = 9;
     }
 
     message FunctionMetadata {
@@ -460,7 +462,8 @@ message GetProviderSchema {
         map<string, Function> functions = 7;
         map<string, Schema> ephemeral_resource_schemas = 8;
         map<string, Schema> list_resource_schemas = 9;
-        map<string, ActionSchema> action_schemas = 10;
+        // TODO: Field number 10 will be used by state stores
+        map<string, ActionSchema> action_schemas = 11;
     }
 }
 
@@ -912,6 +915,18 @@ message ListResource {
 message ValidateListResourceConfig {
     message Request {
         string type_name = 1;
+        DynamicValue config = 2;
+        DynamicValue include_resource_object = 3;
+        DynamicValue limit = 4;
+    }
+    message Response {
+        repeated Diagnostic diagnostics = 1;
+    }
+}
+
+message ValidateActionConfig {
+    message Request {
+        string action_type = 1;
         DynamicValue config = 2;
     }
     message Response {

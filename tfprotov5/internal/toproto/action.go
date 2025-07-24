@@ -20,6 +20,16 @@ func GetMetadata_ActionMetadata(in *tfprotov5.ActionMetadata) *tfplugin5.GetMeta
 	}
 }
 
+func ValidateActionConfig_Response(in *tfprotov5.ValidateActionConfigResponse) *tfplugin5.ValidateActionConfig_Response {
+	if in == nil {
+		return nil
+	}
+
+	return &tfplugin5.ValidateActionConfig_Response{
+		Diagnostics: Diagnostics(in.Diagnostics),
+	}
+}
+
 func PlanAction_Response(in *tfprotov5.PlanActionResponse) *tfplugin5.PlanAction_Response {
 	if in == nil {
 		return nil
