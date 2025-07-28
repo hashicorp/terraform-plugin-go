@@ -574,6 +574,8 @@ func (val Value) IsNull() bool {
 	return val.value == nil
 }
 
+// IsFullyNull returns true if the Value is null or if the Value is an
+// aggregate that consists of only fully null elements and attributes.
 func (val Value) IsFullyNull() bool {
 	switch val.Type().(type) {
 	case primitive:
