@@ -586,7 +586,10 @@ func (val Value) IsFullyNull() bool {
 		return false // already checked IsNull() and not an aggregate
 
 	case List, Set, Tuple:
-		sliceVal := val.value.([]Value)
+		sliceVal, ok := val.value.([]Value)
+		if !ok {
+			panic(fmt.Sprintf("impossible type assertion failure: %T to slice", val))
+		}
 		for _, v := range sliceVal {
 			if !v.IsFullyNull() {
 				return false
@@ -595,7 +598,10 @@ func (val Value) IsFullyNull() bool {
 		return true
 
 	case Map, Object:
-		mapVal := val.value.(map[string]Value)
+		mapVal, ok := val.value.(map[string]Value)
+		if !ok {
+			panic(fmt.Sprintf("impossible type assertion failure: %T to map", val))
+		}
 		for _, v := range mapVal {
 			if !v.IsFullyNull() {
 				return false
