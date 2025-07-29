@@ -768,7 +768,32 @@ func TestValueIsNull(t *testing.T) {
 	}
 
 	tests := map[string]testCase{
-		"nil-object": {
+		"primitive": {
+			value:               NewValue(Number, 990),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"primitive-null": {
+			value:               NewValue(Number, nil),
+			expectedIsNull:      true,
+			expectedIsFullyNull: true,
+		},
+		"dynamic": {
+			value:               NewValue(DynamicPseudoType, "hello"),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"dynamic-null": {
+			value:               NewValue(DynamicPseudoType, nil),
+			expectedIsNull:      true,
+			expectedIsFullyNull: true,
+		},
+		"simple-object": {
+			value:               NewValue(simpleObjectTyp, map[string]Value{"capacity": NewValue(Number, 4096)}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"simple-object-null": {
 			value:               NewValue(simpleObjectTyp, nil),
 			expectedIsNull:      true,
 			expectedIsFullyNull: true,
@@ -782,11 +807,6 @@ func TestValueIsNull(t *testing.T) {
 			value:               NewValue(simpleObjectTyp, map[string]Value{"capacity": NewValue(Number, nil)}),
 			expectedIsNull:      false,
 			expectedIsFullyNull: true,
-		},
-		"simple-object-with-non-nil-primitive": {
-			value:               NewValue(simpleObjectTyp, map[string]Value{"capacity": NewValue(Number, 4096)}),
-			expectedIsNull:      false,
-			expectedIsFullyNull: false,
 		},
 		"object-with-no-nils": {
 			value: NewValue(objectTyp, map[string]Value{
