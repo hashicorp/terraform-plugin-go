@@ -577,31 +577,32 @@ func (val Value) IsNull() bool {
 // IsFullyNull returns true if the Value is null or if the Value is an
 // aggregate that consists of only fully null elements and attributes.
 func (val Value) IsFullyNull() bool {
+	if val.IsNull() {
+		return true
+	}
+
 	switch val.Type().(type) {
 	case primitive:
-		return val.IsNull()
+		return false // already checked IsNull() and not an aggregate
+
 	case List, Set, Tuple:
-		sliceVal, ok := val.value.([]Value)
-		if !ok {
-			return true
-		}
+		sliceVal := val.value.([]Value)
 		for _, v := range sliceVal {
 			if !v.IsFullyNull() {
 				return false
 			}
 		}
 		return true
+
 	case Map, Object:
-		mapVal, ok := val.value.(map[string]Value)
-		if !ok {
-			return true
-		}
+		mapVal := val.value.(map[string]Value)
 		for _, v := range mapVal {
 			if !v.IsFullyNull() {
 				return false
 			}
 		}
 		return true
+
 	default:
 		panic(fmt.Sprintf("unknown type %T", val.Type()))
 	}
