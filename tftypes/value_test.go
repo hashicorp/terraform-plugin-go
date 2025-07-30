@@ -723,6 +723,198 @@ func TestValueIsKnown(t *testing.T) {
 	}
 }
 
+func TestValueIsNull(t *testing.T) {
+	t.Parallel()
+	type testCase struct {
+		value               Value
+		expectedIsNull      bool
+		expectedIsFullyNull bool
+	}
+
+	simpleObjectTyp := Object{
+		AttributeTypes: map[string]Type{
+			"capacity": Number,
+		},
+		OptionalAttributes: map[string]struct{}{
+			"capacity": {},
+		},
+	}
+
+	simpleListTyp := List{
+		ElementType: String,
+	}
+
+	simpleSetTyp := Set{
+		ElementType: String,
+	}
+
+	networkTyp := Object{
+		AttributeTypes: map[string]Type{
+			"name":   String,
+			"speed":  Number,
+			"labels": simpleListTyp,
+		},
+	}
+
+	objectTyp := Object{
+		AttributeTypes: map[string]Type{
+			"id":      String,
+			"network": networkTyp,
+		},
+	}
+
+	listTyp := List{
+		ElementType: networkTyp,
+	}
+
+	tests := map[string]testCase{
+		"primitive": {
+			value:               NewValue(Number, 990),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"primitive-null": {
+			value:               NewValue(Number, nil),
+			expectedIsNull:      true,
+			expectedIsFullyNull: true,
+		},
+		"dynamic": {
+			value:               NewValue(DynamicPseudoType, "hello"),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"dynamic-null": {
+			value:               NewValue(DynamicPseudoType, nil),
+			expectedIsNull:      true,
+			expectedIsFullyNull: true,
+		},
+		"simple-object": {
+			value:               NewValue(simpleObjectTyp, map[string]Value{"capacity": NewValue(Number, 4096)}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"simple-object-null": {
+			value:               NewValue(simpleObjectTyp, nil),
+			expectedIsNull:      true,
+			expectedIsFullyNull: true,
+		},
+		"simple-object-with-empty-attributes-map": {
+			value:               NewValue(simpleObjectTyp, map[string]Value{}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+		"simple-object-with-nil-primitive": {
+			value:               NewValue(simpleObjectTyp, map[string]Value{"capacity": NewValue(Number, nil)}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+		"object-with-no-nils": {
+			value: NewValue(objectTyp, map[string]Value{
+				"id": NewValue(String, "#00decaf"),
+				"network": NewValue(networkTyp, map[string]Value{
+					"name":  NewValue(String, "eth0"),
+					"speed": NewValue(Number, 1000000000),
+					"labels": NewValue(simpleListTyp, []Value{
+						NewValue(String, "connected"),
+					}),
+				}),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"object-with-shallow-nils": {
+			value: NewValue(objectTyp, map[string]Value{
+				"id":      NewValue(String, nil),
+				"network": NewValue(networkTyp, nil),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+		"object-with-deep-nils": {
+			value: NewValue(objectTyp, map[string]Value{
+				"id": NewValue(String, nil),
+				"network": NewValue(networkTyp, map[string]Value{
+					"name":  NewValue(String, nil),
+					"speed": NewValue(Number, nil),
+					"labels": NewValue(simpleListTyp, []Value{
+						NewValue(String, nil),
+					}),
+				}),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+		"object-with-some-nils": {
+			value: NewValue(objectTyp, map[string]Value{
+				"id": NewValue(String, nil),
+				"network": NewValue(networkTyp, map[string]Value{
+					"name":  NewValue(String, nil),
+					"speed": NewValue(Number, 1000),
+					"labels": NewValue(simpleListTyp, []Value{
+						NewValue(String, nil),
+					}),
+				}),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"simple-list-with-no-nils": {
+			value: NewValue(simpleListTyp, []Value{
+				NewValue(String, "restarting"),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"simple-list-with-some-nils": {
+			value: NewValue(simpleListTyp, []Value{
+				NewValue(String, "east-mars"),
+				NewValue(String, "south-mars"),
+				NewValue(String, nil),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: false,
+		},
+		"simple-list-with-shallow-nils": {
+			value: NewValue(simpleListTyp, []Value{
+				NewValue(String, nil),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+		"list-with-deep-nils": {
+			value: NewValue(listTyp, []Value{
+				NewValue(networkTyp, nil),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+		"simple-set-with-shallow-nils": {
+			value: NewValue(simpleSetTyp, []Value{
+				NewValue(String, nil),
+			}),
+			expectedIsNull:      false,
+			expectedIsFullyNull: true,
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			actualIsNull := test.value.IsNull()
+			actualIsFullyNull := test.value.IsFullyNull()
+
+			if test.expectedIsNull != actualIsNull {
+				t.Errorf("expected IsNull() to be %v; actual: %v", test.expectedIsNull, actualIsNull)
+			}
+
+			if test.expectedIsFullyNull != actualIsFullyNull {
+				t.Errorf("expected IsFullyNull() to be %v; actual: %v", test.expectedIsNull, actualIsNull)
+			}
+		})
+	}
+}
+
 func TestValueEqual(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
