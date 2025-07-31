@@ -1,5 +1,0 @@
-kind: BUG FIXES
-body: Fix proto field numbering for `GetProviderSchema`
-time: 2025-07-31T16:45:17.754482+02:00
-custom:
-    Issue: "539"
