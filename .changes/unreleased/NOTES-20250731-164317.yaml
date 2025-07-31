@@ -1,0 +1,5 @@
+kind: NOTES
+body: Updates the `ValidateListResourceConfig` RPC to validate `include_resource` as well as `limit`
+time: 2025-07-31T16:43:17.92172+02:00
+custom:
+    Issue: "538"
