@@ -77,7 +77,7 @@ type PlanActionRequest struct {
 	// LinkedResources contains the data of the managed resource types that are linked to this action.
 	//
 	//   - If the action schema type is Unlinked, this field will be empty.
-	//   - If the action schema type is Lifecycle, this field will be contain a single linked resource.
+	//   - If the action schema type is Lifecycle, this field will contain a single linked resource.
 	//   - If the action schema type is Linked, this field will be one or more linked resources, which
 	//     will be in the same order as the linked resource schemas are defined in the action schema.
 	//
@@ -165,7 +165,7 @@ type InvokeActionRequest struct {
 	// LinkedResources contains the data of the managed resource types that are linked to this action.
 	//
 	//   - If the action schema type is Unlinked, this field will be empty.
-	//   - If the action schema type is Lifecycle, this field will be contain a single linked resource.
+	//   - If the action schema type is Lifecycle, this field will contain a single linked resource.
 	//   - If the action schema type is Linked, this field will be one or more linked resources, which
 	//     will be in the same order as the linked resource schemas are defined in the action schema.
 	//
