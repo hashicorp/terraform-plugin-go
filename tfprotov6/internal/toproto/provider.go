@@ -62,6 +62,7 @@ func GetProviderSchema_Response(in *tfprotov6.GetProviderSchemaResponse) *tfplug
 		Diagnostics:              Diagnostics(in.Diagnostics),
 		EphemeralResourceSchemas: make(map[string]*tfplugin6.Schema, len(in.EphemeralResourceSchemas)),
 		ListResourceSchemas:      make(map[string]*tfplugin6.Schema, len(in.ListResourceSchemas)),
+		StateStoreSchemas:        make(map[string]*tfplugin6.Schema, len(in.StateStoreSchemas)),
 		Functions:                make(map[string]*tfplugin6.Function, len(in.Functions)),
 		Provider:                 Schema(in.Provider),
 		ProviderMeta:             Schema(in.ProviderMeta),
@@ -75,6 +76,10 @@ func GetProviderSchema_Response(in *tfprotov6.GetProviderSchemaResponse) *tfplug
 
 	for name, schema := range in.ListResourceSchemas {
 		resp.ListResourceSchemas[name] = Schema(schema)
+	}
+
+	for name, schema := range in.StateStoreSchemas {
+		resp.StateStoreSchemas[name] = Schema(schema)
 	}
 
 	for name, schema := range in.ResourceSchemas {
