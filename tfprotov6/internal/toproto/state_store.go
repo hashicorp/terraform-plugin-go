@@ -28,6 +28,22 @@ func ConfigureStateStore_Response(in *tfprotov6.ConfigureStateStoreResponse) *tf
 	}
 }
 
+func ReadStateBytes_Response(in *tfprotov6.ReadStateByteChunk) *tfplugin6.ReadStateBytes_Response {
+	if in == nil {
+		return nil
+	}
+
+	return &tfplugin6.ReadStateBytes_Response{
+		Diagnostics: Diagnostics(in.Diagnostics),
+		Bytes:       in.Bytes,
+		TotalLength: in.TotalLength,
+		Range: &tfplugin6.StateRange{
+			Start: in.Range.Start,
+			End:   in.Range.End,
+		},
+	}
+}
+
 func GetStates_Response(in *tfprotov6.GetStatesResponse) *tfplugin6.GetStates_Response {
 	if in == nil {
 		return nil
