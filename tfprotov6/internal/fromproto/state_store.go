@@ -30,6 +30,17 @@ func ConfigureStateStoreRequest(in *tfplugin6.ConfigureStateStore_Request) *tfpr
 	}
 }
 
+func ReadStateBytesRequest(in *tfplugin6.ReadStateBytes_Request) *tfprotov6.ReadStateBytesRequest {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov6.ReadStateBytesRequest{
+		TypeName: in.TypeName,
+		StateId:  in.StateId,
+	}
+}
+
 func GetStatesRequest(in *tfplugin6.GetStates_Request) *tfprotov6.GetStatesRequest {
 	if in == nil {
 		return nil

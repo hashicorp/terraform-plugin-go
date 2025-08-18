@@ -1577,6 +1577,53 @@ func (s *server) ConfigureStateStore(ctx context.Context, protoReq *tfplugin6.Co
 	return protoResp, nil
 }
 
+func (s *server) ReadStateBytes(protoReq *tfplugin6.ReadStateBytes_Request, protoStream grpc.ServerStreamingServer[tfplugin6.ReadStateBytes_Response]) error {
+	rpc := "ReadStateBytes"
+	ctx := protoStream.Context()
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.StateStoreContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.ReadStateBytesRequest(protoReq)
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "StateId", req.StateId)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	if !ok {
+		err := status.Error(codes.Unimplemented, "ProviderServer does not implement ReadStateBytes")
+		logging.ProtocolError(ctx, err.Error())
+		return err
+	}
+
+	stream, err := server.ReadStateBytes(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return err
+	}
+
+	for chunk := range stream.Chunks {
+		select {
+		// TODO: check how interruptions are handled
+		case <-ctx.Done():
+			logging.ProtocolTrace(ctx, "all chunks sent")
+			return nil
+
+		default:
+			protoChunk := toproto.ReadStateBytes_Response(&chunk)
+			if err := protoStream.Send(protoChunk); err != nil {
+				logging.ProtocolError(ctx, "Error sending chunk", map[string]any{logging.KeyError: err})
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func (s *server) GetStates(ctx context.Context, protoReq *tfplugin6.GetStates_Request) (*tfplugin6.GetStates_Response, error) {
 	rpc := "GetStates"
 	ctx = s.loggingContext(ctx)
