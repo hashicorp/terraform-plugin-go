@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"regexp"
@@ -1641,6 +1642,69 @@ func (s *server) ReadStateBytes(protoReq *tfplugin6.ReadStateBytes_Request, prot
 			}
 		}
 	}
+
+	return nil
+}
+
+func (s *server) WriteStateBytes(srv grpc.ClientStreamingServer[tfplugin6.WriteStateBytes_RequestChunk, tfplugin6.WriteStateBytes_Response]) error {
+	rpc := "WriteStateBytes"
+	ctx := srv.Context()
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	// ctx = logging.StateStoreContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	// logging.ProtocolTrace(ctx, "Received request")
+	// defer logging.ProtocolTrace(ctx, "Served request")
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	if !ok {
+		err := status.Error(codes.Unimplemented, "ProviderServer does not implement WriteStateBytes")
+		logging.ProtocolError(ctx, err.Error())
+		return err
+	}
+
+	var iteratorErr error
+
+	// TODO: what about error handling per chunk and providers having the ability to do cleanup on interruption?
+
+	iterator := func(yield func(tfprotov6.WriteStateByteChunk) bool) {
+		for {
+			chunk, err := srv.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				iteratorErr = err
+				srv.SendMsg(&tfplugin6.WriteStateBytes_Response{
+					// Diagnostics: ,
+				})
+				return
+			}
+
+			yield(tfprotov6.WriteStateByteChunk{
+				Bytes:       chunk.Bytes,
+				TotalLength: chunk.TotalLength,
+				Range: tfprotov6.StateByteRange{
+					Start: chunk.Range.Start,
+					End:   chunk.Range.End,
+				},
+			})
+
+		}
+	}
+
+	resp, err := server.WriteStateBytes(ctx, &tfprotov6.WriteStateBytesStream{
+		Chunks: iterator,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = srv.SendAndClose(&tfplugin6.WriteStateBytes_Response{
+		// Diagnostics: resp.Diagnostics,
+	})
 
 	return nil
 }
