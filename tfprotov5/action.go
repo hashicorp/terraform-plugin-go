@@ -77,13 +77,6 @@ type PlanActionRequest struct {
 	// LinkedResources contains the data of the managed resource types that are linked to this action.
 	//
 	//   - If the action schema type is Unlinked, this field will be empty.
-	//   - If the action schema type is Lifecycle, this field will contain a single linked resource.
-	//   - If the action schema type is Linked, this field will be one or more linked resources, which
-	//     will be in the same order as the linked resource schemas are defined in the action schema.
-	//
-	// For Lifecycle actions, the provider may only change computed-only attributes.
-	//
-	// For Linked actions, the provider may change any attributes as long as it adheres to the resource schema.
 	LinkedResources []*ProposedLinkedResource
 
 	// Config is the configuration the user supplied for the action. See
@@ -128,9 +121,7 @@ type ProposedLinkedResource struct {
 type PlanActionResponse struct {
 	// LinkedResources contains the provider modified data of the managed resource types that are linked to this action.
 	//
-	// For Lifecycle actions, the provider may only change computed-only attributes.
-	//
-	// For Linked actions, the provider may change any attributes as long as it adheres to the resource schema.
+	// This field is not currently in-use, but future action schema types will use this field to plan modifications of state data for linked resources.
 	LinkedResources []*PlannedLinkedResource
 
 	// Diagnostics report errors or warnings related to plannning the action and calculating
@@ -165,13 +156,6 @@ type InvokeActionRequest struct {
 	// LinkedResources contains the data of the managed resource types that are linked to this action.
 	//
 	//   - If the action schema type is Unlinked, this field will be empty.
-	//   - If the action schema type is Lifecycle, this field will contain a single linked resource.
-	//   - If the action schema type is Linked, this field will be one or more linked resources, which
-	//     will be in the same order as the linked resource schemas are defined in the action schema.
-	//
-	// For Lifecycle actions, the provider may only change computed-only attributes.
-	//
-	// For Linked actions, the provider may change any attributes as long as it adheres to the resource schema.
 	LinkedResources []*InvokeLinkedResource
 
 	// Config is the configuration the user supplied for the action. See
@@ -252,9 +236,7 @@ func (a ProgressInvokeActionEventType) isInvokeActionEventType() {}
 type CompletedInvokeActionEventType struct {
 	// LinkedResources contains the provider modified data of the managed resource types that are linked to this action.
 	//
-	// For Lifecycle actions, the provider may only change computed-only attributes.
-	//
-	// For Linked actions, the provider may change any attributes as long as it adheres to the resource schema.
+	// This field is not currently in-use, but future action schema types will use this field to modify state data for linked resources.
 	LinkedResources []*NewLinkedResource
 
 	// Diagnostics report errors or warnings related to invoking an action.
