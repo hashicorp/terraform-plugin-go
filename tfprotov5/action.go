@@ -57,6 +57,30 @@ type ValidateActionConfigRequest struct {
 	// from knowing the value at request time. Any attributes not directly
 	// set in the configuration will be null.
 	Config *DynamicValue
+
+	// LinkedResources contains the configuration data of the managed resource types that are linked to this action.
+	//
+	//   - If the action schema type is Unlinked, this field will be empty.
+	LinkedResources []*LinkedResourceConfig
+}
+
+// LinkedResourceConfig represents linked resource config data used in the ValidateActionConfig RPC.
+type LinkedResourceConfig struct {
+	// TypeName is the type of linked resource Terraform is validating.
+	TypeName string
+
+	// Config is the configuration the user supplied for the linked resource. See
+	// the documentation on `DynamicValue` for more information about
+	// safely accessing the configuration.
+	//
+	// The configuration is represented as a tftypes.Object, with each
+	// attribute and nested block getting its own key and value.
+	//
+	// This configuration may contain unknown values if a user uses
+	// interpolation or other functionality that would prevent Terraform
+	// from knowing the value at request time. Any attributes not directly
+	// set in the configuration will be null.
+	Config *DynamicValue
 }
 
 // ValidateActionConfigResponse is the response from the provider about

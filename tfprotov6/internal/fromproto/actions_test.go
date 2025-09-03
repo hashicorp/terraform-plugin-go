@@ -24,15 +24,18 @@ func TestValidateActionConfigRequest(t *testing.T) {
 			expected: nil,
 		},
 		"zero": {
-			in:       &tfplugin6.ValidateActionConfig_Request{},
-			expected: &tfprotov6.ValidateActionConfigRequest{},
+			in: &tfplugin6.ValidateActionConfig_Request{},
+			expected: &tfprotov6.ValidateActionConfigRequest{
+				LinkedResources: []*tfprotov6.LinkedResourceConfig{},
+			},
 		},
 		"Config": {
 			in: &tfplugin6.ValidateActionConfig_Request{
 				Config: testTfplugin6DynamicValue(),
 			},
 			expected: &tfprotov6.ValidateActionConfigRequest{
-				Config: testTfprotov6DynamicValue(),
+				Config:          testTfprotov6DynamicValue(),
+				LinkedResources: []*tfprotov6.LinkedResourceConfig{},
 			},
 		},
 		"ActionType": {
@@ -40,7 +43,26 @@ func TestValidateActionConfigRequest(t *testing.T) {
 				ActionType: "test",
 			},
 			expected: &tfprotov6.ValidateActionConfigRequest{
-				ActionType: "test",
+				ActionType:      "test",
+				LinkedResources: []*tfprotov6.LinkedResourceConfig{},
+			},
+		},
+		"LinkedResources": {
+			in: &tfplugin6.ValidateActionConfig_Request{
+				LinkedResources: []*tfplugin6.LinkedResourceConfig{
+					{
+						TypeName: "test_linked",
+						Config:   testTfplugin6DynamicValue(),
+					},
+				},
+			},
+			expected: &tfprotov6.ValidateActionConfigRequest{
+				LinkedResources: []*tfprotov6.LinkedResourceConfig{
+					{
+						TypeName: "test_linked",
+						Config:   testTfprotov6DynamicValue(),
+					},
+				},
 			},
 		},
 	}
