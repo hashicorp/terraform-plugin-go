@@ -63,87 +63,6 @@ func TestActionSchema(t *testing.T) {
 				},
 			},
 		},
-		"Type - LifecycleActionSchemaType - Executes - Before": {
-			in: &tfprotov6.ActionSchema{
-				Type: tfprotov6.LifecycleActionSchemaType{
-					Executes: tfprotov6.LifecycleExecutionOrderBefore,
-				},
-			},
-			expected: &tfplugin6.ActionSchema{
-				Type: &tfplugin6.ActionSchema_Lifecycle_{
-					Lifecycle: &tfplugin6.ActionSchema_Lifecycle{
-						Executes: tfplugin6.ActionSchema_Lifecycle_BEFORE,
-					},
-				},
-			},
-		},
-		"Type - LifecycleActionSchemaType - Executes - After": {
-			in: &tfprotov6.ActionSchema{
-				Type: tfprotov6.LifecycleActionSchemaType{
-					Executes: tfprotov6.LifecycleExecutionOrderAfter,
-				},
-			},
-			expected: &tfplugin6.ActionSchema{
-				Type: &tfplugin6.ActionSchema_Lifecycle_{
-					Lifecycle: &tfplugin6.ActionSchema_Lifecycle{
-						Executes: tfplugin6.ActionSchema_Lifecycle_AFTER,
-					},
-				},
-			},
-		},
-		"Type - LifecycleActionSchemaType - LinkedResource": {
-			in: &tfprotov6.ActionSchema{
-				Type: tfprotov6.LifecycleActionSchemaType{
-					LinkedResource: &tfprotov6.LinkedResourceSchema{
-						TypeName:    "test",
-						Description: "This is a test linked resource.",
-					},
-				},
-			},
-			expected: &tfplugin6.ActionSchema{
-				Type: &tfplugin6.ActionSchema_Lifecycle_{
-					Lifecycle: &tfplugin6.ActionSchema_Lifecycle{
-						Executes: tfplugin6.ActionSchema_Lifecycle_INVALID,
-						LinkedResource: &tfplugin6.ActionSchema_LinkedResource{
-							TypeName:    "test",
-							Description: "This is a test linked resource.",
-						},
-					},
-				},
-			},
-		},
-		"Type - LinkedActionSchemaType - LinkedResources": {
-			in: &tfprotov6.ActionSchema{
-				Type: tfprotov6.LinkedActionSchemaType{
-					LinkedResources: []*tfprotov6.LinkedResourceSchema{
-						{
-							TypeName:    "test 1",
-							Description: "This is a test linked resource.",
-						},
-						{
-							TypeName:    "test 2",
-							Description: "This is also a test linked resource.",
-						},
-					},
-				},
-			},
-			expected: &tfplugin6.ActionSchema{
-				Type: &tfplugin6.ActionSchema_Linked_{
-					Linked: &tfplugin6.ActionSchema_Linked{
-						LinkedResources: []*tfplugin6.ActionSchema_LinkedResource{
-							{
-								TypeName:    "test 1",
-								Description: "This is a test linked resource.",
-							},
-							{
-								TypeName:    "test 2",
-								Description: "This is also a test linked resource.",
-							},
-						},
-					},
-				},
-			},
-		},
 	}
 
 	for name, testCase := range testCases {
@@ -160,11 +79,6 @@ func TestActionSchema(t *testing.T) {
 				tfplugin6.ActionSchema{},
 				tfplugin6.ActionSchema_Unlinked{},
 				tfplugin6.ActionSchema_Unlinked_{},
-				tfplugin6.ActionSchema_Lifecycle{},
-				tfplugin6.ActionSchema_Lifecycle_{},
-				tfplugin6.ActionSchema_Linked{},
-				tfplugin6.ActionSchema_Linked_{},
-				tfplugin6.ActionSchema_LinkedResource{},
 				tfplugin6.Schema{},
 				tfplugin6.Schema_Attribute{},
 				tfplugin6.Schema_Block{},
