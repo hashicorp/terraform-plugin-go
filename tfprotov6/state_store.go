@@ -56,6 +56,16 @@ type ReadStateBytesStream struct {
 	Chunks iter.Seq[ReadStateByteChunk]
 }
 
+type WriteStateBytesStream struct {
+	Chunks iter.Seq[WriteStateByteChunk]
+}
+
+type WriteStateBytesResponse struct {
+	Diagnostics []*Diagnostic
+}
+
+type WriteStateByteChunk = StateByteChunk
+
 type ReadStateByteChunk struct {
 	StateByteChunk
 	Diagnostics []*Diagnostic
