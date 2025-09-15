@@ -57,7 +57,7 @@ type ReadStateBytesStream struct {
 }
 
 type WriteStateBytesStream struct {
-	Chunks iter.Seq[WriteStateByteChunk]
+	Chunks iter.Seq2[WriteStateByteChunk, error]
 }
 
 type WriteStateBytesResponse struct {
