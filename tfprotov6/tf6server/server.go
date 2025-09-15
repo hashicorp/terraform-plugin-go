@@ -1670,7 +1670,7 @@ func (s *server) WriteStateBytes(srv grpc.ClientStreamingServer[tfplugin6.WriteS
 		for {
 			chunk, err := srv.Recv()
 			if err == io.EOF {
-				break
+				return
 			}
 			if err != nil {
 				logging.ProtocolError(ctx, fmt.Sprintf(
