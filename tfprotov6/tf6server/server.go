@@ -1644,30 +1644,19 @@ func (s *server) WriteStateBytes(srv grpc.ClientStreamingServer[tfplugin6.WriteS
 		return err
 	}
 
-	iterator := func(yield func(tfprotov6.WriteStateByteChunk) bool) {
+	// Trying an aproach using iter.Seq2
+	iterator := func(yield func(tfprotov6.WriteStateByteChunk, error) bool) {
 		for {
 			chunk, err := srv.Recv()
 			if err == io.EOF {
 				break
 			}
 			if err != nil {
-				// attempt to send the error back to client
-				msgErr := srv.SendMsg(&tfplugin6.WriteStateBytes_Response{
-					Diagnostics: toproto.Diagnostics([]*tfprotov6.Diagnostic{
-						{
-							Severity: tfprotov6.DiagnosticSeverityError,
-							Summary:  "Writing state chunk failed",
-							Detail: fmt.Sprintf("Attempt to write a byte chunk of state %q to %q failed: %s",
-								chunk.StateId, chunk.TypeName, err),
-						},
-					}),
-				})
-				if msgErr != nil {
-					err := status.Error(codes.Unimplemented, "ProviderServer does not implement WriteStateBytes")
-					logging.ProtocolError(ctx, err.Error())
-					return
-				}
-				return
+				logging.ProtocolError(ctx, fmt.Sprintf(
+					"WriteStateBytes experienced an error when receiving state data from Terraform: %s",
+					err,
+				),
+				)
 			}
 
 			ok := yield(tfprotov6.WriteStateByteChunk{
@@ -1677,11 +1666,10 @@ func (s *server) WriteStateBytes(srv grpc.ClientStreamingServer[tfplugin6.WriteS
 					Start: chunk.Range.Start,
 					End:   chunk.Range.End,
 				},
-			})
+			}, err)
 			if !ok {
 				return
 			}
-
 		}
 	}
 
