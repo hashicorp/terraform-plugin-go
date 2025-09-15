@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/fromproto"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
@@ -24,18 +25,15 @@ func TestValidateActionConfigRequest(t *testing.T) {
 			expected: nil,
 		},
 		"zero": {
-			in: &tfplugin5.ValidateActionConfig_Request{},
-			expected: &tfprotov5.ValidateActionConfigRequest{
-				LinkedResources: []*tfprotov5.LinkedResourceConfig{},
-			},
+			in:       &tfplugin5.ValidateActionConfig_Request{},
+			expected: &tfprotov5.ValidateActionConfigRequest{},
 		},
 		"Config": {
 			in: &tfplugin5.ValidateActionConfig_Request{
 				Config: testTfplugin5DynamicValue(),
 			},
 			expected: &tfprotov5.ValidateActionConfigRequest{
-				Config:          testTfprotov5DynamicValue(),
-				LinkedResources: []*tfprotov5.LinkedResourceConfig{},
+				Config: testTfprotov5DynamicValue(),
 			},
 		},
 		"ActionType": {
@@ -43,26 +41,7 @@ func TestValidateActionConfigRequest(t *testing.T) {
 				ActionType: "test",
 			},
 			expected: &tfprotov5.ValidateActionConfigRequest{
-				ActionType:      "test",
-				LinkedResources: []*tfprotov5.LinkedResourceConfig{},
-			},
-		},
-		"LinkedResources": {
-			in: &tfplugin5.ValidateActionConfig_Request{
-				LinkedResources: []*tfplugin5.LinkedResourceConfig{
-					{
-						TypeName: "test_linked",
-						Config:   testTfplugin5DynamicValue(),
-					},
-				},
-			},
-			expected: &tfprotov5.ValidateActionConfigRequest{
-				LinkedResources: []*tfprotov5.LinkedResourceConfig{
-					{
-						TypeName: "test_linked",
-						Config:   testTfprotov5DynamicValue(),
-					},
-				},
+				ActionType: "test",
 			},
 		},
 	}
@@ -92,18 +71,15 @@ func TestPlanActionRequest(t *testing.T) {
 			expected: nil,
 		},
 		"zero": {
-			in: &tfplugin5.PlanAction_Request{},
-			expected: &tfprotov5.PlanActionRequest{
-				LinkedResources: []*tfprotov5.ProposedLinkedResource{},
-			},
+			in:       &tfplugin5.PlanAction_Request{},
+			expected: &tfprotov5.PlanActionRequest{},
 		},
 		"ActionType": {
 			in: &tfplugin5.PlanAction_Request{
 				ActionType: "test",
 			},
 			expected: &tfprotov5.PlanActionRequest{
-				ActionType:      "test",
-				LinkedResources: []*tfprotov5.ProposedLinkedResource{},
+				ActionType: "test",
 			},
 		},
 		"Config": {
@@ -111,120 +87,7 @@ func TestPlanActionRequest(t *testing.T) {
 				Config: testTfplugin5DynamicValue(),
 			},
 			expected: &tfprotov5.PlanActionRequest{
-				Config:          testTfprotov5DynamicValue(),
-				LinkedResources: []*tfprotov5.ProposedLinkedResource{},
-			},
-		},
-		"LinkedResources - PriorState": {
-			in: &tfplugin5.PlanAction_Request{
-				LinkedResources: []*tfplugin5.PlanAction_Request_LinkedResource{
-					{
-						PriorState: testTfplugin5DynamicValue(),
-					},
-					{
-						PriorState: testTfplugin5DynamicValue(),
-					},
-					{
-						PriorState: testTfplugin5DynamicValue(),
-					},
-				},
-			},
-			expected: &tfprotov5.PlanActionRequest{
-				LinkedResources: []*tfprotov5.ProposedLinkedResource{
-					{
-						PriorState: testTfprotov5DynamicValue(),
-					},
-					{
-						PriorState: testTfprotov5DynamicValue(),
-					},
-					{
-						PriorState: testTfprotov5DynamicValue(),
-					},
-				},
-			},
-		},
-		"LinkedResources - PlannedState": {
-			in: &tfplugin5.PlanAction_Request{
-				LinkedResources: []*tfplugin5.PlanAction_Request_LinkedResource{
-					{
-						PlannedState: testTfplugin5DynamicValue(),
-					},
-					{
-						PlannedState: testTfplugin5DynamicValue(),
-					},
-					{
-						PlannedState: testTfplugin5DynamicValue(),
-					},
-				},
-			},
-			expected: &tfprotov5.PlanActionRequest{
-				LinkedResources: []*tfprotov5.ProposedLinkedResource{
-					{
-						PlannedState: testTfprotov5DynamicValue(),
-					},
-					{
-						PlannedState: testTfprotov5DynamicValue(),
-					},
-					{
-						PlannedState: testTfprotov5DynamicValue(),
-					},
-				},
-			},
-		},
-		"LinkedResources - Config": {
-			in: &tfplugin5.PlanAction_Request{
-				LinkedResources: []*tfplugin5.PlanAction_Request_LinkedResource{
-					{
-						Config: testTfplugin5DynamicValue(),
-					},
-					{
-						Config: testTfplugin5DynamicValue(),
-					},
-					{
-						Config: testTfplugin5DynamicValue(),
-					},
-				},
-			},
-			expected: &tfprotov5.PlanActionRequest{
-				LinkedResources: []*tfprotov5.ProposedLinkedResource{
-					{
-						Config: testTfprotov5DynamicValue(),
-					},
-					{
-						Config: testTfprotov5DynamicValue(),
-					},
-					{
-						Config: testTfprotov5DynamicValue(),
-					},
-				},
-			},
-		},
-		"LinkedResources - PriorIdentity": {
-			in: &tfplugin5.PlanAction_Request{
-				LinkedResources: []*tfplugin5.PlanAction_Request_LinkedResource{
-					{
-						PriorIdentity: testTfplugin5ResourceIdentityData(),
-					},
-					{
-						PriorIdentity: testTfplugin5ResourceIdentityData(),
-					},
-					{
-						PriorIdentity: testTfplugin5ResourceIdentityData(),
-					},
-				},
-			},
-			expected: &tfprotov5.PlanActionRequest{
-				LinkedResources: []*tfprotov5.ProposedLinkedResource{
-					{
-						PriorIdentity: testTfprotov5ResourceIdentityData(),
-					},
-					{
-						PriorIdentity: testTfprotov5ResourceIdentityData(),
-					},
-					{
-						PriorIdentity: testTfprotov5ResourceIdentityData(),
-					},
-				},
+				Config: testTfprotov5DynamicValue(),
 			},
 		},
 		"ClientCapabilities": {
@@ -237,7 +100,6 @@ func TestPlanActionRequest(t *testing.T) {
 				ClientCapabilities: &tfprotov5.PlanActionClientCapabilities{
 					DeferralAllowed: true,
 				},
-				LinkedResources: []*tfprotov5.ProposedLinkedResource{},
 			},
 		},
 	}
@@ -267,18 +129,15 @@ func TestInvokeActionRequest(t *testing.T) {
 			expected: nil,
 		},
 		"zero": {
-			in: &tfplugin5.InvokeAction_Request{},
-			expected: &tfprotov5.InvokeActionRequest{
-				LinkedResources: []*tfprotov5.InvokeLinkedResource{},
-			},
+			in:       &tfplugin5.InvokeAction_Request{},
+			expected: &tfprotov5.InvokeActionRequest{},
 		},
 		"ActionType": {
 			in: &tfplugin5.InvokeAction_Request{
 				ActionType: "test",
 			},
 			expected: &tfprotov5.InvokeActionRequest{
-				ActionType:      "test",
-				LinkedResources: []*tfprotov5.InvokeLinkedResource{},
+				ActionType: "test",
 			},
 		},
 		"Config": {
@@ -286,120 +145,15 @@ func TestInvokeActionRequest(t *testing.T) {
 				Config: testTfplugin5DynamicValue(),
 			},
 			expected: &tfprotov5.InvokeActionRequest{
-				Config:          testTfprotov5DynamicValue(),
-				LinkedResources: []*tfprotov5.InvokeLinkedResource{},
+				Config: testTfprotov5DynamicValue(),
 			},
 		},
-		"LinkedResources - PriorState": {
+		"ClientCapabilities": {
 			in: &tfplugin5.InvokeAction_Request{
-				LinkedResources: []*tfplugin5.InvokeAction_Request_LinkedResource{
-					{
-						PriorState: testTfplugin5DynamicValue(),
-					},
-					{
-						PriorState: testTfplugin5DynamicValue(),
-					},
-					{
-						PriorState: testTfplugin5DynamicValue(),
-					},
-				},
+				ClientCapabilities: &tfplugin5.ClientCapabilities{},
 			},
 			expected: &tfprotov5.InvokeActionRequest{
-				LinkedResources: []*tfprotov5.InvokeLinkedResource{
-					{
-						PriorState: testTfprotov5DynamicValue(),
-					},
-					{
-						PriorState: testTfprotov5DynamicValue(),
-					},
-					{
-						PriorState: testTfprotov5DynamicValue(),
-					},
-				},
-			},
-		},
-		"LinkedResources - PlannedState": {
-			in: &tfplugin5.InvokeAction_Request{
-				LinkedResources: []*tfplugin5.InvokeAction_Request_LinkedResource{
-					{
-						PlannedState: testTfplugin5DynamicValue(),
-					},
-					{
-						PlannedState: testTfplugin5DynamicValue(),
-					},
-					{
-						PlannedState: testTfplugin5DynamicValue(),
-					},
-				},
-			},
-			expected: &tfprotov5.InvokeActionRequest{
-				LinkedResources: []*tfprotov5.InvokeLinkedResource{
-					{
-						PlannedState: testTfprotov5DynamicValue(),
-					},
-					{
-						PlannedState: testTfprotov5DynamicValue(),
-					},
-					{
-						PlannedState: testTfprotov5DynamicValue(),
-					},
-				},
-			},
-		},
-		"LinkedResources - Config": {
-			in: &tfplugin5.InvokeAction_Request{
-				LinkedResources: []*tfplugin5.InvokeAction_Request_LinkedResource{
-					{
-						Config: testTfplugin5DynamicValue(),
-					},
-					{
-						Config: testTfplugin5DynamicValue(),
-					},
-					{
-						Config: testTfplugin5DynamicValue(),
-					},
-				},
-			},
-			expected: &tfprotov5.InvokeActionRequest{
-				LinkedResources: []*tfprotov5.InvokeLinkedResource{
-					{
-						Config: testTfprotov5DynamicValue(),
-					},
-					{
-						Config: testTfprotov5DynamicValue(),
-					},
-					{
-						Config: testTfprotov5DynamicValue(),
-					},
-				},
-			},
-		},
-		"LinkedResources - PlannedIdentity": {
-			in: &tfplugin5.InvokeAction_Request{
-				LinkedResources: []*tfplugin5.InvokeAction_Request_LinkedResource{
-					{
-						PlannedIdentity: testTfplugin5ResourceIdentityData(),
-					},
-					{
-						PlannedIdentity: testTfplugin5ResourceIdentityData(),
-					},
-					{
-						PlannedIdentity: testTfplugin5ResourceIdentityData(),
-					},
-				},
-			},
-			expected: &tfprotov5.InvokeActionRequest{
-				LinkedResources: []*tfprotov5.InvokeLinkedResource{
-					{
-						PlannedIdentity: testTfprotov5ResourceIdentityData(),
-					},
-					{
-						PlannedIdentity: testTfprotov5ResourceIdentityData(),
-					},
-					{
-						PlannedIdentity: testTfprotov5ResourceIdentityData(),
-					},
-				},
+				ClientCapabilities: &tfprotov5.InvokeActionClientCapabilities{},
 			},
 		},
 	}
