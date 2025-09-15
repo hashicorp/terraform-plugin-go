@@ -24,16 +24,12 @@ type ActionServer interface {
 	ValidateActionConfig(context.Context, *ValidateActionConfigRequest) (*ValidateActionConfigResponse, error)
 
 	// PlanAction is called when Terraform is attempting to
-	// calculate a plan for an action. Depending on the type defined in
-	// the action schema, Terraform may also pass the plan of linked resources
-	// that the action can modify or return unmodified to influence Terraform's plan.
+	// calculate a plan for an action.
 	PlanAction(context.Context, *PlanActionRequest) (*PlanActionResponse, error)
 
 	// InvokeAction is called when Terraform wants to execute the logic of an action.
-	// Depending on the type defined in the action schema, Terraform may also pass the
-	// state of linked resources. The provider runs the logic of the action, reporting progress
-	// events as desired, then sends a final complete event that has the linked resource's resulting
-	// state and identity.
+	// The provider runs the logic of the action, reporting progress
+	// events as desired, then sends a final complete event.
 	//
 	// If an error occurs, the provider sends a complete event with the relevant diagnostics.
 	InvokeAction(context.Context, *InvokeActionRequest) (*InvokeActionServerStream, error)
@@ -46,25 +42,6 @@ type ValidateActionConfigRequest struct {
 	ActionType string
 
 	// Config is the configuration the user supplied for that action. See
-	// the documentation on `DynamicValue` for more information about
-	// safely accessing the configuration.
-	//
-	// The configuration is represented as a tftypes.Object, with each
-	// attribute and nested block getting its own key and value.
-	//
-	// This configuration may contain unknown values if a user uses
-	// interpolation or other functionality that would prevent Terraform
-	// from knowing the value at request time. Any attributes not directly
-	// set in the configuration will be null.
-	Config *DynamicValue
-}
-
-// LinkedResourceConfig represents linked resource config data used in the ValidateActionConfig RPC.
-type LinkedResourceConfig struct {
-	// TypeName is the type of linked resource Terraform is validating.
-	TypeName string
-
-	// Config is the configuration the user supplied for the linked resource. See
 	// the documentation on `DynamicValue` for more information about
 	// safely accessing the configuration.
 	//
@@ -114,19 +91,6 @@ type PlanActionResponse struct {
 	Deferred *Deferred
 }
 
-// PlannedLinkedResource represents linked resource data that was planned during PlanAction and returned.
-type PlannedLinkedResource struct {
-	// PlannedState is the provider's indication of what the state for the
-	// linked resource should be after apply, represented as a `DynamicValue`. See
-	// the documentation for `DynamicValue` for information about safely
-	// creating the `DynamicValue`.
-	PlannedState *DynamicValue
-
-	// PlannedIdentity is the provider's indication of what the identity for the
-	// linked resource should be after apply, represented as a `ResourceIdentityData`
-	PlannedIdentity *ResourceIdentityData
-}
-
 // InvokeActionRequest is the request Terraform sends when it wants to execute
 // the logic of an action.
 type InvokeActionRequest struct {
@@ -150,8 +114,8 @@ type InvokeActionRequest struct {
 type InvokeActionServerStream struct {
 	// Events is the iterator that the provider can stream progress messages back to Terraform
 	// as the action is executing. Once the provider has completed the action invocation, the provider must
-	// respond with a completed event with the new linked resource state or diagnostics explaining why
-	// the action failed.
+	// respond with a completed event. If the action failed, the completed event must contain
+	// diagnostics explaining why the action failed.
 	Events iter.Seq[InvokeActionEvent]
 }
 
