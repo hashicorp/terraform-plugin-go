@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/toproto"
@@ -35,7 +36,6 @@ func TestActionSchema(t *testing.T) {
 						},
 					},
 				},
-				Type: tfprotov5.UnlinkedActionSchemaType{},
 			},
 			expected: &tfplugin5.ActionSchema{
 				Schema: &tfplugin5.Schema{
@@ -47,19 +47,6 @@ func TestActionSchema(t *testing.T) {
 						},
 						BlockTypes: []*tfplugin5.Schema_NestedBlock{},
 					},
-				},
-				Type: &tfplugin5.ActionSchema_Unlinked_{
-					Unlinked: &tfplugin5.ActionSchema_Unlinked{},
-				},
-			},
-		},
-		"Type - UnlinkedActionSchemaType": {
-			in: &tfprotov5.ActionSchema{
-				Type: tfprotov5.UnlinkedActionSchemaType{},
-			},
-			expected: &tfplugin5.ActionSchema{
-				Type: &tfplugin5.ActionSchema_Unlinked_{
-					Unlinked: &tfplugin5.ActionSchema_Unlinked{},
 				},
 			},
 		},
@@ -77,8 +64,6 @@ func TestActionSchema(t *testing.T) {
 			// benefits.
 			diffOpts := cmpopts.IgnoreUnexported(
 				tfplugin5.ActionSchema{},
-				tfplugin5.ActionSchema_Unlinked{},
-				tfplugin5.ActionSchema_Unlinked_{},
 				tfplugin5.Schema{},
 				tfplugin5.Schema_Attribute{},
 				tfplugin5.Schema_Block{},

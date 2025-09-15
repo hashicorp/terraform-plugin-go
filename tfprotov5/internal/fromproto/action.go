@@ -14,23 +14,9 @@ func ValidateActionConfigRequest(in *tfplugin5.ValidateActionConfig_Request) *tf
 	}
 
 	return &tfprotov5.ValidateActionConfigRequest{
-		ActionType:      in.ActionType,
-		Config:          DynamicValue(in.Config),
-		LinkedResources: LinkedResourceConfigs(in.LinkedResources),
+		ActionType: in.ActionType,
+		Config:     DynamicValue(in.Config),
 	}
-}
-
-func LinkedResourceConfigs(in []*tfplugin5.LinkedResourceConfig) []*tfprotov5.LinkedResourceConfig {
-	resp := make([]*tfprotov5.LinkedResourceConfig, 0, len(in))
-
-	for _, inLinkedResource := range in {
-		resp = append(resp, &tfprotov5.LinkedResourceConfig{
-			TypeName: inLinkedResource.TypeName,
-			Config:   DynamicValue(inLinkedResource.Config),
-		})
-	}
-
-	return resp
 }
 
 func PlanActionRequest(in *tfplugin5.PlanAction_Request) *tfprotov5.PlanActionRequest {
@@ -40,24 +26,8 @@ func PlanActionRequest(in *tfplugin5.PlanAction_Request) *tfprotov5.PlanActionRe
 
 	resp := &tfprotov5.PlanActionRequest{
 		ActionType:         in.ActionType,
-		LinkedResources:    ProposedLinkedResources(in.LinkedResources),
 		Config:             DynamicValue(in.Config),
 		ClientCapabilities: PlanActionClientCapabilities(in.ClientCapabilities),
-	}
-
-	return resp
-}
-
-func ProposedLinkedResources(in []*tfplugin5.PlanAction_Request_LinkedResource) []*tfprotov5.ProposedLinkedResource {
-	resp := make([]*tfprotov5.ProposedLinkedResource, 0, len(in))
-
-	for _, inLinkedResource := range in {
-		resp = append(resp, &tfprotov5.ProposedLinkedResource{
-			PriorState:    DynamicValue(inLinkedResource.PriorState),
-			PlannedState:  DynamicValue(inLinkedResource.PlannedState),
-			Config:        DynamicValue(inLinkedResource.Config),
-			PriorIdentity: ResourceIdentityData(inLinkedResource.PriorIdentity),
-		})
 	}
 
 	return resp
@@ -69,24 +39,9 @@ func InvokeActionRequest(in *tfplugin5.InvokeAction_Request) *tfprotov5.InvokeAc
 	}
 
 	resp := &tfprotov5.InvokeActionRequest{
-		ActionType:      in.ActionType,
-		LinkedResources: InvokeLinkedResources(in.LinkedResources),
-		Config:          DynamicValue(in.Config),
-	}
-
-	return resp
-}
-
-func InvokeLinkedResources(in []*tfplugin5.InvokeAction_Request_LinkedResource) []*tfprotov5.InvokeLinkedResource {
-	resp := make([]*tfprotov5.InvokeLinkedResource, 0, len(in))
-
-	for _, inLinkedResource := range in {
-		resp = append(resp, &tfprotov5.InvokeLinkedResource{
-			PriorState:      DynamicValue(inLinkedResource.PriorState),
-			PlannedState:    DynamicValue(inLinkedResource.PlannedState),
-			Config:          DynamicValue(inLinkedResource.Config),
-			PlannedIdentity: ResourceIdentityData(inLinkedResource.PlannedIdentity),
-		})
+		ActionType:         in.ActionType,
+		Config:             DynamicValue(in.Config),
+		ClientCapabilities: InvokeActionClientCapabilities(in.ClientCapabilities),
 	}
 
 	return resp

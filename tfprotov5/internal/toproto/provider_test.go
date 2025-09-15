@@ -327,7 +327,6 @@ func TestGetProviderSchema_Response(t *testing.T) {
 								},
 							},
 						},
-						Type: tfprotov5.UnlinkedActionSchemaType{},
 					},
 				},
 			},
@@ -343,9 +342,6 @@ func TestGetProviderSchema_Response(t *testing.T) {
 								},
 								BlockTypes: []*tfplugin5.Schema_NestedBlock{},
 							},
-						},
-						Type: &tfplugin5.ActionSchema_Unlinked_{
-							Unlinked: &tfplugin5.ActionSchema_Unlinked{},
 						},
 					},
 				},
@@ -640,8 +636,6 @@ func TestGetProviderSchema_Response(t *testing.T) {
 			diffOpts := cmpopts.IgnoreUnexported(
 				tfplugin5.Diagnostic{},
 				tfplugin5.ActionSchema{},
-				tfplugin5.ActionSchema_Unlinked{},
-				tfplugin5.ActionSchema_Unlinked_{},
 				tfplugin5.Function{},
 				tfplugin5.Function_Return{},
 				tfplugin5.GetProviderSchema_Response{},
