@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/toproto"
@@ -126,41 +127,6 @@ func TestPlanAction_Response(t *testing.T) {
 		"zero": {
 			in: &tfprotov6.PlanActionResponse{},
 			expected: &tfplugin6.PlanAction_Response{
-				LinkedResources: []*tfplugin6.PlanAction_Response_LinkedResource{},
-				Diagnostics:     []*tfplugin6.Diagnostic{},
-			},
-		},
-		"LinkedResources - PlannedState": {
-			in: &tfprotov6.PlanActionResponse{
-				LinkedResources: []*tfprotov6.PlannedLinkedResource{
-					{
-						PlannedState: testTfprotov6DynamicValue(),
-					},
-				},
-			},
-			expected: &tfplugin6.PlanAction_Response{
-				LinkedResources: []*tfplugin6.PlanAction_Response_LinkedResource{
-					{
-						PlannedState: testTfplugin6DynamicValue(),
-					},
-				},
-				Diagnostics: []*tfplugin6.Diagnostic{},
-			},
-		},
-		"LinkedResources - PlannedIdentity": {
-			in: &tfprotov6.PlanActionResponse{
-				LinkedResources: []*tfprotov6.PlannedLinkedResource{
-					{
-						PlannedIdentity: testTfprotov6ResourceIdentityData(),
-					},
-				},
-			},
-			expected: &tfplugin6.PlanAction_Response{
-				LinkedResources: []*tfplugin6.PlanAction_Response_LinkedResource{
-					{
-						PlannedIdentity: testTfplugin6ResourceIdentityData(),
-					},
-				},
 				Diagnostics: []*tfplugin6.Diagnostic{},
 			},
 		},
@@ -171,7 +137,6 @@ func TestPlanAction_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.PlanAction_Response{
-				LinkedResources: []*tfplugin6.PlanAction_Response_LinkedResource{},
 				Diagnostics: []*tfplugin6.Diagnostic{
 					testTfplugin6Diagnostic,
 				},
@@ -184,8 +149,7 @@ func TestPlanAction_Response(t *testing.T) {
 				},
 			},
 			expected: &tfplugin6.PlanAction_Response{
-				LinkedResources: []*tfplugin6.PlanAction_Response_LinkedResource{},
-				Diagnostics:     []*tfplugin6.Diagnostic{},
+				Diagnostics: []*tfplugin6.Diagnostic{},
 				Deferred: &tfplugin6.Deferred{
 					Reason: tfplugin6.Deferred_PROVIDER_CONFIG_UNKNOWN,
 				},
@@ -207,7 +171,6 @@ func TestPlanAction_Response(t *testing.T) {
 				tfplugin6.Diagnostic{},
 				tfplugin6.DynamicValue{},
 				tfplugin6.PlanAction_Response{},
-				tfplugin6.PlanAction_Response_LinkedResource{},
 				tfplugin6.Deferred{},
 				tfplugin6.ResourceIdentityData{},
 			)
@@ -247,7 +210,6 @@ func TestInvokeAction_InvokeActionEvent(t *testing.T) {
 		"CompletedInvokeActionEventType - Diagnostics": {
 			in: &tfprotov6.InvokeActionEvent{
 				Type: tfprotov6.CompletedInvokeActionEventType{
-					LinkedResources: []*tfprotov6.NewLinkedResource{},
 					Diagnostics: []*tfprotov6.Diagnostic{
 						testTfprotov6Diagnostic,
 					},
@@ -256,82 +218,9 @@ func TestInvokeAction_InvokeActionEvent(t *testing.T) {
 			expected: &tfplugin6.InvokeAction_Event{
 				Type: &tfplugin6.InvokeAction_Event_Completed_{
 					Completed: &tfplugin6.InvokeAction_Event_Completed{
-						LinkedResources: []*tfplugin6.InvokeAction_Event_Completed_LinkedResource{},
 						Diagnostics: []*tfplugin6.Diagnostic{
 							testTfplugin6Diagnostic,
 						},
-					},
-				},
-			},
-		},
-		"CompletedInvokeActionEventType - LinkedResources - NewState": {
-			in: &tfprotov6.InvokeActionEvent{
-				Type: tfprotov6.CompletedInvokeActionEventType{
-					LinkedResources: []*tfprotov6.NewLinkedResource{
-						{
-							NewState: testTfprotov6DynamicValue(),
-						},
-					},
-					Diagnostics: []*tfprotov6.Diagnostic{},
-				},
-			},
-			expected: &tfplugin6.InvokeAction_Event{
-				Type: &tfplugin6.InvokeAction_Event_Completed_{
-					Completed: &tfplugin6.InvokeAction_Event_Completed{
-						LinkedResources: []*tfplugin6.InvokeAction_Event_Completed_LinkedResource{
-							{
-								NewState: testTfplugin6DynamicValue(),
-							},
-						},
-						Diagnostics: []*tfplugin6.Diagnostic{},
-					},
-				},
-			},
-		},
-		"CompletedInvokeActionEventType - LinkedResources - NewIdentity": {
-			in: &tfprotov6.InvokeActionEvent{
-				Type: tfprotov6.CompletedInvokeActionEventType{
-					LinkedResources: []*tfprotov6.NewLinkedResource{
-						{
-							NewIdentity: testTfprotov6ResourceIdentityData(),
-						},
-					},
-					Diagnostics: []*tfprotov6.Diagnostic{},
-				},
-			},
-			expected: &tfplugin6.InvokeAction_Event{
-				Type: &tfplugin6.InvokeAction_Event_Completed_{
-					Completed: &tfplugin6.InvokeAction_Event_Completed{
-						LinkedResources: []*tfplugin6.InvokeAction_Event_Completed_LinkedResource{
-							{
-								NewIdentity: testTfplugin6ResourceIdentityData(),
-							},
-						},
-						Diagnostics: []*tfplugin6.Diagnostic{},
-					},
-				},
-			},
-		},
-		"CompletedInvokeActionEventType - LinkedResources - RequiresReplace": {
-			in: &tfprotov6.InvokeActionEvent{
-				Type: tfprotov6.CompletedInvokeActionEventType{
-					LinkedResources: []*tfprotov6.NewLinkedResource{
-						{
-							RequiresReplace: true,
-						},
-					},
-					Diagnostics: []*tfprotov6.Diagnostic{},
-				},
-			},
-			expected: &tfplugin6.InvokeAction_Event{
-				Type: &tfplugin6.InvokeAction_Event_Completed_{
-					Completed: &tfplugin6.InvokeAction_Event_Completed{
-						LinkedResources: []*tfplugin6.InvokeAction_Event_Completed_LinkedResource{
-							{
-								RequiresReplace: true,
-							},
-						},
-						Diagnostics: []*tfplugin6.Diagnostic{},
 					},
 				},
 			},
@@ -356,7 +245,6 @@ func TestInvokeAction_InvokeActionEvent(t *testing.T) {
 				tfplugin6.InvokeAction_Event_Progress_{},
 				tfplugin6.InvokeAction_Event_Completed{},
 				tfplugin6.InvokeAction_Event_Completed_{},
-				tfplugin6.InvokeAction_Event_Completed_LinkedResource{},
 				tfplugin6.ResourceIdentityData{},
 			)
 

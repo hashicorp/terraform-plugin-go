@@ -57,11 +57,6 @@ type ValidateActionConfigRequest struct {
 	// from knowing the value at request time. Any attributes not directly
 	// set in the configuration will be null.
 	Config *DynamicValue
-
-	// LinkedResources contains the configuration data of the managed resource types that are linked to this action.
-	//
-	//   - If the action schema type is Unlinked, this field will be empty.
-	LinkedResources []*LinkedResourceConfig
 }
 
 // LinkedResourceConfig represents linked resource config data used in the ValidateActionConfig RPC.
@@ -98,11 +93,6 @@ type PlanActionRequest struct {
 	// ActionType is the name of the action being called.
 	ActionType string
 
-	// LinkedResources contains the data of the managed resource types that are linked to this action.
-	//
-	//   - If the action schema type is Unlinked, this field will be empty.
-	LinkedResources []*ProposedLinkedResource
-
 	// Config is the configuration the user supplied for the action. See
 	// the documentation on `DynamicValue` for more information about
 	// safely accessing the configuration.
@@ -113,43 +103,9 @@ type PlanActionRequest struct {
 	ClientCapabilities *PlanActionClientCapabilities
 }
 
-// ProposedLinkedResource represents linked resource data before PlanAction is called.
-type ProposedLinkedResource struct {
-	// PriorState is the state of the linked resource before the plan is applied,
-	// represented as a `DynamicValue`. See the documentation for
-	// `DynamicValue` for information about safely accessing the state.
-	PriorState *DynamicValue
-
-	// PlannedState is the latest indication of what the state for the
-	// linked resource should be after apply, represented as a `DynamicValue`.
-	// See the documentation for `DynamicValue` for information about safely
-	// accessing the planned state.
-	//
-	// Since PlannedState is the most recent plan for the linked resource, it could
-	// be the result of an RPC call to PlanResourceChange or an RPC call to PlanAction
-	// for a predecessor action
-	PlannedState *DynamicValue
-
-	// Config is the configuration the user supplied for the linked resource. See
-	// the documentation on `DynamicValue` for more information about
-	// safely accessing the configuration.
-	Config *DynamicValue
-
-	// PriorIdentity is the identity of the resource before the plan is
-	// applied, represented as a `ResourceIdentityData`.
-	PriorIdentity *ResourceIdentityData
-}
-
-// PlanActionResponse is the response from the provider when planning an action. If the action
-// has linked resources, it will contain any modifications made to the planned state or identity.
+// PlanActionResponse is the response from the provider when planning an action.
 type PlanActionResponse struct {
-	// LinkedResources contains the provider modified data of the managed resource types that are linked to this action.
-	//
-	// This field is not currently in-use, but future action schema types will use this field to plan modifications of state data for linked resources.
-	LinkedResources []*PlannedLinkedResource
-
-	// Diagnostics report errors or warnings related to plannning the action and calculating
-	// the planned state of the requested linked resources. Returning an empty slice
+	// Diagnostics report errors or warnings related to planning the action. Returning an empty slice
 	// indicates a successful validation with no warnings or errors generated.
 	Diagnostics []*Diagnostic
 
@@ -177,42 +133,14 @@ type InvokeActionRequest struct {
 	// ActionType is the name of the action being called.
 	ActionType string
 
-	// LinkedResources contains the data of the managed resource types that are linked to this action.
-	//
-	//   - If the action schema type is Unlinked, this field will be empty.
-	LinkedResources []*InvokeLinkedResource
-
 	// Config is the configuration the user supplied for the action. See
 	// the documentation on `DynamicValue` for more information about
 	// safely accessing the configuration.
 	Config *DynamicValue
-}
 
-// InvokeLinkedResource represents linked resource data before InvokeAction is called.
-type InvokeLinkedResource struct {
-	// PriorState is the state of the linked resource before changes are applied,
-	// represented as a `DynamicValue`. See the documentation for
-	// `DynamicValue` for information about safely accessing the state.
-	PriorState *DynamicValue
-
-	// PlannedState is the latest indication of what the state for the
-	// linked resource should look like after changes are applied, represented
-	// as a `DynamicValue`. See the documentation for `DynamicValue` for
-	// information about safely accessing the planned state.
-	//
-	// Since PlannedState is the most recent state for the linked resource, it could
-	// be the result of an RPC call to ApplyResourceChange or an RPC call to InvokeAction
-	// for a predecessor action.
-	PlannedState *DynamicValue
-
-	// Config is the configuration the user supplied for the linked resource. See
-	// the documentation on `DynamicValue` for more information about
-	// safely accessing the configuration.
-	Config *DynamicValue
-
-	// PlannedIdentity is Terraform's plan for what the linked resource identity should
-	// look like after the changes are applied, represented as a `ResourceIdentityData`.
-	PlannedIdentity *ResourceIdentityData
+	// ClientCapabilities defines optionally supported protocol features for the
+	// InvokeAction RPC, such as forward-compatible Terraform behavior changes.
+	ClientCapabilities *InvokeActionClientCapabilities
 }
 
 // InvokeActionServerStream represents a streaming response to an
@@ -255,14 +183,9 @@ type ProgressInvokeActionEventType struct {
 
 func (a ProgressInvokeActionEventType) isInvokeActionEventType() {}
 
-// CompletedInvokeActionEventType represents the final completed event, along with all of the linked resource
-// data modified by the provider or diagnostics about an action invocation failure.
+// CompletedInvokeActionEventType represents the final completed event, along with
+// potential diagnostics about an action invocation failure.
 type CompletedInvokeActionEventType struct {
-	// LinkedResources contains the provider modified data of the managed resource types that are linked to this action.
-	//
-	// This field is not currently in-use, but future action schema types will use this field to modify state data for linked resources.
-	LinkedResources []*NewLinkedResource
-
 	// Diagnostics report errors or warnings related to invoking an action.
 	// Returning an empty slice indicates a successful invocation with no warnings
 	// or errors generated.
@@ -270,27 +193,3 @@ type CompletedInvokeActionEventType struct {
 }
 
 func (a CompletedInvokeActionEventType) isInvokeActionEventType() {}
-
-// NewLinkedResource represents linked resource data that was changed during InvokeAction and returned.
-//
-// Depending on how the action was invoked, the modified state data will either be immediately recorded in
-// state or reconcicled in a future terraform apply operation.
-type NewLinkedResource struct {
-	// NewState is the provider's understanding of what the linked resource's
-	// state is after changes are applied, represented as a `DynamicValue`.
-	// See the documentation for `DynamicValue` for information about
-	// safely creating the `DynamicValue`.
-	//
-	// Any attribute, whether computed or not, that has a known value in
-	// the PlannedState in the InvokeActionRequest must be preserved
-	// exactly as it was in NewState.
-	NewState *DynamicValue
-
-	// NewIdentity is the provider's understanding of what the linked resource's
-	// identity is after changes are applied, represented as a `ResourceIdentityData`.
-	NewIdentity *ResourceIdentityData
-
-	// RequiresReplace can only be set if diagnostics are returned for the action and indicate
-	// the linked resource must be replaced as a result of the action invocation error.
-	RequiresReplace bool
-}
