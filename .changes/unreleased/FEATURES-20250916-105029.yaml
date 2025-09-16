@@ -1,0 +1,5 @@
+kind: FEATURES
+body: 'tfprotov5+tfprotov6: Upgraded protocols and added types to support the new action type.'
+time: 2025-09-16T10:50:29.64926-04:00
+custom:
+    Issue: "534"
