@@ -1,0 +1,5 @@
+kind: ENHANCEMENTS
+body: 'tftypes: `tftypes.Value.IsFullyNull()` allows SDKs to determine when a value is null or consists of only null elements and attributes.'
+time: 2025-09-16T10:44:11.656041-04:00
+custom:
+    Issue: "541"
