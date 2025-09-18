@@ -1655,8 +1655,7 @@ func (s *server) WriteStateBytes(srv grpc.ClientStreamingServer[tfplugin6.WriteS
 				logging.ProtocolError(ctx, fmt.Sprintf(
 					"WriteStateBytes experienced an error when receiving state data from Terraform: %s",
 					err,
-				),
-				)
+				))
 			}
 
 			ok := yield(tfprotov6.WriteStateByteChunk{
