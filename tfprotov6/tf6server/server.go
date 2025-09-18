@@ -1644,8 +1644,7 @@ func (s *server) WriteStateBytes(srv grpc.ClientStreamingServer[tfplugin6.WriteS
 		return err
 	}
 
-	// Trying an aproach using iter.Seq2
-	iterator := func(yield func(tfprotov6.WriteStateByteChunk, error) bool) {
+	iterator := func(yield func(tfprotov6.WriteStateBytesStreamMsg) bool) {
 		for {
 			chunk, err := srv.Recv()
 			if err == io.EOF {
@@ -1658,14 +1657,18 @@ func (s *server) WriteStateBytes(srv grpc.ClientStreamingServer[tfplugin6.WriteS
 				))
 			}
 
-			ok := yield(tfprotov6.WriteStateByteChunk{
-				Bytes:       chunk.Bytes,
-				TotalLength: chunk.TotalLength,
-				Range: tfprotov6.StateByteRange{
-					Start: chunk.Range.Start,
-					End:   chunk.Range.End,
-				},
-			}, err)
+			ok := yield(
+				tfprotov6.WriteStateBytesStreamMsg{
+					Chunk: tfprotov6.WriteStateByteChunk{
+						Bytes:       chunk.Bytes,
+						TotalLength: chunk.TotalLength,
+						Range: tfprotov6.StateByteRange{
+							Start: chunk.Range.Start,
+							End:   chunk.Range.End,
+						},
+					},
+					Err: err, // If this isn't nil, it'll be a gRPC error from Recv
+				})
 			if !ok {
 				return
 			}
@@ -1673,7 +1676,7 @@ func (s *server) WriteStateBytes(srv grpc.ClientStreamingServer[tfplugin6.WriteS
 	}
 
 	resp, err := server.WriteStateBytes(ctx, &tfprotov6.WriteStateBytesStream{
-		Chunks: iterator,
+		Messages: iterator,
 	})
 	if err != nil {
 		return err
