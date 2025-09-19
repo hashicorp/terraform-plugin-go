@@ -48,7 +48,9 @@ var protocSteps = []protocStep{
 		"tfprotov5/internal/tfplugin5",
 		[]string{
 			"--go_out=.",
+			"--go_opt=paths=source_relative",
 			"--go-grpc_out=.",
+			"--go-grpc_opt=paths=source_relative",
 			"tfplugin5.proto",
 		},
 	},
@@ -57,7 +59,9 @@ var protocSteps = []protocStep{
 		"tfprotov6/internal/tfplugin6",
 		[]string{
 			"--go_out=.",
+			"--go_opt=paths=source_relative",
 			"--go-grpc_out=.",
+			"--go-grpc_opt=paths=source_relative",
 			"tfplugin6.proto",
 		},
 	},
