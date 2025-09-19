@@ -9,6 +9,9 @@ tools:
 
 # Protocol Buffers compilation is done outside of 'go generate' handling since
 # the 'protoc' tool is not installable via 'go install'.
+protobuf:
+	go run ./tools/protobuf-compile .
+
 protoc:
 	@cd tfprotov5/internal/tfplugin5 && \
 		protoc \
