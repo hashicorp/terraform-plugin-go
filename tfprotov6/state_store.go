@@ -57,23 +57,23 @@ type ReadStateBytesStream struct {
 }
 
 type WriteStateBytesStream struct {
-	Messages iter.Seq[WriteStateBytesStreamMsg]
+	Chunks iter.Seq[WriteStateBytesChunk]
 }
 
-// WriteStateBytesStreamMsg contains paired data:
+// WriteStateBytesChunk contains:
 //  1. A chunk of state data, received from Terraform core to be persisted.
 //  2. Any gRPC-related errors the provider server encountered when
 //     receiving data from Terraform core.
-type WriteStateBytesStreamMsg struct {
-	Chunk WriteStateByteChunk
-	Err   error
+//
+// If a gRPC error is set, then the chunk should be empty.
+type WriteStateBytesChunk struct {
+	StateByteChunk
+	Err error
 }
 
 type WriteStateBytesResponse struct {
 	Diagnostics []*Diagnostic
 }
-
-type WriteStateByteChunk = StateByteChunk
 
 type ReadStateByteChunk struct {
 	StateByteChunk
