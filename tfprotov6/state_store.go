@@ -53,7 +53,7 @@ type ReadStateBytesRequest struct {
 }
 
 type ReadStateBytesStream struct {
-	Chunks iter.Seq[ReadStateByteChunk]
+	Messages iter.Seq[ReadStateByteStreamMsg]
 }
 
 type WriteStateBytesStream struct {
@@ -65,7 +65,7 @@ type WriteStateBytesStream struct {
 //  2. Any gRPC-related errors the provider server encountered when
 //     receiving data from Terraform core.
 type WriteStateBytesStreamMsg struct {
-	Chunk WriteStateByteChunk
+	Chunk StateByteChunk
 	Err   error
 }
 
@@ -73,10 +73,8 @@ type WriteStateBytesResponse struct {
 	Diagnostics []*Diagnostic
 }
 
-type WriteStateByteChunk = StateByteChunk
-
-type ReadStateByteChunk struct {
-	StateByteChunk
+type ReadStateByteStreamMsg struct {
+	Chunk       StateByteChunk
 	Diagnostics []*Diagnostic
 }
 
