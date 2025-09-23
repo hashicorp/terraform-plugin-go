@@ -187,12 +187,13 @@ These are the tools necessary for code generation:
 
 - [`protoc`](https://github.com/protocolbuffers/protobuf): Protocol Buffers compiler.
     - This isn't Go specific tooling, so needs to be installed separately.
-    - The Terraform Plugin Protocol uses well-known types (`Timestamp`), so be sure to copy the `include` directory to a folder included in your `PATH` (for example, on MacOS, `/usr/local/include`).
+    - We also use well-known, reusable types like [google/protobuf/timestamp.proto](https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/timestamp.proto), which are downloaded to the `include` directory.
 - [`protoc-gen-go`](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go): Go plugin for Protocol Buffers compiler.
 - [`protoc-gen-go-grpc`](https://pkg.go.dev/google.golang.org/grpc/cmd/protoc-gen-go-grpc): Go gRPC plugin for Protocol Buffers compiler.
 
 If `make protobuf` fails, follow these instructions:
 * Install `protoc` following this [installation guide](https://github.com/protocolbuffers/protobuf#protobuf-compiler-installation).
+    * The Terraform Plugin Protocol uses well-known types ([`Timestamp`](https://github.com/protocolbuffers/protobuf/blob/2ec06a53ed10f16efd120ecfc77440f83cdb99e5/src/google/protobuf/timestamp.proto#L133)), so be sure to copy the `include` directory to a folder included in your `PATH` (for example, on MacOS, `/usr/local/include`).
 * Install `protoc-gen-go` and `protoc-gen-go-grpc` by running `make tools`.
 * Run `make protoc` to recompile the Protocol Buffers files after any changes.
 
