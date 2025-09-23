@@ -39,12 +39,22 @@ type ValidateStateStoreResponse struct {
 }
 
 type ConfigureStateStoreRequest struct {
-	TypeName string
-	Config   *DynamicValue
+	TypeName     string
+	Config       *DynamicValue
+	Capabilities StateStoreClientCapabilities
 }
 
 type ConfigureStateStoreResponse struct {
-	Diagnostics []*Diagnostic
+	Diagnostics  []*Diagnostic
+	Capabilities StateStoreServerCapabilities
+}
+
+type StateStoreClientCapabilities struct {
+	ChunkSize int64 // suggested chunk size by Core
+}
+
+type StateStoreServerCapabilities struct {
+	ChunkSize int64 // chosen chunk size by plugin
 }
 
 type ReadStateBytesRequest struct {
