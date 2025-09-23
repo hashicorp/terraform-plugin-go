@@ -177,16 +177,24 @@ Run `golangci-lint run ./...` or `make lint` after any changes.
 
 ### Protocol Updates
 
-Ensure the following tooling is installed:
+Run `make protobuf` to install the necessary tooling and to recompile the Protocol Buffers files after any changes.
 
-- [`protoc`](https://github.com/protocolbuffers/protobuf): Protocol Buffers compiler. This isn't Go specific tooling, so follow this [installation guide](https://github.com/protocolbuffers/protobuf#protobuf-compiler-installation)
-  - The Terraform Plugin Protocol uses well-known types (`Timestamp`), so be sure to copy the `include` directory to a folder included in your `PATH` (for example, on MacOS, `/usr/local/include`).
-- [`protoc-gen-go`](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go): Go plugin for Protocol Buffers compiler. Install by running `make tools`
-- [`protoc-gen-go-grpc`](https://pkg.go.dev/google.golang.org/grpc/cmd/protoc-gen-go-grpc): Go gRPC plugin for Protocol Buffers compiler. Install by running `make tools`
+The `make protobuf` command uses a script in `./tools/protobuf-compile` to compile the Go code using the Protocol Buffers defined in `tfprotov5/internal/tfplugin5` and `tfprotov6/internal/tfplugin6`. Before generating the code, the script will download `protoc` and build binaries for `protoc-gen-go` and `protoc-gen-go-grpc` using the Go toolchain. This tooling will be saved into a gitignored location in that directory, so it's easy to know which tooling versions are in use when making protocol changes.
 
-The Protocol Buffers definitions can be found in `tfprotov5/internal/tfplugin5` and `tfprotov6/internal/tfplugin6`.
+#### Tooling for code generation
 
-Run `make protoc` to recompile the Protocol Buffers files after any changes.
+These are the tools necessary for code generation:
+
+- [`protoc`](https://github.com/protocolbuffers/protobuf): Protocol Buffers compiler.
+    - This isn't Go specific tooling, so needs to be installed separately.
+    - The Terraform Plugin Protocol uses well-known types (`Timestamp`), so be sure to copy the `include` directory to a folder included in your `PATH` (for example, on MacOS, `/usr/local/include`).
+- [`protoc-gen-go`](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go): Go plugin for Protocol Buffers compiler.
+- [`protoc-gen-go-grpc`](https://pkg.go.dev/google.golang.org/grpc/cmd/protoc-gen-go-grpc): Go gRPC plugin for Protocol Buffers compiler.
+
+If `make protobuf` fails, follow these instructions:
+* Install `protoc` following this [installation guide](https://github.com/protocolbuffers/protobuf#protobuf-compiler-installation).
+* Install `protoc-gen-go` and `protoc-gen-go-grpc` by running `make tools`.
+* Run `make protoc` to recompile the Protocol Buffers files after any changes.
 
 ## License
 
