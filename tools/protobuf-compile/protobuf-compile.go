@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 // protobuf-compile is a helper tool for running protoc against all of the
 // .proto files in this repository using specific versions of protoc and
@@ -27,8 +27,7 @@ import (
 	"github.com/hashicorp/go-getter"
 )
 
-// Release v29.3 in GitHub corresponds to protoc v5.29.3, which is currently used in the generated code
-const protocVersion = "29.3"
+const protocVersion = "3.15.6"
 
 // We also use protoc-gen-go and its grpc addon, but since these are Go tools
 // in Go modules our version selection for these comes from our top-level
@@ -45,32 +44,30 @@ type protocStep struct {
 
 var protocSteps = []protocStep{
 	{
-		"tfprotov5",
-		"tfprotov5/internal/tfplugin5",
-		[]string{
-			"--go_out=.",
-			"--go_opt=paths=source_relative",
-			"--go-grpc_out=.",
-			"--go-grpc_opt=paths=source_relative",
-			"tfplugin5.proto",
-		},
+		"tfplugin5 (provider wire protocol version 5)",
+		"internal/tfplugin5",
+		[]string{"--go_out=paths=source_relative,plugins=grpc:.", "./tfplugin5.proto"},
 	},
 	{
-		"tfprotov6",
-		"tfprotov6/internal/tfplugin6",
-		[]string{
-			"--go_out=.",
-			"--go_opt=paths=source_relative",
-			"--go-grpc_out=.",
-			"--go-grpc_opt=paths=source_relative",
-			"tfplugin6.proto",
-		},
+		"tfplugin6 (provider wire protocol version 6)",
+		"internal/tfplugin6",
+		[]string{"--go_out=paths=source_relative,plugins=grpc:.", "./tfplugin6.proto"},
+	},
+	{
+		"tfplan (plan file serialization)",
+		"internal/plans/internal/planproto",
+		[]string{"--go_out=paths=source_relative:.", "planfile.proto"},
+	},
+	{
+		"cloudproto1 (cloud protocol version 1)",
+		"internal/cloudplugin/cloudproto1",
+		[]string{"--go_out=paths=source_relative,plugins=grpc:.", "cloudproto1.proto"},
 	},
 }
 
 func main() {
 	if len(os.Args) != 2 {
-		log.Fatal("Usage: go run github.com/hashicorp/terraform-plugin-go/tools/protobuf-compile <basedir>")
+		log.Fatal("Usage: go run github.com/hashicorp/terraform/tools/protobuf-compile <basedir>")
 	}
 	baseDir := os.Args[1]
 	workDir := filepath.Join(baseDir, "tools/protobuf-compile/.workdir")
