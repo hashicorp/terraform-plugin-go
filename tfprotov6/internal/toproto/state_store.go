@@ -25,6 +25,9 @@ func ConfigureStateStore_Response(in *tfprotov6.ConfigureStateStoreResponse) *tf
 
 	return &tfplugin6.ConfigureStateStore_Response{
 		Diagnostics: Diagnostics(in.Diagnostics),
+		Capabilities: &tfplugin6.StateStoreServerCapabilities{
+			ChunkSize: in.Capabilities.ChunkSize,
+		},
 	}
 }
 
