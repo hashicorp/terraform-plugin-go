@@ -27,6 +27,9 @@ func ConfigureStateStoreRequest(in *tfplugin6.ConfigureStateStore_Request) *tfpr
 	return &tfprotov6.ConfigureStateStoreRequest{
 		TypeName: in.TypeName,
 		Config:   DynamicValue(in.Config),
+		Capabilities: tfprotov6.StateStoreClientCapabilities{
+			ChunkSize: in.Capabilities.ChunkSize,
+		},
 	}
 }
 
