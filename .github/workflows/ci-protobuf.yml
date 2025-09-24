@@ -23,17 +23,8 @@ jobs:
       - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: 'go.mod'
-      - uses: arduino/setup-protoc@c65c819552d16ad3c9b72d9dfd5ba5237b9c906b # v3.0.0
-        with:
-          # The version string is embedded in protoc generated files, so it is
-          # pinned here to prevent unexpected differences. Follow the
-          # https://github.com/protocolbuffers/protobuf repository for protoc
-          # release updates.
-          version: '29.3'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - run: go mod download
-      - run: make tools
-      - run: make protoc
+      - run: make protobuf
       - name: git diff
         run: |
           git diff --compact-summary --exit-code || \
