@@ -77,8 +77,14 @@ type WriteStateBytesStream struct {
 //
 // If a gRPC error is set, then the chunk should be empty.
 type WriteStateBytesChunk struct {
+	Meta *WriteStateChunkMeta
 	StateByteChunk
 	Err error
+}
+
+type WriteStateChunkMeta struct {
+	TypeName string
+	StateId  string
 }
 
 type WriteStateBytesResponse struct {
