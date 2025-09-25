@@ -46,7 +46,7 @@ type protocStep struct {
 var protocSteps = []protocStep{
 	{
 		"tfprotov5",
-		"tfprotov5/internal/tfplugin5",
+		"../tfprotov5/internal/tfplugin5", // Path is relative to the go.mod executing this script
 		[]string{
 			"--go_out=.",
 			"--go_opt=paths=source_relative",
@@ -57,7 +57,7 @@ var protocSteps = []protocStep{
 	},
 	{
 		"tfprotov6",
-		"tfprotov6/internal/tfplugin6",
+		"../tfprotov6/internal/tfplugin6", // Path is relative to the go.mod executing this script
 		[]string{
 			"--go_out=.",
 			"--go_opt=paths=source_relative",

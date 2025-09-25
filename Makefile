@@ -6,7 +6,7 @@ lint:
 # Protocol Buffers compilation is done outside of 'go generate' handling since
 # the 'protoc' tool is not installable via 'go install'.
 protobuf:
-	go run ./tools/protobuf-compile .
+	cd tools; go run ./protobuf-compile ..
 
 test:
 	go test ./...
