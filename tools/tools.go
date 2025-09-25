@@ -6,6 +6,9 @@
 package tools
 
 import (
+	// Protocol Buffers compiler plugin for Go.
+	_ "google.golang.org/protobuf/cmd/protoc-gen-go"
+
 	// Protocol Buffers compiler plugin for Go gRPC. This tool is versioned
 	// separately from google.golang.org/grpc.
 	_ "google.golang.org/grpc/cmd/protoc-gen-go-grpc"

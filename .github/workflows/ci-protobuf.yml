@@ -27,5 +27,5 @@ jobs:
       - run: make protobuf
       - name: git diff
         run: |
-          git diff --compact-summary --exit-code || \
-            (echo; git diff; echo; echo "Unexpected difference in directories after code generation. Run 'protoc' command and commit."; exit 1)
+          git diff --compact-summary --exit-code ./tfprotov5/internal/tfplugin5 ./tfprotov6/internal/tfplugin6 || \
+            (echo; git diff ./tfprotov5/internal/tfplugin5 ./tfprotov6/internal/tfplugin6; echo; echo "Unexpected difference in directories after code generation. Run 'make protobuf' command and commit."; exit 1)
