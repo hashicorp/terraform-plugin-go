@@ -111,7 +111,7 @@ func main() {
 
 	// For all of our steps we'll run our localized protoc with our localized
 	// protoc-gen-go.
-	baseCmdLine := []string{protocExec, "--plugin=protoc-gen-go=" + protocGenGoExec, "--plugin=protoc-gen-go-grpc=" + protocGenGoGrpcExec}
+	baseCmdLine := []string{protocExec, "--plugin=go=" + protocGenGoExec, "--plugin=go-grpc=" + protocGenGoGrpcExec}
 
 	for _, step := range protocSteps {
 		log.Printf("working on %s", step.DisplayName)
