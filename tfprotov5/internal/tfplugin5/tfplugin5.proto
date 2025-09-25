@@ -881,7 +881,6 @@ message ListResource {
 
         // A warning or error diagnostics for this event
         repeated Diagnostic diagnostic = 4;
-        string new_field = 5;
     }
 }
 
