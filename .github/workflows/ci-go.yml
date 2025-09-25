@@ -41,7 +41,6 @@ jobs:
         with:
           terraform_version: ${{ matrix.terraform }}
           terraform_wrapper: false
-      - run: go work use ../terraform-provider-corner
       - run: go mod edit -replace github.com/hashicorp/terraform-plugin-go=../
       - run: go mod tidy
       - run: go test -v ./internal/protocolprovider
@@ -75,7 +74,6 @@ jobs:
         with:
           terraform_version: ${{ matrix.terraform }}
           terraform_wrapper: false
-      - run: go work use ../terraform-provider-corner
       - run: go mod edit -replace github.com/hashicorp/terraform-plugin-go=../
       - run: go mod tidy
       - run: go test -v ./internal/framework6provider
