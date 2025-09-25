@@ -311,6 +311,7 @@ message ClientCapabilities {
     // The write_only_attributes_allowed capability signals that the client
     // is able to handle write_only attributes for managed resources.
     bool write_only_attributes_allowed = 2;
+        string new_field = 3;
 }
 
 // Deferred is a message that indicates that change is deferred for a reason.
