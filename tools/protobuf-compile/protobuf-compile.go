@@ -34,7 +34,7 @@ const protocVersion = "29.3"
 // in Go modules our version selection for these comes from our top-level
 // go.mod, as with all other Go dependencies. If you want to switch to a newer
 // version of either tool then you can upgrade their modules in the usual way.
-const protocGenGoPackage = "github.com/golang/protobuf/protoc-gen-go"
+const protocGenGoPackage = "google.golang.org/protobuf/cmd/protoc-gen-go"
 const protocGenGoGrpcPackage = "google.golang.org/grpc/cmd/protoc-gen-go-grpc"
 
 type protocStep struct {
@@ -111,7 +111,7 @@ func main() {
 
 	// For all of our steps we'll run our localized protoc with our localized
 	// protoc-gen-go.
-	baseCmdLine := []string{protocExec, "--plugin=go=" + protocGenGoExec, "--plugin=go-grpc=" + protocGenGoGrpcExec}
+	baseCmdLine := []string{protocExec, "--plugin=" + protocGenGoExec, "--plugin=" + protocGenGoGrpcExec}
 
 	for _, step := range protocSteps {
 		log.Printf("working on %s", step.DisplayName)
@@ -122,7 +122,7 @@ func main() {
 
 		cmd := &exec.Cmd{
 			Path:   cmdLine[0],
-			Args:   cmdLine[1:],
+			Args:   cmdLine,
 			Dir:    step.WorkDir,
 			Env:    os.Environ(),
 			Stdout: os.Stdout,
