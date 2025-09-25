@@ -1657,8 +1657,18 @@ func (s *server) WriteStateBytes(srv grpc.ClientStreamingServer[tfplugin6.WriteS
 				))
 			}
 
+			var meta *tfprotov6.WriteStateChunkMeta
+			if chunk.Meta != nil {
+				// Metadata is only attached to the first chunk
+				meta = &tfprotov6.WriteStateChunkMeta{
+					TypeName: chunk.Meta.TypeName,
+					StateId:  chunk.Meta.StateId,
+				}
+			}
+
 			ok := yield(
 				tfprotov6.WriteStateBytesChunk{
+					Meta: meta,
 					StateByteChunk: tfprotov6.StateByteChunk{
 						Bytes:       chunk.Bytes,
 						TotalLength: chunk.TotalLength,
