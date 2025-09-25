@@ -890,7 +890,6 @@ message ValidateListResourceConfig {
         DynamicValue config = 2;
         DynamicValue include_resource_object = 3;
         DynamicValue limit = 4;
-        string new_field = 5;
     }
     message Response {
         repeated Diagnostic diagnostics = 1;

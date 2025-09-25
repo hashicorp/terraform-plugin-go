@@ -97,7 +97,6 @@ message Schema {
         string description = 4;
         StringKind description_kind = 5;
         bool deprecated = 6;
-        string new_field = 7;
     }
 
     message Attribute {
