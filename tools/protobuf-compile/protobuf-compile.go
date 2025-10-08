@@ -34,7 +34,7 @@ const protocVersion = "29.3"
 // in Go modules our version selection for these comes from our top-level
 // go.mod, as with all other Go dependencies. If you want to switch to a newer
 // version of either tool then you can upgrade their modules in the usual way.
-const protocGenGoPackage = "github.com/golang/protobuf/protoc-gen-go"
+const protocGenGoPackage = "google.golang.org/protobuf/cmd/protoc-gen-go"
 const protocGenGoGrpcPackage = "google.golang.org/grpc/cmd/protoc-gen-go-grpc"
 
 type protocStep struct {
@@ -46,7 +46,7 @@ type protocStep struct {
 var protocSteps = []protocStep{
 	{
 		"tfprotov5",
-		"tfprotov5/internal/tfplugin5",
+		"../tfprotov5/internal/tfplugin5", // Path is relative to the go.mod executing this script
 		[]string{
 			"--go_out=.",
 			"--go_opt=paths=source_relative",
@@ -57,7 +57,7 @@ var protocSteps = []protocStep{
 	},
 	{
 		"tfprotov6",
-		"tfprotov6/internal/tfplugin6",
+		"../tfprotov6/internal/tfplugin6", // Path is relative to the go.mod executing this script
 		[]string{
 			"--go_out=.",
 			"--go_opt=paths=source_relative",
@@ -91,7 +91,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = buildProtocGenGoGrpc(workDir)
+	protocGenGoGrpcExec, err := buildProtocGenGoGrpc(workDir)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -104,7 +104,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	protocGenGoGrpcExec, err := filepath.Abs(protocGenGoExec)
+	protocGenGoGrpcExec, err = filepath.Abs(protocGenGoGrpcExec)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -122,7 +122,7 @@ func main() {
 
 		cmd := &exec.Cmd{
 			Path:   cmdLine[0],
-			Args:   cmdLine[1:],
+			Args:   cmdLine,
 			Dir:    step.WorkDir,
 			Env:    os.Environ(),
 			Stdout: os.Stdout,
