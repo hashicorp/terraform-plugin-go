@@ -399,6 +399,11 @@ service Provider {
     rpc ReadStateBytes(ReadStateBytes.Request) returns (stream ReadStateBytes.Response);
     // WriteStateBytes streams byte chunks of a given state file into a state store
     rpc WriteStateBytes(stream WriteStateBytes.RequestChunk) returns (WriteStateBytes.Response);
+    // LockState locks a given state (i.e. CE workspace)
+    rpc LockState(LockState.Request) returns (LockState.Response);
+    // UnlockState unlocks a given state (i.e. CE workspace)
+    rpc UnlockState(UnlockState.Request) returns (UnlockState.Response);
+
     // GetStates returns a list of all states (i.e. CE workspaces) managed by a given state store
     rpc GetStates(GetStates.Request) returns (GetStates.Response);
     // DeleteState instructs a given state store to delete a specific state (i.e. a CE workspace)
@@ -422,7 +427,7 @@ message GetMetadata {
         repeated FunctionMetadata functions = 5;
         repeated EphemeralResourceMetadata ephemeral_resources = 6;
         repeated ListResourceMetadata list_resources = 7;
-        reserved 8; // TODO: Field number 8 will be used by state stores
+        repeated StateStoreMetadata state_stores = 8;
         repeated ActionMetadata actions = 9;
     }
 
@@ -444,6 +449,10 @@ message GetMetadata {
     }
 
     message ListResourceMetadata {
+        string type_name = 1;
+    }
+
+    message StateStoreMetadata {
         string type_name = 1;
     }
 
@@ -1004,6 +1013,30 @@ message RequestChunkMeta {
 message StateRange {
     int64 start = 1;
     int64 end = 2;
+}
+
+message LockState {
+    message Request {
+        string type_name = 1;
+        string state_id = 2;
+        // operation represents an ongoing operation due to which lock is held (e.g. refresh, plan, apply)
+        string operation = 3;
+    }
+    message Response {
+        string lock_id = 1;
+        repeated Diagnostic diagnostics = 2;
+    }
+}
+
+message UnlockState {
+    message Request {
+        string type_name = 1;
+        string state_id = 2;
+        string lock_id = 3;
+    }
+    message Response {
+        repeated Diagnostic diagnostics = 1;
+    }
 }
 
 message GetStates {
