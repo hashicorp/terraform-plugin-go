@@ -27,6 +27,12 @@ type StateStoreServer interface {
 
 	// DeleteState instructs a given state store to delete a specific state (i.e. a CE workspace)
 	DeleteState(context.Context, *DeleteStateRequest) (*DeleteStateResponse, error)
+
+	// LockState instructs a given state store to lock a specific state (i.e. a CE workspace)
+	LockState(context.Context, *LockStateRequest) (*LockStateResponse, error)
+
+	// UnlockState instructs a given state store to unlock a specific state (i.e. a CE workspace)
+	UnlockState(context.Context, *UnlockStateRequest) (*UnlockStateResponse, error)
 }
 
 type ValidateStateStoreRequest struct {
@@ -121,5 +127,26 @@ type DeleteStateRequest struct {
 }
 
 type DeleteStateResponse struct {
+	Diagnostics []*Diagnostic
+}
+
+type LockStateRequest struct {
+	TypeName  string
+	StateId   string
+	Operation string
+}
+
+type LockStateResponse struct {
+	LockId      string
+	Diagnostics []*Diagnostic
+}
+
+type UnlockStateRequest struct {
+	TypeName string
+	StateId  string
+	LockId   string
+}
+
+type UnlockStateResponse struct {
 	Diagnostics []*Diagnostic
 }
