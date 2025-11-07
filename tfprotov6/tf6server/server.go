@@ -1788,6 +1788,100 @@ func (s *server) DeleteState(ctx context.Context, protoReq *tfplugin6.DeleteStat
 	return protoResp, nil
 }
 
+func (s *server) LockState(ctx context.Context, protoReq *tfplugin6.LockState_Request) (*tfplugin6.LockState_Response, error) {
+	rpc := "LockState"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.StateStoreContext(ctx, protoReq.TypeName)
+
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.LockStateRequest(protoReq)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "StateId", req.StateId)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement LockState")
+
+		protoResp := &tfplugin6.LockState_Response{
+			Diagnostics: []*tfplugin6.Diagnostic{
+				{
+					Severity: tfplugin6.Diagnostic_ERROR,
+					Summary:  "Provider LockState Not Implemented",
+					Detail: "A LockState call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements state store or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	resp, err := server.LockState(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.LockState_Response(resp)
+
+	return protoResp, nil
+}
+
+func (s *server) UnlockState(ctx context.Context, protoReq *tfplugin6.UnlockState_Request) (*tfplugin6.UnlockState_Response, error) {
+	rpc := "UnlockState"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.StateStoreContext(ctx, protoReq.TypeName)
+
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.UnlockStateRequest(protoReq)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "StateId", req.StateId)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement UnlockState")
+
+		protoResp := &tfplugin6.UnlockState_Response{
+			Diagnostics: []*tfplugin6.Diagnostic{
+				{
+					Severity: tfplugin6.Diagnostic_ERROR,
+					Summary:  "Provider UnlockState Not Implemented",
+					Detail: "A UnlockState call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements state store or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	resp, err := server.UnlockState(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.UnlockState_Response(resp)
+
+	return protoResp, nil
+}
+
 func invalidDeferredResponseDiag(reason tfprotov6.DeferredReason) *tfprotov6.Diagnostic {
 	return &tfprotov6.Diagnostic{
 		Severity: tfprotov6.DiagnosticSeverityError,

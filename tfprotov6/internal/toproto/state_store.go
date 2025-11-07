@@ -67,3 +67,23 @@ func DeleteState_Response(in *tfprotov6.DeleteStateResponse) *tfplugin6.DeleteSt
 		Diagnostics: Diagnostics(in.Diagnostics),
 	}
 }
+
+func LockState_Response(in *tfprotov6.LockStateResponse) *tfplugin6.LockState_Response {
+	if in == nil {
+		return nil
+	}
+
+	return &tfplugin6.LockState_Response{
+		Diagnostics: Diagnostics(in.Diagnostics),
+	}
+}
+
+func UnlockState_Response(in *tfprotov6.UnlockStateResponse) *tfplugin6.UnlockState_Response {
+	if in == nil {
+		return nil
+	}
+
+	return &tfplugin6.UnlockState_Response{
+		Diagnostics: Diagnostics(in.Diagnostics),
+	}
+}

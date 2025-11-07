@@ -64,3 +64,26 @@ func DeleteStateRequest(in *tfplugin6.DeleteState_Request) *tfprotov6.DeleteStat
 		StateId:  in.StateId,
 	}
 }
+
+func LockStateRequest(in *tfplugin6.LockState_Request) *tfprotov6.LockStateRequest {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov6.LockStateRequest{
+		TypeName:  in.TypeName,
+		StateId:   in.StateId,
+		Operation: in.Operation,
+	}
+}
+
+func UnlockStateRequest(in *tfplugin6.UnlockState_Request) *tfprotov6.UnlockStateRequest {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov6.UnlockStateRequest{
+		TypeName: in.TypeName,
+		StateId:  in.StateId,
+	}
+}
