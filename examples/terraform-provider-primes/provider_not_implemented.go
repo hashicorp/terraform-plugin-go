@@ -72,3 +72,7 @@ func (p PrimeNumberProvider) RenewEphemeralResource(ctx context.Context, request
 func (p PrimeNumberProvider) CloseEphemeralResource(ctx context.Context, request *tfprotov5.CloseEphemeralResourceRequest) (*tfprotov5.CloseEphemeralResourceResponse, error) {
 	panic("not implemented")
 }
+
+func (p PrimeNumberProvider) GenerateResourceConfig(ctx context.Context, request *tfprotov5.GenerateResourceConfigRequest) (*tfprotov5.GenerateResourceConfigResponse, error) {
+	panic("not implemented")
+}
