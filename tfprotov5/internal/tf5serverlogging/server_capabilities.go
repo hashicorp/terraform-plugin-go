@@ -16,12 +16,14 @@ func ServerCapabilities(ctx context.Context, capabilities *tfprotov5.ServerCapab
 		logging.KeyServerCapabilityGetProviderSchemaOptional: false,
 		logging.KeyServerCapabilityMoveResourceState:         false,
 		logging.KeyServerCapabilityPlanDestroy:               false,
+		logging.KeyServerCapabilityGenerateResourceConfig:    false,
 	}
 
 	if capabilities != nil {
 		responseFields[logging.KeyServerCapabilityGetProviderSchemaOptional] = capabilities.GetProviderSchemaOptional
 		responseFields[logging.KeyServerCapabilityMoveResourceState] = capabilities.MoveResourceState
 		responseFields[logging.KeyServerCapabilityPlanDestroy] = capabilities.PlanDestroy
+		responseFields[logging.KeyServerCapabilityGenerateResourceConfig] = capabilities.GenerateResourceConfig
 	}
 
 	logging.ProtocolTrace(ctx, "Announced server capabilities", responseFields)

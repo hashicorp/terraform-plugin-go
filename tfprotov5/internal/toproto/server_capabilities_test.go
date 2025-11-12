@@ -52,6 +52,14 @@ func TestServerCapabilities(t *testing.T) {
 				PlanDestroy: true,
 			},
 		},
+		"GenerateResourceConfig": {
+			in: &tfprotov5.ServerCapabilities{
+				GenerateResourceConfig: true,
+			},
+			expected: &tfplugin5.ServerCapabilities{
+				GenerateResourceConfig: true,
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
