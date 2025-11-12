@@ -38,6 +38,7 @@ type ProviderServer interface {
 	// down as quickly as possible, and usually represents an interrupt.
 	StopProvider(context.Context, *StopProviderRequest) (*StopProviderResponse, error)
 
+	//
 	GenerateResourceConfig(context.Context, *GenerateResourceConfigRequest) (*GenerateResourceConfigResponse, error)
 
 	// ResourceServer is an interface encapsulating all the
@@ -109,6 +110,21 @@ type ProviderServerWithActions interface {
 
 	// ActionServer is an interface encapsulating all the action-related RPC requests.
 	ActionServer
+}
+
+// ProviderServerWithGenerateResourceConfig is a temporary interface for servers
+// to implement the GenerateResourceConfig RPC.
+//
+// - GenerateResourceConfig
+//
+// Deprecated: This method will be moved into the
+// ProviderServer interface and this interface will be removed in a future
+// version.
+type ProviderServerWithGenerateResourceConfig interface {
+	ProviderServer
+
+	// GenerateResourceConfigServer is an interface containing the method to generate resource config.
+	GenerateResourceConfigServer
 }
 
 // GetMetadataRequest represents a GetMetadata RPC request.
