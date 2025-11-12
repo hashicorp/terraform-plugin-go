@@ -38,9 +38,6 @@ type ProviderServer interface {
 	// down as quickly as possible, and usually represents an interrupt.
 	StopProvider(context.Context, *StopProviderRequest) (*StopProviderResponse, error)
 
-	//
-	GenerateResourceConfig(context.Context, *GenerateResourceConfigRequest) (*GenerateResourceConfigResponse, error)
-
 	// ResourceServer is an interface encapsulating all the
 	// resource-related RPC requests. ProviderServer implementations must
 	// implement them, but they are a handy interface for defining what a
