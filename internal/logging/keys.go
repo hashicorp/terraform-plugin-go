@@ -84,6 +84,9 @@ const (
 	// Whether the PlanDestroy server capability is enabled
 	KeyServerCapabilityPlanDestroy = "tf_server_capability_plan_destroy"
 
+	// Whether the PlanDestroy server capability is enabled
+	KeyServerCapabilityGenerateResourceConfig = "tf_server_capability_generate_resource_config"
+
 	// Whether the DeferralAllowed client capability is enabled
 	KeyClientCapabilityDeferralAllowed = "tf_client_capability_deferral_allowed"
 
