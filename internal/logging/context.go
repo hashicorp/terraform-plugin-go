@@ -109,6 +109,15 @@ func ActionContext(ctx context.Context, action string) context.Context {
 	return ctx
 }
 
+// GenerateResourceConfig injects the resource type into logger contexts.
+func GenerateResourceConfigContext(ctx context.Context, action string) context.Context {
+	ctx = tfsdklog.SetField(ctx, KeyGenerateResourceConfigType, action)
+	ctx = tfsdklog.SubsystemSetField(ctx, SubsystemProto, KeyGenerateResourceConfigType, action)
+	ctx = tflog.SetField(ctx, KeyGenerateResourceConfigType, action)
+
+	return ctx
+}
+
 // RpcContext injects the RPC name into logger contexts.
 func RpcContext(ctx context.Context, rpc string) context.Context {
 	ctx = tfsdklog.SetField(ctx, KeyRPC, rpc)

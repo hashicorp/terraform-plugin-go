@@ -1484,6 +1484,36 @@ func (s *server) InvokeAction(protoReq *tfplugin5.InvokeAction_Request, protoStr
 	return nil
 }
 
+func (s *server) GenerateResourceConfig(ctx context.Context, protoReq *tfplugin5.GenerateResourceConfig_Request) (protoResp *tfplugin5.GenerateResourceConfig_Response, err error) {
+	rpc := "GenerateResourceConfig"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.GenerateResourceConfigContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.GenerateResourceConfigRequest(protoReq)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "State", req.State)
+
+	ctx = tf5serverlogging.DownstreamRequest(ctx)
+
+	resp, err := s.downstream.GenerateResourceConfig(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]any{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "Config", resp.Config)
+
+	protoResp = toproto.GenerateResourceConfig_Response(resp)
+
+	return protoResp, nil
+}
+
 func invalidDeferredResponseDiag(reason tfprotov5.DeferredReason) *tfprotov5.Diagnostic {
 	return &tfprotov5.Diagnostic{
 		Severity: tfprotov5.DiagnosticSeverityError,

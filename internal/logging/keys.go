@@ -66,6 +66,9 @@ const (
 	// The action being operated on
 	KeyActionType = "tf_action_type"
 
+	// The type of resource being operated on
+	KeyGenerateResourceConfigType = "tf_generate_resource_config_type"
+
 	// Path to protocol data file, such as "/tmp/example.json"
 	KeyProtocolDataFile = "tf_proto_data_file"
 

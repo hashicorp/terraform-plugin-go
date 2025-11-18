@@ -109,21 +109,6 @@ type ProviderServerWithActions interface {
 	ActionServer
 }
 
-// ProviderServerWithGenerateResourceConfig is a temporary interface for servers
-// to implement the GenerateResourceConfig RPC.
-//
-// - GenerateResourceConfig
-//
-// Deprecated: This method will be moved into the
-// ProviderServer interface and this interface will be removed in a future
-// version.
-type ProviderServerWithGenerateResourceConfig interface {
-	ProviderServer
-
-	// GenerateResourceConfigServer is an interface containing the method to generate resource config.
-	GenerateResourceConfigServer
-}
-
 // GetMetadataRequest represents a GetMetadata RPC request.
 type GetMetadataRequest struct{}
 
