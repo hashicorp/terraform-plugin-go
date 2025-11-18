@@ -456,7 +456,7 @@ func (s *server) stoppableContext(ctx context.Context) context.Context {
 // terraform-plugin-log loggers injected.
 func (s *server) loggingContext(ctx context.Context) context.Context {
 	if s.useTFLogSink {
-		ctx = tfsdklog.RegisterTestSink(ctx, s.testHandle)
+		ctx = tfsdklog.ContextWithTestLogging(ctx, s.testHandle.Name())
 	}
 
 	ctx = logging.InitContext(ctx, s.tflogSDKOpts, s.tflogOpts)
