@@ -1,9 +1,5 @@
 package tfprotov5
 
-import (
-	"context"
-)
-
 // GenerateResourceConfigRequest is the request Terraform sends when it wants to generate configuration
 // from a resource's state value.
 type GenerateResourceConfigRequest struct {
@@ -25,9 +21,4 @@ type GenerateResourceConfigResponse struct {
 
 	// Diagnostics report errors or warnings related to the creation of the config value.
 	Diagnostics []*Diagnostic
-}
-
-// GenerateResourceConfigServer is an interface containing the method to generate resource config.
-type GenerateResourceConfigServer interface {
-	GenerateResourceConfig(context.Context, *GenerateResourceConfigRequest) (*GenerateResourceConfigResponse, error)
 }

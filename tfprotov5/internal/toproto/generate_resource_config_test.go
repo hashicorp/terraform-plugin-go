@@ -59,7 +59,7 @@ func TestGenerateResourceConfig_Response(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			got := toproto.GenerateResourceConfigResponse(testCase.in)
+			got := toproto.GenerateResourceConfig_Response(testCase.in)
 
 			// Protocol Buffers generated types must have unexported fields
 			// ignored or cmp.Diff() will raise an error. This is easier than

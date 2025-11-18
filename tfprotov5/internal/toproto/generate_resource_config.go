@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5"
 )
 
-func GenerateResourceConfigResponse(in *tfprotov5.GenerateResourceConfigResponse) *tfplugin5.GenerateResourceConfig_Response {
+func GenerateResourceConfig_Response(in *tfprotov5.GenerateResourceConfigResponse) *tfplugin5.GenerateResourceConfig_Response {
 	if in == nil {
 		return nil
 	}
