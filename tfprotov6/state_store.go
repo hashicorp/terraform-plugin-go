@@ -8,6 +8,12 @@ import (
 	"iter"
 )
 
+// StateStoreMetadata describes metadata for a state store.
+type StateStoreMetadata struct {
+	// TypeName is the name of the action.
+	TypeName string
+}
+
 // StateStoreServer is an interface containing the methods an list resource
 // implementation needs to fill.
 type StateStoreServer interface {
