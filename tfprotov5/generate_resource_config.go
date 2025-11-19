@@ -11,9 +11,6 @@ type GenerateResourceConfigRequest struct {
 
 	// State is the resource's state value.
 	State *DynamicValue
-
-	// Experimental, mux would fill this in
-	// ResourceSchema *Schema
 }
 
 // GenerateResourceConfigResponse is the response from the provider containing the config value
