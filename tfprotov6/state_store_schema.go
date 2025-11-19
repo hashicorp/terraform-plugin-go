@@ -3,10 +3,8 @@
 
 package tfprotov6
 
-import "github.com/hashicorp/terraform-plugin-go/tfprotov5"
-
 // StateStoreSchema is how Terraform defines the shape of state store data.
 type StateStoreSchema struct {
 	// Schema is the definition for the state store data itself, which will be specified in an state store block in the user's configuration.
-	Schema *tfprotov5.Schema
+	Schema *Schema
 }
