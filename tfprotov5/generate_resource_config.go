@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package tfprotov5
 
 // GenerateResourceConfigRequest is the request Terraform sends when it wants to generate configuration
