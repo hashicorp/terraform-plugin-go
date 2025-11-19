@@ -93,6 +93,21 @@ type ProviderServerWithListResource interface {
 	ListResourceServer
 }
 
+// ProviderServerGenerateResourceConfig is a temporary interface for servers
+// to implement the GenerateResourceConfig RPC
+//
+// - GenerateResourceConfig
+//
+// Deprecated: All methods will be moved into the
+// ProviderServer interface and this interface will be removed in a future
+// version.
+type ProviderServerGenerateResourceConfig interface {
+	ProviderServer
+
+	// GenerateResourceConfig is an interface encapsulating the GenerateResourceConfig RPC request.
+	GenerateResourceConfig(context.Context, *GenerateResourceConfigRequest) (*GenerateResourceConfigResponse, error)
+}
+
 // ProviderServerWithActions is a temporary interface for servers
 // to implement Action RPCs
 //

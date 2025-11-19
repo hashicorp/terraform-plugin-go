@@ -1499,7 +1499,31 @@ func (s *server) GenerateResourceConfig(ctx context.Context, protoReq *tfplugin5
 
 	ctx = tf5serverlogging.DownstreamRequest(ctx)
 
-	resp, err := s.downstream.GenerateResourceConfig(ctx, req)
+	// TODO: Remove this check and error in preference of
+	// s.downstream.GenerateResourceConfig below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	generateResourceConfigProviderServer, ok := s.downstream.(tfprotov5.ProviderServerGenerateResourceConfig)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement GenerateResourceConfig")
+
+		protoResp := &tfplugin5.GenerateResourceConfig_Response{
+			Diagnostics: []*tfplugin5.Diagnostic{
+				{
+					Severity: tfplugin5.Diagnostic_ERROR,
+					Summary:  "Provider GenerateResourceConfig Not Implemented",
+					Detail: "A GenerateResourceConfig call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements action support or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	// TODO: Update this to call downstream once optional interface is removed
+	// resp, err := s.downstream.GenerateResourceConfig(ctx, req)
+	resp, err := generateResourceConfigProviderServer.GenerateResourceConfig(ctx, req)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]any{logging.KeyError: err})
 		return nil, err
