@@ -77,7 +77,7 @@ type ResourceServer interface {
 	// This functionality is only supported in Terraform 1.14 and later. The
 	// provider must have enabled the GenerateResourceConfig server capability to
 	// enable these requests.
-	GenerateResourceConfig(context.Context, *GenerateResourceConfigRequest) (*GenerateResourceConfigResponse, error)
+	// GenerateResourceConfig(context.Context, *GenerateResourceConfigRequest) (*GenerateResourceConfigResponse, error)
 }
 
 // ValidateResourceTypeConfigRequest is the request Terraform sends when it
