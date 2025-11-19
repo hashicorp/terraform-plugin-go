@@ -18,7 +18,7 @@ type StateStoreServer interface {
 	ConfigureStateStore(context.Context, *ConfigureStateStoreRequest) (*ConfigureStateStoreResponse, error)
 
 	// ReadStateBytes streams byte chunks of a given state file from a state store
-	ReadStateBytes(context.Context, *ReadStateBytesRequest) (*ReadStateBytesStream, error)
+	ReadStateBytes(context.Context, *ReadStateBytesRequest) (*ReadStateBytesResponse, error)
 
 	WriteStateBytes(context.Context, *WriteStateBytesStream) (*WriteStateBytesResponse, error)
 
@@ -148,5 +148,10 @@ type UnlockStateRequest struct {
 }
 
 type UnlockStateResponse struct {
+	Diagnostics []*Diagnostic
+}
+
+type ReadStateBytesResponse struct {
+	Bytes       []byte
 	Diagnostics []*Diagnostic
 }
