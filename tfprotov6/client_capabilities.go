@@ -83,3 +83,12 @@ type PlanActionClientCapabilities struct {
 // but currently they are not sending any capabilities for this RPC.
 type InvokeActionClientCapabilities struct {
 }
+
+// ConfigureStateStoreClientCapabilities allows Terraform to publish information
+// regarding optionally supported protocol features for the ConfigureStateStore,
+// such as forward-compatible Terraform behavior changes.
+type ConfigureStateStoreClientCapabilities struct {
+	// DeferralAllowed signals that the request from Terraform is able to
+	// handle deferred responses from the provider.
+	DeferralAllowed bool
+}
