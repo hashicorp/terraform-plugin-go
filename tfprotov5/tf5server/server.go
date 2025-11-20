@@ -1484,6 +1484,60 @@ func (s *server) InvokeAction(protoReq *tfplugin5.InvokeAction_Request, protoStr
 	return nil
 }
 
+func (s *server) GenerateResourceConfig(ctx context.Context, protoReq *tfplugin5.GenerateResourceConfig_Request) (protoResp *tfplugin5.GenerateResourceConfig_Response, err error) {
+	rpc := "GenerateResourceConfig"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.GenerateResourceConfigContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.GenerateResourceConfigRequest(protoReq)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "State", req.State)
+
+	ctx = tf5serverlogging.DownstreamRequest(ctx)
+
+	// TODO: Remove this check and error in preference of
+	// s.downstream.GenerateResourceConfig below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	generateResourceConfigProviderServer, ok := s.downstream.(tfprotov5.ProviderServerGenerateResourceConfig)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement GenerateResourceConfig")
+
+		protoResp := &tfplugin5.GenerateResourceConfig_Response{
+			Diagnostics: []*tfplugin5.Diagnostic{
+				{
+					Severity: tfplugin5.Diagnostic_ERROR,
+					Summary:  "Provider GenerateResourceConfig Not Implemented",
+					Detail: "A GenerateResourceConfig call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements action support or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	// TODO: Update this to call downstream once optional interface is removed
+	// resp, err := s.downstream.GenerateResourceConfig(ctx, req)
+	resp, err := generateResourceConfigProviderServer.GenerateResourceConfig(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]any{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf5serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Response", "Config", resp.Config)
+
+	protoResp = toproto.GenerateResourceConfig_Response(resp)
+
+	return protoResp, nil
+}
+
 func invalidDeferredResponseDiag(reason tfprotov5.DeferredReason) *tfprotov5.Diagnostic {
 	return &tfprotov5.Diagnostic{
 		Severity: tfprotov5.DiagnosticSeverityError,
