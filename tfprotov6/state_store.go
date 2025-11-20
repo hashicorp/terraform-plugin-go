@@ -24,7 +24,7 @@ type StateStoreServer interface {
 	ConfigureStateStore(context.Context, *ConfigureStateStoreRequest) (*ConfigureStateStoreResponse, error)
 
 	// ReadStateBytes streams byte chunks of a given state file from a state store
-	ReadStateBytes(context.Context, *ReadStateBytesRequest) (*ReadStateBytesResponse, error)
+	ReadStateBytes(context.Context, *ReadStateBytesRequest) (*ReadStateBytesStream, error)
 
 	WriteStateBytes(context.Context, *WriteStateBytesStream) (*WriteStateBytesResponse, error)
 
