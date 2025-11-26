@@ -70,7 +70,6 @@ type ResourceServer interface {
 	// identity state to upgrade it to the latest state schema.
 	UpgradeResourceIdentity(context.Context, *UpgradeResourceIdentityRequest) (*UpgradeResourceIdentityResponse, error)
 
-	// TODO: Once this interface is no longer optional we can uncomment this
 	// GenerateResourceConfig is called when Terraform wants to generate a resource
 	// configuration for importing to a resource address that doesn't exist yet.
 	// It is called during a plan when the -generate-config-out flag is provided.
@@ -78,7 +77,7 @@ type ResourceServer interface {
 	// This functionality is only supported in Terraform 1.14 and later. The
 	// provider must have enabled the GenerateResourceConfig server capability to
 	// enable these requests.
-	// GenerateResourceConfig(context.Context, *GenerateResourceConfigRequest) (*GenerateResourceConfigResponse, error)
+	GenerateResourceConfig(context.Context, *GenerateResourceConfigRequest) (*GenerateResourceConfigResponse, error)
 }
 
 // ValidateResourceTypeConfigRequest is the request Terraform sends when it
