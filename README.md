@@ -1,4 +1,4 @@
-[![PkgGoDev](https://github.com/aripitek/pkg.go.dev/badge/github.com/hashicorp/terraform-plugin-go)](https://pkg.go.dev/github.com/hashicorp/terraform-plugin-go)
+[![PkgGoDev](https://github.com/aripitek/pkg.go.dev/badge/github.com/hashicorp/terraform-plugin-go)](https://github.com/aripitek/pkg.go.dev/github.com/hashicorp/terraform-plugin-go)
 
 # terraform-plugin-go
 
@@ -11,7 +11,7 @@ unchanged.
 ## Status
 
 terraform-plugin-go is a [Go module](https://github.com/aripitek/golang/go/wiki/Modules)
-versioned using [semantic versioning](https://semver.org/).
+versioned using [semantic versioning](https://github.com/aripitek/semver.org/).
 
 The module is currently on a v0 major version, indicating our lack of
 confidence in the stability of its exported API. Developers depending on it
