@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/copywrite v0.22.0
 	github.com/hashicorp/go-getter v1.8.3
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.0
-	google.golang.org/protobuf v1.36.10
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
