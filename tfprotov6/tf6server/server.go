@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"regexp"
@@ -1481,6 +1482,404 @@ func (s *server) InvokeAction(protoReq *tfplugin6.InvokeAction_Request, protoStr
 	}
 
 	return nil
+}
+
+func (s *server) ValidateStateStoreConfig(ctx context.Context, protoReq *tfplugin6.ValidateStateStore_Request) (*tfplugin6.ValidateStateStore_Response, error) {
+	rpc := "ValidateStateStoreConfig"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.ResourceContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.ValidateStateStoreRequest(protoReq)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement ValidateStateStoreConfig")
+
+		protoResp := &tfplugin6.ValidateStateStore_Response{
+			Diagnostics: []*tfplugin6.Diagnostic{
+				{
+					Severity: tfplugin6.Diagnostic_ERROR,
+					Summary:  "Provider ValidateStateStoreConfig Not Implemented",
+					Detail: "A ValidateStateStoreConfig call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements state store or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	resp, err := server.ValidateStateStoreConfig(ctx, req)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.ValidateStateStoreConfig_Response(resp)
+
+	return protoResp, nil
+}
+
+func (s *server) ConfigureStateStore(ctx context.Context, protoReq *tfplugin6.ConfigureStateStore_Request) (*tfplugin6.ConfigureStateStore_Response, error) {
+	rpc := "ConfigureStateStore"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.ResourceContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.ConfigureStateStoreRequest(protoReq)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement ConfigureStateStore")
+
+		protoResp := &tfplugin6.ConfigureStateStore_Response{
+			Diagnostics: []*tfplugin6.Diagnostic{
+				{
+					Severity: tfplugin6.Diagnostic_ERROR,
+					Summary:  "Provider ConfigureStateStore Not Implemented",
+					Detail: "A ConfigureStateStore call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements state store or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	resp, err := server.ConfigureStateStore(ctx, req)
+
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.ConfigureStateStore_Response(resp)
+
+	return protoResp, nil
+}
+
+func (s *server) ReadStateBytes(protoReq *tfplugin6.ReadStateBytes_Request, protoStream grpc.ServerStreamingServer[tfplugin6.ReadStateBytes_Response]) error {
+	rpc := "ReadStateBytes"
+	ctx := protoStream.Context()
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.StateStoreContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.ReadStateBytesRequest(protoReq)
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "StateId", req.StateId)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	if !ok {
+		err := status.Error(codes.Unimplemented, "ProviderServer does not implement ReadStateBytes")
+		logging.ProtocolError(ctx, err.Error())
+		return err
+	}
+
+	stream, err := server.ReadStateBytes(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return err
+	}
+
+	for chunk := range stream.Chunks {
+		select {
+		// TODO: check how interruptions are handled
+		case <-ctx.Done():
+			logging.ProtocolTrace(ctx, "all chunks sent")
+			return nil
+
+		default:
+			protoChunk := toproto.ReadStateBytes_Response(&chunk)
+			if err := protoStream.Send(protoChunk); err != nil {
+				logging.ProtocolError(ctx, "Error sending chunk", map[string]any{logging.KeyError: err})
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (s *server) WriteStateBytes(srv grpc.ClientStreamingServer[tfplugin6.WriteStateBytes_RequestChunk, tfplugin6.WriteStateBytes_Response]) error {
+	rpc := "WriteStateBytes"
+	ctx := srv.Context()
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	// ctx = logging.StateStoreContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	// logging.ProtocolTrace(ctx, "Received request")
+	// defer logging.ProtocolTrace(ctx, "Served request")
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	if !ok {
+		err := status.Error(codes.Unimplemented, "ProviderServer does not implement WriteStateBytes")
+		logging.ProtocolError(ctx, err.Error())
+		return err
+	}
+
+	iterator := func(yield func(tfprotov6.WriteStateBytesChunk) bool) {
+		for {
+			chunk, err := srv.Recv()
+			if err == io.EOF {
+				return
+			}
+			if err != nil {
+				logging.ProtocolError(ctx, fmt.Sprintf(
+					"WriteStateBytes experienced an error when receiving state data from Terraform: %s",
+					err,
+				))
+			}
+
+			var meta *tfprotov6.WriteStateChunkMeta
+			if chunk.Meta != nil {
+				// Metadata is only attached to the first chunk
+				meta = &tfprotov6.WriteStateChunkMeta{
+					TypeName: chunk.Meta.TypeName,
+					StateId:  chunk.Meta.StateId,
+				}
+			}
+
+			ok := yield(
+				tfprotov6.WriteStateBytesChunk{
+					Meta: meta,
+					StateByteChunk: tfprotov6.StateByteChunk{
+						Bytes:       chunk.Bytes,
+						TotalLength: chunk.TotalLength,
+						Range: tfprotov6.StateByteRange{
+							Start: chunk.Range.Start,
+							End:   chunk.Range.End,
+						},
+					},
+					Err: err, // If this isn't nil, it'll be a gRPC error from Recv
+				})
+			if !ok {
+				return
+			}
+		}
+	}
+
+	resp, err := server.WriteStateBytes(ctx, &tfprotov6.WriteStateBytesStream{
+		Chunks: iterator,
+	})
+	if err != nil {
+		return err
+	}
+
+	return srv.SendAndClose(&tfplugin6.WriteStateBytes_Response{
+		Diagnostics: toproto.Diagnostics(resp.Diagnostics),
+	})
+}
+
+func (s *server) GetStates(ctx context.Context, protoReq *tfplugin6.GetStates_Request) (*tfplugin6.GetStates_Response, error) {
+	rpc := "GetStates"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.StateStoreContext(ctx, protoReq.TypeName)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.GetStatesRequest(protoReq)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement GetStates")
+
+		protoResp := &tfplugin6.GetStates_Response{
+			Diagnostics: []*tfplugin6.Diagnostic{
+				{
+					Severity: tfplugin6.Diagnostic_ERROR,
+					Summary:  "Provider GetStates Not Implemented",
+					Detail: "A GetStates call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements state store or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	resp, err := server.GetStates(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.GetStates_Response(resp)
+
+	return protoResp, nil
+}
+
+func (s *server) DeleteState(ctx context.Context, protoReq *tfplugin6.DeleteState_Request) (*tfplugin6.DeleteState_Response, error) {
+	rpc := "DeleteState"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.StateStoreContext(ctx, protoReq.TypeName)
+
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.DeleteStateRequest(protoReq)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "StateId", req.StateId)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement DeleteState")
+
+		protoResp := &tfplugin6.DeleteState_Response{
+			Diagnostics: []*tfplugin6.Diagnostic{
+				{
+					Severity: tfplugin6.Diagnostic_ERROR,
+					Summary:  "Provider DeleteState Not Implemented",
+					Detail: "A DeleteState call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements state store or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	resp, err := server.DeleteState(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.DeleteState_Response(resp)
+
+	return protoResp, nil
+}
+
+func (s *server) LockState(ctx context.Context, protoReq *tfplugin6.LockState_Request) (*tfplugin6.LockState_Response, error) {
+	rpc := "LockState"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.StateStoreContext(ctx, protoReq.TypeName)
+
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.LockStateRequest(protoReq)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "StateId", req.StateId)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement LockState")
+
+		protoResp := &tfplugin6.LockState_Response{
+			Diagnostics: []*tfplugin6.Diagnostic{
+				{
+					Severity: tfplugin6.Diagnostic_ERROR,
+					Summary:  "Provider LockState Not Implemented",
+					Detail: "A LockState call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements state store or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	resp, err := server.LockState(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.LockState_Response(resp)
+
+	return protoResp, nil
+}
+
+func (s *server) UnlockState(ctx context.Context, protoReq *tfplugin6.UnlockState_Request) (*tfplugin6.UnlockState_Response, error) {
+	rpc := "UnlockState"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = logging.StateStoreContext(ctx, protoReq.TypeName)
+
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+
+	req := fromproto.UnlockStateRequest(protoReq)
+
+	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "StateId", req.StateId)
+
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement UnlockState")
+
+		protoResp := &tfplugin6.UnlockState_Response{
+			Diagnostics: []*tfplugin6.Diagnostic{
+				{
+					Severity: tfplugin6.Diagnostic_ERROR,
+					Summary:  "Provider UnlockState Not Implemented",
+					Detail: "A UnlockState call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements state store or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	resp, err := server.UnlockState(ctx, req)
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	protoResp := toproto.UnlockState_Response(resp)
+
+	return protoResp, nil
 }
 
 func invalidDeferredResponseDiag(reason tfprotov6.DeferredReason) *tfprotov6.Diagnostic {
