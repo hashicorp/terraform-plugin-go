@@ -334,6 +334,14 @@ func TestPlanResourceChangeRequest(t *testing.T) {
 				PriorIdentity: testTfprotov6ResourceIdentityData(),
 			},
 		},
+		"PlannedPrivate": {
+			in: &tfplugin6.PlanResourceChange_Request{
+				PlannedPrivate: []byte("{}"),
+			},
+			expected: &tfprotov6.PlanResourceChangeRequest{
+				PlannedPrivate: []byte("{}"),
+			},
+		},
 	}
 
 	for name, testCase := range testCases {

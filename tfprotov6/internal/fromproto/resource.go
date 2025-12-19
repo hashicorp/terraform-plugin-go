@@ -81,6 +81,7 @@ func PlanResourceChangeRequest(in *tfplugin6.PlanResourceChange_Request) *tfprot
 		TypeName:           in.TypeName,
 		ClientCapabilities: PlanResourceChangeClientCapabilities(in.ClientCapabilities),
 		PriorIdentity:      ResourceIdentityData(in.PriorIdentity),
+		PlannedPrivate:     in.PlannedPrivate,
 	}
 
 	return resp

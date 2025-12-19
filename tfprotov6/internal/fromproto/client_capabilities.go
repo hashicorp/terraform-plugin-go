@@ -62,7 +62,8 @@ func PlanResourceChangeClientCapabilities(in *tfplugin6.ClientCapabilities) *tfp
 	}
 
 	resp := &tfprotov6.PlanResourceChangeClientCapabilities{
-		DeferralAllowed: in.DeferralAllowed,
+		DeferralAllowed:     in.DeferralAllowed,
+		StorePlannedPrivate: in.StorePlannedPrivate,
 	}
 
 	return resp

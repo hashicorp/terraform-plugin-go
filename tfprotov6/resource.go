@@ -313,6 +313,13 @@ type PlanResourceChangeRequest struct {
 	// PriorIdentity is the identity of the resource before the plan is
 	// applied, represented as a `ResourceIdentityData`.
 	PriorIdentity *ResourceIdentityData
+
+	// PlannedPrivate is the provider-defined private state stored from the
+	// last plan. PlannedPrivate will only be supplied in the plan immediately
+	// preceding an ApplyResourceChange call.
+	//
+	// It is used to persist data between initial plan and final plan.
+	PlannedPrivate []byte
 }
 
 // PlanResourceChangeResponse is the response from the provider about what the

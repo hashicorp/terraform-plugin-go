@@ -46,6 +46,13 @@ type PlanResourceChangeClientCapabilities struct {
 	// DeferralAllowed signals that the request from Terraform is able to
 	// handle deferred responses from the provider.
 	DeferralAllowed bool
+
+	// StorePlannedPrivate signals that the client will store private data
+	// returned from PlanResourceChange, and return it with the final
+	// PlanResourceChange call.
+	//
+	// This allows providers to persist data between initial plan and final plan.
+	StorePlannedPrivate bool
 }
 
 // ImportResourceStateClientCapabilities allows Terraform to publish information

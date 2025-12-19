@@ -188,6 +188,14 @@ func TestPlanResourceChangeClientCapabilities(t *testing.T) {
 				DeferralAllowed: true,
 			},
 		},
+		"StorePlannedPrivate": {
+			in: &tfplugin6.ClientCapabilities{
+				StorePlannedPrivate: true,
+			},
+			expected: &tfprotov6.PlanResourceChangeClientCapabilities{
+				StorePlannedPrivate: true,
+			},
+		},
 	}
 
 	for name, testCase := range testCases {
