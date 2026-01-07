@@ -56,6 +56,7 @@ const (
 	Provider_ImportResourceState_FullMethodName             = "/tfplugin5.Provider/ImportResourceState"
 	Provider_MoveResourceState_FullMethodName               = "/tfplugin5.Provider/MoveResourceState"
 	Provider_ReadDataSource_FullMethodName                  = "/tfplugin5.Provider/ReadDataSource"
+	Provider_GenerateResourceConfig_FullMethodName          = "/tfplugin5.Provider/GenerateResourceConfig"
 	Provider_ValidateEphemeralResourceConfig_FullMethodName = "/tfplugin5.Provider/ValidateEphemeralResourceConfig"
 	Provider_OpenEphemeralResource_FullMethodName           = "/tfplugin5.Provider/OpenEphemeralResource"
 	Provider_RenewEphemeralResource_FullMethodName          = "/tfplugin5.Provider/RenewEphemeralResource"
@@ -102,6 +103,7 @@ type ProviderClient interface {
 	ImportResourceState(ctx context.Context, in *ImportResourceState_Request, opts ...grpc.CallOption) (*ImportResourceState_Response, error)
 	MoveResourceState(ctx context.Context, in *MoveResourceState_Request, opts ...grpc.CallOption) (*MoveResourceState_Response, error)
 	ReadDataSource(ctx context.Context, in *ReadDataSource_Request, opts ...grpc.CallOption) (*ReadDataSource_Response, error)
+	GenerateResourceConfig(ctx context.Context, in *GenerateResourceConfig_Request, opts ...grpc.CallOption) (*GenerateResourceConfig_Response, error)
 	// ////// Ephemeral Resource Lifecycle
 	ValidateEphemeralResourceConfig(ctx context.Context, in *ValidateEphemeralResourceConfig_Request, opts ...grpc.CallOption) (*ValidateEphemeralResourceConfig_Response, error)
 	OpenEphemeralResource(ctx context.Context, in *OpenEphemeralResource_Request, opts ...grpc.CallOption) (*OpenEphemeralResource_Response, error)
@@ -281,6 +283,16 @@ func (c *providerClient) ReadDataSource(ctx context.Context, in *ReadDataSource_
 	return out, nil
 }
 
+func (c *providerClient) GenerateResourceConfig(ctx context.Context, in *GenerateResourceConfig_Request, opts ...grpc.CallOption) (*GenerateResourceConfig_Response, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GenerateResourceConfig_Response)
+	err := c.cc.Invoke(ctx, Provider_GenerateResourceConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *providerClient) ValidateEphemeralResourceConfig(ctx context.Context, in *ValidateEphemeralResourceConfig_Request, opts ...grpc.CallOption) (*ValidateEphemeralResourceConfig_Response, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ValidateEphemeralResourceConfig_Response)
@@ -451,6 +463,7 @@ type ProviderServer interface {
 	ImportResourceState(context.Context, *ImportResourceState_Request) (*ImportResourceState_Response, error)
 	MoveResourceState(context.Context, *MoveResourceState_Request) (*MoveResourceState_Response, error)
 	ReadDataSource(context.Context, *ReadDataSource_Request) (*ReadDataSource_Response, error)
+	GenerateResourceConfig(context.Context, *GenerateResourceConfig_Request) (*GenerateResourceConfig_Response, error)
 	// ////// Ephemeral Resource Lifecycle
 	ValidateEphemeralResourceConfig(context.Context, *ValidateEphemeralResourceConfig_Request) (*ValidateEphemeralResourceConfig_Response, error)
 	OpenEphemeralResource(context.Context, *OpenEphemeralResource_Request) (*OpenEphemeralResource_Response, error)
@@ -524,6 +537,9 @@ func (UnimplementedProviderServer) MoveResourceState(context.Context, *MoveResou
 }
 func (UnimplementedProviderServer) ReadDataSource(context.Context, *ReadDataSource_Request) (*ReadDataSource_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadDataSource not implemented")
+}
+func (UnimplementedProviderServer) GenerateResourceConfig(context.Context, *GenerateResourceConfig_Request) (*GenerateResourceConfig_Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateResourceConfig not implemented")
 }
 func (UnimplementedProviderServer) ValidateEphemeralResourceConfig(context.Context, *ValidateEphemeralResourceConfig_Request) (*ValidateEphemeralResourceConfig_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ValidateEphemeralResourceConfig not implemented")
@@ -852,6 +868,24 @@ func _Provider_ReadDataSource_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Provider_GenerateResourceConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateResourceConfig_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServer).GenerateResourceConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Provider_GenerateResourceConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServer).GenerateResourceConfig(ctx, req.(*GenerateResourceConfig_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Provider_ValidateEphemeralResourceConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ValidateEphemeralResourceConfig_Request)
 	if err := dec(in); err != nil {
@@ -1120,6 +1154,10 @@ var Provider_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReadDataSource",
 			Handler:    _Provider_ReadDataSource_Handler,
+		},
+		{
+			MethodName: "GenerateResourceConfig",
+			Handler:    _Provider_GenerateResourceConfig_Handler,
 		},
 		{
 			MethodName: "ValidateEphemeralResourceConfig",
