@@ -74,6 +74,7 @@ func LockState_Response(in *tfprotov6.LockStateResponse) *tfplugin6.LockState_Re
 	}
 
 	return &tfplugin6.LockState_Response{
+		LockId:      in.LockId,
 		Diagnostics: Diagnostics(in.Diagnostics),
 	}
 }

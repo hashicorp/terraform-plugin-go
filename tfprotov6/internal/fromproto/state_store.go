@@ -85,5 +85,6 @@ func UnlockStateRequest(in *tfplugin6.UnlockState_Request) *tfprotov6.UnlockStat
 	return &tfprotov6.UnlockStateRequest{
 		TypeName: in.TypeName,
 		StateId:  in.StateId,
+		LockId:   in.LockId,
 	}
 }
