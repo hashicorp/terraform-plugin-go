@@ -66,7 +66,7 @@ const (
 	// The action being operated on
 	KeyActionType = "tf_action_type"
 
-	// The type of state store being operated on, such as "terraform_fs"
+	// The type of state store being operated on, such as "examplecloud_fs"
 	KeyStateStoreType = "tf_state_store_type"
 
 	// Path to protocol data file, such as "/tmp/example.json"
