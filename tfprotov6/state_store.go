@@ -8,11 +8,17 @@ import (
 	"iter"
 )
 
+// StateStoreMetadata describes metadata for a state store in the GetMetadata RPC.
+type StateStoreMetadata struct {
+	// TypeName is the name of the state store.
+	TypeName string
+}
+
 // StateStoreServer is an interface containing the methods an list resource
 // implementation needs to fill.
 type StateStoreServer interface {
 	// ValidateStateStoreConfig performs configuration validation
-	ValidateStateStoreConfig(context.Context, *ValidateStateStoreRequest) (*ValidateStateStoreResponse, error)
+	ValidateStateStoreConfig(context.Context, *ValidateStateStoreConfigRequest) (*ValidateStateStoreConfigResponse, error)
 
 	// ConfigureStateStore configures the state store, such as S3 connection in the context of already configured provider
 	ConfigureStateStore(context.Context, *ConfigureStateStoreRequest) (*ConfigureStateStoreResponse, error)
@@ -35,28 +41,24 @@ type StateStoreServer interface {
 	UnlockState(context.Context, *UnlockStateRequest) (*UnlockStateResponse, error)
 }
 
-type ValidateStateStoreRequest struct {
+type ValidateStateStoreConfigRequest struct {
 	TypeName string
 	Config   *DynamicValue
 }
 
-type ValidateStateStoreResponse struct {
+type ValidateStateStoreConfigResponse struct {
 	Diagnostics []*Diagnostic
 }
 
 type ConfigureStateStoreRequest struct {
 	TypeName     string
 	Config       *DynamicValue
-	Capabilities StateStoreClientCapabilities
+	Capabilities *ConfigureStateStoreClientCapabilities
 }
 
 type ConfigureStateStoreResponse struct {
 	Diagnostics  []*Diagnostic
-	Capabilities StateStoreServerCapabilities
-}
-
-type StateStoreClientCapabilities struct {
-	ChunkSize int64 // suggested chunk size by Core
+	Capabilities *StateStoreServerCapabilities
 }
 
 type StateStoreServerCapabilities struct {
@@ -65,7 +67,7 @@ type StateStoreServerCapabilities struct {
 
 type ReadStateBytesRequest struct {
 	TypeName string
-	StateId  string
+	StateID  string
 }
 
 type ReadStateBytesStream struct {
@@ -73,24 +75,18 @@ type ReadStateBytesStream struct {
 }
 
 type WriteStateBytesStream struct {
-	Chunks iter.Seq[WriteStateBytesChunk]
+	Chunks iter.Seq2[*WriteStateBytesChunk, []*Diagnostic]
 }
 
-// WriteStateBytesChunk contains:
-//  1. A chunk of state data, received from Terraform core to be persisted.
-//  2. Any gRPC-related errors the provider server encountered when
-//     receiving data from Terraform core.
-//
-// If a gRPC error is set, then the chunk should be empty.
+// WriteStateBytesChunk contains a chunk of state data, received from Terraform core to be persisted.
 type WriteStateBytesChunk struct {
 	Meta *WriteStateChunkMeta
 	StateByteChunk
-	Err error
 }
 
 type WriteStateChunkMeta struct {
 	TypeName string
-	StateId  string
+	StateID  string
 }
 
 type WriteStateBytesResponse struct {
@@ -117,13 +113,13 @@ type GetStatesRequest struct {
 }
 
 type GetStatesResponse struct {
-	StateId     []string
+	StateIDs    []string
 	Diagnostics []*Diagnostic
 }
 
 type DeleteStateRequest struct {
 	TypeName string
-	StateId  string
+	StateID  string
 }
 
 type DeleteStateResponse struct {
@@ -132,19 +128,19 @@ type DeleteStateResponse struct {
 
 type LockStateRequest struct {
 	TypeName  string
-	StateId   string
+	StateID   string
 	Operation string
 }
 
 type LockStateResponse struct {
-	LockId      string
+	LockID      string
 	Diagnostics []*Diagnostic
 }
 
 type UnlockStateRequest struct {
 	TypeName string
-	StateId  string
-	LockId   string
+	StateID  string
+	LockID   string
 }
 
 type UnlockStateResponse struct {

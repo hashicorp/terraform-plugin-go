@@ -74,6 +74,10 @@ type ProviderServer interface {
 	/* // Add this back once temporary interface is removed
 	   // ActionServer is an interface encapsulating all the action-related RPC requests.
 	   ActionServer*/
+
+	/* // Add this back once temporary interface is removed
+	   // StateStoreServer is an interface encapsulating all the state store related RPC requests.
+	   StateStoreServer*/
 }
 
 // ProviderServerWithListResource is a temporary interface for servers
@@ -109,6 +113,28 @@ type ProviderServerWithActions interface {
 	ActionServer
 }
 
+// ProviderServerWithStateStores is a temporary interface for servers
+// to implement StateStore RPCs
+//
+// - ValidateStateStoreConfig
+// - ConfigureStateStore
+// - GetStates
+// - DeleteState
+// - LockState
+// - UnlockState
+// - ReadStateBytes
+// - WriteStateBytes
+//
+// Deprecated: All methods will be moved into the
+// ProviderServer interface and this interface will be removed in a future
+// version.
+type ProviderServerWithStateStores interface {
+	ProviderServer
+
+	// StateStoreServer is an interface encapsulating all the state store related RPC requests.
+	StateStoreServer
+}
+
 // GetMetadataRequest represents a GetMetadata RPC request.
 type GetMetadataRequest struct{}
 
@@ -140,6 +166,9 @@ type GetMetadataResponse struct {
 
 	// Actions returns metadata for all actions.
 	Actions []ActionMetadata
+
+	// StateStores returns metadata for all state stores.
+	StateStores []StateStoreMetadata
 }
 
 // GetProviderSchemaRequest represents a Terraform RPC request for the

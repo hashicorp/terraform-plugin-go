@@ -1484,26 +1484,30 @@ func (s *server) InvokeAction(protoReq *tfplugin6.InvokeAction_Request, protoStr
 	return nil
 }
 
-func (s *server) ValidateStateStoreConfig(ctx context.Context, protoReq *tfplugin6.ValidateStateStore_Request) (*tfplugin6.ValidateStateStore_Response, error) {
+func (s *server) ValidateStateStoreConfig(ctx context.Context, protoReq *tfplugin6.ValidateStateStoreConfig_Request) (*tfplugin6.ValidateStateStoreConfig_Response, error) {
 	rpc := "ValidateStateStoreConfig"
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
-	ctx = logging.ResourceContext(ctx, protoReq.TypeName)
+	ctx = logging.StateStoreContext(ctx, protoReq.TypeName)
 	ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
 
-	req := fromproto.ValidateStateStoreRequest(protoReq)
+	req := fromproto.ValidateStateStoreConfigRequest(protoReq)
 
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	// TODO: Remove this check and error in preference of
+	// s.downstream.ValidateStateStoreConfig below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	stateStoreProviderServer, ok := s.downstream.(tfprotov6.ProviderServerWithStateStores)
 	if !ok {
 		logging.ProtocolError(ctx, "ProviderServer does not implement ValidateStateStoreConfig")
 
-		protoResp := &tfplugin6.ValidateStateStore_Response{
+		protoResp := &tfplugin6.ValidateStateStoreConfig_Response{
 			Diagnostics: []*tfplugin6.Diagnostic{
 				{
 					Severity: tfplugin6.Diagnostic_ERROR,
@@ -1517,8 +1521,9 @@ func (s *server) ValidateStateStoreConfig(ctx context.Context, protoReq *tfplugi
 		return protoResp, nil
 	}
 
-	resp, err := server.ValidateStateStoreConfig(ctx, req)
-
+	// TODO: Update this to call downstream once optional interface is removed
+	// resp, err := s.downstream.ValidateStateStoreConfig(ctx, req)
+	resp, err := stateStoreProviderServer.ValidateStateStoreConfig(ctx, req)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
 		return nil, err
@@ -1535,18 +1540,23 @@ func (s *server) ConfigureStateStore(ctx context.Context, protoReq *tfplugin6.Co
 	rpc := "ConfigureStateStore"
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
-	ctx = logging.ResourceContext(ctx, protoReq.TypeName)
+	ctx = logging.StateStoreContext(ctx, protoReq.TypeName)
 	ctx = s.stoppableContext(ctx)
 	logging.ProtocolTrace(ctx, "Received request")
 	defer logging.ProtocolTrace(ctx, "Served request")
 
 	req := fromproto.ConfigureStateStoreRequest(protoReq)
 
+	tf6serverlogging.ConfigureStateStoreClientCapabilities(ctx, req.Capabilities)
 	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "Config", req.Config)
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	// TODO: Remove this check and error in preference of
+	// s.downstream.ConfigureStateStore below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	stateStoreProviderServer, ok := s.downstream.(tfprotov6.ProviderServerWithStateStores)
 	if !ok {
 		logging.ProtocolError(ctx, "ProviderServer does not implement ConfigureStateStore")
 
@@ -1564,7 +1574,9 @@ func (s *server) ConfigureStateStore(ctx context.Context, protoReq *tfplugin6.Co
 		return protoResp, nil
 	}
 
-	resp, err := server.ConfigureStateStore(ctx, req)
+	// TODO: Update this to call downstream once optional interface is removed
+	// resp, err := s.downstream.ConfigureStateStore(ctx, req)
+	resp, err := stateStoreProviderServer.ConfigureStateStore(ctx, req)
 
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
@@ -1572,13 +1584,14 @@ func (s *server) ConfigureStateStore(ctx context.Context, protoReq *tfplugin6.Co
 	}
 
 	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+	tf6serverlogging.StateStoreServerCapabilities(ctx, resp.Capabilities)
 
 	protoResp := toproto.ConfigureStateStore_Response(resp)
 
 	return protoResp, nil
 }
 
-func (s *server) ReadStateBytes(protoReq *tfplugin6.ReadStateBytes_Request, protoStream grpc.ServerStreamingServer[tfplugin6.ReadStateBytes_Response]) error {
+func (s *server) ReadStateBytes(protoReq *tfplugin6.ReadStateBytes_Request, protoStream grpc.ServerStreamingServer[tfplugin6.ReadStateBytes_ResponseChunk]) error {
 	rpc := "ReadStateBytes"
 	ctx := protoStream.Context()
 	ctx = s.loggingContext(ctx)
@@ -1589,18 +1602,23 @@ func (s *server) ReadStateBytes(protoReq *tfplugin6.ReadStateBytes_Request, prot
 	defer logging.ProtocolTrace(ctx, "Served request")
 
 	req := fromproto.ReadStateBytesRequest(protoReq)
-	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "StateId", req.StateId)
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	// TODO: Remove this check and error in preference of
+	// s.downstream.ReadStateBytes below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	stateStoreProviderServer, ok := s.downstream.(tfprotov6.ProviderServerWithStateStores)
 	if !ok {
 		err := status.Error(codes.Unimplemented, "ProviderServer does not implement ReadStateBytes")
 		logging.ProtocolError(ctx, err.Error())
 		return err
 	}
 
-	stream, err := server.ReadStateBytes(ctx, req)
+	// TODO: Update this to call downstream once optional interface is removed
+	// resp, err := s.downstream.ReadStateBytes(ctx, req)
+	stream, err := stateStoreProviderServer.ReadStateBytes(ctx, req)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
 		return err
@@ -1608,15 +1626,14 @@ func (s *server) ReadStateBytes(protoReq *tfplugin6.ReadStateBytes_Request, prot
 
 	for chunk := range stream.Chunks {
 		select {
-		// TODO: check how interruptions are handled
 		case <-ctx.Done():
-			logging.ProtocolTrace(ctx, "all chunks sent")
+			logging.ProtocolTrace(ctx, "Context done")
 			return nil
 
 		default:
-			protoChunk := toproto.ReadStateBytes_Response(&chunk)
+			protoChunk := toproto.ReadStateBytes_ResponseChunk(&chunk)
 			if err := protoStream.Send(protoChunk); err != nil {
-				logging.ProtocolError(ctx, "Error sending chunk", map[string]any{logging.KeyError: err})
+				logging.ProtocolError(ctx, "Error sending state byte chunk", map[string]any{logging.KeyError: err})
 				return err
 			}
 		}
@@ -1630,67 +1647,71 @@ func (s *server) WriteStateBytes(srv grpc.ClientStreamingServer[tfplugin6.WriteS
 	ctx := srv.Context()
 	ctx = s.loggingContext(ctx)
 	ctx = logging.RpcContext(ctx, rpc)
-	// ctx = logging.StateStoreContext(ctx, protoReq.TypeName)
 	ctx = s.stoppableContext(ctx)
-	// logging.ProtocolTrace(ctx, "Received request")
-	// defer logging.ProtocolTrace(ctx, "Served request")
+	// MAINTAINER NOTE: Typically, we would modify the logger to include the state store type being written to, however since Terraform
+	// core is streaming data to this RPC, we only receive the type name on the first chunk (after we already sent the context downstream).
+	//
+	// The result is that downstream SDKs are responsible for adding type name information to the context for logging.
+
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	// TODO: Remove this check and error in preference of
+	// s.downstream.WriteStateBytes below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	stateStoreProviderServer, ok := s.downstream.(tfprotov6.ProviderServerWithStateStores)
 	if !ok {
 		err := status.Error(codes.Unimplemented, "ProviderServer does not implement WriteStateBytes")
 		logging.ProtocolError(ctx, err.Error())
 		return err
 	}
 
-	iterator := func(yield func(tfprotov6.WriteStateBytesChunk) bool) {
+	iterator := func(yield func(*tfprotov6.WriteStateBytesChunk, []*tfprotov6.Diagnostic) bool) {
 		for {
 			chunk, err := srv.Recv()
 			if err == io.EOF {
 				return
 			}
 			if err != nil {
-				logging.ProtocolError(ctx, fmt.Sprintf(
-					"WriteStateBytes experienced an error when receiving state data from Terraform: %s",
-					err,
-				))
-			}
-
-			var meta *tfprotov6.WriteStateChunkMeta
-			if chunk.Meta != nil {
-				// Metadata is only attached to the first chunk
-				meta = &tfprotov6.WriteStateChunkMeta{
-					TypeName: chunk.Meta.TypeName,
-					StateId:  chunk.Meta.StateId,
-				}
-			}
-
-			ok := yield(
-				tfprotov6.WriteStateBytesChunk{
-					Meta: meta,
-					StateByteChunk: tfprotov6.StateByteChunk{
-						Bytes:       chunk.Bytes,
-						TotalLength: chunk.TotalLength,
-						Range: tfprotov6.StateByteRange{
-							Start: chunk.Range.Start,
-							End:   chunk.Range.End,
-						},
+				errMsg := fmt.Sprintf("An unexpected GRPC error occurred receieving state data from Terraform: %s", err)
+				logging.ProtocolError(ctx, errMsg, map[string]any{logging.KeyError: err})
+				diags := []*tfprotov6.Diagnostic{
+					{
+						Severity: tfprotov6.DiagnosticSeverityError,
+						Summary:  "Unexpected GRPC error received in WriteStateBytes",
+						Detail:   errMsg,
 					},
-					Err: err, // If this isn't nil, it'll be a gRPC error from Recv
-				})
-			if !ok {
+				}
+
+				yield(nil, diags)
+				return
+			}
+
+			stateChunk, chunkDiag := fromproto.WriteStateBytesChunk(chunk)
+			if chunkDiag != nil {
+				logging.ProtocolError(ctx, chunkDiag.Detail)
+
+				yield(nil, []*tfprotov6.Diagnostic{chunkDiag})
+				return
+			}
+
+			if !yield(stateChunk, nil) {
 				return
 			}
 		}
 	}
 
-	resp, err := server.WriteStateBytes(ctx, &tfprotov6.WriteStateBytesStream{
-		Chunks: iterator,
-	})
+	// TODO: Update this to call downstream once optional interface is removed
+	// resp, err := s.downstream.WriteStateBytes(ctx, &tfprotov6.WriteStateBytesStream{Chunks: iterator})
+	resp, err := stateStoreProviderServer.WriteStateBytes(ctx, &tfprotov6.WriteStateBytesStream{Chunks: iterator})
 	if err != nil {
 		return err
 	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
 
 	return srv.SendAndClose(&tfplugin6.WriteStateBytes_Response{
 		Diagnostics: toproto.Diagnostics(resp.Diagnostics),
@@ -1710,7 +1731,11 @@ func (s *server) GetStates(ctx context.Context, protoReq *tfplugin6.GetStates_Re
 
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	// TODO: Remove this check and error in preference of
+	// s.downstream.GetStates below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	stateStoreProviderServer, ok := s.downstream.(tfprotov6.ProviderServerWithStateStores)
 	if !ok {
 		logging.ProtocolError(ctx, "ProviderServer does not implement GetStates")
 
@@ -1728,7 +1753,9 @@ func (s *server) GetStates(ctx context.Context, protoReq *tfplugin6.GetStates_Re
 		return protoResp, nil
 	}
 
-	resp, err := server.GetStates(ctx, req)
+	// TODO: Update this to call downstream once optional interface is removed
+	// resp, err := s.downstream.GetStates(ctx, req)
+	resp, err := stateStoreProviderServer.GetStates(ctx, req)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
 		return nil, err
@@ -1753,11 +1780,13 @@ func (s *server) DeleteState(ctx context.Context, protoReq *tfplugin6.DeleteStat
 
 	req := fromproto.DeleteStateRequest(protoReq)
 
-	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "StateId", req.StateId)
-
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	// TODO: Remove this check and error in preference of
+	// s.downstream.DeleteState below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	stateStoreProviderServer, ok := s.downstream.(tfprotov6.ProviderServerWithStateStores)
 	if !ok {
 		logging.ProtocolError(ctx, "ProviderServer does not implement DeleteState")
 
@@ -1775,7 +1804,9 @@ func (s *server) DeleteState(ctx context.Context, protoReq *tfplugin6.DeleteStat
 		return protoResp, nil
 	}
 
-	resp, err := server.DeleteState(ctx, req)
+	// TODO: Update this to call downstream once optional interface is removed
+	// resp, err := s.downstream.DeleteState(ctx, req)
+	resp, err := stateStoreProviderServer.DeleteState(ctx, req)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
 		return nil, err
@@ -1800,11 +1831,13 @@ func (s *server) LockState(ctx context.Context, protoReq *tfplugin6.LockState_Re
 
 	req := fromproto.LockStateRequest(protoReq)
 
-	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "StateId", req.StateId)
-
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	// TODO: Remove this check and error in preference of
+	// s.downstream.LockState below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	stateStoreProviderServer, ok := s.downstream.(tfprotov6.ProviderServerWithStateStores)
 	if !ok {
 		logging.ProtocolError(ctx, "ProviderServer does not implement LockState")
 
@@ -1822,7 +1855,9 @@ func (s *server) LockState(ctx context.Context, protoReq *tfplugin6.LockState_Re
 		return protoResp, nil
 	}
 
-	resp, err := server.LockState(ctx, req)
+	// TODO: Update this to call downstream once optional interface is removed
+	// resp, err := s.downstream.LockState(ctx, req)
+	resp, err := stateStoreProviderServer.LockState(ctx, req)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
 		return nil, err
@@ -1847,11 +1882,13 @@ func (s *server) UnlockState(ctx context.Context, protoReq *tfplugin6.UnlockStat
 
 	req := fromproto.UnlockStateRequest(protoReq)
 
-	logging.ProtocolData(ctx, s.protocolDataDir, rpc, "Request", "StateId", req.StateId)
-
 	ctx = tf6serverlogging.DownstreamRequest(ctx)
 
-	server, ok := s.downstream.(tfprotov6.StateStoreServer)
+	// TODO: Remove this check and error in preference of
+	// s.downstream.UnlockState below once ProviderServer interface
+	// implements this RPC method.
+	// nolint:staticcheck
+	stateStoreProviderServer, ok := s.downstream.(tfprotov6.ProviderServerWithStateStores)
 	if !ok {
 		logging.ProtocolError(ctx, "ProviderServer does not implement UnlockState")
 
@@ -1869,7 +1906,9 @@ func (s *server) UnlockState(ctx context.Context, protoReq *tfplugin6.UnlockStat
 		return protoResp, nil
 	}
 
-	resp, err := server.UnlockState(ctx, req)
+	// TODO: Update this to call downstream once optional interface is removed
+	// resp, err := s.downstream.UnlockState(ctx, req)
+	resp, err := stateStoreProviderServer.UnlockState(ctx, req)
 	if err != nil {
 		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
 		return nil, err

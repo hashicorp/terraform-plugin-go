@@ -8,12 +8,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
 )
 
-func ValidateStateStoreConfig_Response(in *tfprotov6.ValidateStateStoreResponse) *tfplugin6.ValidateStateStore_Response {
+func GetMetadata_StateStoreMetadata(in *tfprotov6.StateStoreMetadata) *tfplugin6.GetMetadata_StateStoreMetadata {
 	if in == nil {
 		return nil
 	}
 
-	return &tfplugin6.ValidateStateStore_Response{
+	return &tfplugin6.GetMetadata_StateStoreMetadata{
+		TypeName: in.TypeName,
+	}
+}
+
+func ValidateStateStoreConfig_Response(in *tfprotov6.ValidateStateStoreConfigResponse) *tfplugin6.ValidateStateStoreConfig_Response {
+	if in == nil {
+		return nil
+	}
+
+	return &tfplugin6.ValidateStateStoreConfig_Response{
 		Diagnostics: Diagnostics(in.Diagnostics),
 	}
 }
@@ -24,26 +34,28 @@ func ConfigureStateStore_Response(in *tfprotov6.ConfigureStateStoreResponse) *tf
 	}
 
 	return &tfplugin6.ConfigureStateStore_Response{
-		Diagnostics: Diagnostics(in.Diagnostics),
-		Capabilities: &tfplugin6.StateStoreServerCapabilities{
-			ChunkSize: in.Capabilities.ChunkSize,
-		},
+		Diagnostics:  Diagnostics(in.Diagnostics),
+		Capabilities: StateStoreServerCapabilities(in.Capabilities),
 	}
 }
 
-func ReadStateBytes_Response(in *tfprotov6.ReadStateByteChunk) *tfplugin6.ReadStateBytes_Response {
+func ReadStateBytes_ResponseChunk(in *tfprotov6.ReadStateByteChunk) *tfplugin6.ReadStateBytes_ResponseChunk {
 	if in == nil {
 		return nil
 	}
 
-	return &tfplugin6.ReadStateBytes_Response{
+	return &tfplugin6.ReadStateBytes_ResponseChunk{
 		Diagnostics: Diagnostics(in.Diagnostics),
 		Bytes:       in.Bytes,
 		TotalLength: in.TotalLength,
-		Range: &tfplugin6.StateRange{
-			Start: in.Range.Start,
-			End:   in.Range.End,
-		},
+		Range:       StateByteRange(in.Range),
+	}
+}
+
+func StateByteRange(in tfprotov6.StateByteRange) *tfplugin6.StateByteRange {
+	return &tfplugin6.StateByteRange{
+		Start: in.Start,
+		End:   in.End,
 	}
 }
 
@@ -53,7 +65,7 @@ func GetStates_Response(in *tfprotov6.GetStatesResponse) *tfplugin6.GetStates_Re
 	}
 
 	return &tfplugin6.GetStates_Response{
-		StateId:     in.StateId,
+		StateIds:    in.StateIDs,
 		Diagnostics: Diagnostics(in.Diagnostics),
 	}
 }
@@ -74,7 +86,7 @@ func LockState_Response(in *tfprotov6.LockStateResponse) *tfplugin6.LockState_Re
 	}
 
 	return &tfplugin6.LockState_Response{
-		LockId:      in.LockId,
+		LockId:      in.LockID,
 		Diagnostics: Diagnostics(in.Diagnostics),
 	}
 }
