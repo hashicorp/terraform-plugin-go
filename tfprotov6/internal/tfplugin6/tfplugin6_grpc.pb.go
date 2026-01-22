@@ -1,9 +1,9 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
-// Terraform Plugin RPC protocol version 6.10
+// Terraform Plugin RPC protocol version 6.11
 //
-// This file defines version 6.10 of the RPC protocol. To implement a plugin
+// This file defines version 6.11 of the RPC protocol. To implement a plugin
 // against this protocol, copy this definition into your own codebase and
 // use protoc to generate stubs for your target language.
 //
@@ -128,11 +128,11 @@ type ProviderClient interface {
 	PlanAction(ctx context.Context, in *PlanAction_Request, opts ...grpc.CallOption) (*PlanAction_Response, error)
 	InvokeAction(ctx context.Context, in *InvokeAction_Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[InvokeAction_Event], error)
 	// ValidateStateStoreConfig performs configuration validation
-	ValidateStateStoreConfig(ctx context.Context, in *ValidateStateStore_Request, opts ...grpc.CallOption) (*ValidateStateStore_Response, error)
+	ValidateStateStoreConfig(ctx context.Context, in *ValidateStateStoreConfig_Request, opts ...grpc.CallOption) (*ValidateStateStoreConfig_Response, error)
 	// ConfigureStateStore configures the state store, such as S3 connection in the context of already configured provider
 	ConfigureStateStore(ctx context.Context, in *ConfigureStateStore_Request, opts ...grpc.CallOption) (*ConfigureStateStore_Response, error)
 	// ReadStateBytes streams byte chunks of a given state file from a state store
-	ReadStateBytes(ctx context.Context, in *ReadStateBytes_Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ReadStateBytes_Response], error)
+	ReadStateBytes(ctx context.Context, in *ReadStateBytes_Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ReadStateBytes_ResponseChunk], error)
 	// WriteStateBytes streams byte chunks of a given state file into a state store
 	WriteStateBytes(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[WriteStateBytes_RequestChunk, WriteStateBytes_Response], error)
 	// LockState locks a given state (i.e. CE workspace)
@@ -433,9 +433,9 @@ func (c *providerClient) InvokeAction(ctx context.Context, in *InvokeAction_Requ
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Provider_InvokeActionClient = grpc.ServerStreamingClient[InvokeAction_Event]
 
-func (c *providerClient) ValidateStateStoreConfig(ctx context.Context, in *ValidateStateStore_Request, opts ...grpc.CallOption) (*ValidateStateStore_Response, error) {
+func (c *providerClient) ValidateStateStoreConfig(ctx context.Context, in *ValidateStateStoreConfig_Request, opts ...grpc.CallOption) (*ValidateStateStoreConfig_Response, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ValidateStateStore_Response)
+	out := new(ValidateStateStoreConfig_Response)
 	err := c.cc.Invoke(ctx, Provider_ValidateStateStoreConfig_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -453,13 +453,13 @@ func (c *providerClient) ConfigureStateStore(ctx context.Context, in *ConfigureS
 	return out, nil
 }
 
-func (c *providerClient) ReadStateBytes(ctx context.Context, in *ReadStateBytes_Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ReadStateBytes_Response], error) {
+func (c *providerClient) ReadStateBytes(ctx context.Context, in *ReadStateBytes_Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ReadStateBytes_ResponseChunk], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &Provider_ServiceDesc.Streams[2], Provider_ReadStateBytes_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[ReadStateBytes_Request, ReadStateBytes_Response]{ClientStream: stream}
+	x := &grpc.GenericClientStream[ReadStateBytes_Request, ReadStateBytes_ResponseChunk]{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -470,7 +470,7 @@ func (c *providerClient) ReadStateBytes(ctx context.Context, in *ReadStateBytes_
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Provider_ReadStateBytesClient = grpc.ServerStreamingClient[ReadStateBytes_Response]
+type Provider_ReadStateBytesClient = grpc.ServerStreamingClient[ReadStateBytes_ResponseChunk]
 
 func (c *providerClient) WriteStateBytes(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[WriteStateBytes_RequestChunk, WriteStateBytes_Response], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -585,11 +585,11 @@ type ProviderServer interface {
 	PlanAction(context.Context, *PlanAction_Request) (*PlanAction_Response, error)
 	InvokeAction(*InvokeAction_Request, grpc.ServerStreamingServer[InvokeAction_Event]) error
 	// ValidateStateStoreConfig performs configuration validation
-	ValidateStateStoreConfig(context.Context, *ValidateStateStore_Request) (*ValidateStateStore_Response, error)
+	ValidateStateStoreConfig(context.Context, *ValidateStateStoreConfig_Request) (*ValidateStateStoreConfig_Response, error)
 	// ConfigureStateStore configures the state store, such as S3 connection in the context of already configured provider
 	ConfigureStateStore(context.Context, *ConfigureStateStore_Request) (*ConfigureStateStore_Response, error)
 	// ReadStateBytes streams byte chunks of a given state file from a state store
-	ReadStateBytes(*ReadStateBytes_Request, grpc.ServerStreamingServer[ReadStateBytes_Response]) error
+	ReadStateBytes(*ReadStateBytes_Request, grpc.ServerStreamingServer[ReadStateBytes_ResponseChunk]) error
 	// WriteStateBytes streams byte chunks of a given state file into a state store
 	WriteStateBytes(grpc.ClientStreamingServer[WriteStateBytes_RequestChunk, WriteStateBytes_Response]) error
 	// LockState locks a given state (i.e. CE workspace)
@@ -690,13 +690,13 @@ func (UnimplementedProviderServer) PlanAction(context.Context, *PlanAction_Reque
 func (UnimplementedProviderServer) InvokeAction(*InvokeAction_Request, grpc.ServerStreamingServer[InvokeAction_Event]) error {
 	return status.Errorf(codes.Unimplemented, "method InvokeAction not implemented")
 }
-func (UnimplementedProviderServer) ValidateStateStoreConfig(context.Context, *ValidateStateStore_Request) (*ValidateStateStore_Response, error) {
+func (UnimplementedProviderServer) ValidateStateStoreConfig(context.Context, *ValidateStateStoreConfig_Request) (*ValidateStateStoreConfig_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ValidateStateStoreConfig not implemented")
 }
 func (UnimplementedProviderServer) ConfigureStateStore(context.Context, *ConfigureStateStore_Request) (*ConfigureStateStore_Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ConfigureStateStore not implemented")
 }
-func (UnimplementedProviderServer) ReadStateBytes(*ReadStateBytes_Request, grpc.ServerStreamingServer[ReadStateBytes_Response]) error {
+func (UnimplementedProviderServer) ReadStateBytes(*ReadStateBytes_Request, grpc.ServerStreamingServer[ReadStateBytes_ResponseChunk]) error {
 	return status.Errorf(codes.Unimplemented, "method ReadStateBytes not implemented")
 }
 func (UnimplementedProviderServer) WriteStateBytes(grpc.ClientStreamingServer[WriteStateBytes_RequestChunk, WriteStateBytes_Response]) error {
@@ -1193,7 +1193,7 @@ func _Provider_InvokeAction_Handler(srv interface{}, stream grpc.ServerStream) e
 type Provider_InvokeActionServer = grpc.ServerStreamingServer[InvokeAction_Event]
 
 func _Provider_ValidateStateStoreConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateStateStore_Request)
+	in := new(ValidateStateStoreConfig_Request)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1205,7 +1205,7 @@ func _Provider_ValidateStateStoreConfig_Handler(srv interface{}, ctx context.Con
 		FullMethod: Provider_ValidateStateStoreConfig_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProviderServer).ValidateStateStoreConfig(ctx, req.(*ValidateStateStore_Request))
+		return srv.(ProviderServer).ValidateStateStoreConfig(ctx, req.(*ValidateStateStoreConfig_Request))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1233,11 +1233,11 @@ func _Provider_ReadStateBytes_Handler(srv interface{}, stream grpc.ServerStream)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ProviderServer).ReadStateBytes(m, &grpc.GenericServerStream[ReadStateBytes_Request, ReadStateBytes_Response]{ServerStream: stream})
+	return srv.(ProviderServer).ReadStateBytes(m, &grpc.GenericServerStream[ReadStateBytes_Request, ReadStateBytes_ResponseChunk]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Provider_ReadStateBytesServer = grpc.ServerStreamingServer[ReadStateBytes_Response]
+type Provider_ReadStateBytesServer = grpc.ServerStreamingServer[ReadStateBytes_ResponseChunk]
 
 func _Provider_WriteStateBytes_Handler(srv interface{}, stream grpc.ServerStream) error {
 	return srv.(ProviderServer).WriteStateBytes(&grpc.GenericServerStream[WriteStateBytes_RequestChunk, WriteStateBytes_Response]{ServerStream: stream})

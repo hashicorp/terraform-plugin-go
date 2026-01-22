@@ -1,9 +1,9 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
-// Terraform Plugin RPC protocol version 6.10
+// Terraform Plugin RPC protocol version 6.11
 //
-// This file defines version 6.10 of the RPC protocol. To implement a plugin
+// This file defines version 6.11 of the RPC protocol. To implement a plugin
 // against this protocol, copy this definition into your own codebase and
 // use protoc to generate stubs for your target language.
 //
@@ -2062,26 +2062,26 @@ func (*InvokeAction) Descriptor() ([]byte, []int) {
 	return file_tfplugin6_proto_rawDescGZIP(), []int{39}
 }
 
-type ValidateStateStore struct {
+type ValidateStateStoreConfig struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ValidateStateStore) Reset() {
-	*x = ValidateStateStore{}
+func (x *ValidateStateStoreConfig) Reset() {
+	*x = ValidateStateStoreConfig{}
 	mi := &file_tfplugin6_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ValidateStateStore) String() string {
+func (x *ValidateStateStoreConfig) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ValidateStateStore) ProtoMessage() {}
+func (*ValidateStateStoreConfig) ProtoMessage() {}
 
-func (x *ValidateStateStore) ProtoReflect() protoreflect.Message {
+func (x *ValidateStateStoreConfig) ProtoReflect() protoreflect.Message {
 	mi := &file_tfplugin6_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2093,8 +2093,8 @@ func (x *ValidateStateStore) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ValidateStateStore.ProtoReflect.Descriptor instead.
-func (*ValidateStateStore) Descriptor() ([]byte, []int) {
+// Deprecated: Use ValidateStateStoreConfig.ProtoReflect.Descriptor instead.
+func (*ValidateStateStoreConfig) Descriptor() ([]byte, []int) {
 	return file_tfplugin6_proto_rawDescGZIP(), []int{40}
 }
 
@@ -2346,7 +2346,7 @@ func (x *RequestChunkMeta) GetStateId() string {
 	return ""
 }
 
-type StateRange struct {
+type StateByteRange struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Start         int64                  `protobuf:"varint,1,opt,name=start,proto3" json:"start,omitempty"`
 	End           int64                  `protobuf:"varint,2,opt,name=end,proto3" json:"end,omitempty"`
@@ -2354,20 +2354,20 @@ type StateRange struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *StateRange) Reset() {
-	*x = StateRange{}
+func (x *StateByteRange) Reset() {
+	*x = StateByteRange{}
 	mi := &file_tfplugin6_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *StateRange) String() string {
+func (x *StateByteRange) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*StateRange) ProtoMessage() {}
+func (*StateByteRange) ProtoMessage() {}
 
-func (x *StateRange) ProtoReflect() protoreflect.Message {
+func (x *StateByteRange) ProtoReflect() protoreflect.Message {
 	mi := &file_tfplugin6_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2379,19 +2379,19 @@ func (x *StateRange) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use StateRange.ProtoReflect.Descriptor instead.
-func (*StateRange) Descriptor() ([]byte, []int) {
+// Deprecated: Use StateByteRange.ProtoReflect.Descriptor instead.
+func (*StateByteRange) Descriptor() ([]byte, []int) {
 	return file_tfplugin6_proto_rawDescGZIP(), []int{47}
 }
 
-func (x *StateRange) GetStart() int64 {
+func (x *StateByteRange) GetStart() int64 {
 	if x != nil {
 		return x.Start
 	}
 	return 0
 }
 
-func (x *StateRange) GetEnd() int64 {
+func (x *StateByteRange) GetEnd() int64 {
 	if x != nil {
 		return x.End
 	}
@@ -7068,7 +7068,7 @@ func (x *InvokeAction_Event_Completed) GetDiagnostics() []*Diagnostic {
 	return nil
 }
 
-type ValidateStateStore_Request struct {
+type ValidateStateStoreConfig_Request struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TypeName      string                 `protobuf:"bytes,1,opt,name=type_name,json=typeName,proto3" json:"type_name,omitempty"`
 	Config        *DynamicValue          `protobuf:"bytes,2,opt,name=config,proto3" json:"config,omitempty"`
@@ -7076,20 +7076,20 @@ type ValidateStateStore_Request struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ValidateStateStore_Request) Reset() {
-	*x = ValidateStateStore_Request{}
+func (x *ValidateStateStoreConfig_Request) Reset() {
+	*x = ValidateStateStoreConfig_Request{}
 	mi := &file_tfplugin6_proto_msgTypes[134]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ValidateStateStore_Request) String() string {
+func (x *ValidateStateStoreConfig_Request) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ValidateStateStore_Request) ProtoMessage() {}
+func (*ValidateStateStoreConfig_Request) ProtoMessage() {}
 
-func (x *ValidateStateStore_Request) ProtoReflect() protoreflect.Message {
+func (x *ValidateStateStoreConfig_Request) ProtoReflect() protoreflect.Message {
 	mi := &file_tfplugin6_proto_msgTypes[134]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -7101,46 +7101,46 @@ func (x *ValidateStateStore_Request) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ValidateStateStore_Request.ProtoReflect.Descriptor instead.
-func (*ValidateStateStore_Request) Descriptor() ([]byte, []int) {
+// Deprecated: Use ValidateStateStoreConfig_Request.ProtoReflect.Descriptor instead.
+func (*ValidateStateStoreConfig_Request) Descriptor() ([]byte, []int) {
 	return file_tfplugin6_proto_rawDescGZIP(), []int{40, 0}
 }
 
-func (x *ValidateStateStore_Request) GetTypeName() string {
+func (x *ValidateStateStoreConfig_Request) GetTypeName() string {
 	if x != nil {
 		return x.TypeName
 	}
 	return ""
 }
 
-func (x *ValidateStateStore_Request) GetConfig() *DynamicValue {
+func (x *ValidateStateStoreConfig_Request) GetConfig() *DynamicValue {
 	if x != nil {
 		return x.Config
 	}
 	return nil
 }
 
-type ValidateStateStore_Response struct {
+type ValidateStateStoreConfig_Response struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Diagnostics   []*Diagnostic          `protobuf:"bytes,1,rep,name=diagnostics,proto3" json:"diagnostics,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ValidateStateStore_Response) Reset() {
-	*x = ValidateStateStore_Response{}
+func (x *ValidateStateStoreConfig_Response) Reset() {
+	*x = ValidateStateStoreConfig_Response{}
 	mi := &file_tfplugin6_proto_msgTypes[135]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ValidateStateStore_Response) String() string {
+func (x *ValidateStateStoreConfig_Response) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ValidateStateStore_Response) ProtoMessage() {}
+func (*ValidateStateStoreConfig_Response) ProtoMessage() {}
 
-func (x *ValidateStateStore_Response) ProtoReflect() protoreflect.Message {
+func (x *ValidateStateStoreConfig_Response) ProtoReflect() protoreflect.Message {
 	mi := &file_tfplugin6_proto_msgTypes[135]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -7152,12 +7152,12 @@ func (x *ValidateStateStore_Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ValidateStateStore_Response.ProtoReflect.Descriptor instead.
-func (*ValidateStateStore_Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use ValidateStateStoreConfig_Response.ProtoReflect.Descriptor instead.
+func (*ValidateStateStoreConfig_Response) Descriptor() ([]byte, []int) {
 	return file_tfplugin6_proto_rawDescGZIP(), []int{40, 1}
 }
 
-func (x *ValidateStateStore_Response) GetDiagnostics() []*Diagnostic {
+func (x *ValidateStateStoreConfig_Response) GetDiagnostics() []*Diagnostic {
 	if x != nil {
 		return x.Diagnostics
 	}
@@ -7328,30 +7328,30 @@ func (x *ReadStateBytes_Request) GetStateId() string {
 	return ""
 }
 
-type ReadStateBytes_Response struct {
+type ReadStateBytes_ResponseChunk struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Bytes         []byte                 `protobuf:"bytes,1,opt,name=bytes,proto3" json:"bytes,omitempty"`
 	TotalLength   int64                  `protobuf:"varint,2,opt,name=total_length,json=totalLength,proto3" json:"total_length,omitempty"`
-	Range         *StateRange            `protobuf:"bytes,3,opt,name=range,proto3" json:"range,omitempty"`
+	Range         *StateByteRange        `protobuf:"bytes,3,opt,name=range,proto3" json:"range,omitempty"`
 	Diagnostics   []*Diagnostic          `protobuf:"bytes,4,rep,name=diagnostics,proto3" json:"diagnostics,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ReadStateBytes_Response) Reset() {
-	*x = ReadStateBytes_Response{}
+func (x *ReadStateBytes_ResponseChunk) Reset() {
+	*x = ReadStateBytes_ResponseChunk{}
 	mi := &file_tfplugin6_proto_msgTypes[139]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ReadStateBytes_Response) String() string {
+func (x *ReadStateBytes_ResponseChunk) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ReadStateBytes_Response) ProtoMessage() {}
+func (*ReadStateBytes_ResponseChunk) ProtoMessage() {}
 
-func (x *ReadStateBytes_Response) ProtoReflect() protoreflect.Message {
+func (x *ReadStateBytes_ResponseChunk) ProtoReflect() protoreflect.Message {
 	mi := &file_tfplugin6_proto_msgTypes[139]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -7363,33 +7363,33 @@ func (x *ReadStateBytes_Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ReadStateBytes_Response.ProtoReflect.Descriptor instead.
-func (*ReadStateBytes_Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use ReadStateBytes_ResponseChunk.ProtoReflect.Descriptor instead.
+func (*ReadStateBytes_ResponseChunk) Descriptor() ([]byte, []int) {
 	return file_tfplugin6_proto_rawDescGZIP(), []int{44, 1}
 }
 
-func (x *ReadStateBytes_Response) GetBytes() []byte {
+func (x *ReadStateBytes_ResponseChunk) GetBytes() []byte {
 	if x != nil {
 		return x.Bytes
 	}
 	return nil
 }
 
-func (x *ReadStateBytes_Response) GetTotalLength() int64 {
+func (x *ReadStateBytes_ResponseChunk) GetTotalLength() int64 {
 	if x != nil {
 		return x.TotalLength
 	}
 	return 0
 }
 
-func (x *ReadStateBytes_Response) GetRange() *StateRange {
+func (x *ReadStateBytes_ResponseChunk) GetRange() *StateByteRange {
 	if x != nil {
 		return x.Range
 	}
 	return nil
 }
 
-func (x *ReadStateBytes_Response) GetDiagnostics() []*Diagnostic {
+func (x *ReadStateBytes_ResponseChunk) GetDiagnostics() []*Diagnostic {
 	if x != nil {
 		return x.Diagnostics
 	}
@@ -7402,7 +7402,7 @@ type WriteStateBytes_RequestChunk struct {
 	Meta          *RequestChunkMeta `protobuf:"bytes,1,opt,name=meta,proto3,oneof" json:"meta,omitempty"`
 	Bytes         []byte            `protobuf:"bytes,2,opt,name=bytes,proto3" json:"bytes,omitempty"`
 	TotalLength   int64             `protobuf:"varint,3,opt,name=total_length,json=totalLength,proto3" json:"total_length,omitempty"`
-	Range         *StateRange       `protobuf:"bytes,4,opt,name=range,proto3" json:"range,omitempty"`
+	Range         *StateByteRange   `protobuf:"bytes,4,opt,name=range,proto3" json:"range,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7458,7 +7458,7 @@ func (x *WriteStateBytes_RequestChunk) GetTotalLength() int64 {
 	return 0
 }
 
-func (x *WriteStateBytes_RequestChunk) GetRange() *StateRange {
+func (x *WriteStateBytes_RequestChunk) GetRange() *StateByteRange {
 	if x != nil {
 		return x.Range
 	}
@@ -7772,7 +7772,7 @@ func (x *GetStates_Request) GetTypeName() string {
 
 type GetStates_Response struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	StateId       []string               `protobuf:"bytes,1,rep,name=state_id,json=stateId,proto3" json:"state_id,omitempty"`
+	StateIds      []string               `protobuf:"bytes,1,rep,name=state_ids,json=stateIds,proto3" json:"state_ids,omitempty"`
 	Diagnostics   []*Diagnostic          `protobuf:"bytes,2,rep,name=diagnostics,proto3" json:"diagnostics,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -7808,9 +7808,9 @@ func (*GetStates_Response) Descriptor() ([]byte, []int) {
 	return file_tfplugin6_proto_rawDescGZIP(), []int{50, 1}
 }
 
-func (x *GetStates_Response) GetStateId() []string {
+func (x *GetStates_Response) GetStateIds() []string {
 	if x != nil {
-		return x.StateId
+		return x.StateIds
 	}
 	return nil
 }
@@ -8373,8 +8373,8 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x1aD\n" +
 	"\tCompleted\x127\n" +
 	"\vdiagnostics\x18\x01 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnosticsB\x06\n" +
-	"\x04type\"\xb2\x01\n" +
-	"\x12ValidateStateStore\x1aW\n" +
+	"\x04type\"\xb8\x01\n" +
+	"\x18ValidateStateStoreConfig\x1aW\n" +
 	"\aRequest\x12\x1b\n" +
 	"\ttype_name\x18\x01 \x01(\tR\btypeName\x12/\n" +
 	"\x06config\x18\x02 \x01(\v2\x17.tfplugin6.DynamicValueR\x06config\x1aC\n" +
@@ -8393,30 +8393,29 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"chunk_size\x18\x01 \x01(\x03R\tchunkSize\"=\n" +
 	"\x1cStateStoreServerCapabilities\x12\x1d\n" +
 	"\n" +
-	"chunk_size\x18\x01 \x01(\x03R\tchunkSize\"\xff\x01\n" +
+	"chunk_size\x18\x01 \x01(\x03R\tchunkSize\"\x88\x02\n" +
 	"\x0eReadStateBytes\x1aA\n" +
 	"\aRequest\x12\x1b\n" +
 	"\ttype_name\x18\x01 \x01(\tR\btypeName\x12\x19\n" +
-	"\bstate_id\x18\x02 \x01(\tR\astateId\x1a\xa9\x01\n" +
-	"\bResponse\x12\x14\n" +
+	"\bstate_id\x18\x02 \x01(\tR\astateId\x1a\xb2\x01\n" +
+	"\rResponseChunk\x12\x14\n" +
 	"\x05bytes\x18\x01 \x01(\fR\x05bytes\x12!\n" +
-	"\ftotal_length\x18\x02 \x01(\x03R\vtotalLength\x12+\n" +
-	"\x05range\x18\x03 \x01(\v2\x15.tfplugin6.StateRangeR\x05range\x127\n" +
-	"\vdiagnostics\x18\x04 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnostics\"\x8c\x02\n" +
-	"\x0fWriteStateBytes\x1a\xb3\x01\n" +
+	"\ftotal_length\x18\x02 \x01(\x03R\vtotalLength\x12/\n" +
+	"\x05range\x18\x03 \x01(\v2\x19.tfplugin6.StateByteRangeR\x05range\x127\n" +
+	"\vdiagnostics\x18\x04 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnostics\"\x90\x02\n" +
+	"\x0fWriteStateBytes\x1a\xb7\x01\n" +
 	"\fRequestChunk\x124\n" +
 	"\x04meta\x18\x01 \x01(\v2\x1b.tfplugin6.RequestChunkMetaH\x00R\x04meta\x88\x01\x01\x12\x14\n" +
 	"\x05bytes\x18\x02 \x01(\fR\x05bytes\x12!\n" +
-	"\ftotal_length\x18\x03 \x01(\x03R\vtotalLength\x12+\n" +
-	"\x05range\x18\x04 \x01(\v2\x15.tfplugin6.StateRangeR\x05rangeB\a\n" +
+	"\ftotal_length\x18\x03 \x01(\x03R\vtotalLength\x12/\n" +
+	"\x05range\x18\x04 \x01(\v2\x19.tfplugin6.StateByteRangeR\x05rangeB\a\n" +
 	"\x05_meta\x1aC\n" +
 	"\bResponse\x127\n" +
 	"\vdiagnostics\x18\x01 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnostics\"J\n" +
 	"\x10RequestChunkMeta\x12\x1b\n" +
 	"\ttype_name\x18\x01 \x01(\tR\btypeName\x12\x19\n" +
-	"\bstate_id\x18\x02 \x01(\tR\astateId\"4\n" +
-	"\n" +
-	"StateRange\x12\x14\n" +
+	"\bstate_id\x18\x02 \x01(\tR\astateId\"8\n" +
+	"\x0eStateByteRange\x12\x14\n" +
 	"\x05start\x18\x01 \x01(\x03R\x05start\x12\x10\n" +
 	"\x03end\x18\x02 \x01(\x03R\x03end\"\xca\x01\n" +
 	"\tLockState\x1a_\n" +
@@ -8433,12 +8432,12 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\bstate_id\x18\x02 \x01(\tR\astateId\x12\x17\n" +
 	"\alock_id\x18\x03 \x01(\tR\x06lockId\x1aC\n" +
 	"\bResponse\x127\n" +
-	"\vdiagnostics\x18\x01 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnostics\"\x93\x01\n" +
+	"\vdiagnostics\x18\x01 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnostics\"\x95\x01\n" +
 	"\tGetStates\x1a&\n" +
 	"\aRequest\x12\x1b\n" +
-	"\ttype_name\x18\x01 \x01(\tR\btypeName\x1a^\n" +
-	"\bResponse\x12\x19\n" +
-	"\bstate_id\x18\x01 \x03(\tR\astateId\x127\n" +
+	"\ttype_name\x18\x01 \x01(\tR\btypeName\x1a`\n" +
+	"\bResponse\x12\x1b\n" +
+	"\tstate_ids\x18\x01 \x03(\tR\bstateIds\x127\n" +
 	"\vdiagnostics\x18\x02 \x03(\v2\x15.tfplugin6.DiagnosticR\vdiagnostics\"\x95\x01\n" +
 	"\vDeleteState\x1aA\n" +
 	"\aRequest\x12\x1b\n" +
@@ -8449,7 +8448,7 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\n" +
 	"StringKind\x12\t\n" +
 	"\x05PLAIN\x10\x00\x12\f\n" +
-	"\bMARKDOWN\x10\x012\x90\x1b\n" +
+	"\bMARKDOWN\x10\x012\xa1\x1b\n" +
 	"\bProvider\x12N\n" +
 	"\vGetMetadata\x12\x1e.tfplugin6.GetMetadata.Request\x1a\x1f.tfplugin6.GetMetadata.Response\x12`\n" +
 	"\x11GetProviderSchema\x12$.tfplugin6.GetProviderSchema.Request\x1a%.tfplugin6.GetProviderSchema.Response\x12{\n" +
@@ -8477,10 +8476,10 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\x14ValidateActionConfig\x12'.tfplugin6.ValidateActionConfig.Request\x1a(.tfplugin6.ValidateActionConfig.Response\x12K\n" +
 	"\n" +
 	"PlanAction\x12\x1d.tfplugin6.PlanAction.Request\x1a\x1e.tfplugin6.PlanAction.Response\x12P\n" +
-	"\fInvokeAction\x12\x1f.tfplugin6.InvokeAction.Request\x1a\x1d.tfplugin6.InvokeAction.Event0\x01\x12i\n" +
-	"\x18ValidateStateStoreConfig\x12%.tfplugin6.ValidateStateStore.Request\x1a&.tfplugin6.ValidateStateStore.Response\x12f\n" +
-	"\x13ConfigureStateStore\x12&.tfplugin6.ConfigureStateStore.Request\x1a'.tfplugin6.ConfigureStateStore.Response\x12Y\n" +
-	"\x0eReadStateBytes\x12!.tfplugin6.ReadStateBytes.Request\x1a\".tfplugin6.ReadStateBytes.Response0\x01\x12a\n" +
+	"\fInvokeAction\x12\x1f.tfplugin6.InvokeAction.Request\x1a\x1d.tfplugin6.InvokeAction.Event0\x01\x12u\n" +
+	"\x18ValidateStateStoreConfig\x12+.tfplugin6.ValidateStateStoreConfig.Request\x1a,.tfplugin6.ValidateStateStoreConfig.Response\x12f\n" +
+	"\x13ConfigureStateStore\x12&.tfplugin6.ConfigureStateStore.Request\x1a'.tfplugin6.ConfigureStateStore.Response\x12^\n" +
+	"\x0eReadStateBytes\x12!.tfplugin6.ReadStateBytes.Request\x1a'.tfplugin6.ReadStateBytes.ResponseChunk0\x01\x12a\n" +
 	"\x0fWriteStateBytes\x12'.tfplugin6.WriteStateBytes.RequestChunk\x1a#.tfplugin6.WriteStateBytes.Response(\x01\x12H\n" +
 	"\tLockState\x12\x1c.tfplugin6.LockState.Request\x1a\x1d.tfplugin6.LockState.Response\x12N\n" +
 	"\vUnlockState\x12\x1e.tfplugin6.UnlockState.Request\x1a\x1f.tfplugin6.UnlockState.Response\x12H\n" +
@@ -8548,14 +8547,14 @@ var file_tfplugin6_proto_goTypes = []any{
 	(*ValidateActionConfig)(nil),                     // 42: tfplugin6.ValidateActionConfig
 	(*PlanAction)(nil),                               // 43: tfplugin6.PlanAction
 	(*InvokeAction)(nil),                             // 44: tfplugin6.InvokeAction
-	(*ValidateStateStore)(nil),                       // 45: tfplugin6.ValidateStateStore
+	(*ValidateStateStoreConfig)(nil),                 // 45: tfplugin6.ValidateStateStoreConfig
 	(*ConfigureStateStore)(nil),                      // 46: tfplugin6.ConfigureStateStore
 	(*StateStoreClientCapabilities)(nil),             // 47: tfplugin6.StateStoreClientCapabilities
 	(*StateStoreServerCapabilities)(nil),             // 48: tfplugin6.StateStoreServerCapabilities
 	(*ReadStateBytes)(nil),                           // 49: tfplugin6.ReadStateBytes
 	(*WriteStateBytes)(nil),                          // 50: tfplugin6.WriteStateBytes
 	(*RequestChunkMeta)(nil),                         // 51: tfplugin6.RequestChunkMeta
-	(*StateRange)(nil),                               // 52: tfplugin6.StateRange
+	(*StateByteRange)(nil),                           // 52: tfplugin6.StateByteRange
 	(*LockState)(nil),                                // 53: tfplugin6.LockState
 	(*UnlockState)(nil),                              // 54: tfplugin6.UnlockState
 	(*GetStates)(nil),                                // 55: tfplugin6.GetStates
@@ -8642,12 +8641,12 @@ var file_tfplugin6_proto_goTypes = []any{
 	(*InvokeAction_Event)(nil),                  // 136: tfplugin6.InvokeAction.Event
 	(*InvokeAction_Event_Progress)(nil),         // 137: tfplugin6.InvokeAction.Event.Progress
 	(*InvokeAction_Event_Completed)(nil),        // 138: tfplugin6.InvokeAction.Event.Completed
-	(*ValidateStateStore_Request)(nil),          // 139: tfplugin6.ValidateStateStore.Request
-	(*ValidateStateStore_Response)(nil),         // 140: tfplugin6.ValidateStateStore.Response
+	(*ValidateStateStoreConfig_Request)(nil),    // 139: tfplugin6.ValidateStateStoreConfig.Request
+	(*ValidateStateStoreConfig_Response)(nil),   // 140: tfplugin6.ValidateStateStoreConfig.Response
 	(*ConfigureStateStore_Request)(nil),         // 141: tfplugin6.ConfigureStateStore.Request
 	(*ConfigureStateStore_Response)(nil),        // 142: tfplugin6.ConfigureStateStore.Response
 	(*ReadStateBytes_Request)(nil),              // 143: tfplugin6.ReadStateBytes.Request
-	(*ReadStateBytes_Response)(nil),             // 144: tfplugin6.ReadStateBytes.Response
+	(*ReadStateBytes_ResponseChunk)(nil),        // 144: tfplugin6.ReadStateBytes.ResponseChunk
 	(*WriteStateBytes_RequestChunk)(nil),        // 145: tfplugin6.WriteStateBytes.RequestChunk
 	(*WriteStateBytes_Response)(nil),            // 146: tfplugin6.WriteStateBytes.Response
 	(*LockState_Request)(nil),                   // 147: tfplugin6.LockState.Request
@@ -8811,16 +8810,16 @@ var file_tfplugin6_proto_depIdxs = []int32{
 	137, // 147: tfplugin6.InvokeAction.Event.progress:type_name -> tfplugin6.InvokeAction.Event.Progress
 	138, // 148: tfplugin6.InvokeAction.Event.completed:type_name -> tfplugin6.InvokeAction.Event.Completed
 	6,   // 149: tfplugin6.InvokeAction.Event.Completed.diagnostics:type_name -> tfplugin6.Diagnostic
-	5,   // 150: tfplugin6.ValidateStateStore.Request.config:type_name -> tfplugin6.DynamicValue
-	6,   // 151: tfplugin6.ValidateStateStore.Response.diagnostics:type_name -> tfplugin6.Diagnostic
+	5,   // 150: tfplugin6.ValidateStateStoreConfig.Request.config:type_name -> tfplugin6.DynamicValue
+	6,   // 151: tfplugin6.ValidateStateStoreConfig.Response.diagnostics:type_name -> tfplugin6.Diagnostic
 	5,   // 152: tfplugin6.ConfigureStateStore.Request.config:type_name -> tfplugin6.DynamicValue
 	47,  // 153: tfplugin6.ConfigureStateStore.Request.capabilities:type_name -> tfplugin6.StateStoreClientCapabilities
 	6,   // 154: tfplugin6.ConfigureStateStore.Response.diagnostics:type_name -> tfplugin6.Diagnostic
 	48,  // 155: tfplugin6.ConfigureStateStore.Response.capabilities:type_name -> tfplugin6.StateStoreServerCapabilities
-	52,  // 156: tfplugin6.ReadStateBytes.Response.range:type_name -> tfplugin6.StateRange
-	6,   // 157: tfplugin6.ReadStateBytes.Response.diagnostics:type_name -> tfplugin6.Diagnostic
+	52,  // 156: tfplugin6.ReadStateBytes.ResponseChunk.range:type_name -> tfplugin6.StateByteRange
+	6,   // 157: tfplugin6.ReadStateBytes.ResponseChunk.diagnostics:type_name -> tfplugin6.Diagnostic
 	51,  // 158: tfplugin6.WriteStateBytes.RequestChunk.meta:type_name -> tfplugin6.RequestChunkMeta
-	52,  // 159: tfplugin6.WriteStateBytes.RequestChunk.range:type_name -> tfplugin6.StateRange
+	52,  // 159: tfplugin6.WriteStateBytes.RequestChunk.range:type_name -> tfplugin6.StateByteRange
 	6,   // 160: tfplugin6.WriteStateBytes.Response.diagnostics:type_name -> tfplugin6.Diagnostic
 	6,   // 161: tfplugin6.LockState.Response.diagnostics:type_name -> tfplugin6.Diagnostic
 	6,   // 162: tfplugin6.UnlockState.Response.diagnostics:type_name -> tfplugin6.Diagnostic
@@ -8852,7 +8851,7 @@ var file_tfplugin6_proto_depIdxs = []int32{
 	131, // 188: tfplugin6.Provider.ValidateActionConfig:input_type -> tfplugin6.ValidateActionConfig.Request
 	133, // 189: tfplugin6.Provider.PlanAction:input_type -> tfplugin6.PlanAction.Request
 	135, // 190: tfplugin6.Provider.InvokeAction:input_type -> tfplugin6.InvokeAction.Request
-	139, // 191: tfplugin6.Provider.ValidateStateStoreConfig:input_type -> tfplugin6.ValidateStateStore.Request
+	139, // 191: tfplugin6.Provider.ValidateStateStoreConfig:input_type -> tfplugin6.ValidateStateStoreConfig.Request
 	141, // 192: tfplugin6.Provider.ConfigureStateStore:input_type -> tfplugin6.ConfigureStateStore.Request
 	143, // 193: tfplugin6.Provider.ReadStateBytes:input_type -> tfplugin6.ReadStateBytes.Request
 	145, // 194: tfplugin6.Provider.WriteStateBytes:input_type -> tfplugin6.WriteStateBytes.RequestChunk
@@ -8887,9 +8886,9 @@ var file_tfplugin6_proto_depIdxs = []int32{
 	132, // 223: tfplugin6.Provider.ValidateActionConfig:output_type -> tfplugin6.ValidateActionConfig.Response
 	134, // 224: tfplugin6.Provider.PlanAction:output_type -> tfplugin6.PlanAction.Response
 	136, // 225: tfplugin6.Provider.InvokeAction:output_type -> tfplugin6.InvokeAction.Event
-	140, // 226: tfplugin6.Provider.ValidateStateStoreConfig:output_type -> tfplugin6.ValidateStateStore.Response
+	140, // 226: tfplugin6.Provider.ValidateStateStoreConfig:output_type -> tfplugin6.ValidateStateStoreConfig.Response
 	142, // 227: tfplugin6.Provider.ConfigureStateStore:output_type -> tfplugin6.ConfigureStateStore.Response
-	144, // 228: tfplugin6.Provider.ReadStateBytes:output_type -> tfplugin6.ReadStateBytes.Response
+	144, // 228: tfplugin6.Provider.ReadStateBytes:output_type -> tfplugin6.ReadStateBytes.ResponseChunk
 	146, // 229: tfplugin6.Provider.WriteStateBytes:output_type -> tfplugin6.WriteStateBytes.Response
 	148, // 230: tfplugin6.Provider.LockState:output_type -> tfplugin6.LockState.Response
 	150, // 231: tfplugin6.Provider.UnlockState:output_type -> tfplugin6.UnlockState.Response

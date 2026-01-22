@@ -1,0 +1,5 @@
+kind: FEATURES
+body: 'tfprotov6: Upgraded protocol v6 and added types to support the new state store type.'
+time: 2026-01-20T16:57:34.518083-05:00
+custom:
+    Issue: "563"

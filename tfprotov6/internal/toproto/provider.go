@@ -21,6 +21,7 @@ func GetMetadata_Response(in *tfprotov6.GetMetadataResponse) *tfplugin6.GetMetad
 		ListResources:      make([]*tfplugin6.GetMetadata_ListResourceMetadata, 0, len(in.ListResources)),
 		Functions:          make([]*tfplugin6.GetMetadata_FunctionMetadata, 0, len(in.Functions)),
 		Resources:          make([]*tfplugin6.GetMetadata_ResourceMetadata, 0, len(in.Resources)),
+		StateStores:        make([]*tfplugin6.GetMetadata_StateStoreMetadata, 0, len(in.StateStores)),
 		ServerCapabilities: ServerCapabilities(in.ServerCapabilities),
 	}
 
@@ -46,6 +47,10 @@ func GetMetadata_Response(in *tfprotov6.GetMetadataResponse) *tfplugin6.GetMetad
 
 	for _, action := range in.Actions {
 		resp.Actions = append(resp.Actions, GetMetadata_ActionMetadata(&action))
+	}
+
+	for _, stateStore := range in.StateStores {
+		resp.StateStores = append(resp.StateStores, GetMetadata_StateStoreMetadata(&stateStore))
 	}
 
 	return resp

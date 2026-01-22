@@ -1,9 +1,9 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
-// Terraform Plugin RPC protocol version 6.10
+// Terraform Plugin RPC protocol version 6.11
 //
-// This file defines version 6.10 of the RPC protocol. To implement a plugin
+// This file defines version 6.11 of the RPC protocol. To implement a plugin
 // against this protocol, copy this definition into your own codebase and
 // use protoc to generate stubs for your target language.
 //
@@ -392,11 +392,11 @@ service Provider {
     rpc InvokeAction(InvokeAction.Request) returns (stream InvokeAction.Event);
 
     // ValidateStateStoreConfig performs configuration validation
-    rpc ValidateStateStoreConfig(ValidateStateStore.Request) returns (ValidateStateStore.Response);
+    rpc ValidateStateStoreConfig(ValidateStateStoreConfig.Request) returns (ValidateStateStoreConfig.Response);
     // ConfigureStateStore configures the state store, such as S3 connection in the context of already configured provider
     rpc ConfigureStateStore(ConfigureStateStore.Request) returns (ConfigureStateStore.Response);
     // ReadStateBytes streams byte chunks of a given state file from a state store
-    rpc ReadStateBytes(ReadStateBytes.Request) returns (stream ReadStateBytes.Response);
+    rpc ReadStateBytes(ReadStateBytes.Request) returns (stream ReadStateBytes.ResponseChunk);
     // WriteStateBytes streams byte chunks of a given state file into a state store
     rpc WriteStateBytes(stream WriteStateBytes.RequestChunk) returns (WriteStateBytes.Response);
     // LockState locks a given state (i.e. CE workspace)
@@ -948,7 +948,7 @@ message InvokeAction {
 
 }
 
-message ValidateStateStore {
+message ValidateStateStoreConfig {
     message Request {
         string type_name = 1;
         DynamicValue config = 2;
@@ -983,10 +983,10 @@ message ReadStateBytes {
         string type_name = 1;
         string state_id = 2;
     }
-    message Response {
+    message ResponseChunk {
         bytes bytes = 1;
         int64 total_length = 2;
-        StateRange range = 3;
+        StateByteRange range = 3;
         repeated Diagnostic diagnostics = 4;
     }
 }
@@ -998,7 +998,7 @@ message WriteStateBytes {
 
         bytes bytes = 2;
         int64 total_length = 3;
-        StateRange range = 4;
+        StateByteRange range = 4;
     }
     message Response {
         repeated Diagnostic diagnostics = 1;
@@ -1010,7 +1010,7 @@ message RequestChunkMeta {
     string state_id = 2;
 }
 
-message StateRange {
+message StateByteRange {
     int64 start = 1;
     int64 end = 2;
 }
@@ -1044,7 +1044,7 @@ message GetStates {
 		string type_name = 1;
     }
     message Response {
-        repeated string state_id = 1;
+        repeated string state_ids = 1;
         repeated Diagnostic diagnostics = 2;
     }
 }

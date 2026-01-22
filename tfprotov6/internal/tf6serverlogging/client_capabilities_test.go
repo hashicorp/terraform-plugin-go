@@ -551,3 +551,70 @@ func TestPlanActionClientCapabilities(t *testing.T) {
 		})
 	}
 }
+
+func TestConfigureStateStoreClientCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		capabilities *tfprotov6.ConfigureStateStoreClientCapabilities
+		expected     []map[string]interface{}
+	}{
+		"nil": {
+			capabilities: nil,
+			expected: []map[string]interface{}{
+				{
+					"@level":   "trace",
+					"@message": "No announced client capabilities",
+					"@module":  "sdk.proto",
+				},
+			},
+		},
+		"empty": {
+			capabilities: &tfprotov6.ConfigureStateStoreClientCapabilities{},
+			expected: []map[string]interface{}{
+				{
+					"@level":                          "trace",
+					"@message":                        "Announced client capabilities",
+					"@module":                         "sdk.proto",
+					"tf_client_capability_chunk_size": "0MB", // Terraform will always send us this capability, so this log should never occur in practice.
+				},
+			},
+		},
+		"chunk_size": {
+			capabilities: &tfprotov6.ConfigureStateStoreClientCapabilities{
+				ChunkSize: 8 << 20,
+			},
+			expected: []map[string]interface{}{
+				{
+					"@level":                          "trace",
+					"@message":                        "Announced client capabilities",
+					"@module":                         "sdk.proto",
+					"tf_client_capability_chunk_size": "8MB",
+				},
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			var output bytes.Buffer
+
+			ctx := tfsdklogtest.RootLogger(context.Background(), &output)
+			ctx = logging.ProtoSubsystemContext(ctx, tfsdklog.Options{})
+
+			tf6serverlogging.ConfigureStateStoreClientCapabilities(ctx, testCase.capabilities)
+
+			entries, err := tfsdklogtest.MultilineJSONDecode(&output)
+
+			if err != nil {
+				t.Fatalf("unable to read multiple line JSON: %s", err)
+			}
+
+			if diff := cmp.Diff(entries, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}

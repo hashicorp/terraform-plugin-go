@@ -74,3 +74,49 @@ func TestServerCapabilities(t *testing.T) {
 		})
 	}
 }
+
+func TestStateStoreServerCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		in       *tfprotov6.StateStoreServerCapabilities
+		expected *tfplugin6.StateStoreServerCapabilities
+	}{
+		"nil": {
+			in:       nil,
+			expected: nil,
+		},
+		"zero": {
+			in:       &tfprotov6.StateStoreServerCapabilities{},
+			expected: &tfplugin6.StateStoreServerCapabilities{},
+		},
+		"ChunkSize": {
+			in: &tfprotov6.StateStoreServerCapabilities{
+				ChunkSize: 8 << 20,
+			},
+			expected: &tfplugin6.StateStoreServerCapabilities{
+				ChunkSize: 8 << 20,
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := toproto.StateStoreServerCapabilities(testCase.in)
+
+			// Protocol Buffers generated types must have unexported fields
+			// ignored or cmp.Diff() will raise an error. This is easier than
+			// writing a custom Comparer for each type, which would have no
+			// benefits.
+			diffOpts := cmpopts.IgnoreUnexported(
+				tfplugin6.StateStoreServerCapabilities{},
+			)
+
+			if diff := cmp.Diff(got, testCase.expected, diffOpts); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
