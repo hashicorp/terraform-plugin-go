@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-go/tftypes/refinement"
 	msgpack "github.com/vmihailenco/msgpack/v5"
 )
 
@@ -44,6 +45,10 @@ type ValueCreator interface {
 type Value struct {
 	typ   Type
 	value interface{}
+
+	// refinements represents the unknown value refinement data associated with this Value.
+	// This field is only populated for unknown values.
+	refinements refinement.Refinements
 }
 
 func (val Value) String() string {
@@ -57,8 +62,17 @@ func (val Value) String() string {
 	if val.IsNull() {
 		return typ.String() + "<null>"
 	}
+
 	if !val.IsKnown() {
-		return typ.String() + "<unknown>"
+		var res strings.Builder
+		res.WriteString(typ.String())
+		res.WriteString("<unknown")
+		if len(val.refinements) > 0 {
+			res.WriteString(", " + val.Refinements().String())
+		}
+		res.WriteString(">")
+
+		return res.String()
 	}
 
 	// everything else is built up
@@ -221,6 +235,15 @@ func (val Value) Equal(o Value) bool {
 	if !val.Type().Equal(o.Type()) {
 		return false
 	}
+
+	if len(val.refinements) != len(o.refinements) {
+		return false
+	}
+
+	if len(val.refinements) > 0 && !val.refinements.Equal(o.refinements) {
+		return false
+	}
+
 	deepEqual, err := val.deepEqual(o)
 	if err != nil {
 		return false
@@ -247,7 +270,19 @@ func (val Value) Copy() Value {
 		}
 		newVal = newVals
 	}
-	return NewValue(val.Type(), newVal)
+
+	newTfValue := NewValue(val.Type(), newVal)
+
+	if len(val.refinements) > 0 {
+		newRefinements := make(refinement.Refinements, len(val.refinements))
+		for key, refnVal := range val.refinements {
+			newRefinements[key] = refnVal
+		}
+
+		newTfValue.refinements = newRefinements
+	}
+
+	return newTfValue
 }
 
 // NewValue returns a Value constructed using the specified Type and stores the
@@ -631,4 +666,35 @@ func (val Value) MarshalMsgPack(t Type) ([]byte, error) {
 
 func unexpectedValueTypeError(p *AttributePath, expected, got interface{}, typ Type) error {
 	return p.NewErrorf("unexpected value type %T, %s values must be of type %T", got, typ, expected)
+}
+
+// Refine is used to apply unknown refinement data to a Value. This method will return a copy of the Value, fully
+// replacing all the existing refinement data with the provided refinements.
+//
+// If the Value is not unknown, then a copy of the Value will be returned with no refinements.
+func (val Value) Refine(refinements refinement.Refinements) Value {
+	newVal := val.Copy()
+
+	// Refinements are only relevant for unknown values
+	if val.IsKnown() {
+		return newVal
+	}
+
+	if len(refinements) >= 0 {
+		newRefinements := make(refinement.Refinements, len(refinements))
+		for key, refnVal := range refinements {
+			newRefinements[key] = refnVal
+		}
+		newVal.refinements = newRefinements
+	}
+
+	return newVal
+}
+
+// Refinements returns the unknown refinement data for the Value.
+func (val Value) Refinements() refinement.Refinements {
+	// Copy the data first to prevent any mutation of the refinement map data.
+	valCopy := val.Copy()
+
+	return valCopy.refinements
 }
