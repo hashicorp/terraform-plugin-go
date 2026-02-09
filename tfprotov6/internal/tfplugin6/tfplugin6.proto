@@ -97,6 +97,7 @@ message Schema {
         string description = 4;
         StringKind description_kind = 5;
         bool deprecated = 6;
+        string deprecation_message = 7;
     }
 
     message Attribute {
@@ -115,6 +116,7 @@ message Schema {
         // combined with optional or required, and is only valid for managed
         // resource schemas.
         bool write_only = 11;
+        string deprecation_message = 12;
     }
 
     message NestedBlock {
