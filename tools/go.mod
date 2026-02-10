@@ -7,7 +7,7 @@ toolchain go1.24.4
 require (
 	github.com/hashicorp/copywrite v0.24.2
 	github.com/hashicorp/go-getter v1.8.3
-	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.1
 	google.golang.org/protobuf v1.36.11
 )
 
