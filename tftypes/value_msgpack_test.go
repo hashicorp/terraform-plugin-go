@@ -5,11 +5,14 @@ package tftypes
 
 import (
 	"encoding/hex"
+	"errors"
 	"math"
 	"math/big"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/terraform-plugin-go/tftypes/refinement"
 )
 
 func TestValueFromMsgPack(t *testing.T) {
@@ -532,11 +535,125 @@ func TestValueFromMsgPack(t *testing.T) {
 			}),
 			typ: List{ElementType: DynamicPseudoType},
 		},
+		// This encoding, while unlikely in practice, is supported. Terraform should collapse this to a known null value before reaching providers.
+		"unknown-with-nullness-true": {
+			hex: "c7030c8101c3",
+			value: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(true),
+			}),
+			typ: Bool,
+		},
+		"unknown-bool-with-nullness-refinement": {
+			hex: "c7030c8101c2",
+			value: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+			}),
+			typ: Bool,
+		},
+		"unknown-number-with-nullness-refinement": {
+			hex: "c7030c8101c2",
+			value: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+			}),
+			typ: Number,
+		},
+		"unknown-string-with-nullness-refinement": {
+			hex: "c7030c8101c2",
+			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+			}),
+			typ: String,
+		},
+		"unknown-list-with-nullness-refinement": {
+			hex: "c7030c8101c2",
+			value: NewValue(List{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+			}),
+			typ: List{ElementType: String},
+		},
+		"unknown-object-with-nullness-refinement": {
+			hex: "c7030c8101c2",
+			value: NewValue(Object{AttributeTypes: map[string]Type{"attr": String}}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+			}),
+			typ: Object{AttributeTypes: map[string]Type{"attr": String}},
+		},
+		"unknown-string-with-prefix-refinement": {
+			hex: "c70e0c8201c202a97072656669783a2f2f",
+			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:     refinement.NewNullness(false),
+				refinement.KeyStringPrefix: refinement.NewStringPrefix("prefix://"),
+			}),
+			typ: String,
+		},
+		"unknown-number-with-bound-refinements-integers-inclusive": {
+			hex: "c70b0c8301c2039201c3049205c3",
+			value: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5), true),
+			}),
+			typ: Number,
+		},
+		"unknown-number-with-bound-refinements-integers-exclusive": {
+			hex: "c70b0c8301c2039201c2049205c2",
+			value: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1), false),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5), false),
+			}),
+			typ: Number,
+		},
+		"unknown-number-with-bound-refinements-float-inclusive": {
+			hex: "c71b0c8301c20392cb3ff3ae147ae147aec30492cb4016ae147ae147aec3",
+			value: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1.23), true),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5.67), true),
+			}),
+			typ: Number,
+		},
+		"unknown-number-with-bound-refinements-float-exclusive": {
+			hex: "c71b0c8301c20392cb3ff3ae147ae147aec20492cb4016ae147ae147aec2",
+			value: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:         refinement.NewNullness(false),
+				refinement.KeyNumberLowerBound: refinement.NewNumberLowerBound(big.NewFloat(1.23), false),
+				refinement.KeyNumberUpperBound: refinement.NewNumberUpperBound(big.NewFloat(5.67), false),
+			}),
+			typ: Number,
+		},
+		"unknown-list-with-bound-refinements": {
+			hex: "c7070c8301c205010605",
+			value: NewValue(List{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:                   refinement.NewNullness(false),
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthLowerBound(1),
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthUpperBound(5),
+			}),
+			typ: List{ElementType: String},
+		},
+		"unknown-map-with-bound-refinements": {
+			hex: "c7070c8301c205000604",
+			value: NewValue(Map{ElementType: Number}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:                   refinement.NewNullness(false),
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthLowerBound(0),
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthUpperBound(4),
+			}),
+			typ: Map{ElementType: Number},
+		},
+		"unknown-set-with-bound-refinements": {
+			hex: "c7070c8301c205020606",
+			value: NewValue(Set{ElementType: Bool}, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:                   refinement.NewNullness(false),
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthLowerBound(2),
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthUpperBound(6),
+			}),
+			typ: Set{ElementType: Bool},
+		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			got, err := test.value.MarshalMsgPack(test.typ) //nolint:staticcheck
+			got, err := test.value.MarshalMsgPack(test.typ)
 			if err != nil {
 				t.Fatalf("unexpected error marshaling: %s", err)
 			}
@@ -549,6 +666,7 @@ func TestValueFromMsgPack(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error parsing hex: %s", err)
 			}
+
 			val, err := ValueFromMsgPack(b, test.typ)
 			if err != nil {
 				t.Fatalf("unexpected error unmarshaling: %s", err)
@@ -556,6 +674,213 @@ func TestValueFromMsgPack(t *testing.T) {
 
 			if test.value.String() != val.String() {
 				t.Errorf("Unexpected results (-wanted +got): %s", cmp.Diff(test.value, val))
+			}
+		})
+	}
+}
+func TestValueFromMsgPack_refinements(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		hex           string
+		expectedValue Value
+		typ           Type
+	}{
+		"unsupported-refinement-on-bool": {
+			// This hex value encodes the Nullness refinement as Key(100), which doesn't exist and should be ignored.
+			hex:           "c7030c8164c2",
+			expectedValue: NewValue(Bool, UnknownValue),
+			typ:           Bool,
+		},
+		"unsupported-refinement-on-prefixed-string": {
+			// This hex value encodes the Nullness refinement as Key(100), which doesn't exist and should be ignored.
+			// The hex value also includes a valid string prefix which should be preserved.
+			hex: "c70e0c8264c202a97072656669783a2f2f",
+			expectedValue: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyStringPrefix: refinement.NewStringPrefix("prefix://"),
+			}),
+			typ: String,
+		},
+	}
+	for name, test := range tests {
+		name, test := name, test
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			b, err := hex.DecodeString(test.hex)
+			if err != nil {
+				t.Fatalf("unexpected error parsing hex: %s", err)
+			}
+
+			val, err := ValueFromMsgPack(b, test.typ)
+			if err != nil {
+				t.Fatalf("unexpected error unmarshaling: %s", err)
+			}
+
+			if test.expectedValue.String() != val.String() {
+				t.Errorf("Unexpected results (-wanted +got): %s", cmp.Diff(test.expectedValue, val))
+			}
+		})
+	}
+}
+
+// This test covers certain scenarios where we ignore refinement data during marshalling that are either invalid or not needed.
+func TestMarshalMsgPack_refinements(t *testing.T) {
+	t.Parallel()
+
+	// Hex encoding of the long prefix refinements that are eventually truncated in this test
+	longPrefixRefinement := "c801050c8201c202d9ff7072656669783a2f2f303132333435363738392d303132333435363738392d303132333435363738392d30313" +
+		"2333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d30313" +
+		"2333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d30313" +
+		"2333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d303132333435363738392d30313" +
+		"2333435363738392d30313233"
+
+	tests := map[string]struct {
+		value       Value
+		typ         Type
+		expectedHex string
+	}{
+		"unknown-dynamic-refinements-ignored": {
+			expectedHex: "d40000",
+			value: NewValue(DynamicPseudoType, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+			}),
+			typ: DynamicPseudoType,
+		},
+		"unknown-string-with-empty-prefix-refinement": {
+			expectedHex: "c7030c8101c2",
+			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness:     refinement.NewNullness(false),
+				refinement.KeyStringPrefix: refinement.NewStringPrefix(""),
+			}),
+			typ: String,
+		},
+		"unknown-string-with-long-prefix-refinement-one": {
+			// This prefix will be cutoff at 256 bytes, so it will be equal to the other long prefix test.
+			expectedHex: longPrefixRefinement,
+			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+				refinement.KeyStringPrefix: refinement.NewStringPrefix(
+					"prefix://0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-" +
+						"0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-" +
+						"0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-thiswillbecutoff1",
+				),
+			}),
+			typ: String,
+		},
+		"unknown-string-with-long-prefix-refinement-two": {
+			// This prefix will be cutoff at 256 bytes, so it will be equal to the other long prefix test.
+			expectedHex: longPrefixRefinement,
+			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				refinement.KeyNullness: refinement.NewNullness(false),
+				refinement.KeyStringPrefix: refinement.NewStringPrefix(
+					"prefix://0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-" +
+						"0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-" +
+						"0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-0123456789-thiswillbecutoff2",
+				),
+			}),
+			typ: String,
+		},
+		"unknown-with-invalid-refinement-type": {
+			expectedHex: "d40000",
+			value: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				// This refinement will be ignored since only strings will attempt to encode this
+				refinement.KeyStringPrefix: refinement.NewStringPrefix("ignored"),
+			}),
+			typ: Bool,
+		},
+		"unknown-with-invalid-refinement-data": {
+			expectedHex: "d40000",
+			value: NewValue(Bool, UnknownValue).Refine(refinement.Refinements{
+				// This refinement will be ignored since we don't know how to encode it
+				refinement.Key(100): refinement.NewStringPrefix("ignored"),
+			}),
+			typ: Bool,
+		},
+	}
+	for name, test := range tests {
+		name, test := name, test
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			got, err := test.value.MarshalMsgPack(test.typ)
+			if err != nil {
+				t.Fatalf("unexpected error marshaling: %s", err)
+			}
+			res := hex.EncodeToString(got)
+			if res != test.expectedHex {
+				t.Errorf("expected msgpack to be %q, got %q", test.expectedHex, res)
+			}
+		})
+	}
+}
+
+func TestMarshalMsgPack_error(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		value         Value
+		typ           Type
+		expectedError error
+	}{
+		"unknown-with-invalid-nullness-refinement": {
+			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				// String prefix is invalid on KeyNullness
+				refinement.KeyNullness: refinement.NewStringPrefix("invalid"),
+			}),
+			typ:           String,
+			expectedError: errors.New("error encoding Nullness value refinement: unexpected refinement data of type refinement.StringPrefix"),
+		},
+		"unknown-with-invalid-prefix-refinement": {
+			value: NewValue(String, UnknownValue).Refine(refinement.Refinements{
+				// Nullness is invalid on KeyStringPrefix
+				refinement.KeyStringPrefix: refinement.NewNullness(false),
+			}),
+			typ:           String,
+			expectedError: errors.New("error encoding StringPrefix value refinement: unexpected refinement data of type refinement.Nullness"),
+		},
+		"unknown-with-invalid-number-lowerbound-refinement": {
+			value: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				// NumberUpperBound is invalid on KeyNumberLowerBound
+				refinement.KeyNumberLowerBound: refinement.NewNumberUpperBound(big.NewFloat(1), true),
+			}),
+			typ:           Number,
+			expectedError: errors.New("error encoding NumberLowerBound value refinement: unexpected refinement data of type refinement.NumberUpperBound"),
+		},
+		"unknown-with-invalid-number-upperbound-refinement": {
+			value: NewValue(Number, UnknownValue).Refine(refinement.Refinements{
+				// NumberLowerBound is invalid on KeyNumberUpperBound
+				refinement.KeyNumberUpperBound: refinement.NewNumberLowerBound(big.NewFloat(1), true),
+			}),
+			typ:           Number,
+			expectedError: errors.New("error encoding NumberUpperBound value refinement: unexpected refinement data of type refinement.NumberLowerBound"),
+		},
+		"unknown-with-invalid-collection-lowerbound-refinement": {
+			value: NewValue(List{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				// CollectionLengthUpperBound is invalid on KeyCollectionLengthLowerBound
+				refinement.KeyCollectionLengthLowerBound: refinement.NewCollectionLengthUpperBound(1),
+			}),
+			typ:           List{ElementType: String},
+			expectedError: errors.New("error encoding CollectionLengthLowerBound value refinement: unexpected refinement data of type refinement.CollectionLengthUpperBound"),
+		},
+		"unknown-with-invalid-collection-upperbound-refinement": {
+			value: NewValue(Map{ElementType: String}, UnknownValue).Refine(refinement.Refinements{
+				// CollectionLengthLowerBound is invalid on KeyCollectionLengthUpperBound
+				refinement.KeyCollectionLengthUpperBound: refinement.NewCollectionLengthLowerBound(1),
+			}),
+			typ:           Map{ElementType: String},
+			expectedError: errors.New("error encoding CollectionLengthUpperBound value refinement: unexpected refinement data of type refinement.CollectionLengthLowerBound"),
+		},
+	}
+	for name, test := range tests {
+		name, test := name, test
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			_, err := test.value.MarshalMsgPack(test.typ)
+			if err == nil {
+				t.Fatalf("got no error, wanted err: %s", test.expectedError)
+			}
+
+			if !strings.Contains(err.Error(), test.expectedError.Error()) {
+				t.Fatalf("wanted error %q, got error: %s", test.expectedError.Error(), err.Error())
 			}
 		})
 	}
