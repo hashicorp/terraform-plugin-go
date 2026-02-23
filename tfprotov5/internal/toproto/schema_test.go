@@ -116,6 +116,14 @@ func TestSchema_Attribute(t *testing.T) {
 				Deprecated: true,
 			},
 		},
+		"DeprecationMessage": {
+			in: &tfprotov5.SchemaAttribute{
+				DeprecationMessage: "use other_attribute instead",
+			},
+			expected: &tfplugin5.Schema_Attribute{
+				DeprecationMessage: "use other_attribute instead",
+			},
+		},
 		"Description": {
 			in: &tfprotov5.SchemaAttribute{
 				Description: "test",
@@ -331,6 +339,16 @@ func TestSchema_Block(t *testing.T) {
 				Attributes: []*tfplugin5.Schema_Attribute{},
 				BlockTypes: []*tfplugin5.Schema_NestedBlock{},
 				Deprecated: true,
+			},
+		},
+		"DeprecationMessage": {
+			in: &tfprotov5.SchemaBlock{
+				DeprecationMessage: "use other_block instead",
+			},
+			expected: &tfplugin5.Schema_Block{
+				Attributes:         []*tfplugin5.Schema_Attribute{},
+				BlockTypes:         []*tfplugin5.Schema_NestedBlock{},
+				DeprecationMessage: "use other_block instead",
 			},
 		},
 		"Description": {
