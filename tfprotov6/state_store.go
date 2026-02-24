@@ -15,6 +15,9 @@ type StateStoreMetadata struct {
 }
 
 // StateStoreServer is an interface containing the methods a state store implementation needs to fill.
+//
+// NOTE: State store support is experimental and exposed without compatibility promises until
+// these notices are removed.
 type StateStoreServer interface {
 	// ValidateStateStoreConfig performs configuration validation for the state store.
 	ValidateStateStoreConfig(context.Context, *ValidateStateStoreConfigRequest) (*ValidateStateStoreConfigResponse, error)
