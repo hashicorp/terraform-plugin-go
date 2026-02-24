@@ -1,4 +1,4 @@
-// Copyright (c) HashiCorp, Inc.
+// Copyright IBM Corp. 2020, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package tf6serverlogging_test
@@ -106,6 +106,73 @@ func TestServerCapabilities(t *testing.T) {
 			ctx = logging.ProtoSubsystemContext(ctx, tfsdklog.Options{})
 
 			tf6serverlogging.ServerCapabilities(ctx, testCase.capabilities)
+
+			entries, err := tfsdklogtest.MultilineJSONDecode(&output)
+
+			if err != nil {
+				t.Fatalf("unable to read multiple line JSON: %s", err)
+			}
+
+			if diff := cmp.Diff(entries, testCase.expected); diff != "" {
+				t.Errorf("unexpected difference: %s", diff)
+			}
+		})
+	}
+}
+
+func TestStateStoreServerCapabilities(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		capabilities *tfprotov6.StateStoreServerCapabilities
+		expected     []map[string]interface{}
+	}{
+		"nil": {
+			capabilities: nil,
+			expected: []map[string]interface{}{
+				{
+					"@level":   "trace",
+					"@message": "No announced server capabilities",
+					"@module":  "sdk.proto",
+				},
+			},
+		},
+		"empty": {
+			capabilities: &tfprotov6.StateStoreServerCapabilities{},
+			expected: []map[string]interface{}{
+				{
+					"@level":                          "trace",
+					"@message":                        "Announced server capabilities",
+					"@module":                         "sdk.proto",
+					"tf_server_capability_chunk_size": "0MB", // This is invalid provider behavior, so this log should never occur in practice.
+				},
+			},
+		},
+		"chunk_size": {
+			capabilities: &tfprotov6.StateStoreServerCapabilities{
+				ChunkSize: 8 << 20,
+			},
+			expected: []map[string]interface{}{
+				{
+					"@level":                          "trace",
+					"@message":                        "Announced server capabilities",
+					"@module":                         "sdk.proto",
+					"tf_server_capability_chunk_size": "8MB",
+				},
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			var output bytes.Buffer
+
+			ctx := tfsdklogtest.RootLogger(context.Background(), &output)
+			ctx = logging.ProtoSubsystemContext(ctx, tfsdklog.Options{})
+
+			tf6serverlogging.StateStoreServerCapabilities(ctx, testCase.capabilities)
 
 			entries, err := tfsdklogtest.MultilineJSONDecode(&output)
 
