@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/toproto"
@@ -50,6 +51,14 @@ func TestServerCapabilities(t *testing.T) {
 			},
 			expected: &tfplugin6.ServerCapabilities{
 				PlanDestroy: true,
+			},
+		},
+		"GenerateResourceConfig": {
+			in: &tfprotov6.ServerCapabilities{
+				GenerateResourceConfig: true,
+			},
+			expected: &tfplugin6.ServerCapabilities{
+				GenerateResourceConfig: true,
 			},
 		},
 	}
