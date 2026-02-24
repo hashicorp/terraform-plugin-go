@@ -1,5 +1,0 @@
-kind: NOTES
-body: The state store protocol definitions are considered experimental and may change up until general availability in Terraform core.
-time: 2026-02-16T14:52:57.64314-05:00
-custom:
-    Issue: "563"
