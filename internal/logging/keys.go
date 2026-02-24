@@ -90,6 +90,9 @@ const (
 	// The final determined ChunkSize returned from the provider for transmitting state bytes.
 	KeyServerCapabilityChunkSize = "tf_server_capability_chunk_size"
 
+	// Whether the GenerateResourceConfig server capability is enabled
+	KeyServerCapabilityGenerateResourceConfig = "tf_server_capability_generate_resource_config"
+
 	// Whether the DeferralAllowed client capability is enabled
 	KeyClientCapabilityDeferralAllowed = "tf_client_capability_deferral_allowed"
 
