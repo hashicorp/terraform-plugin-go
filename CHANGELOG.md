@@ -1,3 +1,14 @@
+## 0.30.0 (February 24, 2026)
+
+NOTES:
+
+* tfprotov6: An upcoming release will require the `StateStoreServer` implementation as part of `ProviderServer`. ([#594](https://github.com/hashicorp/terraform-plugin-go/issues/594))
+
+FEATURES:
+
+* tfprotov6: Upgraded protocol v6 and added types to support the new state store type. ([#563](https://github.com/hashicorp/terraform-plugin-go/issues/563))
+* tfprotov5/tfprotov6: Added DeprecationMessage field to SchemaAttribute and SchemaNestedAttribute ([#600](https://github.com/hashicorp/terraform-plugin-go/issues/600))
+
 ## 0.29.0 (September 17, 2025)
 
 NOTES:
