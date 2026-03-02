@@ -9,11 +9,12 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/terraform-plugin-log/tfsdklog"
+	"github.com/hashicorp/terraform-plugin-log/tfsdklogtest"
+
 	"github.com/hashicorp/terraform-plugin-go/internal/logging"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tf6serverlogging"
-	"github.com/hashicorp/terraform-plugin-log/tfsdklog"
-	"github.com/hashicorp/terraform-plugin-log/tfsdklogtest"
 )
 
 func TestServerCapabilities(t *testing.T) {
@@ -33,6 +34,7 @@ func TestServerCapabilities(t *testing.T) {
 					"tf_server_capability_get_provider_schema_optional": false,
 					"tf_server_capability_move_resource_state":          false,
 					"tf_server_capability_plan_destroy":                 false,
+					"tf_server_capability_generate_resource_config":     false,
 				},
 			},
 		},
@@ -46,6 +48,7 @@ func TestServerCapabilities(t *testing.T) {
 					"tf_server_capability_get_provider_schema_optional": false,
 					"tf_server_capability_move_resource_state":          false,
 					"tf_server_capability_plan_destroy":                 false,
+					"tf_server_capability_generate_resource_config":     false,
 				},
 			},
 		},
@@ -61,6 +64,7 @@ func TestServerCapabilities(t *testing.T) {
 					"tf_server_capability_get_provider_schema_optional": true,
 					"tf_server_capability_move_resource_state":          false,
 					"tf_server_capability_plan_destroy":                 false,
+					"tf_server_capability_generate_resource_config":     false,
 				},
 			},
 		},
@@ -76,6 +80,7 @@ func TestServerCapabilities(t *testing.T) {
 					"tf_server_capability_get_provider_schema_optional": false,
 					"tf_server_capability_move_resource_state":          true,
 					"tf_server_capability_plan_destroy":                 false,
+					"tf_server_capability_generate_resource_config":     false,
 				},
 			},
 		},
@@ -91,6 +96,23 @@ func TestServerCapabilities(t *testing.T) {
 					"tf_server_capability_get_provider_schema_optional": false,
 					"tf_server_capability_move_resource_state":          false,
 					"tf_server_capability_plan_destroy":                 true,
+					"tf_server_capability_generate_resource_config":     false,
+				},
+			},
+		},
+		"generate_resource_config": {
+			capabilities: &tfprotov6.ServerCapabilities{
+				GenerateResourceConfig: true,
+			},
+			expected: []map[string]interface{}{
+				{
+					"@level":   "trace",
+					"@message": "Announced server capabilities",
+					"@module":  "sdk.proto",
+					"tf_server_capability_get_provider_schema_optional": false,
+					"tf_server_capability_move_resource_state":          false,
+					"tf_server_capability_plan_destroy":                 false,
+					"tf_server_capability_generate_resource_config":     true,
 				},
 			},
 		},
