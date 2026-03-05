@@ -6,13 +6,18 @@ package tftypes
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"math"
 	"math/big"
 	"sort"
+	"unicode/utf8"
 
+	"github.com/hashicorp/terraform-plugin-go/tftypes/refinement"
 	msgpack "github.com/vmihailenco/msgpack/v5"
 	msgpackCodes "github.com/vmihailenco/msgpack/v5/msgpcode"
 )
+
+const unknownWithRefinementsExt = 0x0c
 
 type msgPackUnknownType struct{}
 
@@ -43,11 +48,7 @@ func msgpackUnmarshal(dec *msgpack.Decoder, typ Type, path *AttributePath) (Valu
 	}
 	if msgpackCodes.IsExt(peek) {
 		// as with go-cty, assume all extensions are unknown values
-		err := dec.Skip()
-		if err != nil {
-			return Value{}, path.NewErrorf("error skipping extension byte: %w", err)
-		}
-		return NewValue(typ, UnknownValue), nil
+		return msgpackUnmarshalUnknown(dec, typ, path)
 	}
 	if typ.Is(DynamicPseudoType) {
 		return msgpackUnmarshalDynamic(dec, path)
@@ -344,6 +345,157 @@ func msgpackUnmarshalDynamic(dec *msgpack.Decoder, path *AttributePath) (Value, 
 	}
 	return msgpackUnmarshal(dec, typ, path)
 }
+func msgpackUnmarshalUnknown(dec *msgpack.Decoder, typ Type, path *AttributePath) (Value, error) {
+	// The value is unknown, but we will check the extension header to see if any
+	// type-specific refinements are applied to the value.
+	typeCode, extLen, err := dec.DecodeExtHeader()
+	if err != nil {
+		return Value{}, path.NewErrorf("error decoding extension header: %w", err)
+	}
+
+	if extLen <= 1 {
+		// If the extension is zero or one-length, this is a wholly unknown value with no
+		// refinements.
+
+		if extLen > 0 {
+			// Skip the body
+			err = dec.Skip()
+			if err != nil {
+				return Value{}, path.NewErrorf("error skipping extension body: %w", err)
+			}
+		}
+
+		return NewValue(typ, UnknownValue), nil
+	}
+
+	// Check if the extension is the designated cty unknown refinement code
+	if typeCode != unknownWithRefinementsExt {
+		return Value{}, path.NewErrorf("unsupported extension type")
+	}
+
+	if extLen > 1024 {
+		// cty refinements cannot be greater than 1 kiB
+		return Value{}, path.NewErrorf("unknown value refinement too large")
+	}
+
+	// Unknown value refinements are always a msgpack-encoded map
+	body := make([]byte, extLen)
+	_, err = io.ReadAtLeast(dec.Buffered(), body, len(body))
+	if err != nil {
+		return Value{}, path.NewErrorf("error reading msgpack extension body: %s", err)
+	}
+
+	rfnDec := msgpack.NewDecoder(bytes.NewReader(body))
+	entryCount, err := rfnDec.DecodeMapLen()
+	if err != nil {
+		return Value{}, path.NewErrorf("error decoding msgpack extension body: not a map")
+	}
+
+	// cty ignores all refinements for DynamicPseudoType at the moment, this allows them to be introduced
+	// in the future in a backward compatible way.
+	if typ.Is(DynamicPseudoType) {
+		return NewValue(typ, UnknownValue), nil
+	}
+
+	newVal := NewValue(typ, UnknownValue)
+	newRefinements := make(refinement.Refinements, 0)
+
+	for i := 0; i < entryCount; i++ {
+		keyCode, err := rfnDec.DecodeInt64()
+		if err != nil {
+			return Value{}, path.NewErrorf("error decoding msgpack extension body: non-integer key in map")
+		}
+
+		switch keyCode := refinement.Key(keyCode); keyCode {
+		case refinement.KeyNullness:
+			isNull, err := rfnDec.DecodeBool()
+			if err != nil {
+				return Value{}, path.NewErrorf("error decoding msgpack extension body: null refinement is not boolean")
+			}
+
+			// isNull should always be false if this refinement is present, but to match cty's support
+			// of this encoding, we will pass along the value. If isNull is true, then the value should not be
+			// unknown with refinements, it should be a known null value.
+			newRefinements[keyCode] = refinement.NewNullness(isNull)
+		case refinement.KeyStringPrefix:
+			if !typ.Is(String) {
+				return Value{}, path.NewErrorf("error decoding msgpack extension body: string prefix refinement for non-string type")
+			}
+			prefix, err := rfnDec.DecodeString()
+			if err != nil {
+				return Value{}, path.NewErrorf("error decoding msgpack extension body: string prefix refinement is not string")
+			}
+			if !utf8.ValidString(prefix) {
+				return Value{}, path.NewErrorf("error decoding msgpack extension body: string prefix refinement is not valid UTF-8")
+			}
+
+			newRefinements[keyCode] = refinement.NewStringPrefix(prefix)
+		case refinement.KeyNumberLowerBound, refinement.KeyNumberUpperBound:
+			if !typ.Is(Number) {
+				return Value{}, path.NewErrorf("error decoding msgpack extension body: numeric bound refinement for non-number type")
+			}
+
+			// Numeric bound refinements are always a tuple of [number, bool] so we re-use the msgpack decoding logic on this refinement.
+			tfValBound, err := msgpackUnmarshal(rfnDec, Tuple{ElementTypes: []Type{Number, Bool}}, path)
+			if err != nil || tfValBound.IsNull() || !tfValBound.IsKnown() {
+				return Value{}, path.NewErrorf("error decoding msgpack extension body: numeric bound refinement must be [number, bool] tuple")
+			}
+
+			tupleVal := make([]Value, 2)
+			err = tfValBound.As(&tupleVal)
+			if err != nil {
+				return Value{}, path.NewErrorf("error decoding msgpack extension body: numeric bound refinement tuple value conversion failed: %w", err)
+			}
+
+			if len(tupleVal) != 2 {
+				return Value{}, path.NewErrorf("error decoding msgpack extension body: numeric bound refinement tuple value conversion failed: expected 2 elements, got %d elements", len(tupleVal))
+			}
+
+			var boundVal *big.Float
+			err = tupleVal[0].As(&boundVal)
+			if err != nil {
+				return Value{}, path.NewErrorf("error decoding msgpack extension body: numeric bound refinement bound value conversion failed: %w", err)
+			}
+
+			var inclusiveVal bool
+			err = tupleVal[1].As(&inclusiveVal)
+			if err != nil {
+				return Value{}, path.NewErrorf("error decoding msgpack extension body: numeric bound refinement inclusive value conversion failed: %w", err)
+			}
+
+			if keyCode == refinement.KeyNumberLowerBound {
+				newRefinements[keyCode] = refinement.NewNumberLowerBound(boundVal, inclusiveVal)
+			} else {
+				newRefinements[keyCode] = refinement.NewNumberUpperBound(boundVal, inclusiveVal)
+			}
+		case refinement.KeyCollectionLengthLowerBound, refinement.KeyCollectionLengthUpperBound:
+			if !typ.Is(List{}) && !typ.Is(Map{}) && !typ.Is(Set{}) {
+				return Value{}, path.NewErrorf("error decoding msgpack extension body: length bound refinement for non-collection type")
+			}
+
+			boundVal, err := rfnDec.DecodeInt()
+			if err != nil {
+				return Value{}, path.NewErrorf("error decoding msgpack extension body: length bound refinement must be integer")
+			}
+
+			if keyCode == refinement.KeyCollectionLengthLowerBound {
+				newRefinements[keyCode] = refinement.NewCollectionLengthLowerBound(int64(boundVal))
+			} else {
+				newRefinements[keyCode] = refinement.NewCollectionLengthUpperBound(int64(boundVal))
+			}
+		default:
+			err := rfnDec.Skip()
+			if err != nil {
+				return Value{}, path.NewErrorf("error skipping unknown extension body, keycode = %d: %w", keyCode, err)
+			}
+			// We don't want to error here, as cty could introduce new refinements that we'd
+			// want to just ignore until this logic is updated
+			continue
+		}
+	}
+
+	return newVal.Refine(newRefinements), nil
+}
 
 func marshalMsgPack(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
 	if typ.Is(DynamicPseudoType) && !val.Type().Is(DynamicPseudoType) {
@@ -351,11 +503,7 @@ func marshalMsgPack(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder)
 
 	}
 	if !val.IsKnown() {
-		err := enc.Encode(msgPackUnknownVal)
-		if err != nil {
-			return p.NewErrorf("error encoding UnknownValue: %w", err)
-		}
-		return nil
+		return marshalUnknownValue(val, typ, p, enc)
 	}
 	if val.IsNull() {
 		err := enc.EncodeNil()
@@ -388,6 +536,210 @@ func marshalMsgPack(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder)
 		return marshalMsgPackObject(val, typ.(Object), p, enc)
 	}
 	return fmt.Errorf("unknown type %s", typ)
+}
+
+func marshalUnknownValue(val Value, typ Type, p *AttributePath, enc *msgpack.Encoder) error {
+	// Use the representation of a wholly unknown value if there are no refinements. DynamicPseudoType
+	// cannot have refinements, so it will also use the wholly unknown value.
+	if len(val.refinements) == 0 || typ.Is(DynamicPseudoType) {
+		err := enc.Encode(msgPackUnknownVal)
+		if err != nil {
+			return p.NewErrorf("error encoding UnknownValue: %w", err)
+		}
+		return nil
+	}
+
+	var refnBuf bytes.Buffer
+	refnEnc := msgpack.NewEncoder(&refnBuf)
+	mapLen := 0
+
+	// Nullness refinement applies to all types except for DynamicPseudoType (handled above)
+	if refnVal, ok := val.refinements[refinement.KeyNullness]; ok {
+		data, ok := refnVal.(refinement.Nullness)
+		if !ok {
+			return p.NewErrorf("error encoding Nullness value refinement: unexpected refinement data of type %T", refnVal)
+		}
+
+		err := refnEnc.EncodeInt(int64(refinement.KeyNullness))
+		if err != nil {
+			return p.NewErrorf("error encoding Nullness value refinement key: %w", err)
+		}
+
+		// It shouldn't be possible for an unknown value to be definitely null (i.e. Nullness.value = true),
+		// as that should be represented by a known null value instead. This encoding is in place to be compliant
+		// with Terraform's encoding which uses a definitely null refinement to collapse into a known null value.
+		err = refnEnc.EncodeBool(data.Nullness())
+		if err != nil {
+			return p.NewErrorf("error encoding Nullness value refinement: %w", err)
+		}
+
+		mapLen++
+	}
+
+	// Refinements for strings
+	if typ.Is(String) {
+		if refnVal, ok := val.refinements[refinement.KeyStringPrefix]; ok {
+			data, ok := refnVal.(refinement.StringPrefix)
+			if !ok {
+				return p.NewErrorf("error encoding StringPrefix value refinement: unexpected refinement data of type %T", refnVal)
+			}
+
+			if prefix := data.PrefixValue(); prefix != "" {
+				// Matching cty for the max prefix length allowed here.
+				//
+				// This ensures the total size of the refinements blob does not exceed the limit
+				// set by the decoder (1024).
+				maxPrefixLength := 256
+				if len(prefix) > maxPrefixLength {
+					prefix = prefix[:maxPrefixLength-1]
+				}
+
+				err := refnEnc.EncodeInt(int64(refinement.KeyStringPrefix))
+				if err != nil {
+					return p.NewErrorf("error encoding StringPrefix value refinement key: %w", err)
+				}
+
+				err = refnEnc.EncodeString(prefix)
+				if err != nil {
+					return p.NewErrorf("error encoding StringPrefix value refinement: %w", err)
+				}
+
+				mapLen++
+			}
+		}
+	}
+
+	// Refinements for numbers
+	if typ.Is(Number) {
+		if refnVal, ok := val.refinements[refinement.KeyNumberLowerBound]; ok {
+			data, ok := refnVal.(refinement.NumberLowerBound)
+			if !ok {
+				return p.NewErrorf("error encoding NumberLowerBound value refinement: unexpected refinement data of type %T", refnVal)
+			}
+
+			// Numeric bound refinements are always a tuple of [number, bool] so we re-use the msgpack encoding logic on this refinement.
+			boundTfType := Tuple{ElementTypes: []Type{Number, Bool}}
+			boundTfVal := NewValue(
+				boundTfType,
+				[]Value{
+					NewValue(Number, data.LowerBound()),
+					NewValue(Bool, data.IsInclusive()),
+				},
+			)
+
+			err := refnEnc.EncodeInt(int64(refinement.KeyNumberLowerBound))
+			if err != nil {
+				return p.NewErrorf("error encoding NumberLowerBound value refinement key: %w", err)
+			}
+
+			err = marshalMsgPack(boundTfVal, boundTfType, p, refnEnc)
+			if err != nil {
+				return p.NewErrorf("error encoding NumberLowerBound value refinement: %w", err)
+			}
+
+			mapLen++
+		}
+
+		if refnVal, ok := val.refinements[refinement.KeyNumberUpperBound]; ok {
+			data, ok := refnVal.(refinement.NumberUpperBound)
+			if !ok {
+				return p.NewErrorf("error encoding NumberUpperBound value refinement: unexpected refinement data of type %T", refnVal)
+			}
+
+			// Numeric bound refinements are always a tuple of [number, bool] so we re-use the msgpack encoding logic on this refinement.
+			boundTfType := Tuple{ElementTypes: []Type{Number, Bool}}
+			boundTfVal := NewValue(
+				boundTfType,
+				[]Value{
+					NewValue(Number, data.UpperBound()),
+					NewValue(Bool, data.IsInclusive()),
+				},
+			)
+
+			err := refnEnc.EncodeInt(int64(refinement.KeyNumberUpperBound))
+			if err != nil {
+				return p.NewErrorf("error encoding NumberUpperBound value refinement key: %w", err)
+			}
+
+			err = marshalMsgPack(boundTfVal, boundTfType, p, refnEnc)
+			if err != nil {
+				return p.NewErrorf("error encoding NumberUpperBound value refinement: %w", err)
+			}
+
+			mapLen++
+		}
+	}
+
+	// Refinements for collections
+	if typ.Is(List{}) || typ.Is(Map{}) || typ.Is(Set{}) {
+		if refnVal, ok := val.refinements[refinement.KeyCollectionLengthLowerBound]; ok {
+			data, ok := refnVal.(refinement.CollectionLengthLowerBound)
+			if !ok {
+				return p.NewErrorf("error encoding CollectionLengthLowerBound value refinement: unexpected refinement data of type %T", refnVal)
+			}
+
+			err := refnEnc.EncodeInt(int64(refinement.KeyCollectionLengthLowerBound))
+			if err != nil {
+				return p.NewErrorf("error encoding CollectionLengthLowerBound value refinement key: %w", err)
+			}
+
+			err = refnEnc.EncodeInt(data.LowerBound())
+			if err != nil {
+				return p.NewErrorf("error encoding CollectionLengthLowerBound value refinement: %w", err)
+			}
+
+			mapLen++
+		}
+
+		if refnVal, ok := val.refinements[refinement.KeyCollectionLengthUpperBound]; ok {
+			data, ok := refnVal.(refinement.CollectionLengthUpperBound)
+			if !ok {
+				return p.NewErrorf("error encoding CollectionLengthUpperBound value refinement: unexpected refinement data of type %T", refnVal)
+			}
+			err := refnEnc.EncodeInt(int64(refinement.KeyCollectionLengthUpperBound))
+			if err != nil {
+				return p.NewErrorf("error encoding CollectionLengthUpperBound value refinement key: %w", err)
+			}
+
+			err = refnEnc.EncodeInt(data.UpperBound())
+			if err != nil {
+				return p.NewErrorf("error encoding CollectionLengthUpperBound value refinement: %w", err)
+			}
+
+			mapLen++
+		}
+	}
+
+	if mapLen == 0 {
+		// Didn't find any refinements we know how to encode, use the wholly unknown value.
+		err := enc.Encode(msgPackUnknownVal)
+		if err != nil {
+			return p.NewErrorf("error encoding UnknownValue: %w", err)
+		}
+		return nil
+	}
+
+	// Encode all of the unknown value refinements
+	var lenBuf bytes.Buffer
+	lenEnc := msgpack.NewEncoder(&lenBuf)
+	lenEnc.EncodeMapLen(mapLen) //nolint
+
+	err := enc.EncodeExtHeader(unknownWithRefinementsExt, lenBuf.Len()+refnBuf.Len())
+	if err != nil {
+		return p.NewErrorf("error encoding UnknownValue with refinements: %s", err)
+	}
+
+	_, err = enc.Writer().Write(lenBuf.Bytes())
+	if err != nil {
+		return p.NewErrorf("error encoding UnknownValue with refinements: %s", err)
+	}
+
+	_, err = enc.Writer().Write(refnBuf.Bytes())
+	if err != nil {
+		return p.NewErrorf("error encoding UnknownValue with refinements: %s", err)
+	}
+
+	return nil
 }
 
 func marshalMsgPackDynamicPseudoType(val Value, _ Type, p *AttributePath, enc *msgpack.Encoder) error {
