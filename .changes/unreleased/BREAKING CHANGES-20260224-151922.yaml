@@ -4,4 +4,4 @@ body: 'tfprotov5+tfprotov6: The `GenerateResourceConfig` RPC call is now require
  should not send the `GenerateResourceConfig` server capability.'
 time: 2026-02-24T15:19:22.025253-05:00
 custom:
-    Issue: "33"
+    Issue: "607"
