@@ -1,7 +1,6 @@
 kind: BREAKING CHANGES
-body: 'tfprotov5+tfprotov6: The `GenerateResourceConfig` RPC call is now required in `ResourceServer`. Implementations that don''t support
- provider generated configuration can return an empty response for the `GenerateResourceConfig` method, and 
- should not send the `GenerateResourceConfig` server capability.'
+body: 'tfprotov5+tfprotov6: The `GenerateResourceConfig` RPC call is now required in `ResourceServer`. Providers built using terraform-plugin-go that do not support
+ provider generated configuration should not send the `GenerateResourceConfig` server capability, and return an empty response for the `GenerateResourceConfig` method'
 time: 2026-02-24T15:19:22.025253-05:00
 custom:
     Issue: "607"
