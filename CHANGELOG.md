@@ -1,3 +1,14 @@
+## 0.31.0 (March 10, 2026)
+
+BREAKING CHANGES:
+
+* tfprotov5+tfprotov6: The `GenerateResourceConfig` RPC call is now required in `ResourceServer`. ([#607](https://github.com/hashicorp/terraform-plugin-go/issues/607))
+
+NOTES:
+
+* This Go module has been updated to Go 1.25 per the [Go support policy](https://golang.org/doc/devel/release.html#policy). Any consumers building on earlier Go versions may experience errors. ([#612](https://github.com/hashicorp/terraform-plugin-go/issues/612))
+* all: To prevent compilation errors, ensure your Go module is updated to at least terraform-plugin-framework@v1.19.0, terraform-plugin-mux@v0.23.0, terraform-plugin-sdk/v2@v2.40.0, and terraform-plugin-testing@v1.15.0 before upgrading this dependency. ([#607](https://github.com/hashicorp/terraform-plugin-go/issues/607))
+
 ## 0.30.0 (February 24, 2026)
 
 NOTES:
