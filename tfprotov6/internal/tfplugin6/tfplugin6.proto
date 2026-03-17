@@ -418,6 +418,49 @@ service Provider {
 
     //////// Graceful Shutdown
     rpc StopProvider(StopProvider.Request) returns (StopProvider.Response);
+
+    // Note: this is a prototype and all of the actual comments about it can be found in TF core
+    rpc GetCodeMigrations(GetCodeMigrations.Request) returns (GetCodeMigrations.Response);
+}
+
+message GetCodeMigrations {
+    message Request {}
+
+    message Response {
+        repeated CodeMigration code_migrations = 1;
+        repeated Diagnostic diagnostics = 2;
+    }
+
+    message CodeMigration {
+      string type_name = 1;
+      string name = 2;
+
+      oneof migration {
+        NestedBlockToNestedAttr nested_block_to_nested_attr = 3;
+        TransformAttr transform_attr = 4;
+        RenameAttr rename_attr = 5;
+        RemoveAttr remove_attr = 6;
+      }
+
+      message NestedBlockToNestedAttr {
+        AttributePath nested_block_path = 1;
+      }
+
+      message TransformAttr {
+        AttributePath target_attr_path = 1;
+        string function_name = 2;
+        repeated DynamicValue additional_arguments = 3;
+      }
+
+      message RenameAttr {
+        AttributePath target_attr_path = 1;
+        AttributePath destination_attr_path = 2;
+      }
+
+      message RemoveAttr {
+        AttributePath target_attr_path = 1;
+      }
+    }
 }
 
 message GetMetadata {

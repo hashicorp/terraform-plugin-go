@@ -5,6 +5,8 @@ package tfprotov6
 
 import (
 	"context"
+
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 // ProviderServer is an interface that reflects that Terraform protocol.
@@ -365,3 +367,66 @@ type StopProviderResponse struct {
 	// string, not a Diagnostic.
 	Error string
 }
+
+// Deprecated: This is a prototype RPC, don't use unless you're super curious :P
+type ProviderServerWithCodeMigrations interface {
+	ProviderServer
+
+	GetCodeMigrations(context.Context, *GetCodeMigrationsRequest) (*GetCodeMigrationsResponse, error)
+}
+
+type GetCodeMigrationsRequest struct{}
+
+type GetCodeMigrationsResponse struct {
+	CodeMigrations []CodeMigration
+	Diagnostics    []*Diagnostic
+}
+
+type CodeMigration struct {
+	TypeName  string
+	Name      string
+	Migration Migration
+}
+
+type Migration interface {
+	isMigration()
+}
+
+// Nested block to nested attribute migration
+var _ Migration = &Migration_NestedBlockToNestedAttr{}
+
+type Migration_NestedBlockToNestedAttr struct {
+	NestedBlockPath *tftypes.AttributePath
+}
+
+func (m Migration_NestedBlockToNestedAttr) isMigration() {}
+
+// Transform migration
+var _ Migration = &Migration_TransformAttr{}
+
+type Migration_TransformAttr struct {
+	TargetAttrPath      *tftypes.AttributePath
+	FunctionName        string
+	AdditionalArguments []*DynamicValue
+}
+
+func (m Migration_TransformAttr) isMigration() {}
+
+// Rename attribute migration
+var _ Migration = &Migration_RenameAttr{}
+
+type Migration_RenameAttr struct {
+	TargetAttrPath      *tftypes.AttributePath
+	DestinationAttrPath *tftypes.AttributePath
+}
+
+func (m Migration_RenameAttr) isMigration() {}
+
+// Remove attribute migration
+var _ Migration = &Migration_RemoveAttr{}
+
+type Migration_RemoveAttr struct {
+	TargetAttrPath *tftypes.AttributePath
+}
+
+func (m Migration_RemoveAttr) isMigration() {}

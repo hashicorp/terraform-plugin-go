@@ -1951,6 +1951,97 @@ func (s *server) GenerateResourceConfig(ctx context.Context, protoReq *tfplugin6
 	return protoResp, nil
 }
 
+func (s *server) GetCodeMigrations(ctx context.Context, protoReq *tfplugin6.GetCodeMigrations_Request) (*tfplugin6.GetCodeMigrations_Response, error) {
+	rpc := "GetCodeMigrations"
+	ctx = s.loggingContext(ctx)
+	ctx = logging.RpcContext(ctx, rpc)
+	ctx = s.stoppableContext(ctx)
+	logging.ProtocolTrace(ctx, "Received request")
+	defer logging.ProtocolTrace(ctx, "Served request")
+	ctx = tf6serverlogging.DownstreamRequest(ctx)
+
+	codeMigrationServer, ok := s.downstream.(tfprotov6.ProviderServerWithCodeMigrations)
+	if !ok {
+		logging.ProtocolError(ctx, "ProviderServer does not implement GetCodeMigrations")
+
+		protoResp := &tfplugin6.GetCodeMigrations_Response{
+			Diagnostics: []*tfplugin6.Diagnostic{
+				{
+					Severity: tfplugin6.Diagnostic_ERROR,
+					Summary:  "Provider GetCodeMigrations Not Implemented",
+					Detail: "A GetCodeMigrations call was received by the provider, however the provider does not implement the call. " +
+						"Either upgrade the provider to a version that implements state store or this is a bug in Terraform that should be reported to the Terraform maintainers.",
+				},
+			},
+		}
+
+		return protoResp, nil
+	}
+
+	resp, err := codeMigrationServer.GetCodeMigrations(ctx, &tfprotov6.GetCodeMigrationsRequest{})
+	if err != nil {
+		logging.ProtocolError(ctx, "Error from downstream", map[string]interface{}{logging.KeyError: err})
+		return nil, err
+	}
+
+	tf6serverlogging.DownstreamResponse(ctx, resp.Diagnostics)
+
+	// Map the response back to tfplugin6
+	protoResp := &tfplugin6.GetCodeMigrations_Response{
+		CodeMigrations: make([]*tfplugin6.GetCodeMigrations_CodeMigration, len(resp.CodeMigrations)),
+		Diagnostics:    toproto.Diagnostics(resp.Diagnostics),
+	}
+
+	for i, codeMigration := range resp.CodeMigrations {
+		protoMigration := &tfplugin6.GetCodeMigrations_CodeMigration{
+			TypeName: codeMigration.TypeName,
+			Name:     codeMigration.Name,
+		}
+
+		switch migration := codeMigration.Migration.(type) {
+		case tfprotov6.Migration_NestedBlockToNestedAttr:
+			protoMigration.Migration = &tfplugin6.GetCodeMigrations_CodeMigration_NestedBlockToNestedAttr_{
+				NestedBlockToNestedAttr: &tfplugin6.GetCodeMigrations_CodeMigration_NestedBlockToNestedAttr{
+					NestedBlockPath: toproto.AttributePath(migration.NestedBlockPath),
+				},
+			}
+		case tfprotov6.Migration_TransformAttr:
+			additionalArgs := make([]*tfplugin6.DynamicValue, len(migration.AdditionalArguments))
+			for i2, additionalArg := range migration.AdditionalArguments {
+				additionalArgs[i2] = toproto.DynamicValue(additionalArg)
+			}
+
+			protoMigration.Migration = &tfplugin6.GetCodeMigrations_CodeMigration_TransformAttr_{
+				TransformAttr: &tfplugin6.GetCodeMigrations_CodeMigration_TransformAttr{
+					TargetAttrPath:      toproto.AttributePath(migration.TargetAttrPath),
+					FunctionName:        migration.FunctionName,
+					AdditionalArguments: additionalArgs,
+				},
+			}
+
+		case tfprotov6.Migration_RenameAttr:
+			protoMigration.Migration = &tfplugin6.GetCodeMigrations_CodeMigration_RenameAttr_{
+				RenameAttr: &tfplugin6.GetCodeMigrations_CodeMigration_RenameAttr{
+					TargetAttrPath:      toproto.AttributePath(migration.TargetAttrPath),
+					DestinationAttrPath: toproto.AttributePath(migration.DestinationAttrPath),
+				},
+			}
+		case tfprotov6.Migration_RemoveAttr:
+			protoMigration.Migration = &tfplugin6.GetCodeMigrations_CodeMigration_RemoveAttr_{
+				RemoveAttr: &tfplugin6.GetCodeMigrations_CodeMigration_RemoveAttr{
+					TargetAttrPath: toproto.AttributePath(migration.TargetAttrPath),
+				},
+			}
+		default:
+			panic(fmt.Sprintf("provider defined an unimplemented code migration: %T", migration))
+		}
+
+		protoResp.CodeMigrations[i] = protoMigration
+	}
+
+	return protoResp, nil
+}
+
 func invalidDeferredResponseDiag(reason tfprotov6.DeferredReason) *tfprotov6.Diagnostic {
 	return &tfprotov6.Diagnostic{
 		Severity: tfprotov6.DiagnosticSeverityError,
