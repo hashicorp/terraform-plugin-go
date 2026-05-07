@@ -317,6 +317,16 @@ message ClientCapabilities {
     // The write_only_attributes_allowed capability signals that the client
     // is able to handle write_only attributes for managed resources.
     bool write_only_attributes_allowed = 2;
+
+    // Terraform Core has bool store_planned_private = 3; but this has not been added yet to plugin-go.
+
+    // computed_blocks_allowed indicates that the client can handle optionally
+    // computed nested block values in resources. Because older versions of
+    // Terraform without this capability will ignore the computed flag in the
+    // schema, it is up to the provider to return an appropriate diagnostic when
+    // a resource requiring the computed behavior is used.
+    bool computed_blocks_allowed = 4;
+
 }
 
 // Deferred is a message that indicates that change is deferred for a reason.

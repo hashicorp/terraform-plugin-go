@@ -1041,8 +1041,14 @@ type ClientCapabilities struct {
 	// The write_only_attributes_allowed capability signals that the client
 	// is able to handle write_only attributes for managed resources.
 	WriteOnlyAttributesAllowed bool `protobuf:"varint,2,opt,name=write_only_attributes_allowed,json=writeOnlyAttributesAllowed,proto3" json:"write_only_attributes_allowed,omitempty"`
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
+	// computed_blocks_allowed indicates that the client can handle optionally
+	// computed nested block values in resources. Because older versions of
+	// Terraform without this capability will ignore the computed flag in the
+	// schema, it is up to the provider to return an appropriate diagnostic when
+	// a resource requiring the computed behavior is used.
+	ComputedBlocksAllowed bool `protobuf:"varint,4,opt,name=computed_blocks_allowed,json=computedBlocksAllowed,proto3" json:"computed_blocks_allowed,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *ClientCapabilities) Reset() {
@@ -1085,6 +1091,13 @@ func (x *ClientCapabilities) GetDeferralAllowed() bool {
 func (x *ClientCapabilities) GetWriteOnlyAttributesAllowed() bool {
 	if x != nil {
 		return x.WriteOnlyAttributesAllowed
+	}
+	return false
+}
+
+func (x *ClientCapabilities) GetComputedBlocksAllowed() bool {
+	if x != nil {
+		return x.ComputedBlocksAllowed
 	}
 	return false
 }
@@ -8223,10 +8236,11 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\fplan_destroy\x18\x01 \x01(\bR\vplanDestroy\x12?\n" +
 	"\x1cget_provider_schema_optional\x18\x02 \x01(\bR\x19getProviderSchemaOptional\x12.\n" +
 	"\x13move_resource_state\x18\x03 \x01(\bR\x11moveResourceState\x128\n" +
-	"\x18generate_resource_config\x18\x04 \x01(\bR\x16generateResourceConfig\"\x82\x01\n" +
+	"\x18generate_resource_config\x18\x04 \x01(\bR\x16generateResourceConfig\"\xba\x01\n" +
 	"\x12ClientCapabilities\x12)\n" +
 	"\x10deferral_allowed\x18\x01 \x01(\bR\x0fdeferralAllowed\x12A\n" +
-	"\x1dwrite_only_attributes_allowed\x18\x02 \x01(\bR\x1awriteOnlyAttributesAllowed\"\xa2\x01\n" +
+	"\x1dwrite_only_attributes_allowed\x18\x02 \x01(\bR\x1awriteOnlyAttributesAllowed\x126\n" +
+	"\x17computed_blocks_allowed\x18\x04 \x01(\bR\x15computedBlocksAllowed\"\xa2\x01\n" +
 	"\bDeferred\x122\n" +
 	"\x06reason\x18\x01 \x01(\x0e2\x1a.tfplugin6.Deferred.ReasonR\x06reason\"b\n" +
 	"\x06Reason\x12\v\n" +

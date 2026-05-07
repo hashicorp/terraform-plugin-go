@@ -20,6 +20,7 @@ func ValidateResourceConfigClientCapabilities(ctx context.Context, capabilities 
 
 	responseFields := map[string]interface{}{
 		logging.KeyClientCapabilityWriteOnlyAttributesAllowed: capabilities.WriteOnlyAttributesAllowed,
+		logging.KeyClientCapabilityComputedBlocksAllowed:      capabilities.ComputedBlocksAllowed,
 	}
 
 	logging.ProtocolTrace(ctx, "Announced client capabilities", responseFields)

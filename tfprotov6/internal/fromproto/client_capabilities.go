@@ -15,6 +15,7 @@ func ValidateResourceConfigClientCapabilities(in *tfplugin6.ClientCapabilities) 
 
 	resp := &tfprotov6.ValidateResourceConfigClientCapabilities{
 		WriteOnlyAttributesAllowed: in.WriteOnlyAttributesAllowed,
+		ComputedBlocksAllowed:      in.ComputedBlocksAllowed,
 	}
 
 	return resp
