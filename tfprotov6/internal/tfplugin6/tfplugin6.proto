@@ -98,6 +98,7 @@ message Schema {
         StringKind description_kind = 5;
         bool deprecated = 6;
         string deprecation_message = 7;
+        bool computed = 8;
     }
 
     message Attribute {

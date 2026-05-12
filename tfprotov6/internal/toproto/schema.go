@@ -29,6 +29,7 @@ func Schema_Block(in *tfprotov6.SchemaBlock) *tfplugin6.Schema_Block {
 	resp := &tfplugin6.Schema_Block{
 		Attributes:         Schema_Attributes(in.Attributes),
 		BlockTypes:         Schema_NestedBlocks(in.BlockTypes),
+		Computed:           in.Computed,
 		Deprecated:         in.Deprecated,
 		DeprecationMessage: in.DeprecationMessage,
 		Description:        in.Description,

@@ -2792,6 +2792,7 @@ type Schema_Block struct {
 	DescriptionKind    StringKind             `protobuf:"varint,5,opt,name=description_kind,json=descriptionKind,proto3,enum=tfplugin6.StringKind" json:"description_kind,omitempty"`
 	Deprecated         bool                   `protobuf:"varint,6,opt,name=deprecated,proto3" json:"deprecated,omitempty"`
 	DeprecationMessage string                 `protobuf:"bytes,7,opt,name=deprecation_message,json=deprecationMessage,proto3" json:"deprecation_message,omitempty"`
+	Computed           bool                   `protobuf:"varint,8,opt,name=computed,proto3" json:"computed,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -2873,6 +2874,13 @@ func (x *Schema_Block) GetDeprecationMessage() string {
 		return x.DeprecationMessage
 	}
 	return ""
+}
+
+func (x *Schema_Block) GetComputed() bool {
+	if x != nil {
+		return x.Computed
+	}
+	return false
 }
 
 type Schema_Attribute struct {
@@ -8145,10 +8153,10 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\aflatmap\x18\x02 \x03(\v2 .tfplugin6.RawState.FlatmapEntryR\aflatmap\x1a:\n" +
 	"\fFlatmapEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xb2\v\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xce\v\n" +
 	"\x06Schema\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\x03R\aversion\x12-\n" +
-	"\x05block\x18\x02 \x01(\v2\x17.tfplugin6.Schema.BlockR\x05block\x1a\xd3\x02\n" +
+	"\x05block\x18\x02 \x01(\v2\x17.tfplugin6.Schema.BlockR\x05block\x1a\xef\x02\n" +
 	"\x05Block\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\x03R\aversion\x12;\n" +
 	"\n" +
@@ -8161,7 +8169,8 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\n" +
 	"deprecated\x18\x06 \x01(\bR\n" +
 	"deprecated\x12/\n" +
-	"\x13deprecation_message\x18\a \x01(\tR\x12deprecationMessage\x1a\xb4\x03\n" +
+	"\x13deprecation_message\x18\a \x01(\tR\x12deprecationMessage\x12\x1a\n" +
+	"\bcomputed\x18\b \x01(\bR\bcomputed\x1a\xb4\x03\n" +
 	"\tAttribute\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\fR\x04type\x129\n" +

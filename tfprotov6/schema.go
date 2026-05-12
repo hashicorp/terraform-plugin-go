@@ -140,6 +140,12 @@ type SchemaBlock struct {
 	// Description field is using.
 	DescriptionKind StringKind
 
+	// Computed, when set to true, indicates that this block's values will be
+	// set by the provider and are not configurable by the user. This is used
+	// for computed nested blocks, where the provider determines the block's
+	// contents rather than the user.
+	Computed bool
+
 	// Deprecated, when set to true, indicates that a block should no
 	// longer be used and users should migrate away from it. At the moment
 	// it is unused and will have no impact, but it will be used in future
