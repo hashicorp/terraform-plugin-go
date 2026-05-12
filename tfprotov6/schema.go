@@ -321,6 +321,10 @@ type SchemaNestedBlock struct {
 	// block is required to be set. All other SchemaNestedBlockNestingModes
 	// must leave MaxItems set to 0.
 	MaxItems int64
+
+	// Computed, when set to true, indicates the provider may set a value for
+	// this block if a user has not provided configuration for it.
+	Computed bool
 }
 
 // ValueType returns the tftypes.Type for a SchemaNestedBlock.

@@ -465,6 +465,14 @@ func TestSchema_NestedBlock(t *testing.T) {
 				},
 			},
 		},
+		"Computed": {
+			in: &tfprotov6.SchemaNestedBlock{
+				Computed: true,
+			},
+			expected: &tfplugin6.Schema_NestedBlock{
+				Computed: true,
+			},
+		},
 		"MaxItems": {
 			in: &tfprotov6.SchemaNestedBlock{
 				MaxItems: 123,

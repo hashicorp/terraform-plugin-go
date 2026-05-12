@@ -79,6 +79,7 @@ func Schema_NestedBlock(in *tfprotov6.SchemaNestedBlock) *tfplugin6.Schema_Neste
 
 	resp := &tfplugin6.Schema_NestedBlock{
 		Block:    Schema_Block(in.Block),
+		Computed: in.Computed,
 		MaxItems: in.MaxItems,
 		MinItems: in.MinItems,
 		Nesting:  Schema_NestedBlock_NestingMode(in.Nesting),

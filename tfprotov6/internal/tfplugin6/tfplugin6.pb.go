@@ -3018,6 +3018,7 @@ type Schema_NestedBlock struct {
 	Nesting       Schema_NestedBlock_NestingMode `protobuf:"varint,3,opt,name=nesting,proto3,enum=tfplugin6.Schema_NestedBlock_NestingMode" json:"nesting,omitempty"`
 	MinItems      int64                          `protobuf:"varint,4,opt,name=min_items,json=minItems,proto3" json:"min_items,omitempty"`
 	MaxItems      int64                          `protobuf:"varint,5,opt,name=max_items,json=maxItems,proto3" json:"max_items,omitempty"`
+	Computed      bool                           `protobuf:"varint,6,opt,name=computed,proto3" json:"computed,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3085,6 +3086,13 @@ func (x *Schema_NestedBlock) GetMaxItems() int64 {
 		return x.MaxItems
 	}
 	return 0
+}
+
+func (x *Schema_NestedBlock) GetComputed() bool {
+	if x != nil {
+		return x.Computed
+	}
+	return false
 }
 
 type Schema_Object struct {
@@ -8137,7 +8145,7 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\aflatmap\x18\x02 \x03(\v2 .tfplugin6.RawState.FlatmapEntryR\aflatmap\x1a:\n" +
 	"\fFlatmapEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x96\v\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xb2\v\n" +
 	"\x06Schema\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\x03R\aversion\x12-\n" +
 	"\x05block\x18\x02 \x01(\v2\x17.tfplugin6.Schema.BlockR\x05block\x1a\xd3\x02\n" +
@@ -8171,13 +8179,14 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"deprecated\x12\x1d\n" +
 	"\n" +
 	"write_only\x18\v \x01(\bR\twriteOnly\x12/\n" +
-	"\x13deprecation_message\x18\f \x01(\tR\x12deprecationMessage\x1a\xa7\x02\n" +
+	"\x13deprecation_message\x18\f \x01(\tR\x12deprecationMessage\x1a\xc3\x02\n" +
 	"\vNestedBlock\x12\x1b\n" +
 	"\ttype_name\x18\x01 \x01(\tR\btypeName\x12-\n" +
 	"\x05block\x18\x02 \x01(\v2\x17.tfplugin6.Schema.BlockR\x05block\x12C\n" +
 	"\anesting\x18\x03 \x01(\x0e2).tfplugin6.Schema.NestedBlock.NestingModeR\anesting\x12\x1b\n" +
 	"\tmin_items\x18\x04 \x01(\x03R\bminItems\x12\x1b\n" +
-	"\tmax_items\x18\x05 \x01(\x03R\bmaxItems\"M\n" +
+	"\tmax_items\x18\x05 \x01(\x03R\bmaxItems\x12\x1a\n" +
+	"\bcomputed\x18\x06 \x01(\bR\bcomputed\"M\n" +
 	"\vNestingMode\x12\v\n" +
 	"\aINVALID\x10\x00\x12\n" +
 	"\n" +
