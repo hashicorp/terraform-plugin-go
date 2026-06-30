@@ -36,6 +36,14 @@ func TestValidateResourceConfigClientCapabilities(t *testing.T) {
 				WriteOnlyAttributesAllowed: true,
 			},
 		},
+		"ComputedBlocksAllowed": {
+			in: &tfplugin6.ClientCapabilities{
+				ComputedBlocksAllowed: true,
+			},
+			expected: &tfprotov6.ValidateResourceConfigClientCapabilities{
+				ComputedBlocksAllowed: true,
+			},
+		},
 	}
 
 	for name, testCase := range testCases {

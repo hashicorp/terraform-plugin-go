@@ -99,6 +99,9 @@ const (
 	// Whether the WriteOnlyAttributesAllowed client capability is enabled
 	KeyClientCapabilityWriteOnlyAttributesAllowed = "tf_client_capability_write_only_attributes_allowed"
 
+	// Whether the ComputedBlocksAllowed client capability is enabled
+	KeyClientCapabilityComputedBlocksAllowed = "tf_client_capability_computed_blocks_allowed"
+
 	// The ChunkSize requested from Terraform core for transmitting state bytes.
 	KeyClientCapabilityChunkSize = "tf_client_capability_chunk_size"
 )
