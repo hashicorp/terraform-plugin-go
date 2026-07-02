@@ -152,6 +152,10 @@ type SchemaBlock struct {
 	// the block is deprecated and what users should do instead. This
 	// message will be surfaced to users in deprecation warnings.
 	DeprecationMessage string
+
+	// Computed, when set to true, indicates that the provider will supply a
+	// value for this block.
+	Computed bool
 }
 
 // ValueType returns the tftypes.Type for a SchemaBlock.

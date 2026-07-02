@@ -10,6 +10,10 @@ type ValidateResourceConfigClientCapabilities struct {
 	// WriteOnlyAttributesAllowed signals that the client is able to
 	// handle write_only attributes for managed resources.
 	WriteOnlyAttributesAllowed bool
+
+	// ComputedBlocksAllowed signals that the client is able to
+	// handle computed blocks for managed resources.
+	ComputedBlocksAllowed bool
 }
 
 // ConfigureProviderClientCapabilities allows Terraform to publish information

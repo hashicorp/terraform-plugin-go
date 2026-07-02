@@ -98,6 +98,7 @@ message Schema {
         StringKind description_kind = 5;
         bool deprecated = 6;
         string deprecation_message = 7;
+        bool computed = 8;
     }
 
     message Attribute {
@@ -317,6 +318,9 @@ message ClientCapabilities {
     // The write_only_attributes_allowed capability signals that the client
     // is able to handle write_only attributes for managed resources.
     bool write_only_attributes_allowed = 2;
+
+    reserved 3; // We haven't implemented this yet XD
+    bool computed_blocks_allowed = 4;
 }
 
 // Deferred is a message that indicates that change is deferred for a reason.
