@@ -41,6 +41,7 @@ func TestValidateResourceConfigClientCapabilities(t *testing.T) {
 					"@level":   "trace",
 					"@message": "Announced client capabilities",
 					"@module":  "sdk.proto",
+					"tf_client_capability_computed_blocks_allowed":       false,
 					"tf_client_capability_write_only_attributes_allowed": false,
 				},
 			},
@@ -54,7 +55,22 @@ func TestValidateResourceConfigClientCapabilities(t *testing.T) {
 					"@level":   "trace",
 					"@message": "Announced client capabilities",
 					"@module":  "sdk.proto",
+					"tf_client_capability_computed_blocks_allowed":       false,
 					"tf_client_capability_write_only_attributes_allowed": true,
+				},
+			},
+		},
+		"computed_blocks_allowed": {
+			capabilities: &tfprotov6.ValidateResourceConfigClientCapabilities{
+				ComputedBlocksAllowed: true,
+			},
+			expected: []map[string]interface{}{
+				{
+					"@level":   "trace",
+					"@message": "Announced client capabilities",
+					"@module":  "sdk.proto",
+					"tf_client_capability_computed_blocks_allowed":       true,
+					"tf_client_capability_write_only_attributes_allowed": false,
 				},
 			},
 		},
