@@ -63,6 +63,7 @@ func TestApplyResourceChange_Response(t *testing.T) {
 		},
 		"UnsafeToUseLegacyTypeSystem": {
 			in: &tfprotov5.ApplyResourceChangeResponse{
+				// nolint:staticcheck // Intended deprecated field for mux
 				UnsafeToUseLegacyTypeSystem: true,
 			},
 			expected: &tfplugin5.ApplyResourceChange_Response{
@@ -527,6 +528,7 @@ func TestPlanResourceChange_Response(t *testing.T) {
 		},
 		"UnsafeToUseLegacyTypeSystem": {
 			in: &tfprotov5.PlanResourceChangeResponse{
+				// nolint:staticcheck // Intended deprecated field for mux
 				UnsafeToUseLegacyTypeSystem: true,
 			},
 			expected: &tfplugin5.PlanResourceChange_Response{
