@@ -63,6 +63,7 @@ func TestApplyResourceChange_Response(t *testing.T) {
 		},
 		"UnsafeToUseLegacyTypeSystem": {
 			in: &tfprotov6.ApplyResourceChangeResponse{
+				// nolint:staticcheck // Intended deprecated field
 				UnsafeToUseLegacyTypeSystem: true,
 			},
 			expected: &tfplugin6.ApplyResourceChange_Response{
@@ -527,6 +528,7 @@ func TestPlanResourceChange_Response(t *testing.T) {
 		},
 		"UnsafeToUseLegacyTypeSystem": {
 			in: &tfprotov6.PlanResourceChangeResponse{
+				// nolint:staticcheck // Intended deprecated field
 				UnsafeToUseLegacyTypeSystem: true,
 			},
 			expected: &tfplugin6.PlanResourceChange_Response{
