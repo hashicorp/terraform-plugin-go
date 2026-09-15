@@ -354,6 +354,16 @@ func TestSchema_Block(t *testing.T) {
 				},
 			},
 		},
+		"Computed": {
+			in: &tfprotov6.SchemaBlock{
+				Computed: true,
+			},
+			expected: &tfplugin6.Schema_Block{
+				Attributes: []*tfplugin6.Schema_Attribute{},
+				BlockTypes: []*tfplugin6.Schema_NestedBlock{},
+				Computed:   true,
+			},
+		},
 		"Deprecated": {
 			in: &tfprotov6.SchemaBlock{
 				Deprecated: true,
@@ -463,6 +473,14 @@ func TestSchema_NestedBlock(t *testing.T) {
 					},
 					BlockTypes: []*tfplugin6.Schema_NestedBlock{},
 				},
+			},
+		},
+		"Computed": {
+			in: &tfprotov6.SchemaNestedBlock{
+				Computed: true,
+			},
+			expected: &tfplugin6.Schema_NestedBlock{
+				Computed: true,
 			},
 		},
 		"MaxItems": {

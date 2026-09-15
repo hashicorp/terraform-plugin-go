@@ -1041,8 +1041,14 @@ type ClientCapabilities struct {
 	// The write_only_attributes_allowed capability signals that the client
 	// is able to handle write_only attributes for managed resources.
 	WriteOnlyAttributesAllowed bool `protobuf:"varint,2,opt,name=write_only_attributes_allowed,json=writeOnlyAttributesAllowed,proto3" json:"write_only_attributes_allowed,omitempty"`
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
+	// computed_blocks_allowed indicates that the client can handle optionally
+	// computed nested block values in resources. Because older versions of
+	// Terraform without this capability will ignore the computed flag in the
+	// schema, it is up to the provider to return an appropriate diagnostic when
+	// a resource requiring the computed behavior is used.
+	ComputedBlocksAllowed bool `protobuf:"varint,4,opt,name=computed_blocks_allowed,json=computedBlocksAllowed,proto3" json:"computed_blocks_allowed,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *ClientCapabilities) Reset() {
@@ -1085,6 +1091,13 @@ func (x *ClientCapabilities) GetDeferralAllowed() bool {
 func (x *ClientCapabilities) GetWriteOnlyAttributesAllowed() bool {
 	if x != nil {
 		return x.WriteOnlyAttributesAllowed
+	}
+	return false
+}
+
+func (x *ClientCapabilities) GetComputedBlocksAllowed() bool {
+	if x != nil {
+		return x.ComputedBlocksAllowed
 	}
 	return false
 }
@@ -2779,6 +2792,7 @@ type Schema_Block struct {
 	DescriptionKind    StringKind             `protobuf:"varint,5,opt,name=description_kind,json=descriptionKind,proto3,enum=tfplugin6.StringKind" json:"description_kind,omitempty"`
 	Deprecated         bool                   `protobuf:"varint,6,opt,name=deprecated,proto3" json:"deprecated,omitempty"`
 	DeprecationMessage string                 `protobuf:"bytes,7,opt,name=deprecation_message,json=deprecationMessage,proto3" json:"deprecation_message,omitempty"`
+	Computed           bool                   `protobuf:"varint,8,opt,name=computed,proto3" json:"computed,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -2860,6 +2874,13 @@ func (x *Schema_Block) GetDeprecationMessage() string {
 		return x.DeprecationMessage
 	}
 	return ""
+}
+
+func (x *Schema_Block) GetComputed() bool {
+	if x != nil {
+		return x.Computed
+	}
+	return false
 }
 
 type Schema_Attribute struct {
@@ -3005,6 +3026,7 @@ type Schema_NestedBlock struct {
 	Nesting       Schema_NestedBlock_NestingMode `protobuf:"varint,3,opt,name=nesting,proto3,enum=tfplugin6.Schema_NestedBlock_NestingMode" json:"nesting,omitempty"`
 	MinItems      int64                          `protobuf:"varint,4,opt,name=min_items,json=minItems,proto3" json:"min_items,omitempty"`
 	MaxItems      int64                          `protobuf:"varint,5,opt,name=max_items,json=maxItems,proto3" json:"max_items,omitempty"`
+	Computed      bool                           `protobuf:"varint,6,opt,name=computed,proto3" json:"computed,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3072,6 +3094,13 @@ func (x *Schema_NestedBlock) GetMaxItems() int64 {
 		return x.MaxItems
 	}
 	return 0
+}
+
+func (x *Schema_NestedBlock) GetComputed() bool {
+	if x != nil {
+		return x.Computed
+	}
+	return false
 }
 
 type Schema_Object struct {
@@ -8124,10 +8153,10 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\aflatmap\x18\x02 \x03(\v2 .tfplugin6.RawState.FlatmapEntryR\aflatmap\x1a:\n" +
 	"\fFlatmapEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x96\v\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xce\v\n" +
 	"\x06Schema\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\x03R\aversion\x12-\n" +
-	"\x05block\x18\x02 \x01(\v2\x17.tfplugin6.Schema.BlockR\x05block\x1a\xd3\x02\n" +
+	"\x05block\x18\x02 \x01(\v2\x17.tfplugin6.Schema.BlockR\x05block\x1a\xef\x02\n" +
 	"\x05Block\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\x03R\aversion\x12;\n" +
 	"\n" +
@@ -8140,7 +8169,8 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\n" +
 	"deprecated\x18\x06 \x01(\bR\n" +
 	"deprecated\x12/\n" +
-	"\x13deprecation_message\x18\a \x01(\tR\x12deprecationMessage\x1a\xb4\x03\n" +
+	"\x13deprecation_message\x18\a \x01(\tR\x12deprecationMessage\x12\x1a\n" +
+	"\bcomputed\x18\b \x01(\bR\bcomputed\x1a\xb4\x03\n" +
 	"\tAttribute\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\fR\x04type\x129\n" +
@@ -8158,13 +8188,14 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"deprecated\x12\x1d\n" +
 	"\n" +
 	"write_only\x18\v \x01(\bR\twriteOnly\x12/\n" +
-	"\x13deprecation_message\x18\f \x01(\tR\x12deprecationMessage\x1a\xa7\x02\n" +
+	"\x13deprecation_message\x18\f \x01(\tR\x12deprecationMessage\x1a\xc3\x02\n" +
 	"\vNestedBlock\x12\x1b\n" +
 	"\ttype_name\x18\x01 \x01(\tR\btypeName\x12-\n" +
 	"\x05block\x18\x02 \x01(\v2\x17.tfplugin6.Schema.BlockR\x05block\x12C\n" +
 	"\anesting\x18\x03 \x01(\x0e2).tfplugin6.Schema.NestedBlock.NestingModeR\anesting\x12\x1b\n" +
 	"\tmin_items\x18\x04 \x01(\x03R\bminItems\x12\x1b\n" +
-	"\tmax_items\x18\x05 \x01(\x03R\bmaxItems\"M\n" +
+	"\tmax_items\x18\x05 \x01(\x03R\bmaxItems\x12\x1a\n" +
+	"\bcomputed\x18\x06 \x01(\bR\bcomputed\"M\n" +
 	"\vNestingMode\x12\v\n" +
 	"\aINVALID\x10\x00\x12\n" +
 	"\n" +
@@ -8223,10 +8254,11 @@ const file_tfplugin6_proto_rawDesc = "" +
 	"\fplan_destroy\x18\x01 \x01(\bR\vplanDestroy\x12?\n" +
 	"\x1cget_provider_schema_optional\x18\x02 \x01(\bR\x19getProviderSchemaOptional\x12.\n" +
 	"\x13move_resource_state\x18\x03 \x01(\bR\x11moveResourceState\x128\n" +
-	"\x18generate_resource_config\x18\x04 \x01(\bR\x16generateResourceConfig\"\x82\x01\n" +
+	"\x18generate_resource_config\x18\x04 \x01(\bR\x16generateResourceConfig\"\xba\x01\n" +
 	"\x12ClientCapabilities\x12)\n" +
 	"\x10deferral_allowed\x18\x01 \x01(\bR\x0fdeferralAllowed\x12A\n" +
-	"\x1dwrite_only_attributes_allowed\x18\x02 \x01(\bR\x1awriteOnlyAttributesAllowed\"\xa2\x01\n" +
+	"\x1dwrite_only_attributes_allowed\x18\x02 \x01(\bR\x1awriteOnlyAttributesAllowed\x126\n" +
+	"\x17computed_blocks_allowed\x18\x04 \x01(\bR\x15computedBlocksAllowed\"\xa2\x01\n" +
 	"\bDeferred\x122\n" +
 	"\x06reason\x18\x01 \x01(\x0e2\x1a.tfplugin6.Deferred.ReasonR\x06reason\"b\n" +
 	"\x06Reason\x12\v\n" +

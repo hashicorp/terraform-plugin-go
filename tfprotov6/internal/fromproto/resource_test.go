@@ -559,11 +559,13 @@ func TestValidateResourceConfigRequest(t *testing.T) {
 			in: &tfplugin6.ValidateResourceConfig_Request{
 				ClientCapabilities: &tfplugin6.ClientCapabilities{
 					WriteOnlyAttributesAllowed: true,
+					ComputedBlocksAllowed:      true,
 				},
 			},
 			expected: &tfprotov6.ValidateResourceConfigRequest{
 				ClientCapabilities: &tfprotov6.ValidateResourceConfigClientCapabilities{
 					WriteOnlyAttributesAllowed: true,
+					ComputedBlocksAllowed:      true,
 				},
 			},
 		},
