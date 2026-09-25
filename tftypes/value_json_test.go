@@ -224,7 +224,7 @@ func TestValueFromJSON(t *testing.T) {
 			json: `{{}}`,
 			expectedError: AttributePathError{
 				Path: NewAttributePath(),
-				err:  fmt.Errorf("error reading object attribute key token: invalid character '{'"),
+				err:  fmt.Errorf("error reading object attribute key token: object member name must be a string"),
 			},
 		},
 		"object-attribute-key-missing-error": {
