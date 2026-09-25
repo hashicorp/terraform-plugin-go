@@ -6,6 +6,7 @@ package tftypes
 import (
 	"fmt"
 	"math/big"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -14,10 +15,11 @@ import (
 func TestValueFromJSON(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
-		value         Value
-		typ           Type
-		json          string
-		expectedError error
+		value                Value
+		typ                  Type
+		json                 string
+		expectedError        error
+		expectedErrorSnippet string
 	}
 	tests := map[string]testCase{
 		// Primitives
@@ -222,10 +224,8 @@ func TestValueFromJSON(t *testing.T) {
 				AttributeTypes: map[string]Type{},
 			},
 			json: `{{}}`,
-			expectedError: AttributePathError{
-				Path: NewAttributePath(),
-				err:  fmt.Errorf("error reading object attribute key token: invalid character '{'"),
-			},
+			// TODO - update test case to use `expectedError` once the repo uses Go 1.27 as a minimum version.
+			expectedErrorSnippet: "error reading object attribute key token: ", // Wrapped error from encoding/json can vary based on Go version being < or >= 1.27.
 		},
 		"object-attribute-key-missing-error": {
 			value: Value{},
@@ -399,8 +399,17 @@ func TestValueFromJSON(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			val, err := ValueFromJSON([]byte(test.json), test.typ)
-			if diff := cmp.Diff(test.expectedError, err); diff != "" {
-				t.Errorf("unexpected error difference: %s", diff)
+
+			if test.expectedErrorSnippet != "" {
+				// Enable not needing to assert the full error message, due to differences in errors from encoding/json
+				// in Go <1.27 versus >=1.27.
+				if err == nil || !strings.Contains(err.Error(), test.expectedErrorSnippet) {
+					t.Errorf("expected error containing %q, got %v", test.expectedErrorSnippet, err)
+				}
+			} else {
+				if diff := cmp.Diff(test.expectedError, err); diff != "" {
+					t.Errorf("unexpected error difference: %s", diff)
+				}
 			}
 			if diff := cmp.Diff(test.value, val); diff != "" {
 				t.Errorf("Unexpected results (-wanted +got): %s", diff)
