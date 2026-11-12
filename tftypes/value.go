@@ -44,6 +44,10 @@ type ValueCreator interface {
 type Value struct {
 	typ   Type
 	value interface{}
+
+	// setIndex is only set on Set values. It is shared by copies of the
+	// Value and built on the first ElementKeyValue lookup.
+	setIndex *setElementIndex
 }
 
 func (val Value) String() string {
@@ -190,6 +194,13 @@ func (val Value) ApplyTerraform5AttributePathStep(step AttributePathStep) (inter
 			return nil, fmt.Errorf("cannot convert %T into []tftypes.Value", val.value)
 		}
 		stepValue := Value(s)
+		if val.setIndex != nil {
+			if setType, ok := val.Type().(Set); ok {
+				if el, found := val.setIndex.lookup(setType.ElementType, stepValue, sl); found {
+					return el, nil
+				}
+			}
+		}
 		for _, el := range sl {
 			deepEqual, err := stepValue.deepEqual(el)
 			if err != nil {
