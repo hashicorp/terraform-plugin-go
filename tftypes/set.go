@@ -98,8 +98,9 @@ func valueFromSet(typ Type, in interface{}) (Value, error) {
 			}
 		}
 		return Value{
-			typ:   Set{ElementType: typ},
-			value: value,
+			typ:      Set{ElementType: typ},
+			value:    value,
+			setIndex: &setElementIndex{},
 		}, nil
 	default:
 		return Value{}, fmt.Errorf("tftypes.NewValue can't use %T as a tftypes.Set; expected types are: %s", in, formattedSupportedGoTypes(Set{}))

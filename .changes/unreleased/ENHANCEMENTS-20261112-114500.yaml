@@ -1,0 +1,5 @@
+kind: ENHANCEMENTS
+body: 'tftypes: Improved performance of `tftypes.Value.Equal()` and attribute path lookups on large sets by indexing set elements instead of comparing against every element.'
+time: 2026-11-12T11:45:00.000000-07:00
+custom:
+    Issue: "675"
